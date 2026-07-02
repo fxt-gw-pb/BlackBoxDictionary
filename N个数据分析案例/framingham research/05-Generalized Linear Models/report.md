@@ -1,0 +1,253 @@
+---
+title: "学习笔记 · 05 广义线性模型（Logistic 回归与 Deviance）"
+---
+
+
+
+> **本节目标**：当结局是 **0/1（二分类）**时，线性回归不再合适，改用 **logistic 回归**（GLM 的一种）。
+> 我们用它建模"胆固醇是否 ≥200"对**年龄组**（按分值 1/2/3）的依赖，并借此理解一个核心概念——**偏差（deviance）**。
+>
+> **本节的"题眼"**：同一份数据可以写成两种形式——
+> **非分组（ungrouped）**：每人一行 0/1；**分组（grouped）**：每个年龄组汇总成"成功数/总数"。
+> 我们要弄清：
+> (a) 为什么两种形式下 M0、M1 的**偏差不同**？
+> (b) 为什么两种形式下 **M0−M1 的偏差差值却相同**？
+> 答案揭示了 deviance 的本质，以及"检验某个变量效应"为何与数据录入形式无关。
+
+## 1 准备两种形式的数据
+
+
+``` r
+library(tidyverse)
+theme_set(theme_minimal(base_size = 12, base_family = "PingFang SC"))
+
+raw <- read_csv("../rawdata/Framingham_data.csv", show_col_types = FALSE)
+
+# 非分组：每人一行
+ungrouped <- raw %>%
+  filter(PERIOD == 1, !is.na(TOTCHOL), !is.na(AGE_group)) %>%
+  transmute(Y = as.integer(TOTCHOL >= 200),
+            X = as.numeric(AGE_group))      # 年龄组当作分值 1/2/3
+nrow(ungrouped)
+```
+
+```
+#> [1] 4165
+```
+
+``` r
+# 分组：每个年龄组汇总成 成功(undesirable)/失败(desirable)
+grouped <- ungrouped %>%
+  group_by(X) %>%
+  summarise(undesirable = sum(Y), n = n(), .groups = "drop") %>%
+  mutate(desirable = n - undesirable, prop = undesirable / n)
+grouped
+```
+
+```
+#> # A tibble: 3 × 5
+#>       X undesirable     n desirable  prop
+#>   <dbl>       <int> <int>     <int> <dbl>
+#> 1     1        2330  3025       695 0.770
+#> 2     2         915  1036       121 0.883
+#> 3     3          92   104        12 0.885
+```
+
+`grouped` 只有 3 行（3 个年龄组），却包含了和几千行 `ungrouped` **完全相同的信息**——这正是后面理解 deviance 差异的关键。
+
+## 2 拟合两种形式下的 M0 与 M1
+
+`glm(..., family = binomial)` 是 logistic 回归的标准写法。非分组用 `Y ~ ...`；分组用 `cbind(成功, 失败) ~ ...`。
+
+
+``` r
+# 非分组
+m0_ung <- glm(Y ~ 1, data = ungrouped, family = binomial)
+m1_ung <- glm(Y ~ X, data = ungrouped, family = binomial)
+
+# 分组
+m0_grp <- glm(cbind(undesirable, desirable) ~ 1, data = grouped, family = binomial)
+m1_grp <- glm(cbind(undesirable, desirable) ~ X, data = grouped, family = binomial)
+
+# M1（分组）系数：和非分组应当完全一致
+summary(m1_grp)$coefficients
+```
+
+```
+#>              Estimate Std. Error  z value     Pr(>|z|)
+#> (Intercept) 0.5073697 0.11787174 4.304422 1.674221e-05
+#> X           0.7118789 0.09304527 7.650888 1.995964e-14
+```
+
+``` r
+coef(m1_ung)
+```
+
+```
+#> (Intercept)           X 
+#>   0.5073697   0.7118789
+```
+
+注意：**两种形式给出的回归系数完全相同**（截距和斜率）。也就是说，它们对"年龄如何影响胆固醇"的估计是一模一样的——区别只在 deviance。
+
+## 3 (a) 为什么两种形式的偏差不同？
+
+先把四个模型的**残差偏差（residual deviance）**列出来：
+
+
+``` r
+dev_tab <- tibble(
+  data_entry = c("Ungrouped", "Ungrouped", "Grouped", "Grouped"),
+  model = c("M0", "M1", "M0", "M1"),
+  residual_deviance = c(deviance(m0_ung), deviance(m1_ung),
+                        deviance(m0_grp), deviance(m1_grp)),
+  df_residual = c(df.residual(m0_ung), df.residual(m1_ung),
+                  df.residual(m0_grp), df.residual(m1_grp))
+)
+dev_tab
+```
+
+```
+#> # A tibble: 4 × 4
+#>   data_entry model residual_deviance df_residual
+#>   <chr>      <chr>             <dbl>       <int>
+#> 1 Ungrouped  M0              4154.          4164
+#> 2 Ungrouped  M1              4086.          4163
+#> 3 Grouped    M0                72.3            2
+#> 4 Grouped    M1                 4.32           1
+```
+
+非分组的偏差是几千，分组的偏差却接近 0——差别巨大。**原因在于 deviance 的定义**：
+
+$$\text{deviance} = 2\big[\,\ell(\text{饱和模型}) - \ell(\text{当前模型})\,\big]$$
+
+它衡量"当前模型"相对"**饱和模型**（saturated model，每个观测点都完美拟合）的差距。而"饱和模型"是什么，取决于**数据有多少行**：
+
+- **非分组**：饱和模型要给每个人一个单独的概率，参考点极其"完美"，所以当前模型显得差很多 → 偏差大。
+- **分组**：饱和模型只需给 3 个年龄组各一个概率，参考点没那么"完美"，当前模型已能较好匹配 → 偏差小得多（M0 ≈ 72、M1 ≈ 4.3）。M1 用 2 个参数去拟合 3 个组的比例，残差偏差只剩约 4.3。
+
+一句话：**偏差的绝对值依赖于"饱和模型"这个参照系，而参照系随数据粒度改变，所以两种形式的偏差不可直接比较。**
+
+## 4 (b) 为什么偏差的"差值"却相同？
+
+
+``` r
+diff_tab <- tibble(
+  data_entry = c("Ungrouped", "Grouped"),
+  dev_M0 = c(deviance(m0_ung), deviance(m0_grp)),
+  dev_M1 = c(deviance(m1_ung), deviance(m1_grp)),
+  difference = dev_M0 - dev_M1,
+  df = c(df.residual(m0_ung) - df.residual(m1_ung),
+         df.residual(m0_grp) - df.residual(m1_grp))
+)
+diff_tab
+```
+
+```
+#> # A tibble: 2 × 5
+#>   data_entry dev_M0  dev_M1 difference    df
+#>   <chr>       <dbl>   <dbl>      <dbl> <int>
+#> 1 Ungrouped  4154.  4086.         68.0     1
+#> 2 Grouped      72.3    4.32       68.0     1
+```
+
+**差值完全相同**（约 68，df = 1，见上表）。为什么？把定义代入：
+
+$$D(M_0) - D(M_1) = 2\big[\ell(\text{sat}) - \ell(M_0)\big] - 2\big[\ell(\text{sat}) - \ell(M_1)\big] = 2\big[\ell(M_1) - \ell(M_0)\big].$$
+
+**饱和模型那一项被减掉了！** 剩下的 $2[\ell(M_1)-\ell(M_0)]$ 只和 M0、M1 自己的对数似然有关，而这两个模型的系数、似然在两种形式下本就相同——所以差值当然相同。
+
+更重要的是：这个差值正是检验"年龄效应 β = 0"的**似然比统计量（likelihood ratio test）**，在 H0 下近似 χ²(df=1)：
+
+
+``` r
+anova(m0_ung, m1_ung, test = "LRT")   # 非分组的似然比检验
+```
+
+```
+#> Analysis of Deviance Table
+#> 
+#> Model 1: Y ~ 1
+#> Model 2: Y ~ X
+#>   Resid. Df Resid. Dev Df Deviance  Pr(>Chi)    
+#> 1      4164     4154.5                          
+#> 2      4163     4086.4  1   68.003 < 2.2e-16 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+p 值极小，**拒绝 β = 0**：年龄组对"胆固醇不理想"有显著影响。**结论：检验某变量的效应，用分组还是非分组数据都一样**——因为检验依据的是偏差的"差值"，而差值与录入形式无关。
+
+## 5 可视化：观测比例 vs 模型拟合
+
+
+``` r
+newd <- tibble(X = seq(1, 3, 0.05))
+newd$M1 <- predict(m1_grp, newdata = newd, type = "response")
+
+ggplot() +
+  geom_point(data = grouped, aes(X, prop), size = 3, colour = "black") +
+  geom_line(data = newd, aes(X, M1), colour = "firebrick", linewidth = 1) +
+  geom_hline(yintercept = predict(m0_grp, type = "response")[1],
+             linetype = 2, colour = "steelblue") +
+  scale_x_continuous(breaks = 1:3, labels = c("≤55", "55–65", ">65")) +
+  labs(title = "胆固醇不理想的概率：观测 vs Logistic 拟合",
+       subtitle = "黑点=各组观测比例；红线=M1拟合；蓝虚线=M0（总平均）",
+       x = "年龄组（分值 X）", y = "P(undesirable)")
+```
+
+![plot of chunk plot-fit](figures/plot-fit-1.png)
+
+红线（M1）随年龄上升，明显比蓝虚线（M0，忽略年龄的总平均）更贴合三个黑点——直观印证了"年龄效应显著"。
+
+## 6 拓展分析：优势比解释 + 线性趋势是否够用
+
+> **额外题目 1**：logistic 回归的斜率怎么解释？答案是 **优势比（odds ratio）**。
+>
+> **额外题目 2**：我们把年龄当成"分值 1/2/3"（线性趋势），假设"每升一级、log-odds 等量增加"。
+> 这个线性假设**成立吗**？把年龄当成**因子**再比一比就知道。
+
+
+``` r
+# 斜率的优势比及 95% CI：年龄每升高一级，"不理想"的优势乘以多少
+exp(cbind(OR = coef(m1_ung), confint.default(m1_ung)))
+```
+
+```
+#>                   OR    2.5 %   97.5 %
+#> (Intercept) 1.660917 1.318308 2.092564
+#> X           2.037817 1.698114 2.445476
+```
+
+`X` 行的 OR > 1 且置信区间不含 1：**年龄组每升高一级，胆固醇"不理想"的优势（odds）约提高对应倍数**，与剂量–反应趋势一致。
+
+
+``` r
+# 把年龄当因子（每组一个独立参数）。对分组数据，这就是"饱和模型"，偏差=0
+m1_factor <- glm(cbind(undesirable, desirable) ~ factor(X), data = grouped, family = binomial)
+
+# 线性 vs 因子：检验"线性趋势"是否有 lack-of-fit
+anova(m1_grp, m1_factor, test = "LRT")
+```
+
+```
+#> Analysis of Deviance Table
+#> 
+#> Model 1: cbind(undesirable, desirable) ~ X
+#> Model 2: cbind(undesirable, desirable) ~ factor(X)
+#>   Resid. Df Resid. Dev Df Deviance Pr(>Chi)  
+#> 1         1     4.3163                       
+#> 2         0     0.0000  1   4.3163  0.03775 *
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+这个检验的 df = 1（因子模型比线性模型多 1 个参数）。这里 **p ≈ 0.038 < 0.05**，提示线性趋势存在**轻微的 lack-of-fit**——因子模型（每组单独参数）拟合更好。回看第 1 节的比例 **0.77 → 0.883 → 0.885**：从第 1 组到第 2 组跳得多，第 2 到第 3 组几乎持平，并非完美等距的线性递增，这正是轻微非线性的来源。不过偏差只差约 4.3，**线性模型作为简洁近似仍可接受**——是否采用更复杂的因子设定，要在"简洁"与"拟合"之间权衡。这也提醒：把有序变量当"分值"是有假设的，**用得上时一定要回头检验线性是否成立**。
+
+## 7 小结
+
+- **二分类结局 → logistic 回归**（`glm(family = binomial)`）；分组数据用 `cbind(成功, 失败)`。
+- **deviance 的绝对值不可跨形式比较**：它以"饱和模型"为参照，而饱和模型随数据粒度变化。
+- **deviance 的差值可比、且不变**：因为饱和项相消，差值 = 似然比统计量，用于检验变量效应。
+- **检验效应与数据录入形式无关**——这是本节最实用的结论。
+- 斜率用 **OR** 解释；用"线性 vs 因子"的 LR 检验判断**线性趋势是否够用**。

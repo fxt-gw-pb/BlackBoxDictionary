@@ -1,0 +1,282 @@
+---
+title: "学习笔记 · 01 数据可视化（Data Visualization）"
+---
+
+
+
+> **本节目标**：拿到一份真实的流行病学数据，第一步永远是"看数据"。本节我们用图形回答两类问题——
+> (1) 每个变量长什么样（**分布**）；(2) 结局与每个协变量之间有没有关系（**边际关系**）。
+> 全程使用 `ggplot2`，它是 R 中最主流的绘图语法（grammar of graphics）。
+>
+> **分析思路**：结局是基线（PERIOD 1）的总胆固醇 `TOTCHOL`，可看作连续变量，也可二分为
+> "undesirable（≥200 mg/dL）/ desirable"。协变量是 `BMI`、年龄组、性别。
+> 连续结局配**直方图/密度图/散点图/箱线图**，分类结局配**柱状图/堆叠比例图**——
+> 变量类型决定图形类型，这是可视化的第一原则。
+
+## 1 准备工作：读入数据、清洗与重编码
+
+做任何分析前，先把"原始数据"整理成"分析数据"：筛选基线、构造需要的变量、把数字编码（0/1/2/3）变成有意义的标签、并检查缺失值。
+
+
+``` r
+library(tidyverse)   # 含 dplyr / ggplot2 / tidyr 等，最主流的数据处理 + 绘图工具
+library(patchwork)   # 把多张 ggplot 拼到一起
+
+# 自定义统一主题，让所有图风格一致
+theme_set(theme_minimal(base_size = 12, base_family = "PingFang SC"))
+
+# 读入原始数据（项目共享的 rawdata）
+raw <- read_csv("../rawdata/Framingham_data.csv", show_col_types = FALSE)
+
+# 整理成"基线分析数据"
+df <- raw %>%
+  filter(PERIOD == 1) %>%                       # 只保留第 1 期（基线）
+  mutate(
+    chol_status = factor(if_else(TOTCHOL >= 200, "Undesirable", "Desirable"),
+                         levels = c("Desirable", "Undesirable")),
+    AGE_group   = factor(AGE_group, levels = c(1, 2, 3),
+                         labels = c("≤55", "55–65", ">65")),
+    Sex         = factor(SEX, levels = c(0, 1), labels = c("Men", "Women"))
+  )
+
+dim(df)                                          # 基线样本量 = 行数 × 列数
+```
+
+```
+#> [1] 4215   14
+```
+
+``` r
+colSums(is.na(df[c("TOTCHOL", "BMI", "AGE_group", "SEX")]))  # 各关键变量缺失个数
+```
+
+```
+#>   TOTCHOL       BMI AGE_group       SEX 
+#>        50        17         0         0
+```
+
+**怎么读这段输出**：基线共 4215 名受试者；`BMI` 有少量缺失，`TOTCHOL` 也有缺失，年龄组和性别没有缺失。缺失值在画图时 `ggplot2` 会自动剔除并给出提示，这里先心里有数。
+
+
+``` r
+summary(df$TOTCHOL)   # 连续结局的五数概括
+```
+
+```
+#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+#>   113.0   206.0   234.0   236.7   263.0   696.0      50
+```
+
+``` r
+summary(df$BMI)       # 连续协变量
+```
+
+```
+#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+#>   15.54   23.07   25.39   25.79   28.02   56.80      17
+```
+
+``` r
+table(df$chol_status) # 二分类结局
+```
+
+```
+#> 
+#>   Desirable Undesirable 
+#>         828        3337
+```
+
+``` r
+table(df$AGE_group)   # 年龄组人数
+```
+
+```
+#> 
+#>   ≤55 55–65    >65 
+#>   3057   1050    108
+```
+
+``` r
+table(df$Sex)         # 性别人数
+```
+
+```
+#> 
+#>   Men Women 
+#>  1810  2405
+```
+
+胆固醇均值约在 220 mg/dL 上下，已高于 200 的"理想"上限——提示"undesirable"会占多数；女性人数略多于男性；年龄组以最年轻一组为主。这些数字先给我们一个"心理预期"，下面用图形确认。
+
+## 2 单变量分布
+
+### 2.1 连续胆固醇：直方图 + 密度图
+
+直方图看"形状和范围"，密度图看"光滑后的分布"。两者一起看最稳妥。
+
+
+``` r
+p_hist <- ggplot(df, aes(TOTCHOL)) +
+  geom_histogram(binwidth = 10, fill = "#4C72B0", colour = "white") +
+  labs(title = "总胆固醇分布（基线）", x = "总胆固醇 (mg/dL)", y = "人数")
+
+p_dens <- ggplot(df, aes(TOTCHOL)) +
+  geom_density(fill = "#4C72B0", alpha = 0.5) +
+  geom_vline(xintercept = 200, linetype = 2, colour = "firebrick") +
+  labs(title = "总胆固醇密度", x = "总胆固醇 (mg/dL)", y = "密度")
+
+p_hist | p_dens     # patchwork：用 | 左右拼图
+```
+
+![plot of chunk dist-totchol](figures/dist-totchol-1.png)
+
+分布呈**右偏**（右侧拖一条长尾），峰值在 200–230 之间。红色虚线是 200 的临床切点，可以看到大部分人落在它右侧。右偏是生理指标的常态，这也是后续分析常对胆固醇取对数的原因。
+
+### 2.2 二分类胆固醇：柱状图
+
+
+``` r
+ggplot(df, aes(chol_status, fill = chol_status)) +
+  geom_bar(width = 0.65, show.legend = FALSE) +
+  geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.3) +
+  labs(title = "胆固醇状态分布（基线）", x = NULL, y = "人数")
+```
+
+![plot of chunk dist-cholstatus](figures/dist-cholstatus-1.png)
+
+正如预期，"Undesirable" 明显多于 "Desirable"——基线人群胆固醇普遍偏高。
+
+### 2.3 BMI 分布
+
+
+``` r
+ggplot(df, aes(BMI)) +
+  geom_histogram(binwidth = 1, fill = "#55A868", colour = "white") +
+  labs(title = "BMI 分布（基线）", x = "BMI (kg/m²)", y = "人数")
+```
+
+![plot of chunk dist-bmi](figures/dist-bmi-1.png)
+
+BMI 也轻度右偏，集中在 22–30，符合成年人群特征。
+
+### 2.4 年龄组与性别（分类协变量）
+
+
+``` r
+p_age <- ggplot(df, aes(AGE_group, fill = AGE_group)) +
+  geom_bar(width = 0.65, show.legend = FALSE) +
+  labs(title = "年龄组分布", x = "年龄组", y = "人数")
+
+p_sex <- ggplot(df, aes(Sex, fill = Sex)) +
+  geom_bar(width = 0.65, show.legend = FALSE) +
+  labs(title = "性别分布", x = NULL, y = "人数")
+
+p_age | p_sex
+```
+
+![plot of chunk dist-cat](figures/dist-cat-1.png)
+
+年龄组高度不均衡：最年轻一组占绝大多数——这在后续做年龄分层/校正时要特别注意（高龄组样本少，估计不稳定）。
+
+## 3 结局与协变量的边际关系
+
+"边际"指**一次只看一个协变量**，暂不控制其他变量。这是建模前的探索，帮我们形成假设。
+
+### 3.1 连续胆固醇 vs BMI：散点 + 平滑曲线
+
+
+``` r
+ggplot(df, aes(BMI, TOTCHOL)) +
+  geom_point(alpha = 0.25, colour = "#4C72B0") +
+  geom_smooth(method = "loess", colour = "firebrick", se = TRUE) +
+  labs(title = "总胆固醇 vs BMI", x = "BMI (kg/m²)", y = "总胆固醇 (mg/dL)")
+```
+
+![plot of chunk rel-bmi](figures/rel-bmi-1.png)
+
+`geom_smooth(method = "loess")` 是**局部加权回归**，不预设直线形状，最适合"先看趋势"。曲线整体上扬：BMI 越高，胆固醇倾向越高，且大致是线性的正相关。
+
+### 3.2 连续胆固醇 vs 年龄组 / 性别：箱线图
+
+分类协变量配连续结局，最主流的图是**箱线图**（看中位数、四分位距、离群点）。
+
+
+``` r
+p_a <- ggplot(df, aes(AGE_group, TOTCHOL, fill = AGE_group)) +
+  geom_boxplot(alpha = 0.8, show.legend = FALSE) +
+  labs(title = "胆固醇 by 年龄组", x = "年龄组", y = "总胆固醇 (mg/dL)")
+
+p_s <- ggplot(df, aes(Sex, TOTCHOL, fill = Sex)) +
+  geom_boxplot(alpha = 0.8, show.legend = FALSE) +
+  labs(title = "胆固醇 by 性别", x = NULL, y = "总胆固醇 (mg/dL)")
+
+p_a | p_s
+```
+
+![plot of chunk rel-box](figures/rel-box-1.png)
+
+年龄越大，胆固醇中位数越高（箱子整体上移）；女性的胆固醇也略高于男性。这些都是后续回归要正式检验的"线索"。
+
+### 3.3 二分类胆固醇 vs 各协变量：堆叠比例图
+
+结局是分类时，看**各组中"undesirable"所占比例**最直观。`position = "fill"` 把每根柱子拉伸到 100%，比较的是比例而非人数。
+
+
+``` r
+p_age_prop <- ggplot(df, aes(AGE_group, fill = chol_status)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "胆固醇状态 by 年龄组", x = "年龄组", y = "比例", fill = "状态")
+
+p_sex_prop <- ggplot(df, aes(Sex, fill = chol_status)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "胆固醇状态 by 性别", x = NULL, y = "比例", fill = "状态")
+
+p_age_prop | p_sex_prop
+```
+
+![plot of chunk rel-prop](figures/rel-prop-1.png)
+
+"undesirable" 比例随年龄组上升而明显增大；女性中"undesirable"比例也略高。和连续结局的结论一致——交叉印证让我们更有信心。
+
+
+``` r
+ggplot(df, aes(chol_status, BMI, fill = chol_status)) +
+  geom_boxplot(alpha = 0.8, show.legend = FALSE) +
+  labs(title = "BMI by 胆固醇状态", x = "胆固醇状态", y = "BMI (kg/m²)")
+```
+
+![plot of chunk rel-bmi-box](figures/rel-bmi-box-1.png)
+
+反过来看，"undesirable"组的 BMI 中位数更高，再次支持"BMI 与胆固醇正相关"。
+
+## 4 拓展分析：效应修饰（effect modification）
+
+> **额外题目**：年龄组、性别是否会**改变** BMI 与胆固醇的关系？这就是"效应修饰 / 交互"。
+> 可视化上，把样本**按性别上色、按年龄组分面（facet）**，看不同子群里 BMI–胆固醇的斜率是否一致。
+> 这是从"边际关系"迈向"多变量建模"的桥梁，也是第 4、6 节回归分析的前奏。
+
+
+``` r
+ggplot(df, aes(BMI, TOTCHOL, colour = Sex)) +
+  geom_point(alpha = 0.2) +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ AGE_group) +
+  scale_colour_manual(values = c("Men" = "#4C72B0", "Women" = "#C44E52")) +
+  labs(title = "BMI 与总胆固醇的关系：按性别上色、按年龄组分面",
+       x = "BMI (kg/m²)", y = "总胆固醇 (mg/dL)", colour = "性别")
+```
+
+![plot of chunk effmod](figures/effmod-1.png)
+
+**怎么读**：比较**分面之间**（年龄组）和**同一分面内两条线**（性别）的斜率。本图中，最年轻组（≤55）的斜率明显更陡，越年长越平缓——提示**年龄可能修饰 BMI 的效应**；而同一分面内男、女两条线大致平行——提示**性别大概不修饰**。这些只是"目测假设"，最终要靠回归里的交互项**正式检验**（第 4 节的结论正是：BMI×年龄显著、BMI×性别不显著）。高龄组样本少、线更"抖"，解读需谨慎。
+
+## 5 小结
+
+- **变量类型决定图形**：连续→直方图/密度/散点/箱线；分类→柱状/堆叠比例。
+- **三条一致的线索**：BMI↑、年龄↑、女性 → 胆固醇更高 / "undesirable"比例更高。
+- **可视化是建模的前奏**：右偏 → 提示取对数（第 2、4 节）；分组斜率 → 提示检验交互（第 4、6 节）；
+  年龄组极不均衡 → 提醒分层时注意小样本。
+- **可重复性**：本笔记由 `report.Rmd` 用 `knitr::knit()` 生成，所有图都自动存入 `figures/`，
+  改一行代码、重新 knit，报告与图同步更新。

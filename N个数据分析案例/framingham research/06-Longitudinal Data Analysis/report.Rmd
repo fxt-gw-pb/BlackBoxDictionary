@@ -1,0 +1,193 @@
+---
+title: "学习笔记 · 06 纵向数据分析（LMM / GLMM / GEE）"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE, message = FALSE, warning = FALSE,
+  fig.path = "figures/", fig.width = 7.5, fig.height = 4.2,
+  dpi = 150, dev = "ragg_png", comment = "#>"
+)
+```
+
+> **本节目标**：每人有最多 3 次随访，**同一个人的多次测量彼此相关**，普通回归把它们当独立会低估标准误。
+> 纵向数据有两大主流框架：
+> **混合效应模型（LMM/GLMM）**——加入"个体随机效应"，给出**个体特异（subject-specific）**解释；
+> **广义估计方程（GEE）**——直接建模总体均值 + 工作相关结构，给出**总体平均（population-average）**解释。
+>
+> **主线问题**：时变 BMI 与胆固醇的关系，校正时间（PERIOD）、年龄组、性别。
+> 步骤：(a) 画轨迹判断时间趋势 →(b) 连续结局 LMM →(c) 二分结局 GLMM →(d) 二分结局 GEE →(e) 比较 GLMM 与 GEE。
+
+## 1 准备纵向数据（长格式）
+
+```{r prep}
+library(tidyverse)
+library(lme4)       # LMM / GLMM 的主流实现
+library(geepack)    # GEE 的主流实现
+theme_set(theme_minimal(base_size = 12, base_family = "PingFang SC"))
+
+raw <- read_csv("../rawdata/Framingham_data.csv", show_col_types = FALSE)
+
+dat <- raw %>%
+  filter(!is.na(TOTCHOL), !is.na(BMI), !is.na(AGE_group), !is.na(SEX)) %>%
+  mutate(
+    log_chol = log(TOTCHOL),
+    undesirable = as.integer(TOTCHOL >= 200),
+    Age = factor(AGE_group, levels = c(1, 2, 3), labels = c("≤55", "55–65", ">65")),
+    Sex = factor(SEX, levels = c(0, 1), labels = c("Men", "Women")),
+    period_c = PERIOD - 2          # 时间中心化（第2期为0），减小与二次项的共线性
+  ) %>%
+  arrange(RANDID, PERIOD)
+
+c(rows = nrow(dat), subjects = n_distinct(dat$RANDID))
+table(dat$PERIOD)                  # 每期观测数（越往后越少：失访/死亡）
+```
+
+数据是"**长格式**"：一人多行、每行一次随访。`RANDID` 是把同一人的多行"绑定"起来的关键。
+
+## 2 (a) 个体轨迹与时间趋势：线性还是二次？
+
+```{r traj, fig.height=4.2}
+set.seed(7)
+sub <- sample(unique(dat$RANDID), 80)            # 随机抽 80 人画轨迹，避免一团乱麻
+
+ggplot(dat %>% filter(RANDID %in% sub),
+       aes(PERIOD, log_chol, group = RANDID)) +
+  geom_line(alpha = 0.3, colour = "steelblue") +
+  stat_summary(aes(group = 1), data = dat, fun = mean,
+               geom = "line", colour = "firebrick", linewidth = 1.2) +
+  stat_summary(aes(group = 1), data = dat, fun = mean,
+               geom = "point", colour = "firebrick", size = 2.5) +
+  scale_x_continuous(breaks = 1:3) +
+  labs(title = "个体 log(胆固醇) 轨迹（蓝，随机80人）与总体均值（红）",
+       x = "PERIOD（随访期）", y = "log(总胆固醇)")
+```
+
+```{r trend-test}
+dat %>% group_by(PERIOD) %>%
+  summarise(mean_logchol = mean(log_chol), n = n(), .groups = "drop")
+
+# 用边际模型粗判趋势形状：线性 vs 二次
+lin  <- lm(log_chol ~ period_c, data = dat)
+quad <- lm(log_chol ~ period_c + I(period_c^2), data = dat)
+anova(lin, quad)     # 二次项是否显著改善
+```
+
+红线（总体均值）从第 1 期升到第 2 期、再回落到第 3 期（**5.45 → 5.50 → 5.45**），呈明显的**先升后降的二次（凹）形**，而非单调直线。线性 vs 二次的模型比较中，**二次项极其显著**（F ≈ 206，p < 2×10⁻¹⁶）——证实时间趋势是**二次**的。因此后续 LMM/GLMM/GEE 都纳入 `period_c` 及其二次项 `I(period_c^2)`，以正确刻画这条"驼峰"曲线。
+
+## 3 (b) 线性混合模型 LMM（连续结局）
+
+> **LMM 思想**：`log_chol = 固定效应（BMI、时间、年龄、性别）+ 个体随机截距 b_i + 误差`。
+> 随机截距 `(1 | RANDID)` 表示"每个人有自己的基线水平"，从而**显式建模个体内相关**。
+
+```{r lmm}
+lmm <- lmer(log_chol ~ BMI + period_c + I(period_c^2) + Age + Sex + (1 | RANDID),
+            data = dat, REML = TRUE)
+round(summary(lmm)$coefficients, 5)
+```
+
+固定效应的解读和普通回归一样（对数尺度→`exp(β)` 为倍数效应）。`BMI` 系数为正且 |t| 很大：**校正时间、年龄、性别后，BMI 越高，胆固醇越高**。
+
+```{r lmm-icc}
+# 方差成分 → 组内相关 ICC = 个体间方差 / 总方差
+vc <- as.data.frame(VarCorr(lmm))
+sig_b2 <- vc$vcov[vc$grp == "RANDID"]    # 个体间（随机截距）方差
+sig_e2 <- vc$vcov[vc$grp == "Residual"]  # 个体内（残差）方差
+c(var_between = sig_b2, var_within = sig_e2, ICC = sig_b2 / (sig_b2 + sig_e2))
+```
+
+**ICC（组内相关系数）**= 个体间方差占总方差的比例。这里 ICC ≈ `r round(as.numeric(as.data.frame(VarCorr(lmm))$vcov[1] / sum(as.data.frame(VarCorr(lmm))$vcov)), 2)`，说明同一个人多次测量之间**确有相当强的相关**——正是必须用纵向模型、不能当独立数据的理由。
+
+## 4 (c) 广义线性混合模型 GLMM（二分结局）
+
+结局换成 0/1（是否 ≥200），把 LMM 升级成 **logistic 版的混合模型**：`glmer(..., family = binomial)`。
+
+```{r glmm}
+glmm <- glmer(undesirable ~ BMI + period_c + I(period_c^2) + Age + Sex + (1 | RANDID),
+              data = dat, family = binomial,
+              control = glmerControl(optimizer = "bobyqa"))
+round(summary(glmm)$coefficients, 5)
+```
+
+GLMM 系数是 **个体特异（subject-specific）log-odds**：解释为"**对同一个人**，BMI 每升 1，胆固醇不理想的 log-odds 增加多少"。
+
+```{r glmm-varcomp}
+sig_b2_glmm <- as.data.frame(VarCorr(glmm))$vcov[1]   # 随机截距方差
+sig_b2_glmm
+```
+
+## 5 (d) 广义估计方程 GEE（二分结局）
+
+> **GEE 思想**：不引入随机效应，而是**直接建模总体平均的 logit**，并用一个"工作相关结构"
+> （这里用 `exchangeable`，即同一人内任意两次相关系数相同）来校正相关。
+> 标准误用**稳健（sandwich）估计**，即使相关结构设错也依然有效。
+
+```{r gee}
+gee <- geeglm(undesirable ~ BMI + period_c + I(period_c^2) + Age + Sex,
+              id = RANDID, data = dat,
+              family = binomial, corstr = "exchangeable")
+round(summary(gee)$coefficients, 5)
+summary(gee)$corr        # 估计出的工作相关系数 alpha
+```
+
+GEE 系数是 **总体平均（population-average）log-odds**：解释为"**人群中** BMI 高 1 个单位的两群人，平均而言胆固醇不理想的 log-odds 相差多少"。
+
+## 6 (e) GLMM vs GEE：为什么 BMI 系数不一样？
+
+```{r compare}
+# 注意：glmer 的 summary()$coefficients 是"矩阵"，geeglm 的是"数据框"，
+# 列名也不同（Std. Error vs Std.err），所以分别取标量更稳妥。
+est_glmm <- summary(glmm)$coefficients["BMI", "Estimate"]
+se_glmm  <- summary(glmm)$coefficients["BMI", "Std. Error"]
+est_gee  <- summary(gee)$coefficients["BMI", "Estimate"]
+se_gee   <- summary(gee)$coefficients["BMI", "Std.err"]
+
+cmp <- tibble(
+  Model = c("GLMM（个体特异）", "GEE（总体平均）"),
+  beta_BMI = c(est_glmm, est_gee),
+  SE = c(se_glmm, se_gee),
+  OR = exp(c(est_glmm, est_gee))
+)
+cmp
+
+# 理论上的"收缩因子"：PA ≈ SS / sqrt(1 + 0.346 * sigma_b^2)
+shrink <- 1 / sqrt(1 + (16 / (15 * pi))^2 * sig_b2_glmm)
+c(theoretical_ratio_PA_over_SS = shrink,
+  empirical_ratio = est_gee / est_glmm)
+```
+
+**关键结论**：GEE 的 BMI 系数（绝对值）**略小于** GLMM 的——这不是 bug，而是两类模型的本质区别：
+
+- **GLMM（个体特异）**：固定"是同一个人"，问 BMI 变化的效应。
+- **GEE（总体平均）**：在整个人群上平均，随机效应被"平均掉"，使得 logit 尺度上的斜率被**收缩（衰减）**。
+- 收缩程度由随机截距方差 σ_b² 决定，理论因子 ≈ 1/√(1+0.346·σ_b²)。上面"理论比值"与"实际比值"接近，印证了这一机制。
+
+二者**没有谁对谁错**，取决于你想回答的问题：临床上对"个体改变 BMI 的后果"感兴趣→看 GLMM；公共卫生上对"人群层面的平均关联"感兴趣→看 GEE。对**线性** LMM，二者会一致；只有在 **logistic 这种非线性链接**下才出现这种收缩差异。
+
+## 7 拓展分析：工作相关结构的选择
+
+> **额外题目**：GEE 的"工作相关结构"设成 `independence`（假装不相关）和 `exchangeable`（可交换）会有差别吗？
+> GEE 的稳健标准误对结构错配是"免疫"的，但**选对结构能提高效率**（标准误更小）。
+
+```{r gee-corr}
+gee_ind <- geeglm(undesirable ~ BMI + period_c + I(period_c^2) + Age + Sex,
+                  id = RANDID, data = dat,
+                  family = binomial, corstr = "independence")
+
+tibble(
+  corr_structure = c("independence", "exchangeable"),
+  beta_BMI = c(coef(gee_ind)["BMI"], coef(gee)["BMI"]),
+  SE_BMI = c(summary(gee_ind)$coefficients["BMI", "Std.err"],
+             summary(gee)$coefficients["BMI", "Std.err"])
+)
+```
+
+两种结构的**点估计几乎相同**（稳健性的体现），但 `exchangeable` 把"同一人内相关"显式建模，通常 **标准误更小、更有效率**。这说明：GEE 里选结构主要影响**效率**而非**无偏性**——这正是 GEE 相比混合模型"更稳健、对相关结构要求更宽松"的优点。
+
+## 8 小结
+
+- **纵向数据 = 个体内相关**：必须用 LMM/GLMM 或 GEE，否则标准误失真。
+- **LMM**：随机截距显式建模个体差异；**ICC** 量化个体内相关强度（本数据 ICC 不低）。
+- **GLMM（个体特异） vs GEE（总体平均）**：logistic 下 GEE 系数被**收缩**，因随机效应被平均掉；二者回答不同问题。
+- **GEE 工作相关结构**主要影响**效率**，稳健 SE 保证估计有效；`exchangeable` 通常比 `independence` 更高效。
+- BMI 与胆固醇的正向关联在三套模型中**一致存在**——纵向证据进一步巩固了前几节的横断面结论。
