@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -48,111 +48,170 @@
       <div class="detail-meta">
         <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
         <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
-        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 分类数据分析 / 分层分析</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 分类数据 / 分层分析 / 混杂控制</b></span>
       </div>
     </div>
     <div class="intro-note"><h1>Mantel-Haenszel检验（Mantel-Haenszel Test）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>Mantel-Haenszel 检验用于在多个分层 2x2 列联表中检验暴露与结局是否存在一致的条件关联，常用于控制一个分类混杂因素。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>Mantel-Haenszel 把数据按一个混杂因素（如年龄）<strong>分层</strong>，在每一层里干净地看暴露与结局的关联，再把各层的关联加权合并成一个「已调整」的比值比——从而在不建回归模型的情况下控制混杂。</p>
+<h3>1.2 定义</h3>
+<p>Mantel-Haenszel（Cochran-Mantel-Haenszel, CMH）方法用于分层 2×2 列联表，在控制一个分类混杂因素的前提下检验暴露与结局的关联，并给出合并的比值比 $\mathrm{OR}_{MH}$。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：在控制一个分层因素后，暴露与结局是否仍相关。</li>
-<li>适用任务：分层列联表分析、初步控制混杂。</li>
-<li>常见医学场景：按年龄层、性别层、中心分层后评估暴露与结局关联。</li>
+<li>研究问题：在控制某个分层因素后，暴露与结局是否仍相关、关联多强？</li>
+<li>适用任务：混杂调整的关联检验、合并多个 2×2 表、分层设计分析。</li>
+<li>常见医学场景：控制年龄段后评估暴露与疾病的关联、合并多中心/多研究的 2×2 结果、匹配分层分析。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>它相当于“在每一层里先做 2x2 比较，再把这些层内证据按权重汇总起来”，从而避免被 Simpson 悖论那样的混杂误导。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>假设整体上「喝咖啡的人更容易失眠」，但其实是「年轻人既爱熬夜喝咖啡、又本就睡得晚」在作怪。把人按年龄分层后，在每个年龄层内单独看咖啡与失眠的关系，混杂就被「关」在层内、不再干扰。MH 就是先在各层内看干净的关联，再把它们合成一个总的调整后关联——避免了辛普森悖论。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-Q_{MH} = \frac{\left[\sum_{k=1}^{K}(n_{k11} - m_{k11})\right]^2}{\sum_{k=1}^{K} v_{k11}}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>一个混杂因素同时影响暴露和结局，会<strong>歪曲</strong>甚至反转整体关联（辛普森悖论）：把所有人混在一张表里算出的「粗 OR」可能完全误导。根本困难是：<strong>如何在不做完整回归建模的情况下，剔除某个分类混杂因素的影响？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>分层是控制混杂最直接的手段：在同一层内，混杂因素取值相同，于是层内的暴露-结局关联不再被它污染。MH 的巧妙在于<strong>如何合并各层</strong>——用一套权重（与各层样本量、边际有关）对层内 OR 加权平均，使合并估计在「各层真实 OR 相同」时高效且稳健。CMH 检验则把各层「观测的病例数」与其在独立假设下的期望累加比较。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$n_{k11}$：第 $k$ 层 2x2 表左上角频数。</li>
-<li>$m_{k11}$、$v_{k11}$：零假设下的期望和方差。</li>
-<li>$Q_{MH}$：近似服从 $\chi^2_1$ 的统计量。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>数据由多个独立分层 2x2 表组成。</li>
-<li>各层内观测独立，各层之间独立。</li>
-<li>层间 OR 方向大体一致，否则汇总意义有限。</li>
+<li>相对<strong>直接算粗 OR</strong>：MH 控制了分层混杂，避免辛普森悖论。</li>
+<li>相对 <strong>Logistic 回归</strong>：MH 简单、无需拟合模型、对稀疏分层稳健；Logistic 更灵活、可调多个连续/分类混杂。</li>
+<li>相对<strong>逐层单独看</strong>：MH 把各层证据合并为一个更有力的总体结论。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>各层 $i$ 的 2×2 表记为 $\begin{smallmatrix}a_i &amp; b_i\\ c_i &amp; d_i\end{smallmatrix}$，层内总数 $n_i$，合并比值比：</p>
+<p>$$
+\mathrm{OR}_{MH}=\frac{\sum_i a_i d_i / n_i}{\sum_i b_i c_i / n_i}
+$$</p>
+<p>这个式子在说：把每层的「支持正关联的证据」$a_i d_i/n_i$ 和「支持负关联的证据」$b_i c_i/n_i$ 分别按层累加，再相除，得到调整后的总 OR。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>自变量类型：二分类暴露。</li>
-<li>因变量类型：二分类结局。</li>
-<li>数据结构：$K$ 个 2x2 分层表。</li>
-<li>是否适合高维数据：不适合高维多混杂因素。</li>
-<li>是否适合缺失较多数据：分层后缺失会进一步稀疏。</li>
-<li>是否适合删失数据：不适合。</li>
-<li>是否适合重复测量数据：不适合。</li>
+<li>在每层内，若暴露与结局独立，则病例数 $a_i$ 的期望 $E_i=\dfrac{(a_i+b_i)(a_i+c_i)}{n_i}$、方差 $V_i$ 由超几何分布给出。</li>
+<li>CMH 统计量把各层的 $a_i-E_i$ 累加再平方除以总方差：$\chi^2_{CMH}=\dfrac{(\sum_i a_i-\sum_i E_i)^2}{\sum_i V_i}$，近似自由度 1 的卡方。</li>
+<li>$\mathrm{OR}_{MH}$ 是层内 OR 的加权合并，权重 $\propto b_i c_i/n_i$，对稀疏层稳健。</li>
+<li>合并前应检验各层 OR 是否一致（Breslow-Day 齐性检验）；不齐则合并意义存疑。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>Mantel-Haenszel 检验最适合“多个分层的 2x2 表”。例如在 <code>Framingham_data.csv</code> 基线中，按 <code>AGE_group</code> 分层考察 <code>CURSMOKE × PREVHYP</code>：</p>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$a_i,b_i,c_i,d_i$：第 $i$ 层 2×2 表的四格。</li>
+<li>$\mathrm{OR}_{MH}$：调整后的合并比值比。</li>
+<li>$\chi^2_{CMH}$：控制分层后的关联检验统计量。</li>
+<li>Breslow-Day：层间 OR 齐性检验。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>AGE_group</th>
-<th>Smoke + HTN</th>
-<th>Smoke + NoHTN</th>
-<th>NoSmoke + HTN</th>
-<th>NoSmoke + NoHTN</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>1</td>
-<td>362</td>
-<td>1313</td>
-<td>372</td>
-<td>1010</td>
+<td>层内独立</td>
+<td>每层是独立 2×2</td>
+<td>p/OR 失真</td>
+<td>看设计</td>
 </tr>
 <tr>
-<td>2</td>
-<td>161</td>
-<td>218</td>
-<td>334</td>
-<td>337</td>
+<td>OR 齐性</td>
+<td>各层真实 OR 相近</td>
+<td>合并 OR 无意义</td>
+<td>Breslow-Day 检验</td>
 </tr>
 <tr>
-<td>3</td>
+<td>混杂已分层</td>
+<td>关键混杂被纳入分层</td>
+<td>残余混杂</td>
+<td>领域知识</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>按年龄分两层，看暴露 $E$ 与疾病 $D$ 的关联：</p>
+<ul>
+<li>层 1（年轻）：$a_1=10,\ b_1=20,\ c_1=5,\ d_1=25$，$n_1=60$。</li>
+<li>层 2（年长）：$a_2=30,\ b_2=10,\ c_2=15,\ d_2=15$，$n_2=70$。</li>
+</ul>
+<p><strong>一步步计算：</strong></p>
+<ul>
+<li>分子各项 $a_i d_i/n_i$：层 1 $=10\times25/60=4.167$；层 2 $=30\times15/70=6.429$；合计 $10.60$。</li>
+<li>分母各项 $b_i c_i/n_i$：层 1 $=20\times5/60=1.667$；层 2 $=10\times15/70=2.143$；合计 $3.81$。</li>
+<li>合并：$\mathrm{OR}_{MH}=\dfrac{10.60}{3.81}=2.78$。</li>
+<li>对比<strong>粗 OR</strong>（把两层合成一张表 $a{=}40,b{=}30,c{=}20,d{=}40$）：$\mathrm{OR}_{\text{粗}}=\dfrac{40\times40}{30\times20}=2.67$。</li>
+</ul>
+<p><strong>结论：</strong> 调整年龄后暴露与疾病的 OR 约 2.78。本例粗 OR（2.67）与调整 OR（2.78）接近，说明此处年龄的混杂作用不强；但当粗 OR 与 $\mathrm{OR}_{MH}$ 差别很大（甚至方向相反）时，就暴露出严重混杂——这正是 MH 的价值。合并前应先用 Breslow-Day 确认两层 OR 大体一致，否则应分层报告而非合并。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：暴露（二分类）+ 分层因素（分类）。</li>
+<li>因变量类型：二分类结局。</li>
+<li>数据结构：多层 2×2 表。</li>
+<li>是否适合高维数据：分层数不宜过多、过稀。</li>
+<li>是否适合缺失较多数据：先处理缺失。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：不适合。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>a</th>
+<th>b</th>
+<th>c</th>
+<th>d</th>
+<th>层内 OR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>年轻</td>
+<td>10</td>
 <td>20</td>
-<td>14</td>
-<td>49</td>
+<td>5</td>
 <td>25</td>
+<td>2.50</td>
+</tr>
+<tr>
+<td>年长</td>
+<td>30</td>
+<td>10</td>
+<td>15</td>
+<td>15</td>
+<td>3.00</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：若干个 2x2 分层表。</li>
-<li>关键变量：暴露、结局、分层变量。</li>
-<li>需要预处理的内容：确保每层表方向一致。</li>
+<li>输入数据：按分层因素拆分的多张 2×2 表。</li>
+<li>关键变量：暴露、结局、分层因素。</li>
+<li>需要预处理的内容：分层、检查各层非空、齐性检验。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：MH 统计量、p 值。</li>
-<li>参数估计：合并 OR 或 RR。</li>
+<li>模型对象/统计结果：$\mathrm{OR}_{MH}$、CMH $\chi^2$、p 值。</li>
+<li>参数估计：合并 OR 及其区间。</li>
 <li>预测结果：无。</li>
-<li>不确定性指标：合并 OR 的置信区间。</li>
+<li>不确定性指标：$\mathrm{OR}_{MH}$ 的置信区间、Breslow-Day p。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：只有一个主要分层混杂因素时的快速分层分析。</li>
-<li>不适合：多个连续混杂变量、强交互、层间效应异质性很大。</li>
-<li>使用前需要特别检查的点：层间 OR 是否相近，是否存在 Simpson 悖论风险。</li>
+<li>适合：控制一个分类混杂、合并多个 2×2、分层/匹配设计。</li>
+<li>不适合：需调整多个连续混杂（用 Logistic）、各层 OR 明显不齐时的合并。</li>
+<li>使用前需要特别检查的点：层间 OR 齐性、层是否过稀、混杂是否恰当分层。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="mantel-haenszel-test" data-i="0">Python</button><button class="codetab" data-uid="mantel-haenszel-test" data-i="1">R</button></div><div class="codepanel active" data-uid="mantel-haenszel-test" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>statsmodels</code></li>
@@ -160,93 +219,104 @@ $$</p>
 <pre><code class="language-python">import numpy as np
 from statsmodels.stats.contingency_tables import StratifiedTable
 
-tables = np.array([
-    [[12, 18], [5, 25]],
-    [[20, 10], [9, 21]],
-    [[15, 14], [6, 19]],
-]).transpose(1, 2, 0)
-
+# 每层为 [[a, b], [c, d]]
+tables = [np.array([[10, 20], [5, 25]]),
+          np.array([[30, 10], [15, 15]])]
 st = StratifiedTable(tables)
-print(st.test_null_odds())
-print(st.oddsratio_pooled)
-print(st.oddsratio_pooled_confint())
+print(&quot;OR_MH =&quot;, round(st.oddsratio_pooled, 2))    # 2.78
+print(st.test_null_odds())                          # CMH 检验
+print(st.test_equal_odds())                         # Breslow-Day 齐性
 </code></pre></div><div class="codepanel" data-uid="mantel-haenszel-test" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>stats</code></li>
 </ul>
-<pre><code class="language-r">tab &lt;- array(
-  c(12, 18, 5, 25,
-    20, 10, 9, 21,
-    15, 14, 6, 19),
-  dim = c(2, 2, 3)
-)
-mantelhaen.test(tab)
+<pre><code class="language-r">arr &lt;- array(c(10,5,20,25, 30,15,10,15), dim = c(2,2,2))
+mantelhaen.test(arr)          # OR_MH、CMH 卡方与 p
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：控制分层因素后，暴露与结局是否仍有关联。</li>
-<li>每个主要参数如何解释：合并 OR 大于 1 或小于 1 代表关联方向。</li>
-<li>临床或医学意义如何表达：要同时给出分层背景与合并 OR 区间。</li>
-<li>常见误读：若层间效应异质性很强，单一合并 OR 可能没有意义。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>各层 OR 的森林图。</li>
-<li>分层列联表。</li>
-<li>合并 OR 与各层 OR 对照图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下面的图像把 <code>Framingham_data.csv</code> 中 <code>CURSMOKE × PREVHYP</code> 在不同年龄层下的 OR 画成分层森林图，适合配合 Mantel-Haenszel 检验一起解释。</p>
-<p><img alt="" src="img/mantel_haenszel_agegroup_or.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：$\mathrm{OR}_{MH}$ 及区间、CMH p、与粗 OR 的差异、Breslow-Day。</li>
+<li>每个主要参数如何解读：$\mathrm{OR}_{MH}$ 是调整后关联；与粗 OR 差别大提示混杂。</li>
+<li>临床或医学意义如何表达：报告「调整某因素后的 OR 及区间」，说明混杂被控制。</li>
+<li>常见误读：各层 OR 不齐仍报一个合并 OR；把 MH 当成能控制所有混杂。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>齐性：先做 Breslow-Day；若各层 OR 差异大（有效应修饰），应分层报告而非合并。</li>
+<li>稀疏层：MH 对含零格/小层比 Logistic 稳健，但层过稀仍不稳。</li>
+<li>残余混杂：MH 只控制被分层的因素，其他混杂仍在，需领域判断。</li>
+<li>连续混杂：连续变量分层会有残余混杂，宜用回归。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>各层 OR + 合并 OR 的森林图。</li>
+<li>分层前后（粗 vs 调整）OR 对比。</li>
+<li>各层暴露-结局比例并列条形图。</li>
+</ul>
+<h3>10.1 图像示例</h3>
+<p>下图展示按年龄段分层后各层与合并的比值比。</p>
+<p><img alt="" src="img/mantel_haenszel_agegroup_or.png" /></p></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>能初步控制一个分类混杂因素。</li>
-<li>对解释 Simpson 悖论很有帮助。</li>
-<li>结果直观。</li>
+<li>简单地控制一个分类混杂，避免辛普森悖论。</li>
+<li>无需拟合模型，对稀疏分层稳健。</li>
+<li>直接给可解释的合并 OR。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>只能处理较简单的分层结构。</li>
-<li>不适合多个复杂混杂因素。</li>
-<li>层间异质性大时解释困难。</li>
+<li>一次只便于控制一个（少数）分类混杂。</li>
+<li>各层 OR 不齐时合并意义存疑。</li>
+<li>连续混杂需分箱，有残余混杂。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>不检查层间同质性就直接汇总。</li>
-<li>把它当作回归模型的完全替代。</li>
-<li>分层方向不一致导致 OR 含义混乱。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和普通卡方的区别：MH 是分层后的条件分析。</li>
-<li>和 Fisher 的区别：Fisher 处理单个 2x2 小样本表。</li>
-<li>应该如何选择：只有一个主要分类混杂因素时可用 MH；更复杂情形通常转向回归模型。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>按年龄组分层比较暴露与疾病。</li>
-<li>多中心研究中按中心分层比较治疗效果。</li>
-<li>教学中解释 Simpson 悖论和混杂控制。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-pearson-chi-squared-test-of-independence.html" data-cn="Pearson卡方独立性检验" data-en="Pearson Chi-Squared Test of Independence" data-def="Pearson 卡方独立性检验用于判断两个分类变量在列联表中是否独立，是分类数据分析的基础方法。">Pearson卡方独立性检验（Pearson Chi-Squared Test of Independence）</a></li>
-<li><a class="xlink" href="m-fisher-exact-test.html" data-cn="Fisher精确检验" data-en="Fisher Exact Test" data-def="Fisher 精确检验是针对 2x2 列联表的小样本精确检验，利用超几何分布在固定边际下直接计算 p 值。">Fisher精确检验（Fisher Exact Test）</a></li>
-<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归通过把连续型结局表示为若干自变量的线性组合，来估计变量与结局之间的方向、大小和不确定性，是医学统计最基础的建模方法之一。">线性回归（Linear Regression）</a></li>
+<li>不查齐性就报合并 OR。</li>
+<li>用它控制多个连续混杂（应回归）。</li>
+<li>分层过细导致层内样本太少。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Agresti A. <em>An Introduction to Categorical Data Analysis</em>. 3rd ed. Wiley; 2018.</li>
-<li>statsmodels Developers. <code>statsmodels.stats.contingency_tables.StratifiedTable</code>. statsmodels API Reference. <a href="https://www.statsmodels.org/stable/generated/statsmodels.stats.contingency_tables.StratifiedTable.html">https://www.statsmodels.org/stable/generated/statsmodels.stats.contingency_tables.StratifiedTable.html</a> （访问日期：2026-07-02）</li>
-<li>R Core Team. <code>mantelhaen.test</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/mantelhaen.test.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/mantelhaen.test.html</a> （访问日期：2026-07-02）</li>
+<li>和 <strong>Pearson 卡方</strong>：卡方不控制混杂，MH 分层控制一个混杂。</li>
+<li>和 <strong>Logistic 回归</strong>：MH 简单稳健但只调少数分类混杂；Logistic 可调多个连续混杂。</li>
+<li>和<strong>分层单独分析</strong>：MH 合并各层证据得总体结论。</li>
+<li>如何选择：单个分类混杂、稀疏数据 → MH；多混杂、需建模 → Logistic。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>控制年龄/性别后评估暴露与疾病关联。</li>
+<li>Meta 分析式合并多个 2×2 研究结果。</li>
+<li>匹配或分层病例对照研究的分析。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>混杂（Confounding）</strong>：同时影响暴露与结局、歪曲关联的第三变量。</li>
+<li><strong>分层（Stratification）</strong>：按混杂因素分组，在层内看干净关联。</li>
+<li><strong>合并比值比（$\mathrm{OR}_{MH}$）</strong>：各层 OR 的加权合并。</li>
+<li><strong>辛普森悖论</strong>：分层与合并关联方向相反的现象。</li>
+<li><strong>Breslow-Day 检验</strong>：各层 OR 是否一致（无效应修饰）的检验。</li>
+<li><strong>效应修饰</strong>：关联强度随分层因素改变，此时不宜合并。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-pearson-chi-squared-test-of-independence.html" data-cn="Pearson卡方独立性检验" data-en="Pearson Chi-Squared Test of Independence" data-def="卡方检验把列联表里「实际观测到的频数」和「假如两变量毫无关系时本该出现的期望频数」逐格相比：两者差得越大，越说明两个分类变量之间存在关联。">Pearson卡方独立性检验（Pearson Chi-Squared Test of Independence）</a></li>
+<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
+<li><a class="xlink" href="m-causal-inference.html" data-cn="因果推断" data-en="Causal Inference" data-def="因果推断是一组用于估计干预或暴露对结局影响的方法框架。它关注的是“如果我们改变处理状态，结局会怎样变化”，而不是单纯描述变量之间是否相关。">因果推断（Causal Inference）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Mantel N, Haenszel W. Statistical aspects of the analysis of data from retrospective studies of disease. <em>J Natl Cancer Inst</em>. 1959;22(4):719-748.</li>
+<li>Cochran WG. Some methods for strengthening the common chi-squared tests. <em>Biometrics</em>. 1954;10(4):417-451.</li>
+<li>Rothman KJ, Greenland S, Lash TL. <em>Modern Epidemiology</em>. 3rd ed. Lippincott; 2008.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-mcnemar-test.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">McNemar检验</div></a><a class="pg pg-next" href="m-bootstrap-resampling.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">Bootstrap重抽样</div></a></div>

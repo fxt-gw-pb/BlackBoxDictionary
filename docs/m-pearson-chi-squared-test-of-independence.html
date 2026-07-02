@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -48,191 +48,293 @@
       <div class="detail-meta">
         <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
         <span>难度&nbsp;·&nbsp;<b>basic</b></span>
-        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 分类数据分析 / 假设检验</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 分类数据 / 列联表 / 假设检验</b></span>
       </div>
     </div>
     <div class="intro-note"><h1>Pearson卡方独立性检验（Pearson Chi-Squared Test of Independence）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>Pearson 卡方独立性检验用于判断两个分类变量在列联表中是否独立，是分类数据分析的基础方法。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>卡方检验把列联表里「实际观测到的频数」和「假如两变量毫无关系时本该出现的期望频数」逐格相比：两者差得越大，越说明两个分类变量之间存在关联。</p>
+<h3>1.2 定义</h3>
+<p>Pearson 卡方独立性检验用于判断两个分类变量是否独立（无关联）。它基于列联表，比较观测频数与独立假设下的期望频数，构造近似服从卡方分布的统计量。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：分类暴露与分类结局之间是否存在关联。</li>
-<li>适用任务：列联表独立性检验。</li>
-<li>常见医学场景：治疗组与结局、吸烟与疾病、性别与并发症之间的关联分析。</li>
+<li>研究问题：两个分类特征是否相关（如暴露与疾病、性别与结局）？</li>
+<li>适用任务：列联表关联检验、率的组间比较。</li>
+<li>常见医学场景：暴露组与非暴露组的患病率比较、不同性别的并发症发生率、分类危险因素与结局的关联。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>如果两个分类变量独立，那么各单元格实际人数应该和“按边际比例乘出来的期望人数”差不多。差得越离谱，越不支持独立。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>先假设「两件事完全无关」，据此推算「本该」出现的表格（期望频数）。再看真实表格偏离它多远。就像先假设硬币公平、算出正反各半的期望，再看实际抛掷偏离多少。偏离若在随机波动之内，就没有证据说两者相关；偏离若大得离谱，就推翻「无关」的假设。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-\begin{aligned}
-\hat\mu_{ij} &amp;= \frac{n_{i\cdot}n_{\cdot j}}{n} \\
-X^2 &amp;= \sum_{i=1}^{I}\sum_{j=1}^{J}\frac{(n_{ij} - \hat\mu_{ij})^2}{\hat\mu_{ij}} \\
-\mathrm{df} &amp;= (I - 1)(J - 1)
-\end{aligned}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>列联表里各格频数天然有随机波动。即便两变量真的独立，观测频数也不会精确等于「行列比例相乘」的期望。根本困难是：<strong>如何判断观测到的偏离，是真实关联还是抽样噪声？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>「独立」有精确的数学含义：$P(A,B)=P(A)P(B)$，于是每格的期望频数 = 行合 × 列合 ÷ 总数。把每格的偏离标准化（除以期望）再累加，得到卡方统计量 $\sum (O-E)^2/E$——每格贡献与「偏离平方相对期望的大小」成正比。在独立假设与大样本下，这个和近似服从自由度 $(r-1)(c-1)$ 的卡方分布，于是可算 p 值。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$n_{ij}$：观察到的单元格频数。</li>
-<li>$\hat\mu_{ij}$：零假设下的期望频数。</li>
-<li>$X^2$：卡方统计量。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>观测相互独立。</li>
-<li>数据是频数而不是比例。</li>
-<li>期望频数不能太小；常见经验是平均单元格频数至少约 5。</li>
+<li>相对<strong>直接比较各格比例</strong>：卡方给出整体的显著性与不确定性。</li>
+<li>相对 <strong>Fisher 精确检验</strong>：卡方是大样本近似，期望频数小时不准，此时用 Fisher。</li>
+<li>相对 <strong>McNemar</strong>：卡方要求两变量的观测相互独立；配对二分类要用 McNemar。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>$$
+\chi^2=\sum_{\text{所有格}}\frac{(O-E)^2}{E},\qquad E_{ij}=\frac{(\text{行}_i\text{合})\times(\text{列}_j\text{合})}{N}
+$$</p>
+<p>自由度 $df=(r-1)(c-1)$。这个式子在说：每格把「观测减期望」平方后除以期望（对偏离标准化），再全表求和；期望频数由「独立即行列比例相乘」给出。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>自变量类型：分类变量。</li>
-<li>因变量类型：分类变量。</li>
-<li>数据结构：二维列联表最典型。</li>
-<li>是否适合高维数据：稀疏表不合适。</li>
-<li>是否适合缺失较多数据：需先决定缺失是否作为单独类别。</li>
-<li>是否适合删失数据：不适合。</li>
-<li>是否适合重复测量数据：不适合，配对分类数据应考虑 McNemar。</li>
+<li>独立假设 $P(\text{行}_i,\text{列}_j)=P(\text{行}_i)P(\text{列}_j)$，用边际频率估计概率，得 $E_{ij}$。</li>
+<li>每格 $O_{ij}$ 近似服从泊松/二项，标准化偏离 $(O-E)/\sqrt{E}$ 近似标准正态。</li>
+<li>其平方和在独立假设下近似卡方分布，自由度为 $(r-1)(c-1)$（表格被边际约束后的自由格数）。</li>
+<li>大 $\chi^2$（右尾）意味观测系统偏离独立，即拒绝独立假设。$2\times2$ 表小样本可加 Yates 连续性校正。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>卡方独立性检验最适合直接作用在列联表上。下面给出一个按性别和高血压状态整理的 2×2 表：</p>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$O,E$：各格观测、期望频数。</li>
+<li>$\chi^2$：累积标准化偏离，$\ge 0$。</li>
+<li>$df=(r-1)(c-1)$：自由度。</li>
+<li>p 值：独立假设下出现如此大偏离的概率；效应量用 Cramér's V / OR。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>SEX</th>
-<th>PREVHYP = No</th>
-<th>PREVHYP = Yes</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Female</td>
-<td>1671</td>
-<td>734</td>
+<td>期望频数够大</td>
+<td>各格 $E\ge 5$（多数格）</td>
+<td>近似失准、p 偏差</td>
+<td>看期望频数表；小则用 Fisher</td>
 </tr>
 <tr>
-<td>Male</td>
-<td>1246</td>
-<td>564</td>
+<td>观测独立</td>
+<td>每个个体只计一次、互不影响</td>
+<td>p 失真</td>
+<td>看设计；配对用 McNemar</td>
+</tr>
+<tr>
+<td>随机抽样</td>
+<td>样本代表总体</td>
+<td>外推受限</td>
+<td>看抽样方式</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>比较吸烟与患病的关联（2×2 列联表）：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>患病</th>
+<th>未患</th>
+<th>行合</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>吸烟</td>
+<td>30</td>
+<td>70</td>
+<td>100</td>
+</tr>
+<tr>
+<td>不吸</td>
+<td>15</td>
+<td>85</td>
+<td>100</td>
+</tr>
+<tr>
+<td>列合</td>
+<td>45</td>
+<td>155</td>
+<td>200</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<p><strong>一步步计算：</strong></p>
+<ul>
+<li>期望频数：$E(\text{吸烟,病})=\dfrac{100\times45}{200}=22.5$；同理 $E(\text{吸烟,未})=77.5$，$E(\text{不吸,病})=22.5$，$E(\text{不吸,未})=77.5$。</li>
+<li>各格贡献 $(O-E)^2/E$：</li>
+<li>吸烟·病：$(30-22.5)^2/22.5=56.25/22.5=2.5$</li>
+<li>吸烟·未：$(70-77.5)^2/77.5=56.25/77.5=0.726$</li>
+<li>不吸·病：$(15-22.5)^2/22.5=2.5$</li>
+<li>不吸·未：$(85-77.5)^2/77.5=0.726$</li>
+<li>$\chi^2=2.5+0.726+2.5+0.726=6.45$，$df=(2-1)(2-1)=1$。</li>
+<li>临界值 $\chi^2_{0.05,1}=3.84$；因 $6.45\gt 3.84$，<strong>拒绝独立</strong>，即吸烟与患病相关。</li>
+</ul>
+<p><strong>结论：</strong> 吸烟组患病率 30% 高于不吸组 15%，卡方 6.45 超过临界值，关联显著。注意卡方只说「有关联」，方向与强度要看 <strong>比值比</strong> $\mathrm{OR}=\dfrac{30\times85}{70\times15}=\dfrac{2550}{1050}=2.43$——吸烟者患病优势约为不吸者的 2.4 倍。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：两个分类变量。</li>
+<li>因变量类型：分类（列联表频数）。</li>
+<li>数据结构：$r\times c$ 列联表。</li>
+<li>是否适合高维数据：大表需注意稀疏格。</li>
+<li>是否适合缺失较多数据：缺失需先处理。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：不适合；配对用 McNemar。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>患病</th>
+<th>未患</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>吸烟</td>
+<td>30</td>
+<td>70</td>
+</tr>
+<tr>
+<td>不吸</td>
+<td>15</td>
+<td>85</td>
+</tr>
+</tbody>
+</table>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：列联表或原始分类数据。</li>
+<li>输入数据：列联表或原始分类记录。</li>
 <li>关键变量：两个分类变量。</li>
-<li>需要预处理的内容：构造列联表，核对频数。</li>
+<li>需要预处理的内容：制表、检查期望频数。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：卡方值、自由度、p 值。</li>
-<li>参数估计：不直接给效应量，通常应补充 OR、RR 或 Cramer's V。</li>
+<li>模型对象/统计结果：$\chi^2$、自由度、p 值。</li>
+<li>参数估计：无（关联强度用 Cramér's V / OR）。</li>
 <li>预测结果：无。</li>
-<li>不确定性指标：主要是检验结果。</li>
+<li>不确定性指标：OR/RR 的置信区间（另算）。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：大样本列联表独立性检验。</li>
-<li>不适合：2x2 小样本稀疏表、配对分类数据。</li>
-<li>使用前需要特别检查的点：期望频数、研究设计是否独立抽样。</li>
+<li>适合：中大样本的列联表独立性检验、率的比较。</li>
+<li>不适合：期望频数小（用 Fisher）、配对数据（用 McNemar）、有序变量趋势（用 Cochran-Armitage）。</li>
+<li>使用前需要特别检查的点：期望频数、观测独立、是否配对。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="pearson-chi-squared-test-of-independence" data-i="0">Python</button><button class="codetab" data-uid="pearson-chi-squared-test-of-independence" data-i="1">R</button></div><div class="codepanel active" data-uid="pearson-chi-squared-test-of-independence" data-i="0"><p>常用包：</p>
 <ul>
-<li><code>pandas</code></li>
 <li><code>scipy</code></li>
 </ul>
-<pre><code class="language-python">import pandas as pd
-from scipy import stats
+<pre><code class="language-python">import numpy as np
+from scipy.stats import chi2_contingency
 
-df = pd.DataFrame({
-    &quot;treatment&quot;: [&quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;B&quot;, &quot;B&quot;, &quot;B&quot;, &quot;B&quot;],
-    &quot;response&quot;:  [&quot;yes&quot;, &quot;no&quot;, &quot;yes&quot;, &quot;yes&quot;, &quot;no&quot;, &quot;no&quot;, &quot;yes&quot;]
-})
-
-table = pd.crosstab(df[&quot;treatment&quot;], df[&quot;response&quot;])
-chi2, p, dof, expected = stats.chi2_contingency(table)
-print(chi2, p, dof)
-print(expected)
+table = np.array([[30, 70], [15, 85]])
+chi2, p, dof, expected = chi2_contingency(table, correction=False)
+print(f&quot;chi2={chi2:.2f}, df={dof}, p={p:.4f}&quot;)   # chi2≈6.45
+print(&quot;期望频数:\n&quot;, expected)
 </code></pre></div><div class="codepanel" data-uid="pearson-chi-squared-test-of-independence" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>stats</code></li>
 </ul>
-<pre><code class="language-r">tab &lt;- matrix(c(30, 20, 18, 32), nrow = 2, byrow = TRUE)
-chisq.test(tab)
+<pre><code class="language-r">table &lt;- matrix(c(30, 70, 15, 85), nrow = 2, byrow = TRUE)
+chisq.test(table, correct = FALSE)      # correct=TRUE 加 Yates 校正
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：是否有证据拒绝独立性。</li>
-<li>每个主要参数如何解释：卡方值越大，观察频数与期望频数偏离越大。</li>
-<li>临床或医学意义如何表达：显著后应进一步给出方向和大小，如 OR 或 RR。</li>
-<li>常见误读：卡方显著不告诉你差异在哪个单元格，也不告诉你效应大小。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>列联表热图。</li>
-<li>堆叠条形图。</li>
-<li>马赛克图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图用堆叠比例条形图展示性别与高血压状态的关联结构，适合作为卡方独立性检验的配套展示。</p>
-<p><img alt="" src="img/chisq_prevhyp_sex.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：$\chi^2$/p，以及关联的方向与强度（OR/RR/Cramér's V）。</li>
+<li>每个主要参数如何解读：p 小说明有关联；单看卡方不含方向，需配 OR。</li>
+<li>临床或医学意义如何表达：报告率的差异与 OR/RR 区间，而非仅 p。</li>
+<li>常见误读：把卡方大小当关联强度（它受样本量影响）；期望频数小仍用卡方。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>期望频数：查期望频数表，若多格 $\lt 5$（尤其 2×2 有格 $\lt 5$），改用 Fisher。</li>
+<li>独立性：确认每个个体只计一次；配对数据改用 McNemar。</li>
+<li>大样本敏感：极大样本下微不足道的关联也会显著，务必看效应量。</li>
+<li>有序变量：忽略顺序会损失功效，用 Cochran-Armitage 趋势检验。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>分组堆叠/并列条形图（比例）。</li>
+<li>马赛克图（mosaic plot）展示列联结构。</li>
+<li>标准化残差热图（看哪格贡献大）。</li>
+</ul>
+<h3>10.1 图像示例</h3>
+<p>下图比较不同性别的高血压患病情况。</p>
+<p><img alt="" src="img/chisq_prevhyp_sex.png" /></p></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>简单标准。</li>
-<li>适用广泛。</li>
-<li>是分类数据分析的基础入口。</li>
+<li>简单通用，适用任意 $r\times c$ 表。</li>
+<li>计算与解释门槛低。</li>
+<li>与残差分析结合可定位关联来源。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>对稀疏数据不稳健。</li>
-<li>不给效应量方向与大小。</li>
-<li>不控制混杂。</li>
+<li>大样本近似，小期望频数失准。</li>
+<li>只测关联、不给方向与强度。</li>
+<li>对极大样本过度敏感。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>期望频数很小时仍机械使用。</li>
-<li>把比例数据当频数重复输入。</li>
-<li>忽视配对设计或分层结构。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 Fisher 精确检验的区别：Fisher 更适合 2x2 小样本。</li>
-<li>和 McNemar 的区别：McNemar 用于配对分类数据。</li>
-<li>应该如何选择：大样本独立列联表优先卡方，小样本 2x2 表优先 Fisher。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>比较治疗组与对照组不良事件发生率。</li>
-<li>分析暴露状态与疾病有无的关联。</li>
-<li>描述基线分类变量平衡性。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-fisher-exact-test.html" data-cn="Fisher精确检验" data-en="Fisher Exact Test" data-def="Fisher 精确检验是针对 2x2 列联表的小样本精确检验，利用超几何分布在固定边际下直接计算 p 值。">Fisher精确检验（Fisher Exact Test）</a></li>
-<li><a class="xlink" href="m-mcnemar-test.html" data-cn="McNemar检验" data-en="McNemar Test" data-def="McNemar 检验用于分析配对或匹配设计中的二分类结局，检验两个相关测量的阳性比例是否相同。">McNemar检验（McNemar Test）</a></li>
-<li><a class="xlink" href="m-mantel-haenszel-test.html" data-cn="Mantel-Haenszel检验" data-en="Mantel-Haenszel Test" data-def="Mantel-Haenszel 检验用于在多个分层 2x2 列联表中检验暴露与结局是否存在一致的条件关联，常用于控制一个分类混杂因素。">Mantel-Haenszel检验（Mantel-Haenszel Test）</a></li>
+<li>期望频数小仍用卡方（应 Fisher）。</li>
+<li>对配对数据误用（应 McNemar）。</li>
+<li>把统计显著当临床重要。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Agresti A. <em>An Introduction to Categorical Data Analysis</em>. 3rd ed. Wiley; 2018.</li>
-<li>SciPy Developers. <code>scipy.stats.chi2_contingency</code>. SciPy API Reference. <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.chi2_contingency.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.chi2_contingency.html</a> （访问日期：2026-07-02）</li>
-<li>R Core Team. <code>chisq.test</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/chisq.test.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/chisq.test.html</a> （访问日期：2026-07-02）</li>
+<li>和 <strong>Fisher 精确检验</strong>：小样本/小期望用 Fisher，大样本用卡方。</li>
+<li>和 <strong>McNemar</strong>：配对二分类用 McNemar。</li>
+<li>和 <strong>Cochran-Armitage</strong>：有序暴露的趋势用 CA。</li>
+<li>和 <strong>Mantel-Haenszel</strong>：需控制分层混杂时用 MH。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>暴露与疾病的关联初筛。</li>
+<li>不同组别并发症/结局率比较。</li>
+<li>分类危险因素与二分类结局关联。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>列联表（Contingency Table）</strong>：两分类变量的频数交叉表。</li>
+<li><strong>期望频数（$E$）</strong>：独立假设下每格应有的频数。</li>
+<li><strong>卡方统计量（$\chi^2$）</strong>：标准化偏离的累加。</li>
+<li><strong>自由度</strong>：$(r-1)(c-1)$。</li>
+<li><strong>Cramér's V</strong>：从卡方导出的关联强度（0–1）。</li>
+<li><strong>Yates 校正</strong>：2×2 表的连续性校正。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-fisher-exact-test.html" data-cn="Fisher精确检验" data-en="Fisher Exact Test" data-def="Fisher 精确检验不靠大样本近似：它固定行列合计，直接用超几何分布把「所有可能的表」一一枚举，加总「比观测更极端」的那些表的概率，得到精确的 p 值。">Fisher精确检验（Fisher Exact Test）</a></li>
+<li><a class="xlink" href="m-mcnemar-test.html" data-cn="McNemar检验" data-en="McNemar Test" data-def="McNemar 检验用于配对的二分类数据：它只看发生了改变的那些对（前阳后阴、前阴后阳），忽略两次结果一致的对，判断「改变」是否偏向某一方向。">McNemar检验（McNemar Test）</a></li>
+<li><a class="xlink" href="m-mantel-haenszel-test.html" data-cn="Mantel-Haenszel检验" data-en="Mantel-Haenszel Test" data-def="Mantel-Haenszel 把数据按一个混杂因素（如年龄）分层，在每一层里干净地看暴露与结局的关联，再把各层的关联加权合并成一个「已调整」的比值比——从而在不建回归模型的情况下控制混杂。">Mantel-Haenszel检验（Mantel-Haenszel Test）</a></li>
+<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Pearson K. On the criterion that a given system of deviations... <em>Philos Mag</em>. 1900;50(302):157-175.</li>
+<li>Agresti A. <em>Categorical Data Analysis</em>. 3rd ed. Wiley; 2013.</li>
+<li>Altman DG. <em>Practical Statistics for Medical Research</em>. Chapman &amp; Hall; 1990.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-kendall-rank-correlation.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">Kendall秩相关</div></a><a class="pg pg-next" href="m-fisher-exact-test.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">Fisher精确检验</div></a></div>

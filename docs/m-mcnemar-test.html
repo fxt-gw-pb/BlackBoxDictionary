@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -47,182 +47,280 @@
       <div class="detail-en">McNemar Test</div>
       <div class="detail-meta">
         <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
-        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
-        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 分类数据分析 / 配对数据</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 分类数据 / 配对设计 / 二分类</b></span>
       </div>
     </div>
     <div class="intro-note"><h1>McNemar检验（McNemar Test）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>McNemar 检验用于分析配对或匹配设计中的二分类结局，检验两个相关测量的阳性比例是否相同。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>McNemar 检验用于配对的二分类数据：它<strong>只看发生了改变的那些对</strong>（前阳后阴、前阴后阳），忽略两次结果一致的对，判断「改变」是否偏向某一方向。</p>
+<h3>1.2 定义</h3>
+<p>McNemar 检验用于配对二分类数据，检验配对前后（或两种条件下）阳性比例是否相等（边际同质性），基于「不一致对」的数量。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：同一对象两次分类结果是否发生系统性变化。</li>
-<li>适用任务：前后测、左右眼/双胞胎、病例-配对对照等二分类比较。</li>
-<li>常见医学场景：治疗前后是否转阴、两种诊断方法是否一致。</li>
+<li>研究问题：同一批对象两次二分类测量的阳性率是否变化？</li>
+<li>适用任务：配对二分类的前后比较、两种诊断方法在同一批人上的阳性率比较。</li>
+<li>常见医学场景：干预前后患病/阳性状态变化、两种检测方法对同一批样本的阳性判定比较、配对病例对照的暴露比较。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>如果两次测量没有系统差异，那么“从阳变阴”和“从阴变阳”的人数应该差不多。McNemar 就专门比较这两类不一致对。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>一群人参加培训前后各答一道「会/不会」的题。有人「本来会、还是会」，有人「本来不会、还是不会」——这两类人不提供「培训有没有用」的信息（他们没变）。真正有用的是「本来不会、后来会」和「本来会、后来不会」这两拨人。McNemar 就是比较这两拨「变了的人」谁更多。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-Q_M = \frac{(n_{12} - n_{21})^2}{n_{12} + n_{21}}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>配对数据里，同一个人的两次测量高度相关，不满足普通卡方要求的「观测独立」。而且两次都一致的对（both yes / both no）不含「变化方向」的信息。根本困难是：<strong>如何在配对结构下，检验两次的阳性率是否发生了系统变化？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>把配对结果排成 2×2 表，对角线（一致对 $a,d$）与检验无关，只有非对角的<strong>不一致对</strong> $b$（前阳后阴）与 $c$（前阴后阳）携带变化信息。若前后阳性率相等，则「一增一减」应对称，即 $b\approx c$。于是检验退化为：在 $b+c$ 个变化里，偏向某方向的是否显著多于一半——本质是一个 $p=0.5$ 的二项检验。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$n_{12}, n_{21}$：配对表中不一致的两类人数。</li>
-<li>对角线一致单元格不提供变化方向信息，重点在非对角线。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>数据是配对的。</li>
-<li>结局是二分类。</li>
-<li>每对之间相互独立。</li>
+<li>相对<strong>普通卡方</strong>：卡方要求独立观测，配对数据必须用 McNemar。</li>
+<li>相对<strong>配对 t 检验</strong>：配对 t 用于配对连续结局，McNemar 用于配对二分类。</li>
+<li>相对 <strong>Cochran's Q</strong>：Q 是 McNemar 在「三个及以上配对条件」的推广。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>$$
+\chi^2=\frac{(b-c)^2}{b+c},\qquad df=1
+$$</p>
+<p>其中 $b,c$ 是两类不一致对的数量。这个式子在说：只用两类「变化对」的差 $b-c$ 相对其总量 $b+c$ 做标准化；一致对完全不进入公式。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>自变量类型：时间点、方法、配对成员。</li>
-<li>因变量类型：二分类。</li>
-<li>数据结构：2x2 配对列联表。</li>
-<li>是否适合高维数据：不适合。</li>
-<li>是否适合缺失较多数据：任何一对缺失都会丢掉配对信息。</li>
-<li>是否适合删失数据：不适合。</li>
-<li>是否适合重复测量数据：仅适合两次测量。</li>
+<li>配对 2×2 表：$a$（both+）、$b$（前+后−）、$c$（前−后+）、$d$（both−）。</li>
+<li>原假设「边际同质」等价于 $b$ 的期望等于 $c$，即在 $b+c$ 个不一致对中每个以 $1/2$ 概率落向任一侧。</li>
+<li>于是 $b\sim\mathrm{Binomial}(b+c,\ 1/2)$；正态近似给 $\chi^2=(b-c)^2/(b+c)$，近似自由度 1 的卡方。</li>
+<li>$b+c$ 较小时用<strong>精确二项检验</strong>；也可加连续性校正 $(|b-c|-1)^2/(b+c)$。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>McNemar 检验关注的是同一对象两次二分类结果的转移。下面是 <code>Framingham_data.csv</code> 中 <code>PREVHYP</code> 从第 1 期到第 2 期的配对 2x2 表：</p>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$a,d$：一致对（对检验无贡献）。</li>
+<li>$b,c$：不一致对，检验的核心。</li>
+<li>$\chi^2=(b-c)^2/(b+c)$：统计量。</li>
+<li>p 值：变化是否显著偏向一方；效应看 $b/c$ 或比例差。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>PREVHYP_P1 \ PREVHYP_P2</th>
-<th>P2 No</th>
-<th>P2 Yes</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>P1 No</td>
-<td>1926</td>
-<td>742</td>
+<td>配对结构</td>
+<td>数据成对</td>
+<td>误用普通卡方</td>
+<td>看设计</td>
 </tr>
 <tr>
-<td>P1 Yes</td>
-<td>0</td>
-<td>1109</td>
+<td>对子独立</td>
+<td>不同对子互不影响</td>
+<td>p 失真</td>
+<td>看设计</td>
+</tr>
+<tr>
+<td>$b+c$ 足够</td>
+<td>不一致对不太少</td>
+<td>近似失准</td>
+<td>$b+c\lt 25$ 用精确版</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>某疗法前后患者「阳性/阴性」状态的配对表：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>后阳性</th>
+<th>后阴性</th>
+<th>行合</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>前阳性</td>
+<td>20 ($a$)</td>
+<td>15 ($b$)</td>
+<td>35</td>
+</tr>
+<tr>
+<td>前阴性</td>
+<td>5 ($c$)</td>
+<td>60 ($d$)</td>
+<td>65</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<p><strong>一步步计算：</strong></p>
+<ul>
+<li>一致对：$a=20$（一直阳）、$d=60$（一直阴）——<strong>不进入公式</strong>。</li>
+<li>不一致对：$b=15$（前阳后阴，即好转）、$c=5$（前阴后阳，即恶化）。</li>
+<li>统计量：$\chi^2=\dfrac{(b-c)^2}{b+c}=\dfrac{(15-5)^2}{15+5}=\dfrac{100}{20}=5.0$，$df=1$。</li>
+<li>临界值 $\chi^2_{0.05,1}=3.84$；因 $5.0\gt 3.84$，<strong>拒绝</strong>「前后阳性率相等」。</li>
+</ul>
+<p><strong>结论：</strong> 在 20 个状态改变的人里，15 人好转、仅 5 人恶化，方向明显偏向好转，$\chi^2=5.0$ 显著。前阳性率 35% 降到后阳性率 25%（$a+c=25$）。注意：80 个「没变」的人（$a+d$）虽占多数，却对结论毫无贡献——<strong>McNemar 的全部信息都来自那 20 个变化的人</strong>，这正是它区别于普通卡方的精髓。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：配对条件（前/后、方法 A/B）。</li>
+<li>因变量类型：二分类。</li>
+<li>数据结构：配对 2×2 表。</li>
+<li>是否适合高维数据：否；多条件用 Cochran's Q。</li>
+<li>是否适合缺失较多数据：仅用完整对子。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：两次；多次用 Cochran's Q。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>后阳</th>
+<th>后阴</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>前阳</td>
+<td>20</td>
+<td>15</td>
+</tr>
+<tr>
+<td>前阴</td>
+<td>5</td>
+<td>60</td>
+</tr>
+</tbody>
+</table>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：配对二分类表。</li>
-<li>关键变量：两次分类结果或两成员结果。</li>
-<li>需要预处理的内容：构造正确的配对 2x2 表。</li>
+<li>输入数据：配对二分类结果。</li>
+<li>关键变量：两次测量、对子标识。</li>
+<li>需要预处理的内容：制配对 2×2 表。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：McNemar 统计量、p 值。</li>
-<li>参数估计：通常关注变化方向，可补充不一致对比例。</li>
+<li>模型对象/统计结果：$\chi^2$、p 值。</li>
+<li>参数估计：不一致对之比 $b/c$、比例差。</li>
 <li>预测结果：无。</li>
-<li>不确定性指标：可使用精确二项分布版本。</li>
+<li>不确定性指标：比例差的置信区间。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：前后比较、同一对象两种检测方法比较。</li>
-<li>不适合：独立样本 2x2 表、多时间点重复测量。</li>
-<li>使用前需要特别检查的点：是否真的是配对设计；若样本很小，可考虑精确版本。</li>
+<li>适合：配对二分类前后比较、两法阳性率比较、配对病例对照。</li>
+<li>不适合：独立组（用卡方）、连续配对结局（用配对 t）、多条件（用 Cochran's Q）。</li>
+<li>使用前需要特别检查的点：数据配对、$b+c$ 是否够大（否则精确版）。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="mcnemar-test" data-i="0">Python</button><button class="codetab" data-uid="mcnemar-test" data-i="1">R</button></div><div class="codepanel active" data-uid="mcnemar-test" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>statsmodels</code></li>
 </ul>
-<pre><code class="language-python">import numpy as np
-from statsmodels.stats.contingency_tables import mcnemar
+<pre><code class="language-python">from statsmodels.stats.contingency_tables import mcnemar
 
-table = np.array([[175, 16],
-                  [54, 188]])
-
-res = mcnemar(table, exact=False, correction=True)
-print(res.statistic, res.pvalue)
+table = [[20, 15], [5, 60]]
+res = mcnemar(table, exact=False, correction=False)   # b+c 小时 exact=True
+print(f&quot;stat={res.statistic:.2f}, p={res.pvalue:.4f}&quot;)   # 5.00
 </code></pre></div><div class="codepanel" data-uid="mcnemar-test" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>stats</code></li>
 </ul>
-<pre><code class="language-r">tab &lt;- matrix(c(175, 16, 54, 188), nrow = 2, byrow = TRUE)
-mcnemar.test(tab)
+<pre><code class="language-r">table &lt;- matrix(c(20, 15, 5, 60), nrow = 2, byrow = TRUE)
+mcnemar.test(table, correct = FALSE)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：不一致对是否明显偏向某个方向。</li>
-<li>每个主要参数如何解释：如果 $n_{12}$ 与 $n_{21}$ 差异大，说明存在系统变化。</li>
-<li>临床或医学意义如何表达：建议同时报告转归方向和比例。</li>
-<li>常见误读：不能把它当成独立样本卡方检验。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>2x2 配对表。</li>
-<li>before-after 转移图。</li>
-<li>不一致对方向条形图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下面的图像展示 <code>Framingham_data.csv</code> 中基线与第 2 期高血压状态的转移表，非对角线单元格就是 McNemar 检验最关心的信息。</p>
-<p><img alt="" src="img/mcnemar_prevhyp_p12.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：$\chi^2$/p，以及 $b$ 与 $c$ 的方向与比例。</li>
+<li>每个主要参数如何解读：$b\gt c$ 说明前阳性者更多转阴（好转方向）。</li>
+<li>临床或医学意义如何表达：报告前后阳性率变化及方向，而非只报 p。</li>
+<li>常见误读：把一致对也算进「变化」；忽略方向只看显著性。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>样本量：$b+c\lt 25$ 时用精确二项检验或连续性校正。</li>
+<li>配对确认：务必确认数据真的是配对，否则应改用普通卡方。</li>
+<li>方向解读：$b$、$c$ 谁大决定变化方向，需结合临床。</li>
+<li>多条件：三次以上测量用 Cochran's Q。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>配对流向图（Sankey/alluvial）展示前后状态转移。</li>
+<li>不一致对 $b$ vs $c$ 的条形图。</li>
+<li>前后阳性率的点区间对比。</li>
+</ul>
+<h3>10.1 图像示例</h3>
+<p>下图展示配对前后高血压状态的变化。</p>
+<p><img alt="" src="img/mcnemar_prevhyp_p12.png" /></p></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>明确针对配对二分类设计。</li>
-<li>方法简单直观。</li>
-<li>可做精确版本。</li>
+<li>正确处理配对二分类，聚焦变化。</li>
+<li>计算简单直观。</li>
+<li>有精确版应对小样本。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>只能处理二分类、两次测量。</li>
-<li>不能控制其他协变量。</li>
-<li>只利用不一致对信息。</li>
+<li>只用不一致对，一致对信息浪费（本质如此）。</li>
+<li>仅两条件、二分类。</li>
+<li>不给关联强度的连续尺度。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>错把独立样本数据做 McNemar。</li>
-<li>忽略样本量过小时应使用精确版本。</li>
-<li>只报 p 值，不报变化方向和实际人数。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 Pearson 卡方的区别：卡方用于独立样本，McNemar 用于配对样本。</li>
-<li>和 Fisher 的区别：Fisher 也通常用于独立 2x2 表。</li>
-<li>应该如何选择：配对二分类就选 McNemar，而不是普通卡方。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>比较治疗前后阳性率。</li>
-<li>比较两种诊断试验在同一受试者上的差异。</li>
-<li>比较病例-对照匹配对中的分类结果变化。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-pearson-chi-squared-test-of-independence.html" data-cn="Pearson卡方独立性检验" data-en="Pearson Chi-Squared Test of Independence" data-def="Pearson 卡方独立性检验用于判断两个分类变量在列联表中是否独立，是分类数据分析的基础方法。">Pearson卡方独立性检验（Pearson Chi-Squared Test of Independence）</a></li>
-<li><a class="xlink" href="m-fisher-exact-test.html" data-cn="Fisher精确检验" data-en="Fisher Exact Test" data-def="Fisher 精确检验是针对 2x2 列联表的小样本精确检验，利用超几何分布在固定边际下直接计算 p 值。">Fisher精确检验（Fisher Exact Test）</a></li>
-<li><a class="xlink" href="m-mantel-haenszel-test.html" data-cn="Mantel-Haenszel检验" data-en="Mantel-Haenszel Test" data-def="Mantel-Haenszel 检验用于在多个分层 2x2 列联表中检验暴露与结局是否存在一致的条件关联，常用于控制一个分类混杂因素。">Mantel-Haenszel检验（Mantel-Haenszel Test）</a></li>
+<li>对配对数据误用普通卡方（或反之）。</li>
+<li>$b+c$ 很小仍用卡方近似。</li>
+<li>忽略变化方向。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Agresti A. <em>An Introduction to Categorical Data Analysis</em>. 3rd ed. Wiley; 2018.</li>
-<li>statsmodels Developers. <code>statsmodels.stats.contingency_tables.mcnemar</code>. statsmodels API Reference. <a href="https://www.statsmodels.org/stable/generated/statsmodels.stats.contingency_tables.mcnemar.html">https://www.statsmodels.org/stable/generated/statsmodels.stats.contingency_tables.mcnemar.html</a> （访问日期：2026-07-02）</li>
-<li>R Core Team. <code>mcnemar.test</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/mcnemar.test.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/mcnemar.test.html</a> （访问日期：2026-07-02）</li>
+<li>和 <strong>Pearson 卡方</strong>：卡方独立组、McNemar 配对。</li>
+<li>和<strong>配对 t 检验</strong>：配对连续用 t，配对二分类用 McNemar。</li>
+<li>和 <strong>Cochran's Q</strong>：多条件配对二分类用 Q。</li>
+<li>和<strong>条件 Logistic 回归</strong>：需协变量调整的配对分析用条件 Logistic。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>干预前后阳性/患病状态变化。</li>
+<li>两种诊断方法在同一批样本的阳性率比较。</li>
+<li>1:1 配对病例对照的暴露差异（配对 OR = $b/c$）。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>配对二分类</strong>：同一对象两次「是/否」测量。</li>
+<li><strong>不一致对（Discordant Pairs）</strong>：两次结果不同的对（$b,c$）。</li>
+<li><strong>一致对（Concordant Pairs）</strong>：两次结果相同的对（$a,d$）。</li>
+<li><strong>边际同质性</strong>：前后阳性率相等的原假设。</li>
+<li><strong>Cochran's Q</strong>：McNemar 的多条件推广。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-pearson-chi-squared-test-of-independence.html" data-cn="Pearson卡方独立性检验" data-en="Pearson Chi-Squared Test of Independence" data-def="卡方检验把列联表里「实际观测到的频数」和「假如两变量毫无关系时本该出现的期望频数」逐格相比：两者差得越大，越说明两个分类变量之间存在关联。">Pearson卡方独立性检验（Pearson Chi-Squared Test of Independence）</a></li>
+<li><a class="xlink" href="m-paired-t-test.html" data-cn="配对样本t检验" data-en="Paired t-Test" data-def="配对 t 检验把「每一对的差值」算出来，再对这一列差值做单样本 t 检验（看它是否偏离 0）——用「配对」抵消个体之间的差异，只留下处理效应。">配对样本t检验（Paired t-Test）</a></li>
+<li><a class="xlink" href="m-conditional-logistic-regression.html" data-cn="条件Logistic回归" data-en="Conditional Logistic Regression" data-def="条件 Logistic 回归用于分析匹配设计中的二元结局，通过对匹配组进行条件化来消去组特异截距，从而估计暴露效应。">条件Logistic回归（Conditional Logistic Regression）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>McNemar Q. Note on the sampling error of the difference between correlated proportions. <em>Psychometrika</em>. 1947;12(2):153-157.</li>
+<li>Agresti A. <em>Categorical Data Analysis</em>. 3rd ed. Wiley; 2013.</li>
+<li>Altman DG. <em>Practical Statistics for Medical Research</em>. Chapman &amp; Hall; 1990.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-fisher-exact-test.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">Fisher精确检验</div></a><a class="pg pg-next" href="m-mantel-haenszel-test.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">Mantel-Haenszel检验</div></a></div>

@@ -202,7 +202,7 @@
           <span class="entry-cn">Pearson卡方独立性检验</span>
           <span class="entry-en">Pearson Chi-Squared Test of Independence</span>
         </div>
-        <p class="entry-def">Pearson 卡方独立性检验用于判断两个分类变量在列联表中是否独立，是分类数据分析的基础方法。</p>
+        <p class="entry-def">卡方检验把列联表里「实际观测到的频数」和「假如两变量毫无关系时本该出现的期望频数」逐格相比：两者差得越大，越说明两个分类变量之间存在关联。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -215,11 +215,11 @@
           <span class="entry-cn">Fisher精确检验</span>
           <span class="entry-en">Fisher Exact Test</span>
         </div>
-        <p class="entry-def">Fisher 精确检验是针对 2x2 列联表的小样本精确检验，利用超几何分布在固定边际下直接计算 p 值。</p>
+        <p class="entry-def">Fisher 精确检验不靠大样本近似：它固定行列合计，直接用超几何分布把「所有可能的表」一一枚举，加总「比观测更极端」的那些表的概率，得到精确的 p 值。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
-        <span class="entry-diff">basic</span>
+        <span class="entry-diff">intermediate</span>
       </div>
     </a><a class="entry" href="m-mcnemar-test.html">
       <span class="entry-no">02·15</span>
@@ -228,11 +228,11 @@
           <span class="entry-cn">McNemar检验</span>
           <span class="entry-en">McNemar Test</span>
         </div>
-        <p class="entry-def">McNemar 检验用于分析配对或匹配设计中的二分类结局，检验两个相关测量的阳性比例是否相同。</p>
+        <p class="entry-def">McNemar 检验用于配对的二分类数据：它只看发生了改变的那些对（前阳后阴、前阴后阳），忽略两次结果一致的对，判断「改变」是否偏向某一方向。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
-        <span class="entry-diff">basic</span>
+        <span class="entry-diff">intermediate</span>
       </div>
     </a><a class="entry" href="m-mantel-haenszel-test.html">
       <span class="entry-no">02·16</span>
@@ -241,7 +241,7 @@
           <span class="entry-cn">Mantel-Haenszel检验</span>
           <span class="entry-en">Mantel-Haenszel Test</span>
         </div>
-        <p class="entry-def">Mantel-Haenszel 检验用于在多个分层 2x2 列联表中检验暴露与结局是否存在一致的条件关联，常用于控制一个分类混杂因素。</p>
+        <p class="entry-def">Mantel-Haenszel 把数据按一个混杂因素（如年龄）分层，在每一层里干净地看暴露与结局的关联，再把各层的关联加权合并成一个「已调整」的比值比——从而在不建回归模型的情况下</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
