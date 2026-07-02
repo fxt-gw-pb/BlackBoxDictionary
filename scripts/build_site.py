@@ -121,11 +121,24 @@ def md_to_html(text, index):
         counter[0] += 1
         return f"ZZTOKEN{counter[0]}ZZ"
 
-    def keep_display(m):
-        k = token(); store[k] = m.group(0); return k
+    # 保护顺序很关键：必须先把代码块（围栏 + 行内）抽走，再处理数学与双链，
+    # 否则 Python 的 `df[["x"]]`（含 [[..]]）会被当成双链、R 的 `df$x`（含 $）
+    # 会被当成行内公式而遭破坏。代码自渲染为 <pre>/<code> 并 HTML 转义。
+    def keep_fence(m):
+        lang = (m.group(1) or "").strip().lower()
+        lang = {"py": "python", "r": "r", "python": "python"}.get(lang, lang or "none")
+        k = token()
+        store[k] = f'<pre><code class="language-{lang}">{html.escape(m.group(2))}</code></pre>'
+        return k
 
-    def keep_inline(m):
-        k = token(); store[k] = m.group(0); return k
+    def keep_code(m):
+        k = token(); store[k] = f'<code>{html.escape(m.group(1))}</code>'; return k
+
+    # 数学内容原样保留 $ 定界符，但必须转义 < > &，否则公式里的 T<t 等
+    # 会被浏览器当成 HTML 标签起始，破坏 DOM 并导致 KaTeX 渲染失败。
+    # KaTeX auto-render 读取的是 textContent，会把实体解码回原字符，故不影响渲染。
+    def keep_math(m):
+        k = token(); store[k] = html.escape(m.group(0), quote=False); return k
 
     def keep_wiki(m):
         target = m.group(1).strip()
@@ -143,8 +156,10 @@ def md_to_html(text, index):
             return k
         return html.escape(disp)
 
-    text = re.sub(r"\$\$.+?\$\$", keep_display, text, flags=re.S)
-    text = re.sub(r"\$[^\$\n]+?\$", keep_inline, text)
+    text = re.sub(r"```([^\n`]*)\n(.*?)```", keep_fence, text, flags=re.S)
+    text = re.sub(r"`([^`\n]+?)`", keep_code, text)
+    text = re.sub(r"\$\$.+?\$\$", keep_math, text, flags=re.S)
+    text = re.sub(r"\$[^\$\n]+?\$", keep_math, text)
     text = re.sub(r"\[\[([^\]|]+?)(?:\|([^\]]+))?\]\]", keep_wiki, text)
 
     out = md_lib.markdown(text, extensions=MD_EXTS)
@@ -154,6 +169,8 @@ def md_to_html(text, index):
     # 恢复 token
     for k, v in store.items():
         out = out.replace(k, v)
+    # 代码块若被 markdown 包进 <p> 会产生非法嵌套，去掉包裹
+    out = out.replace("<p><pre>", "<pre>").replace("</pre></p>", "</pre>")
     return out
 
 
@@ -397,9 +414,14 @@ def render_detail(c, cats, index):
     else:
         pager.append('<span></span>')
 
-    katex = """<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    katex = """<script>window.Prism=window.Prism||{};window.Prism.manual=true;</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>"""
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-clike.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>"""
 
     body = f"""{masthead()}
 <main class="wrap detail">
@@ -430,11 +452,11 @@ def render_detail(c, cats, index):
 <div id="hovercard" class="hovercard"></div>
 <script>
 document.addEventListener('DOMContentLoaded', function(){{
-  if(window.renderMathInElement){{
-    renderMathInElement(document.getElementById('article'), {{delimiters:[{{left:'$$',right:'$$',display:true}},{{left:'$',right:'$',display:false}}],throwOnError:false}});
-  }} else {{
-    var t=setInterval(function(){{if(window.renderMathInElement){{clearInterval(t);renderMathInElement(document.getElementById('article'),{{delimiters:[{{left:'$$',right:'$$',display:true}},{{left:'$',right:'$',display:false}}],throwOnError:false}});}}}},150);
-  }}
+  function doMath(){{ renderMathInElement(document.getElementById('article'), {{delimiters:[{{left:'$$',right:'$$',display:true}},{{left:'$',right:'$',display:false}}],throwOnError:false}}); }}
+  if(window.renderMathInElement){{ doMath(); }}
+  else {{ var t=setInterval(function(){{if(window.renderMathInElement){{clearInterval(t);doMath();}}}},150); }}
+  if(window.Prism){{ Prism.highlightAllUnder(document.getElementById('article')); }}
+  else {{ var p=setInterval(function(){{if(window.Prism){{clearInterval(p);Prism.highlightAllUnder(document.getElementById('article'));}}}},150); }}
 }});
 </script>"""
     return page(f"{c['title']} · 黑盒词典", body, extra_head=katex, body_class="page detail-page")
@@ -622,6 +644,25 @@ article#article{padding:56px 0 130px;max-width:760px;min-width:0;}
 .sec-body .katex-display{margin:0;padding:22px 26px;background:var(--warm);border-left:2px solid var(--accent);overflow-x:auto;}
 .sec-body pre{margin:14px 0;padding:22px 24px;background:var(--code-bg);overflow-x:auto;border:1px solid var(--rule);}
 .sec-body pre code{font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.85;background:none;padding:0;color:var(--body);}
+/* 代码语法高亮：Prism 自定义配色，克制的书卷色调，适配纸白与深色两种底 */
+.token.comment,.token.prolog,.token.doctype,.token.cdata{color:#A79F8E;font-style:italic;}
+.token.punctuation{color:#6B6459;}
+.token.keyword,.token.control-flow{color:#8A3A2E;}
+.token.boolean,.token.number,.token.constant{color:#8A5A2B;}
+.token.string,.token.char,.token.attr-value,.token.regex,.token.string-interpolation{color:#4F6B3A;}
+.token.function,.token.method{color:#2C4A6E;}
+.token.class-name,.token.builtin,.token.namespace,.token.decorator,.token.annotation{color:#6E4A8E;}
+.token.operator,.token.entity{color:#6B6459;}
+.token.property,.token.parameter,.token.variable,.token.attr-name{color:#4A443A;}
+html.dark .token.comment,html.dark .token.prolog,html.dark .token.doctype,html.dark .token.cdata{color:#7C7462;}
+html.dark .token.punctuation{color:#B8AF9C;}
+html.dark .token.keyword,html.dark .token.control-flow{color:#D5715F;}
+html.dark .token.boolean,html.dark .token.number,html.dark .token.constant{color:#D3A56A;}
+html.dark .token.string,html.dark .token.char,html.dark .token.attr-value,html.dark .token.regex,html.dark .token.string-interpolation{color:#A8BE90;}
+html.dark .token.function,html.dark .token.method{color:#82A6D0;}
+html.dark .token.class-name,html.dark .token.builtin,html.dark .token.namespace,html.dark .token.decorator,html.dark .token.annotation{color:#B79BD6;}
+html.dark .token.operator,html.dark .token.entity{color:#B8AF9C;}
+html.dark .token.property,html.dark .token.parameter,html.dark .token.variable,html.dark .token.attr-name{color:#D6CFBF;}
 /* code tabs */
 .impl{border:1px solid var(--rule);margin:14px 0;}
 .codebar{display:flex;border-bottom:1px solid var(--rule);}

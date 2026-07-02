@@ -8,9 +8,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
+<script>window.Prism=window.Prism||{};window.Prism.manual=true;</script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-clike.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
 <script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
 </head>
 <body class="page detail-page">
@@ -68,7 +73,7 @@
 $$</p>
 <p>ROC 曲线是 $(\mathrm{FPR}(c),\mathrm{TPR}(c))$ 随 $c$ 变化的轨迹。AUC 为曲线下面积，并等价于概率解释：</p>
 <p>$$
-\mathrm{AUC}=P\big(\hat{s}_{i}>\hat{s}_{j}\mid y_i=1,\,y_j=0\big)=\frac{U}{n_1 n_0}
+\mathrm{AUC}=P\big(\hat{s}_{i}&gt;\hat{s}_{j}\mid y_i=1,\,y_j=0\big)=\frac{U}{n_1 n_0}
 $$</p>
 <p>其中 $U$ 是 Mann-Whitney U 统计量，$n_1,n_0$ 为阳性、阴性样本数。</p>
 <h3>2.2 参数或统计量含义</h3>
@@ -263,11 +268,11 @@ plot(roc_obj)
 <div id="hovercard" class="hovercard"></div>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-  if(window.renderMathInElement){
-    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
-  } else {
-    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
-  }
+  function doMath(){ renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false}); }
+  if(window.renderMathInElement){ doMath(); }
+  else { var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);doMath();}},150); }
+  if(window.Prism){ Prism.highlightAllUnder(document.getElementById('article')); }
+  else { var p=setInterval(function(){if(window.Prism){clearInterval(p);Prism.highlightAllUnder(document.getElementById('article'));}},150); }
 });
 </script>
 <script src="assets/app.js"></script>

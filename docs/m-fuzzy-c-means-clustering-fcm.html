@@ -8,9 +8,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
+<script>window.Prism=window.Prism||{};window.Prism.manual=true;</script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-clike.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
 <script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
 </head>
 <body class="page detail-page">
@@ -70,7 +75,7 @@ $$</p>
 <p>$$
 J_m=\sum_{i=1}^{n}\sum_{k=1}^{C}u_{ik}^m\|x_i-c_k\|^2
 $$</p>
-<p>其中 $m>1$ 为模糊系数。簇中心更新为：</p>
+<p>其中 $m&gt;1$ 为模糊系数。簇中心更新为：</p>
 <p>$$
 c_k=\frac{\sum_{i=1}^{n}u_{ik}^m x_i}{\sum_{i=1}^{n}u_{ik}^m}
 $$</p>
@@ -184,7 +189,7 @@ import skfuzzy as fuzz
 from sklearn.preprocessing import StandardScaler
 
 df = pd.read_csv(&quot;inflammation_metabolic_profiles.csv&quot;)
-X = df&amp;quot;CRP&amp;quot;, &amp;quot;IL6&amp;quot;, &amp;quot;BMI&amp;quot;, &amp;quot;TG&amp;quot;, &amp;quot;HDL&amp;quot;
+X = df[[&quot;CRP&quot;, &quot;IL6&quot;, &quot;BMI&quot;, &quot;TG&quot;, &quot;HDL&quot;]]
 X_scaled = StandardScaler().fit_transform(X).T
 
 centers, membership, _, _, objective, _, fpc = fuzz.cluster.cmeans(
@@ -285,11 +290,11 @@ head(membership)
 <div id="hovercard" class="hovercard"></div>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-  if(window.renderMathInElement){
-    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
-  } else {
-    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
-  }
+  function doMath(){ renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false}); }
+  if(window.renderMathInElement){ doMath(); }
+  else { var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);doMath();}},150); }
+  if(window.Prism){ Prism.highlightAllUnder(document.getElementById('article')); }
+  else { var p=setInterval(function(){if(window.Prism){clearInterval(p);Prism.highlightAllUnder(document.getElementById('article'));}},150); }
 });
 </script>
 <script src="assets/app.js"></script>

@@ -155,6 +155,25 @@ article#article{padding:56px 0 130px;max-width:760px;min-width:0;}
 .sec-body .katex-display{margin:0;padding:22px 26px;background:var(--warm);border-left:2px solid var(--accent);overflow-x:auto;}
 .sec-body pre{margin:14px 0;padding:22px 24px;background:var(--code-bg);overflow-x:auto;border:1px solid var(--rule);}
 .sec-body pre code{font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.85;background:none;padding:0;color:var(--body);}
+/* 代码语法高亮：Prism 自定义配色，克制的书卷色调，适配纸白与深色两种底 */
+.token.comment,.token.prolog,.token.doctype,.token.cdata{color:#A79F8E;font-style:italic;}
+.token.punctuation{color:#6B6459;}
+.token.keyword,.token.control-flow{color:#8A3A2E;}
+.token.boolean,.token.number,.token.constant{color:#8A5A2B;}
+.token.string,.token.char,.token.attr-value,.token.regex,.token.string-interpolation{color:#4F6B3A;}
+.token.function,.token.method{color:#2C4A6E;}
+.token.class-name,.token.builtin,.token.namespace,.token.decorator,.token.annotation{color:#6E4A8E;}
+.token.operator,.token.entity{color:#6B6459;}
+.token.property,.token.parameter,.token.variable,.token.attr-name{color:#4A443A;}
+html.dark .token.comment,html.dark .token.prolog,html.dark .token.doctype,html.dark .token.cdata{color:#7C7462;}
+html.dark .token.punctuation{color:#B8AF9C;}
+html.dark .token.keyword,html.dark .token.control-flow{color:#D5715F;}
+html.dark .token.boolean,html.dark .token.number,html.dark .token.constant{color:#D3A56A;}
+html.dark .token.string,html.dark .token.char,html.dark .token.attr-value,html.dark .token.regex,html.dark .token.string-interpolation{color:#A8BE90;}
+html.dark .token.function,html.dark .token.method{color:#82A6D0;}
+html.dark .token.class-name,html.dark .token.builtin,html.dark .token.namespace,html.dark .token.decorator,html.dark .token.annotation{color:#B79BD6;}
+html.dark .token.operator,html.dark .token.entity{color:#B8AF9C;}
+html.dark .token.property,html.dark .token.parameter,html.dark .token.variable,html.dark .token.attr-name{color:#D6CFBF;}
 /* code tabs */
 .impl{border:1px solid var(--rule);margin:14px 0;}
 .codebar{display:flex;border-bottom:1px solid var(--rule);}

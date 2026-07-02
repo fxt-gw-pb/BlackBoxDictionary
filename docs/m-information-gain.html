@@ -8,9 +8,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
+<script>window.Prism=window.Prism||{};window.Prism.manual=true;</script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-clike.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
 <script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
 </head>
 <body class="page detail-page">
@@ -181,7 +186,7 @@ $$</p>
 from sklearn.feature_selection import mutual_info_classif
 
 df = pd.read_csv(&quot;infection_features.csv&quot;)
-X = df&amp;quot;Fever&amp;quot;, &amp;quot;Cough&amp;quot;, &amp;quot;CRP_high&amp;quot;, &amp;quot;WBC_high&amp;quot;
+X = df[[&quot;Fever&quot;, &quot;Cough&quot;, &quot;CRP_high&quot;, &quot;WBC_high&quot;]]
 y = df[&quot;Bacterial&quot;].astype(int)
 
 # 对离散变量，互信息得分可作为信息论特征排序的常用实现。
@@ -274,11 +279,11 @@ scores[order(scores$importance, decreasing = TRUE), ]
 <div id="hovercard" class="hovercard"></div>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-  if(window.renderMathInElement){
-    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
-  } else {
-    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
-  }
+  function doMath(){ renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false}); }
+  if(window.renderMathInElement){ doMath(); }
+  else { var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);doMath();}},150); }
+  if(window.Prism){ Prism.highlightAllUnder(document.getElementById('article')); }
+  else { var p=setInterval(function(){if(window.Prism){clearInterval(p);Prism.highlightAllUnder(document.getElementById('article'));}},150); }
 });
 </script>
 <script src="assets/app.js"></script>

@@ -8,9 +8,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
+<script>window.Prism=window.Prism||{};window.Prism.manual=true;</script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-clike.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
 <script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
 </head>
 <body class="page detail-page">
@@ -65,7 +70,7 @@
 <p>高维空间中，点 $x_i$ 与 $x_j$ 的相似度定义为条件概率：</p>
 <p>$$
 p_{j|i}=\frac{\exp(-\|x_i-x_j\|^2/2\sigma_i^2)}
-\sum_{k\neq i}\exp(-\|x_i-x_k\|^2/2\sigma_i^2)}
+{\sum_{k\neq i}\exp(-\|x_i-x_k\|^2/2\sigma_i^2)}
 $$</p>
 <p>对称化后得到：</p>
 <p>$$
@@ -74,7 +79,7 @@ $$</p>
 <p>低维空间中，使用 t 分布定义相似度：</p>
 <p>$$
 q_{ij}=\frac{(1+\|y_i-y_j\|^2)^{-1}}
-\sum_{k\neq l}(1+\|y_k-y_l\|^2)^{-1}}
+{\sum_{k\neq l}(1+\|y_k-y_l\|^2)^{-1}}
 $$</p>
 <p>目标是最小化 KL 散度：</p>
 <p>$$
@@ -289,11 +294,11 @@ head(embedding)
 <div id="hovercard" class="hovercard"></div>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-  if(window.renderMathInElement){
-    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
-  } else {
-    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
-  }
+  function doMath(){ renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false}); }
+  if(window.renderMathInElement){ doMath(); }
+  else { var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);doMath();}},150); }
+  if(window.Prism){ Prism.highlightAllUnder(document.getElementById('article')); }
+  else { var p=setInterval(function(){if(window.Prism){clearInterval(p);Prism.highlightAllUnder(document.getElementById('article'));}},150); }
 });
 </script>
 <script src="assets/app.js"></script>
