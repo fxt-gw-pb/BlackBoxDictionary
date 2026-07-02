@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,43 +54,99 @@
     <div class="intro-note"><h1>组内相关系数（Intraclass Correlation Coefficient, ICC）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>组内相关系数衡量连续测量的信度，即同一对象被不同评分者或不同次测量时结果的一致程度，本质是「对象间方差占总方差的比例」。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>ICC 是「真实的个体间差异」占「总变异」的比例：若同一个人重复测量都很接近、而不同人之间差异明显，说明测量可靠，ICC 就高。</p>
+<h3>1.2 定义</h3>
+<p>组内相关系数度量连续测量的信度，即同一对象被不同评分者或不同次测量时结果的一致程度，本质是把总方差分解为「对象间方差」与「测量误差方差」后，前者所占的比例。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：一项连续测量在不同评分者或不同时间点下有多可重复。</li>
-<li>适用任务：评分者间信度、重测信度、仪器一致性、量表信度。</li>
-<li>常见医学场景：血压/超声测量的可重复性、量表总分的稳定性、多阅片者定量读数。</li>
+<li>研究问题：一项连续测量在不同评分者或不同时间点下有多可重复？</li>
+<li>适用任务：评分者间信度、重测信度、仪器/量表一致性。</li>
+<li>常见医学场景：血压/超声测量的可重复性、量表总分的稳定性、多阅片者定量读数、影像组学特征的稳定性。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>若测量可靠，同一个人重复测得的值应彼此接近，而不同人之间应有真实差异。ICC 就是把「真实的个体间差异」从「测量噪声」中分离出来，占比越高说明测量越可靠。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>想象给同一批人反复量身高。若尺子可靠，同一个人每次量得都差不多（误差小），而人和人之间高矮分明（真实差异大）。ICC 就是把「人与人之间的真实高矮差」从「量尺的抖动」里分出来，看真实差异占了总变异的几成——占比越高，说明这把尺子越能区分不同的人。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>以单向随机模型为例：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>「测量可靠」到底指什么？如果所有人身高都差不多（同质人群），再好的尺子也难显出「区分力」；如果尺子噪声很大，真实差异会被淹没。根本困难是：<strong>如何把「测量能捕捉的真实个体差异」与「测量本身的噪声」定量地分开？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>用<strong>方差分解</strong>：把每次测量的总变异拆成「对象间方差 $\sigma_b^2$」（不同人真实不同）和「误差方差 $\sigma_e^2$」（同一人重复测的抖动），双向模型还可分出「评分者系统偏差 $\sigma_r^2$」。信度就是「信号占总变异的比例」$\sigma_b^2/(\sigma_b^2+\sigma_e^2)$。这也解释了为何 ICC 依赖人群：同质人群 $\sigma_b^2$ 小、ICC 天然偏低。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
+<ul>
+<li>相对 <strong>Pearson 相关</strong>：Pearson 只看两列是否线性相关、<strong>对系统偏差不敏感</strong>（评分者 B 一律比 A 高 5 分，Pearson 仍可为 1）；ICC 计入偏差与量级一致，才是真正的信度。</li>
+<li>相对 <strong>Cohen's Kappa</strong>：Kappa 用于分类，ICC 用于连续。</li>
+<li>相对 <strong>Bland-Altman</strong>：Bland-Altman 展示偏差与量程依赖的「图」，ICC 给单一信度「指数」，二者互补。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>单向随机模型的信度：</p>
 <p>$$
 \mathrm{ICC}=\frac{\sigma_b^2}{\sigma_b^2+\sigma_e^2}
 $$</p>
-<p>双向模型中还可区分「绝对一致」与「一致性」，绝对一致额外计入评分者系统偏差 $\sigma_r^2$：</p>
+<p>由单因素方差分析的均方估计（$k$ 为每对象测量次数）：</p>
 <p>$$
-\mathrm{ICC}_{\text{agreement}}=\frac{\sigma_b^2}{\sigma_b^2+\sigma_r^2+\sigma_e^2}
+\mathrm{ICC}(1,1)=\frac{\mathrm{MS}_b-\mathrm{MS}_e}{\mathrm{MS}_b+(k-1)\mathrm{MS}_e}
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
+<p>这个式子在说：信度 = 对象间方差 ÷ 总方差；用组间均方与组内均方可把方差分量估出来。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>$\sigma_b^2$：对象（被测个体）间方差，即「真实」信号。</li>
-<li>$\sigma_e^2$：残差方差，即测量误差。</li>
-<li>$\sigma_r^2$：评分者主效应方差（系统偏差）。</li>
-<li>Shrout-Fleiss 记号 ICC(1,1)/(2,1)/(3,1) 区分模型与单次/均值形式。</li>
+<li>把测量写成「总均值 + 对象效应 + 误差」的方差分量模型。</li>
+<li>对象效应方差 $\sigma_b^2$ 是信号，误差方差 $\sigma_e^2$ 是噪声；ICC 是信号占比。</li>
+<li>用单因素 ANOVA 的 $\mathrm{MS}_b,\mathrm{MS}_e$ 反解方差分量，得上面的估计式。</li>
+<li>双向模型区分「一致性 consistency」（不计评分者系统偏差）与「绝对一致 agreement」（计入偏差 $\sigma_r^2$）；并区分「单次」与「$k$ 次均值」的信度（Shrout-Fleiss 记号 ICC(1/2/3,1/k)）。</li>
 </ul>
-<h3>2.3 关键假设</h3>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>方差分量模型（单向或双向 ANOVA）设定正确。</li>
-<li>明确区分「一致性 consistency」与「绝对一致 agreement」目标。</li>
-<li>明确报告单次评分还是 $k$ 次均值的信度。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<li>$\sigma_b^2$：对象间方差（信号）。</li>
+<li>$\sigma_e^2$：误差方差（噪声）；$\sigma_r^2$：评分者偏差方差。</li>
+<li>$k$：每对象测量次数。</li>
+<li>ICC：$[0,1]$，越高越可靠；需注明模型(1/2/3)与形式(单次/均值)。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>方差模型正确</td>
+<td>单向/双向选对</td>
+<td>ICC 数值偏差</td>
+<td>依设计选模型</td>
+</tr>
+<tr>
+<td>目标明确</td>
+<td>一致性 vs 绝对一致</td>
+<td>报错类型误导</td>
+<td>按用途选</td>
+</tr>
+<tr>
+<td>人群有代表性</td>
+<td>有真实个体变异</td>
+<td>同质人群 ICC 偏低</td>
+<td>看对象间离散</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>对一批对象各测 $k=2$ 次，做单因素 ANOVA 得组间均方 $\mathrm{MS}_b=25$、组内（误差）均方 $\mathrm{MS}_e=1$。</p>
+<p><strong>一步步计算（ICC(1,1)）：</strong></p>
+<ul>
+<li>代入：$\mathrm{ICC}=\dfrac{\mathrm{MS}_b-\mathrm{MS}_e}{\mathrm{MS}_b+(k-1)\mathrm{MS}_e}=\dfrac{25-1}{25+(2-1)\times1}=\dfrac{24}{26}\approx0.92$。</li>
+<li>反解方差分量：$\sigma_e^2=\mathrm{MS}_e=1$，$\sigma_b^2=\dfrac{\mathrm{MS}_b-\mathrm{MS}_e}{k}=\dfrac{24}{2}=12$；校验 $\dfrac{12}{12+1}\approx0.92$ ✓。</li>
+</ul>
+<p><strong>结论：</strong> ICC≈0.92，属「优」信度——对象间的真实差异（方差 12）远大于测量噪声（方差 1），说明这项测量能可靠地区分不同个体、可用于个体随访。若换成很同质的人群（$\mathrm{MS}_b$ 只比 $\mathrm{MS}_e$ 略大，如 2 vs 1），ICC 会骤降到 $\dfrac{1}{3}\approx0.33$——<strong>同一把尺子在不同人群里 ICC 可以差很多</strong>，这提醒解读时必须结合人群变异。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
 <li>自变量类型：无，多列（评分者/时间点）连续测量。</li>
 <li>因变量类型：连续测量值。</li>
@@ -100,15 +156,13 @@ $$</p>
 <li>是否适合删失数据：不适用。</li>
 <li>是否适合重复测量数据：正是其用途（重测信度）。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>3 名评分者对 5 名受试者的评分：</p>
+<h3>5.2 示例表格</h3>
 <table>
 <thead>
 <tr>
 <th>Subject</th>
 <th>Rater1</th>
 <th>Rater2</th>
-<th>Rater3</th>
 </tr>
 </thead>
 <tbody>
@@ -116,57 +170,42 @@ $$</p>
 <td>1</td>
 <td>9</td>
 <td>8</td>
-<td>9</td>
 </tr>
 <tr>
 <td>2</td>
 <td>6</td>
-<td>6</td>
 <td>5</td>
 </tr>
 <tr>
 <td>3</td>
-<td>8</td>
-<td>7</td>
-<td>8</td>
-</tr>
-<tr>
-<td>4</td>
 <td>3</td>
 <td>4</td>
-<td>3</td>
-</tr>
-<tr>
-<td>5</td>
-<td>7</td>
-<td>8</td>
-<td>7</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
 <li>输入数据：对象在多个评分者/时点上的测量。</li>
-<li>关键变量：模型类型（1/2/3）、目标（一致性/绝对一致）、单次/均值。</li>
+<li>关键变量：模型(1/2/3)、目标(一致性/绝对)、单次/均值。</li>
 <li>需要预处理的内容：整理成对象 × 评分者结构、处理缺失。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：ICC 及 95% CI，方差分量。</li>
+<li>模型对象/统计结果：ICC 及 95% CI、方差分量。</li>
 <li>参数估计：各方差分量。</li>
 <li>预测结果：无。</li>
 <li>不确定性指标：ICC 置信区间、F 检验。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
 <li>适合：连续测量的评分者间/重测信度评估。</li>
-<li>不适合：分类结局（用 <a class="xlink" href="m-cohen-s-kappa.html" data-cn="Cohen&#x27;s Kappa一致性系数" data-en="Cohen&#x27;s Kappa" data-def="Cohen&#x27;s Kappa 衡量两名评分者对同一批对象做分类判断时的一致程度，并扣除仅凭机遇就能达成的一致，是评分者间信度的标准指标。">Cohen Kappa一致性系数（Cohen&#x27;s Kappa）</a>）、评估固定偏差与量程依赖（用 <a class="xlink" href="m-bland-altman-analysis.html" data-cn="Bland-Altman分析" data-en="Bland-Altman Analysis" data-def="Bland-Altman 分析通过绘制两种测量方法的「差值对均值」散点图，评估它们是否可以互换：给出平均偏差和 95% 一致性界限（limits of agreement）。">Bland-Altman分析（Bland-Altman Analysis）</a>）。</li>
-<li>使用前需要特别检查的点：选对模型（1/2/3）与形式（单次/均值）、一致性 vs 绝对一致。</li>
+<li>不适合：分类结局（用 Kappa）、评估固定偏差与量程依赖（用 Bland-Altman）。</li>
+<li>使用前需要特别检查的点：选对模型(1/2/3)与形式(单次/均值)、一致性 vs 绝对一致。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="intraclass-correlation-coefficient-icc" data-i="0">Python</button><button class="codetab" data-uid="intraclass-correlation-coefficient-icc" data-i="1">R</button></div><div class="codepanel active" data-uid="intraclass-correlation-coefficient-icc" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>pingouin</code></li>
@@ -175,9 +214,9 @@ $$</p>
 import pandas as pd
 
 long = pd.DataFrame({
-    &quot;subject&quot;: [1,1,1,2,2,2],
-    &quot;rater&quot;:   [&quot;r1&quot;,&quot;r2&quot;,&quot;r3&quot;,&quot;r1&quot;,&quot;r2&quot;,&quot;r3&quot;],
-    &quot;score&quot;:   [9,8,9,6,6,5],
+    &quot;subject&quot;: [1,1,2,2,3,3],
+    &quot;rater&quot;:   [&quot;r1&quot;,&quot;r2&quot;]*3,
+    &quot;score&quot;:   [9,8, 6,5, 3,4],
 })
 icc = pg.intraclass_corr(data=long, targets=&quot;subject&quot;,
                          raters=&quot;rater&quot;, ratings=&quot;score&quot;)
@@ -187,71 +226,88 @@ print(icc[[&quot;Type&quot;,&quot;ICC&quot;,&quot;CI95%&quot;]])
 <li><code>irr</code></li>
 </ul>
 <pre><code class="language-r">library(irr)
-m &lt;- matrix(c(9,8,9, 6,6,5, 8,7,8, 3,4,3, 7,8,7),
-            ncol = 3, byrow = TRUE)
+m &lt;- matrix(c(9,8, 6,5, 3,4), ncol = 2, byrow = TRUE)
 icc(m, model = &quot;twoway&quot;, type = &quot;agreement&quot;, unit = &quot;single&quot;)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
       <div class="sec-body"><ul>
 <li>核心结果看什么：ICC 值、置信区间下限、所选模型/形式。</li>
-<li>每个主要参数如何解释：常用 Koo-Li 标准——$&lt;0.5$ 差、$0.5$–$0.75$ 中、$0.75$–$0.9$ 好、$&gt;0.9$ 优。</li>
-<li>临床或医学意义如何表达：高 ICC 支持该测量可用于个体随访与多中心比较。</li>
+<li>每个主要参数如何解读：Koo-Li——$\lt0.5$ 差、$0.5$–$0.75$ 中、$0.75$–$0.9$ 好、$\gt0.9$ 优。</li>
+<li>临床或医学意义如何表达：高 ICC 支持该测量用于个体随访与多中心比较。</li>
 <li>常见误读：混淆「一致性」与「绝对一致」；只报点估计不报 CI 下限。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>模型选择：随机评分者用双向随机、固定评分者用双向混合、单向仅当评分者各不同。</li>
+<li>人群变异：同质样本会低估 ICC，解读须结合对象间离散。</li>
+<li>一致性 vs 绝对：关心「排序一致」用 consistency；关心「数值可换」用 agreement。</li>
+<li>报告规范：注明 ICC(模型,形式) 与 95% CI（Koo-Li 指南）。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
 <li>评分者两两散点图 + 对角线。</li>
 <li>各对象测量的误差棒图。</li>
 <li>方差分量堆叠条形图。</li>
 </ul></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>直接给出 0–1 的信度尺度，易沟通。</li>
-<li>可分解方差、区分一致性与绝对一致。</li>
+<li>给 0–1 的信度尺度，易沟通。</li>
+<li>分解方差、区分一致性与绝对一致。</li>
 <li>支持多评分者与均值信度。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>依赖对象间的真实变异（同质样本会低估）。</li>
-<li>模型选择不当会得到很不同的数值。</li>
-<li>不显示偏差是否随量程变化（需 Bland-Altman 补充）。</li>
+<li>依赖对象间真实变异（同质样本低估）。</li>
+<li>模型选择不当数值差很大。</li>
+<li>不显示偏差是否随量程变化。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>不声明 ICC(1/2/3) 与单次/均值，导致不可复现。</li>
-<li>在极同质人群上报低 ICC，误判测量不可靠。</li>
-<li>用 Pearson 相关代替 ICC（前者对系统偏差不敏感）。</li>
+<li>不声明 ICC(1/2/3) 与单次/均值。</li>
+<li>在极同质人群报低 ICC，误判不可靠。</li>
+<li>用 Pearson 代替 ICC（前者对系统偏差不敏感）。</li>
 </ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-pearson-correlation.html" data-cn="Pearson相关" data-en="Pearson Correlation" data-def="Pearson 相关系数 $r$ 是「标准化的协方差」：把两个变量各自的单位除掉，得到一个 $-1$ 到 $1$ 之间、无量纲的数，衡量它们线性关系的方向与强度。">Pearson相关（Pearson Correlation）</a> 的区别：Pearson 只看线性相关、对系统偏差不敏感；ICC 计入偏差与量级一致。</li>
-<li>和 <a class="xlink" href="m-cohen-s-kappa.html" data-cn="Cohen&#x27;s Kappa一致性系数" data-en="Cohen&#x27;s Kappa" data-def="Cohen&#x27;s Kappa 衡量两名评分者对同一批对象做分类判断时的一致程度，并扣除仅凭机遇就能达成的一致，是评分者间信度的标准指标。">Cohen Kappa一致性系数（Cohen&#x27;s Kappa）</a> 的区别：Kappa 用于分类，ICC 用于连续。</li>
-<li>和 <a class="xlink" href="m-bland-altman-analysis.html" data-cn="Bland-Altman分析" data-en="Bland-Altman Analysis" data-def="Bland-Altman 分析通过绘制两种测量方法的「差值对均值」散点图，评估它们是否可以互换：给出平均偏差和 95% 一致性界限（limits of agreement）。">Bland-Altman分析（Bland-Altman Analysis）</a> 的区别：Bland-Altman 展示偏差与一致限，ICC 给单一信度指数。</li>
+<li>和 <strong>Pearson 相关</strong>：Pearson 只看线性相关、忽略系统偏差；ICC 计入偏差与量级一致。</li>
+<li>和 <strong>Cohen's Kappa</strong>：Kappa 分类、ICC 连续。</li>
+<li>和 <strong>Bland-Altman</strong>：Bland-Altman 展示偏差与一致限，ICC 给单一指数。</li>
+<li>如何选择：连续信度指数 → ICC；方法可换性 → Bland-Altman；分类一致 → Kappa。</li>
 </ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
       <div class="sec-body"><ul>
 <li>血压计/超声定量测量的重测与阅片者信度。</li>
 <li>量表总分的评分者间与重测稳定性。</li>
 <li>影像组学特征在不同扫描仪/分割者间的稳定性。</li>
 </ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-cohen-s-kappa.html" data-cn="Cohen&#x27;s Kappa一致性系数" data-en="Cohen&#x27;s Kappa" data-def="Cohen&#x27;s Kappa 衡量两名评分者对同一批对象做分类判断时的一致程度，并扣除仅凭机遇就能达成的一致，是评分者间信度的标准指标。">Cohen Kappa一致性系数（Cohen&#x27;s Kappa）</a></li>
-<li><a class="xlink" href="m-bland-altman-analysis.html" data-cn="Bland-Altman分析" data-en="Bland-Altman Analysis" data-def="Bland-Altman 分析通过绘制两种测量方法的「差值对均值」散点图，评估它们是否可以互换：给出平均偏差和 95% 一致性界限（limits of agreement）。">Bland-Altman分析（Bland-Altman Analysis）</a></li>
+<li><strong>对象间方差（$\sigma_b^2$）</strong>：不同对象真实水平的差异（信号）。</li>
+<li><strong>误差方差（$\sigma_e^2$）</strong>：同一对象重复测量的抖动（噪声）。</li>
+<li><strong>一致性 vs 绝对一致</strong>：是否计入评分者系统偏差。</li>
+<li><strong>Shrout-Fleiss 模型</strong>：ICC(1/2/3, 1/k) 的分类体系。</li>
+<li><strong>信度（Reliability）</strong>：信号占总变异的比例。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-cohen-s-kappa.html" data-cn="Cohen&#x27;s Kappa一致性系数" data-en="Cohen&#x27;s Kappa" data-def="Kappa 衡量两名评分者分类判断的一致性，但先扣掉「就算瞎猜也能碰巧一致」的部分：它回答「在机遇一致之上，两人还多达成了多少一致」。">Cohen Kappa一致性系数（Cohen&#x27;s Kappa）</a></li>
+<li><a class="xlink" href="m-bland-altman-analysis.html" data-cn="Bland-Altman分析" data-en="Bland-Altman Analysis" data-def="Bland-Altman 直接盯着「两种方法测同一对象的差值」：算出平均偏差（系统差）和 95% 一致性界限（个体差能有多大），据此判断两法能不能互换——而不是问它们相不相关。">Bland-Altman分析（Bland-Altman Analysis）</a></li>
 <li><a class="xlink" href="m-linear-mixed-effects-model-lmm.html" data-cn="线性混合效应模型" data-en="Linear Mixed-Effects Model, LMM" data-def="线性混合效应模型用于分析重复测量或层级数据中的连续结局，在固定效应之外加入随机效应来刻画个体间异质性和组内相关性。">线性混合效应模型（Linear Mixed-Effects Model, LMM）</a></li>
 </ul></div>
-    </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Shrout PE, Fleiss JL. Intraclass correlations: uses in assessing rater reliability. <em>Psychol Bull</em>. 1979;86(2):420-428.</li>
-<li>Koo TK, Li MY. A guideline of selecting and reporting intraclass correlation coefficients for reliability research. <em>J Chiropr Med</em>. 2016;15(2):155-163.</li>
+<li>Koo TK, Li MY. A guideline of selecting and reporting intraclass correlation coefficients. <em>J Chiropr Med</em>. 2016;15(2):155-163.</li>
 <li>McGraw KO, Wong SP. Forming inferences about some intraclass correlation coefficients. <em>Psychol Methods</em>. 1996;1(1):30-46.</li>
 </ul></div>
     </section>

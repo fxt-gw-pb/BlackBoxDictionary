@@ -230,7 +230,7 @@ print(fit)
     </section><section id="sec-9" data-sec="9" class="sec">
       <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 是一种从原始样本中“有放回重抽样”的方法，用来近似统计量的抽样分布，从而估计标准误、方差和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a> 的区别：CV 靠不重叠切分，Bootstrap 靠有放回重抽样，二者都可估泛化误差与不确定性。</li>
+<li>和 <a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 用「从手上的样本里有放回地反复重抽」来模拟「把整个研究重做很多遍」，从而不靠任何公式，就能估计任意统计量的抽样波动、标准误和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a> 的区别：CV 靠不重叠切分，Bootstrap 靠有放回重抽样，二者都可估泛化误差与不确定性。</li>
 <li>和单次留出法（hold-out）的区别：CV 用满所有数据、方差更低，小样本更可靠。</li>
 <li>和外部验证的区别：CV 是内部验证，外部验证在独立人群评估可推广性。</li>
 </ul></div>
@@ -244,7 +244,7 @@ print(fit)
     </section><section id="sec-11" data-sec="11" class="sec">
       <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 是一种从原始样本中“有放回重抽样”的方法，用来近似统计量的抽样分布，从而估计标准误、方差和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a></li>
+<li><a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 用「从手上的样本里有放回地反复重抽」来模拟「把整个研究重做很多遍」，从而不靠任何公式，就能估计任意统计量的抽样波动、标准误和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a></li>
 <li><a class="xlink" href="m-receiver-operating-characteristic-and-auc.html" data-cn="ROC曲线与AUC" data-en="Receiver Operating Characteristic and AUC" data-def="ROC 曲线（受试者工作特征曲线）把一个连续评分或预测概率在所有可能阈值下的敏感度与（1−特异度）连成一条曲线；AUC 是曲线下面积，用一个 0–1 的数概括模型的整体区分能力。">ROC曲线与AUC（Receiver Operating Characteristic and AUC）</a></li>
 <li><a class="xlink" href="m-calibration-curve.html" data-cn="校准曲线" data-en="Calibration Curve" data-def="校准曲线（可靠性图）比较模型的预测概率与实际观察到的事件发生频率，用来判断“模型说的 20% 风险，是不是真的大约 20% 的人发生了事件”。">校准曲线（Calibration Curve）</a></li>
 </ul></div>

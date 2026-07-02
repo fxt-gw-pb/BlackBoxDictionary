@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -48,220 +48,271 @@
       <div class="detail-meta">
         <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
         <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
-        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 非参数统计 / 重抽样</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 重抽样 / 区间估计 / 不确定性</b></span>
       </div>
     </div>
     <div class="intro-note"><h1>Bootstrap重抽样（Bootstrap Resampling）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>Bootstrap 是一种从原始样本中“有放回重抽样”的方法，用来近似统计量的抽样分布，从而估计标准误、方差和置信区间。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>Bootstrap 用「从手上的样本里有放回地反复重抽」来<strong>模拟「把整个研究重做很多遍」</strong>，从而不靠任何公式，就能估计任意统计量的抽样波动、标准误和置信区间。</p>
+<h3>1.2 定义</h3>
+<p>Bootstrap（自助法）是一种重抽样方法：把观测样本当作总体的替身，有放回地抽取大量「自助样本」，在每个上重算统计量，用这些重复值的分布来近似该统计量的真实抽样分布。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：当统计量的理论分布难推导时，如何评估不确定性。</li>
-<li>适用任务：构造置信区间、估计标准误、比较复杂统计量的稳定性。</li>
-<li>常见医学场景：小样本研究、偏态数据、中位数或 AUC 等复杂指标的区间估计。</li>
+<li>研究问题：某个统计量（尤其没有简单公式的）有多不确定？置信区间是多少？</li>
+<li>适用任务：复杂统计量的标准误与区间估计、正态近似不成立时的推断。</li>
+<li>常见医学场景：中位数/分位数的区间、相关系数或 AUC 的区间、比值/比率、非线性组合指标的不确定性。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>因为我们通常只有一份数据，所以 Bootstrap 把“经验分布函数”当作总体的近似，再反复从这份经验分布里采样，模拟如果我们重复做很多次研究，统计量会怎么波动。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>理想情况下，想知道「估计有多准」，应该把整个研究重复上千次，看每次结果散多开。现实只做得起一次。Bootstrap 的妙招是：既然样本是总体最好的缩影，就把样本当「小总体」，从里面有放回地反复抽同样大小的新样本——每次抽都像「重做一次研究」。上千次之后，这些结果的散布就近似了「真重复研究」的散布。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-\begin{aligned}
-(X_1^*, \ldots, X_n^*) &amp;\sim \hat F_n \\
-\hat\theta_r^* &amp;= t(X_1^*, \ldots, X_n^*), \quad r = 1, \ldots, R
-\end{aligned}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>均值有现成的标准误公式，但中位数、相关系数、AUC、两个估计的比值……很多统计量要么没有简洁的方差公式，要么其正态近似在小样本/偏态下失效。根本困难是：<strong>如何在没有解析公式、也不敢用正态近似时，得到一个统计量的不确定性？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>用<strong>经验分布</strong>代替未知的总体分布。既然真总体不可见，就用「样本的经验分布」（每个观测各占 $1/n$）当它的最佳估计；「从总体再抽一个样本」就用「从样本有放回地抽 $n$ 个」来模拟。对每个自助样本重算统计量 $\hat{\theta}^*$，重复 $B$ 次（几千次），这 $B$ 个值的分布就近似 $\hat{\theta}$ 的抽样分布——其标准差是标准误，其百分位给置信区间。它把「解析推导」换成了「计算模拟」。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$\hat\theta$：原始样本上的统计量。</li>
-<li>$\hat\theta_r^*$：第 $r$ 次 Bootstrap 样本上的统计量。</li>
-<li>$R$：重抽样次数。</li>
-<li>百分位区间：直接取 $\hat\theta^*$ 分布的相应分位数。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>原始样本能代表目标总体。</li>
-<li>最常见设定是假设观测独立同分布。</li>
-<li>重抽样不能弥补系统偏倚或错误设计。</li>
+<li>相对<strong>解析标准误</strong>：Bootstrap 通用、不需为每个统计量推公式；代价是要算力、且小样本时不可靠。</li>
+<li>相对<strong>正态近似 CI</strong>：偏态或小样本时 Bootstrap（尤其 BCa）区间更准。</li>
+<li>相对<strong>置换检验</strong>：置换用于假设检验（打乱标签），Bootstrap 用于估计不确定性（有放回重抽）。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>自助标准误与百分位区间（$\hat{\theta}^{*(b)}$ 为第 $b$ 个自助样本上的统计量）：</p>
+<p>$$
+\widehat{\mathrm{SE}}=\sqrt{\frac{1}{B-1}\sum_{b=1}^{B}\big(\hat{\theta}^{*(b)}-\bar{\theta}^{*}\big)^2},\qquad
+\mathrm{CI}_{95\%}=\big[\hat{\theta}^{*}_{(2.5\%)},\ \hat{\theta}^{*}_{(97.5\%)}\big]
+$$</p>
+<p>这个式子在说：标准误就是 $B$ 个自助统计量的标准差；百分位区间就是把这 $B$ 个值排序、取第 2.5 与 97.5 百分位。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>自变量类型：不限。</li>
-<li>因变量类型：不限，只要能定义统计量。</li>
-<li>数据结构：最基础的是独立样本；复杂结构需用 block/bootstrap 等变体。</li>
-<li>是否适合高维数据：可用，但计算量大。</li>
-<li>是否适合缺失较多数据：需先明确缺失处理，再进行 Bootstrap。</li>
-<li>是否适合删失数据：可用专门的生存 Bootstrap 变体。</li>
-<li>是否适合重复测量数据：普通 Bootstrap 不够，应尊重聚类或个体层级。</li>
+<li>记经验分布 $\hat{F}_n$（每个观测权重 $1/n$）；它是总体 $F$ 的一致估计。</li>
+<li>「Bootstrap 原理」：用 $\hat{F}_n$ 下 $\hat{\theta}^*$ 相对 $\hat{\theta}$ 的分布，近似 $F$ 下 $\hat{\theta}$ 相对真值 $\theta$ 的分布。</li>
+<li>无法解析积分，就用蒙特卡洛：抽 $B$ 个自助样本、各算 $\hat{\theta}^*$，用经验分布逼近。</li>
+<li>区间有多种构造：百分位法（简单）、基本法、BCa（校正偏差与偏度，最常推荐）、自助 t。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>Bootstrap 很适合先从一个简单连续变量开始，例如 <code>Framingham_data.csv</code> 基线的 BMI：</p>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$B$：自助重复次数（标准误用几百、区间用 $\ge 2000$）。</li>
+<li>$\hat{\theta}^{*(b)}$：第 $b$ 个自助样本上的统计量。</li>
+<li>$\widehat{\mathrm{SE}}$：自助标准误；百分位：区间端点。</li>
+<li>分布形状：自助值的直方图直接展示抽样分布是否偏态。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>RANDID</th>
-<th>PERIOD</th>
-<th>BMI</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>2448</td>
-<td>1</td>
-<td>26.97</td>
+<td>样本代表总体</td>
+<td>经验分布近似总体</td>
+<td>小样本时不可靠</td>
+<td>看样本量</td>
 </tr>
 <tr>
-<td>6238</td>
-<td>1</td>
-<td>28.73</td>
+<td>观测独立</td>
+<td>i.i.d. 抽样</td>
+<td>需分块/分层自助</td>
+<td>看数据结构</td>
 </tr>
 <tr>
-<td>9428</td>
+<td>统计量平滑</td>
+<td>对数据平滑依赖</td>
+<td>极值/边界统计量失效</td>
+<td>看统计量类型</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>用 5 个观测 $\{2,4,6,8,10\}$（均值 6）演示自助抽样如何模拟重复研究。</p>
+<p><strong>一步步计算：</strong></p>
+<ul>
+<li>有放回抽 $n=5$ 得若干自助样本，各算均值：</li>
+<li>自助样本 1：$\{4,4,8,10,2\}\to$ 均值 $5.6$</li>
+<li>自助样本 2：$\{2,6,6,8,10\}\to$ 均值 $6.4$</li>
+<li>自助样本 3：$\{10,8,6,4,2\}\to$ 均值 $6.0$</li>
+<li>重复 $B=2000$ 次，得到 2000 个均值。它们的标准差就是自助标准误，约 $1.3$（与解析值 $s/\sqrt{n}=3.16/\sqrt5=1.41$ 接近）。</li>
+<li>把 2000 个均值排序，取第 2.5% 与 97.5% 百分位，即得 95% 自助置信区间（约 $3.6$ 到 $8.4$）。</li>
+</ul>
+<p><strong>结论：</strong> 只靠「反复重抽 + 重算」，就复现了均值的标准误与区间，<strong>完全没用到任何标准误公式</strong>。对均值这种有公式的量，两者结果吻合；真正的价值在于——把「均值」换成「中位数」「相关系数」「AUC」等没有简单公式的量，同一套流程照样给出不确定性。注意每个自助样本会重复或漏掉某些原始观测，这正是它模拟抽样波动的机制。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：任意（对统计量重抽）。</li>
+<li>因变量类型：任意。</li>
+<li>数据结构：独立观测；相关数据用分块/分层自助。</li>
+<li>是否适合高维数据：可，但计算量大。</li>
+<li>是否适合缺失较多数据：需把缺失处理纳入每次重抽。</li>
+<li>是否适合删失数据：需专门的生存自助。</li>
+<li>是否适合重复测量数据：需按对象整块重抽（cluster bootstrap）。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>自助样本</th>
+<th>抽到的值</th>
+<th>均值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
 <td>1</td>
-<td>25.34</td>
+<td>4,4,8,10,2</td>
+<td>5.6</td>
 </tr>
 <tr>
-<td>10552</td>
-<td>1</td>
-<td>28.58</td>
+<td>2</td>
+<td>2,6,6,8,10</td>
+<td>6.4</td>
 </tr>
 <tr>
-<td>11252</td>
-<td>1</td>
-<td>23.10</td>
+<td>3</td>
+<td>10,8,6,4,2</td>
+<td>6.0</td>
 </tr>
 </tbody>
 </table>
-<p>后续可以把统计量从“均值”扩展到中位数、相关系数、AUC 或回归系数。</p>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：任意可计算目标统计量的数据集。</li>
-<li>关键变量：定义统计量所需的全部变量。</li>
-<li>需要预处理的内容：确定重抽样单位、缺失处理、随机种子。</li>
+<li>输入数据：原始样本 + 一个「计算统计量」的函数。</li>
+<li>关键变量：统计量、重复次数 $B$、区间方法。</li>
+<li>需要预处理的内容：确认独立性、决定重抽单元（个体/整群）。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：Bootstrap 统计量分布。</li>
-<li>参数估计：统计量点估计。</li>
-<li>预测结果：可用于模型性能的内部验证。</li>
-<li>不确定性指标：标准误、方差、百分位置信区间等。</li>
+<li>模型对象/统计结果：自助分布、标准误、置信区间。</li>
+<li>参数估计：原统计量。</li>
+<li>预测结果：无。</li>
+<li>不确定性指标：自助 SE 与区间（百分位/BCa）。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：中位数、分位数、AUC、相关系数、复杂模型性能指标的区间估计。</li>
-<li>不适合：样本过小到无法代表总体、强依赖结构未建模、极端稀有事件。</li>
-<li>使用前需要特别检查的点：抽样单位是什么、是否存在聚类、重抽样次数是否足够。</li>
+<li>适合：复杂/无公式统计量的不确定性、偏态或小样本下的区间。</li>
+<li>不适合：极值/边界统计量（最大值）、强相关未处理、样本太小。</li>
+<li>使用前需要特别检查的点：重抽单元是否正确、$B$ 是否足够、区间方法选择。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="bootstrap-resampling" data-i="0">Python</button><button class="codetab" data-uid="bootstrap-resampling" data-i="1">R</button></div><div class="codepanel active" data-uid="bootstrap-resampling" data-i="0"><p>常用包：</p>
 <ul>
-<li><code>scipy</code></li>
 <li><code>numpy</code></li>
+<li><code>scipy</code></li>
 </ul>
 <pre><code class="language-python">import numpy as np
-from scipy import stats
+from scipy.stats import bootstrap
 
-x = np.array([12.3, 10.8, 11.4, 13.1, 9.9, 12.0, 11.1])
-
-res = stats.bootstrap(
-    (x,),
-    np.mean,
-    confidence_level=0.95,
-    n_resamples=5000,
-    method=&quot;percentile&quot;,
-    random_state=0
-)
-
-print(res.confidence_interval)
-print(res.standard_error)
+x = np.array([2, 4, 6, 8, 10])
+res = bootstrap((x,), np.mean, n_resamples=2000,
+                confidence_level=0.95, method=&quot;BCa&quot;)
+print(&quot;SE =&quot;, round(res.standard_error, 2))
+print(&quot;95% CI =&quot;, res.confidence_interval)
 </code></pre></div><div class="codepanel" data-uid="bootstrap-resampling" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>boot</code></li>
 </ul>
 <pre><code class="language-r">library(boot)
-
-x &lt;- c(12.3, 10.8, 11.4, 13.1, 9.9, 12.0, 11.1)
-
-mean_boot &lt;- function(data, indices) {
-  mean(data[indices])
-}
-
-fit &lt;- boot(data = x, statistic = mean_boot, R = 5000)
-boot.ci(fit, type = &quot;perc&quot;)
+x &lt;- c(2,4,6,8,10)
+b &lt;- boot(x, statistic = function(d, i) mean(d[i]), R = 2000)
+boot.ci(b, type = &quot;bca&quot;)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：统计量在重抽样中的波动范围。</li>
-<li>每个主要参数如何解释：标准误表示不确定性大小，区间表示可能的参数范围。</li>
-<li>临床或医学意义如何表达：例如“中位数改善值的 95% Bootstrap CI 为 1.2 到 3.8”。</li>
-<li>常见误读：Bootstrap 区间不是让估计“更准”，只是更好地量化不确定性。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>Bootstrap 统计量直方图。</li>
-<li>Bootstrap 分布密度图。</li>
-<li>点估计加 Bootstrap 置信区间图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图展示基线 BMI 均值经过 2000 次 Bootstrap 后的抽样分布近似形状。</p>
-<p><img alt="" src="img/bootstrap_bmi_mean.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：自助分布形状、标准误、置信区间是否含无效值。</li>
+<li>每个主要参数如何解读：区间偏离对称提示统计量抽样分布偏态；宽度反映精度。</li>
+<li>临床或医学意义如何表达：报告点估计 + 自助 95% CI（注明区间方法与 $B$）。</li>
+<li>常见误读：把 Bootstrap 当「凭空造数据」（它只是重排现有信息）；小样本上盲信。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>收敛：增大 $B$（如 2000→10000）看区间是否稳定。</li>
+<li>分布检查：画自助值直方图，偏态时优先 BCa 而非百分位。</li>
+<li>相关/聚类：普通自助会低估不确定性，改用按整群重抽。</li>
+<li>边界统计量：最大/最小值等对重抽极敏感，Bootstrap 不适用。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>自助分布直方图 + 区间标注。</li>
+<li>多方法区间（百分位/BCa/正态）对比。</li>
+<li>统计量随 $B$ 增大的收敛曲线。</li>
+</ul>
+<h3>10.1 图像示例</h3>
+<p>下图展示 BMI 均值的自助抽样分布。</p>
+<p><img alt="" src="img/bootstrap_bmi_mean.png" /></p></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>通用性强。</li>
-<li>不依赖复杂解析推导。</li>
-<li>对复杂统计量尤其有价值。</li>
+<li>通用，不需为每个统计量推公式。</li>
+<li>偏态/小样本下区间常优于正态近似。</li>
+<li>直接展示抽样分布形状。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>计算成本较高。</li>
-<li>依赖样本代表性。</li>
-<li>对强相关数据不应直接套普通 Bootstrap。</li>
+<li>计算量大。</li>
+<li>小样本时经验分布本身不可靠。</li>
+<li>对极值/边界统计量失效。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>忽略抽样单位，错误地在观测层面重抽样。</li>
-<li>样本极小却过度信赖 Bootstrap 区间。</li>
-<li>只报告区间，不说明使用的是哪种 Bootstrap 方法。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和经典 t 区间的区别：t 区间依赖理论分布，Bootstrap 依赖重抽样近似。</li>
-<li>和置换检验的区别：Bootstrap 主要估计抽样分布，置换检验主要构造零分布。</li>
-<li>应该如何选择：若理论分布清晰、样本足够大，经典方法更简单；复杂统计量可优先考虑 Bootstrap。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>小样本下中位数或分位数的区间估计。</li>
-<li>ROC/AUC、校准指标等模型性能的内部验证。</li>
-<li>Spearman 相关、回归系数稳健性评估。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-empirical-cumulative-distribution-function-ecdf.html" data-cn="经验分布函数" data-en="Empirical Cumulative Distribution Function, ECDF" data-def="经验分布函数是「用数据本身当作分布」：在每个观测值处向上跳一小步 $1/n$，画出「有多大比例的数据不超过 $x$」这条阶梯曲线，它是真实累积分布函数（CDF）最诚实的估计。">经验分布函数（Empirical Cumulative Distribution Function, ECDF）</a></li>
-<li><a class="xlink" href="m-spearman-rank-correlation.html" data-cn="Spearman秩相关" data-en="Spearman Rank Correlation" data-def="Spearman 相关就是「把数据换成名次后再算 Pearson 相关」：它衡量两个变量是否同增同减（单调关系），不要求关系是直线，且对异常值稳健。">Spearman秩相关（Spearman Rank Correlation）</a></li>
-<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归通过把连续型结局表示为若干自变量的线性组合，来估计变量与结局之间的方向、大小和不确定性，是医学统计最基础的建模方法之一。">线性回归（Linear Regression）</a></li>
-<li><a class="xlink" href="m-one-sample-t-test.html" data-cn="单样本t检验" data-en="One-Sample t-Test" data-def="单样本 t 检验问一个问题：这组数据的均值，离某个「参照值」是不是远到不像抽样运气？做法是把「均值与参照值之差」除以它的标准误，得到信噪比 $t$。">单样本t检验（One-Sample t-Test）</a></li>
+<li>相关/聚类数据用普通自助（低估不确定性）。</li>
+<li>$B$ 太小导致区间不稳。</li>
+<li>把自助当成「增加了样本量」。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Efron B, Tibshirani RJ. <em>An Introduction to the Bootstrap</em>. Chapman and Hall/CRC; 1993.</li>
-<li>SciPy Developers. <code>scipy.stats.bootstrap</code>. SciPy API Reference. <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html</a> （访问日期：2026-07-02）</li>
-<li>Canty A, Ripley B. <code>boot</code>: Bootstrap R (S-Plus) Functions. CRAN Reference Manual. <a href="https://cran.r-project.org/package=boot">https://cran.r-project.org/package=boot</a> （访问日期：2026-07-02）</li>
+<li>和<strong>解析标准误/CI</strong>：Bootstrap 通用但耗算力；有公式时解析更快。</li>
+<li>和<strong>置换检验</strong>：置换检验假设、Bootstrap 估不确定性。</li>
+<li>和<strong>贝叶斯后验</strong>：都给不确定性，但框架与解释不同。</li>
+<li>如何选择：有可靠公式用解析；复杂/偏态统计量用 Bootstrap。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>AUC、C-index、敏感度/特异度的置信区间。</li>
+<li>中位生存/分位数的区间估计。</li>
+<li>复杂派生指标（比值、差的比）的不确定性。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>重抽样（Resampling）</strong>：从样本反复抽取新样本的方法。</li>
+<li><strong>有放回抽样（With Replacement）</strong>：抽后放回，允许重复，Bootstrap 的核心。</li>
+<li><strong>经验分布</strong>：样本各点等权重的分布，总体的估计。</li>
+<li><strong>百分位区间</strong>：用自助值分位数构造的置信区间。</li>
+<li><strong>BCa 区间</strong>：校正偏差与偏度的自助区间，常最优。</li>
+<li><strong>蒙特卡洛</strong>：用大量随机模拟逼近难以解析的量。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-confidence-interval.html" data-cn="置信区间" data-en="Confidence Interval" data-def="置信区间给点估计配上一段范围，回答「这个数字有多可信」；95% 指的是方法的长期表现——反复抽样构造的区间里，约 95% 会罩住真值。">置信区间（Confidence Interval）</a></li>
+<li><a class="xlink" href="m-concordance-index-c-index.html" data-cn="一致性指数" data-en="Concordance Index, C-index" data-def="一致性指数衡量预测模型的区分度：随机取一对可比较个体，模型给「更早发生事件者」更高风险的概率。它是 ROC 曲线下面积在生存数据上的推广。">一致性指数（Concordance Index, C-index）</a></li>
+<li><a class="xlink" href="m-receiver-operating-characteristic-and-auc.html" data-cn="ROC曲线与AUC" data-en="Receiver Operating Characteristic and AUC" data-def="ROC 曲线（受试者工作特征曲线）把一个连续评分或预测概率在所有可能阈值下的敏感度与（1−特异度）连成一条曲线；AUC 是曲线下面积，用一个 0–1 的数概括模型的整体区分能力。">ROC曲线与AUC（Receiver Operating Characteristic and AUC）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Efron B, Tibshirani RJ. <em>An Introduction to the Bootstrap</em>. Chapman &amp; Hall; 1993.</li>
+<li>Davison AC, Hinkley DV. <em>Bootstrap Methods and Their Application</em>. Cambridge University Press; 1997.</li>
+<li>Carpenter J, Bithell J. Bootstrap confidence intervals. <em>Stat Med</em>. 2000;19(9):1141-1164.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-mantel-haenszel-test.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">Mantel-Haenszel检验</div></a><a class="pg pg-next" href="m-cohen-s-kappa.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">Cohen&#x27;s Kappa一致性系数</div></a></div>
