@@ -228,7 +228,7 @@ sv_waterfall(shp, row_id = 1)  # 单样本解释
       <div class="sec-body"><ul>
 <li>和 <a class="xlink" href="m-tree-based-feature-selection.html" data-cn="基于树模型的特征选择" data-en="Tree-based Feature Selection" data-def="基于树模型的特征选择利用决策树、随机森林、梯度提升树等模型产生的特征重要性，对特征进行排序或筛选。常用重要性包括不纯度减少、分裂次数、置换重要性和 SHAP 重要性。">基于树模型的特征选择（Tree-based Feature Selection）</a> 的区别：树的分裂重要性偏向高基数/高方差特征，SHAP 归因更一致且带方向。</li>
 <li>和置换重要性的区别：置换重要性衡量打乱特征后性能下降，SHAP 分解到单次预测；相关特征下二者可能不一致。</li>
-<li>和 <a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归通过把连续型结局表示为若干自变量的线性组合，来估计变量与结局之间的方向、大小和不确定性，是医学统计最基础的建模方法之一。">线性回归（Linear Regression）</a> 系数的区别：线性系数是全局线性效应，SHAP 适用于任意复杂模型的局部归因。</li>
+<li>和 <a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a> 系数的区别：线性系数是全局线性效应，SHAP 适用于任意复杂模型的局部归因。</li>
 </ul></div>
     </section><section id="sec-10" data-sec="10" class="sec">
       <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>

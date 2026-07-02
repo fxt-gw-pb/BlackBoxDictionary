@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -48,230 +48,266 @@
       <div class="detail-meta">
         <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
         <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
-        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 回归分析 / 过度离散 / 稳健方差</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 过度离散 / 拟似然 / 稳健标准误</b></span>
       </div>
     </div>
     <div class="intro-note"><h1>Quasi-Likelihood与过度离散（Quasi-Likelihood and Overdispersion）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>Quasi-Likelihood 是 GLM 的半参数扩展，不要求完整指定响应分布，只需要指定均值模型和方差模型，因此常被用来处理过度离散和稳健方差估计问题。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>拟似然不承诺结局的完整分布，只规定「均值-方差关系」：它用一个离散因子 $\phi$ 把标准误按实际观测到的分散程度放大，从而在过度离散时得到诚实的推断，而系数点估计不变。</p>
+<h3>1.2 定义</h3>
+<p>拟似然（quasi-likelihood）方法在 GLM 框架下，只设定均值结构与「方差=$\phi\cdot V(\mu)$」，用估计出的离散因子 $\phi$ 修正标准误。quasi-Poisson、quasi-binomial 是其常见形式，专门应对过度离散。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：当均值模型大体正确，但方差结构不满足标准 Poisson / Binomial 假设时，如何仍然做有效推断。</li>
-<li>适用任务：过度离散计数数据、分组二项数据、稳健标准误修正。</li>
-<li>常见医学场景：Poisson 回归中方差明显大于均值，或 grouped binomial 数据中组内异质性较强。</li>
+<li>研究问题：计数/比例结局过度离散时，如何在<strong>不承诺具体分布</strong>的前提下得到可靠的标准误与 p 值？</li>
+<li>适用任务：过度离散计数（quasi-Poisson）、过度离散比例（quasi-binomial）的稳健推断。</li>
+<li>常见医学场景：过度离散的发病计数、分组二元数据的比例过度离散、不想选具体分布时的稳健修正。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>Quasi-Likelihood 的关键思想是：如果我最关心的是均值关系，那就不强迫自己完全相信某个分布，只要把均值和方差的大体规律建好，就仍然能估计回归系数并修正标准误。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>Poisson 假设「方差正好等于均值」，一旦实际数据更散，它给出的标准误就像用一把「偏小的尺子」量误差，处处显得比真实更精确。拟似然的做法很实用：先量出「数据实际比模型预期散了多少倍」（这就是 $\phi$），再把所有标准误统一放大 $\sqrt{\phi}$ 倍。它不追问「数据到底服从什么分布」，只做最小必要的修正。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-\begin{aligned}
-E(Y_i) &amp;= \mu_i(\boldsymbol{\beta}) = g^{-1}(\mathbf{X}_i^\top \boldsymbol{\beta}) \\
-\mathrm{Var}(Y_i) &amp;= \phi V(\mu_i) \\
-U_j(\boldsymbol{\beta}) &amp;= \sum_{i=1}^n \frac{Y_i-\mu_i}{\phi V(\mu_i)}\frac{\partial \mu_i}{\partial \beta_j} = 0
-\end{aligned}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>过度离散会让 Poisson/二项模型<strong>低估标准误、夸大显著性</strong>。负二项能解决，但要承诺一个具体分布（Gamma-Poisson 混合）。根本困难是：<strong>能不能在不指定完整分布、只依赖均值-方差假设的情况下，就把推断修正得稳健？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>参数估计其实只需要「均值结构正确」——不需要完整似然。Wedderburn 的拟似然把这一点形式化：只要设定 $E[Y]=\mu$ 和 $\mathrm{Var}(Y)=\phi\,V(\mu)$，得分方程就与普通 GLM 相同，故<strong>系数点估计不变</strong>；而所有标准误都含一个公共因子 $\sqrt{\phi}$。用 <strong>Pearson $\chi^2$/自由度</strong> 估出 $\phi$，把标准误乘上 $\sqrt{\phi}$ 即完成修正。$\phi=1$ 即无过度离散、退回普通 GLM。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$\mu_i$：均值模型。</li>
-<li>$V(\mu_i)$：方差函数。</li>
-<li>$\phi$：离散参数；$\phi&gt;1$ 常提示过度离散。</li>
-<li>robust / sandwich variance：即使方差模型写错，也能在大样本下给出稳健标准误。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>均值模型正确是最关键前提。</li>
-<li>不必完整指定响应分布。</li>
-<li>稳健方差通常依赖较大样本近似。</li>
+<li>相对 <strong>Poisson/二项</strong>：拟似然放大 SE、修正过度自信。</li>
+<li>相对<strong>负二项</strong>：拟似然方差 $\phi\mu$（线性、无完整似然，故不能用 AIC）；负二项方差 $\mu+\alpha\mu^2$（二次、完整似然，可 AIC）。两者对「过度离散随均值如何增长」的假设不同。</li>
+<li>相对<strong>稳健（三明治）标准误</strong>：思路相近（都不承诺完整分布），三明治 SE 用经验方差更一般，拟似然用参数化的方差函数。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>$$
+\mathrm{Var}(Y_i)=\phi\,V(\mu_i),\qquad
+\hat{\phi}=\frac{1}{n-p}\sum_i\frac{(y_i-\hat{\mu}_i)^2}{V(\hat{\mu}_i)}
+$$</p>
+<p>对 quasi-Poisson $V(\mu)=\mu$，对 quasi-binomial $V(\mu)=\mu(1-\mu)$。这个式子在说：方差是「基准方差函数」乘以一个离散因子 $\phi$；$\phi$ 用 Pearson 残差平方和除以自由度来估。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>自变量类型：连续、二分类、多分类都可。</li>
-<li>因变量类型：计数型或 grouped binary。</li>
-<li>数据结构：独立样本宽表，或按组聚合的计数 / 比例表。</li>
-<li>是否适合高维数据：可扩展，但不是高维首选。</li>
-<li>是否适合缺失较多数据：可用，但需先处理缺失。</li>
-<li>是否适合删失数据：不适合。</li>
-<li>是否适合重复测量数据：其思想可推广到 GEE。</li>
+<li>拟得分函数只依赖均值与方差函数，形式同 GLM 的估计方程，故 $\hat{\boldsymbol{\beta}}$ 与对应 GLM 相同。</li>
+<li>由于 $\mathrm{Var}(Y)=\phi V(\mu)$，系数协方差矩阵整体乘以 $\phi$，即 $\mathrm{SE}_{\text{quasi}}=\sqrt{\phi}\cdot\mathrm{SE}_{\text{GLM}}$。</li>
+<li>$\phi$ 用 Pearson $\chi^2/(n-p)$ 估计（$n-p$ 为残差自由度）。</li>
+<li>检验从 z/卡方改用 t/F（因 $\phi$ 是估计的），更保守。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>下面用短信数据中的 <code>word_count</code> 演示“计数结局 + 方差可能大于均值”的数据形式：</p>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$\phi$（离散因子）：$\gt1$ 过度离散、$=1$ 无、$\lt1$ 欠离散。</li>
+<li>$V(\mu)$：方差函数（泊松 $\mu$、二项 $\mu(1-\mu)$）。</li>
+<li>$\hat{\boldsymbol{\beta}}$：与对应 GLM 相同（点估计不变）。</li>
+<li>放大后的 SE / t 检验：修正后的推断。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>label</th>
-<th>word_count</th>
-<th>message_length</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>ham</td>
-<td>20</td>
-<td>111</td>
+<td>均值结构正确</td>
+<td>log/logit 尺度线性</td>
+<td>点估计有偏</td>
+<td>残差图</td>
 </tr>
 <tr>
-<td>ham</td>
-<td>6</td>
-<td>29</td>
+<td>方差正比于 V(μ)</td>
+<td>过度离散是常数倍</td>
+<td>φ 修正不充分</td>
+<td>均值-方差图</td>
 </tr>
 <tr>
-<td>spam</td>
-<td>28</td>
-<td>155</td>
-</tr>
-<tr>
-<td>ham</td>
-<td>11</td>
-<td>49</td>
-</tr>
-<tr>
-<td>ham</td>
-<td>13</td>
-<td>61</td>
+<td>独立</td>
+<td>观测独立</td>
+<td>需改用聚类稳健 SE</td>
+<td>看设计</td>
 </tr>
 </tbody>
-</table>
-<p>按标签分组后，<code>word_count</code> 的均值和方差分别为：</p>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>一个 Poisson 模型有 $n-p=15$ 的残差自由度，算得 Pearson $\chi^2=45$。</p>
+<p><strong>一步步计算：</strong></p>
+<ul>
+<li>离散因子：$\hat{\phi}=\dfrac{\text{Pearson }\chi^2}{n-p}=\dfrac{45}{15}=3.0$。因 $\phi=3\gg1$，存在明显过度离散。</li>
+<li>标准误放大倍数：$\sqrt{\phi}=\sqrt{3}\approx1.73$。</li>
+<li>设某系数 Poisson 下 $\hat{\beta}=0.80$、$\mathrm{SE}=0.30$，则 Wald $z=0.80/0.30=2.67$（$p\approx0.008$，显著）。</li>
+<li>拟似然修正：$\mathrm{SE}_{\text{quasi}}=0.30\times1.73=0.52$，$t=0.80/0.52=1.54$（$p\approx0.14$，<strong>不再显著</strong>）。</li>
+</ul>
+<p><strong>结论：</strong> 点估计 $\hat{\beta}=0.80$（率比 $e^{0.80}\approx2.2$）<strong>完全不变</strong>，但把标准误按实际分散放大 1.73 倍后，原本「显著」的结论翻转为「不显著」。这生动说明：<strong>忽视过度离散会制造假阳性</strong>。拟似然以最小假设（只需均值-方差关系）完成了这项修正；若还想要完整分布与 AIC 比较，则改用负二项。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续、分类均可。</li>
+<li>因变量类型：过度离散计数或比例。</li>
+<li>数据结构：每行一观测。</li>
+<li>是否适合高维数据：可，但 $\phi$ 估计需足够自由度。</li>
+<li>是否适合缺失较多数据：需先处理。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：思路可延伸到 GEE 的稳健 SE。</li>
+</ul>
+<h3>5.2 示例表格</h3>
 <table>
 <thead>
 <tr>
-<th>label</th>
-<th>mean(word_count)</th>
-<th>var(word_count)</th>
+<th>量</th>
+<th>值</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>ham</td>
-<td>14.20</td>
-<td>130.52</td>
+<td>Pearson χ²</td>
+<td>45</td>
 </tr>
 <tr>
-<td>spam</td>
-<td>23.85</td>
-<td>33.78</td>
+<td>残差自由度</td>
+<td>15</td>
+</tr>
+<tr>
+<td>φ</td>
+<td>3.0</td>
+</tr>
+<tr>
+<td>SE 放大</td>
+<td>√3≈1.73</td>
 </tr>
 </tbody>
 </table>
-<p>可以看到两组里方差都大于均值，存在过度离散迹象。</p>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：计数或 grouped binary 数据。</li>
-<li>关键变量：均值模型中的协变量、方差函数选择、是否使用稳健方差。</li>
-<li>需要预处理的内容：缺失处理、必要时构造 grouped data。</li>
+<li>输入数据：计数/比例结局 + 协变量。</li>
+<li>关键变量：结局、协变量、方差函数选择。</li>
+<li>需要预处理的内容：先诊断过度离散。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：回归系数、稳健标准误、离散参数估计。</li>
-<li>参数估计：均值模型中的 $\boldsymbol{\beta}$。</li>
-<li>预测结果：均值或率。</li>
-<li>不确定性指标：quasi-SE、sandwich variance、Pearson $\chi^2$。</li>
+<li>模型对象/统计结果：系数（同 GLM）、放大后的 SE、$\phi$。</li>
+<li>参数估计：$\hat{\boldsymbol{\beta}}$ 与 $\hat{\phi}$。</li>
+<li>预测结果：期望计数/比例。</li>
+<li>不确定性指标：修正后的 SE、t 检验、CI。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：Poisson 或 grouped binomial 模型出现过度离散时。</li>
-<li>不适合：完全不知道均值模型是否合理时；极小样本。</li>
-<li>使用前需要特别检查的点：Pearson 统计量、deviance、残差、稳健 SE 与模型化 SE 的差异。</li>
+<li>适合：过度离散计数/比例、不愿承诺具体分布、只想稳健修正 SE。</li>
+<li>不适合：需要 AIC/似然比较（用负二项）、零膨胀（用零膨胀模型）。</li>
+<li>使用前需要特别检查的点：$\phi$ 大小、均值结构是否正确、是否零膨胀。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="quasi-likelihood-and-overdispersion" data-i="0">Python</button><button class="codetab" data-uid="quasi-likelihood-and-overdispersion" data-i="1">R</button></div><div class="codepanel active" data-uid="quasi-likelihood-and-overdispersion" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>statsmodels</code></li>
 </ul>
 <pre><code class="language-python">import statsmodels.api as sm
+import statsmodels.formula.api as smf
 
-# practical option in Python:
-# fit a Poisson GLM and request robust covariance
-model = sm.GLM(y, X, family=sm.families.Poisson())
-result = model.fit(cov_type=&quot;HC0&quot;)
-print(result.summary())
-print(result.pearson_chi2 / result.df_resid)  # rough overdispersion check
+fit = smf.glm(&quot;count ~ x&quot;, data=df, family=sm.families.Poisson()).fit()
+phi = fit.pearson_chi2 / fit.df_resid          # 离散因子
+print(&quot;phi =&quot;, round(phi, 2))
+# 用 scale 放大 SE(等价 quasi-Poisson)
+fit_q = smf.glm(&quot;count ~ x&quot;, data=df,
+                family=sm.families.Poisson()).fit(scale=&quot;X2&quot;)
+print(fit_q.bse / fit.bse)                     # ≈ sqrt(phi)
 </code></pre></div><div class="codepanel" data-uid="quasi-likelihood-and-overdispersion" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>stats</code></li>
 </ul>
-<pre><code class="language-r"># count outcome with overdispersion
-fit_qp &lt;- glm(y ~ x, family = quasipoisson(link = &quot;log&quot;), data = df)
-summary(fit_qp)
-
-# grouped binary with overdispersion
-fit_qb &lt;- glm(cbind(success, failure) ~ x, family = quasibinomial(link = &quot;logit&quot;), data = df)
-summary(fit_qb)
+<pre><code class="language-r">fit &lt;- glm(count ~ x, family = quasipoisson(link = &quot;log&quot;), data = df)
+summary(fit)          # 报告估计的 dispersion(φ) 与放大后的 SE
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：系数通常和对应的 Poisson / Binomial 模型一致，但标准误会改变。</li>
-<li>每个主要参数如何解释：解释方式仍取决于所用 link；变化主要在方差和推断层面。</li>
-<li>临床或医学意义如何表达：可强调“效应方向稳定，但不确定性比 naive GLM 更大”。</li>
-<li>常见误读：Quasi-Likelihood 修正的是推断，不一定改变点估计。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>均值与方差对比图。</li>
-<li>Pearson 残差图。</li>
-<li>观测均值和拟合均值图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图对比短信词数在不同类别下的均值和方差，用来直观说明“过度离散”这一现象。</p>
-<p><img alt="" src="img/quasi_overdispersion_wordcount.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：$\phi$ 是否远大于 1、放大后的 SE/CI/p。</li>
+<li>每个主要参数如何解读：系数同 GLM；$\phi\gt1$ 表示需要修正。</li>
+<li>临床或医学意义如何表达：报告率比/OR 与「已校正过度离散」的区间。</li>
+<li>常见误读：以为拟似然改变了点估计；用 quasi 模型的 AIC 比较（没有真似然）。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>$\phi$ 的量级：$\phi\approx1$ 无需修正；$\gg1$ 明显过度离散。</li>
+<li>均值-方差形态：若方差随 $\mu$ 二次增长，负二项可能比线性的 $\phi\mu$ 更贴合。</li>
+<li>零膨胀：$\phi$ 大也可能源于过多零，需甄别。</li>
+<li>聚类：观测相关时用聚类稳健 SE 或 GEE。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>Pearson 残差 vs 拟合值图（看离散）。</li>
+<li>修正前后 SE/CI 对比。</li>
+<li>均值-方差散点。</li>
+</ul>
+<h3>10.1 图像示例</h3>
+<p>下图展示计数数据的过度离散现象。</p>
+<p><img alt="" src="img/quasi_overdispersion_wordcount.png" /></p></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>比完整分布建模更稳健。</li>
-<li>适合修正过度离散带来的标准误低估。</li>
-<li>是 GEE 的重要理论基础。</li>
+<li>最小假设（只需均值-方差）即修正推断。</li>
+<li>系数不变、只调 SE，简单稳健。</li>
+<li>涵盖 quasi-Poisson / quasi-binomial。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>不提供完整似然，因此 AIC 等似然指标不总能直接用。</li>
-<li>样本太小时稳健方差可能不稳定。</li>
-<li>不能替代对均值模型错误设定的修复。</li>
+<li>无完整似然，不能 AIC/LRT 比较。</li>
+<li>方差为 $\phi V(\mu)$ 的形式可能不贴合。</li>
+<li>不处理零膨胀。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>只看过度离散，不检查均值模型本身是否错。</li>
-<li>把 quasi 模型和负二项回归混为一谈。</li>
-<li>在二元个体级数据上谈“过度离散”而忽略 grouped / clustered 结构。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和负二项回归的区别：负二项回归完整指定了一个更灵活的计数分布；Quasi-Likelihood 只指定前两阶矩。</li>
-<li>和 GEE 的区别：GEE 把 quasi-likelihood 思想扩展到相关数据。</li>
-<li>应该如何选择：独立计数数据出现过度离散时，可优先考虑 quasi-Poisson 或负二项；相关数据则更常转向 GEE。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>修正 Poisson 回归中过度离散导致的 SE 偏小。</li>
-<li>grouped binary 数据中的稳健推断。</li>
-<li>作为 GEE 与 sandwich variance 的理论入门。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-poisson-regression.html" data-cn="Poisson回归" data-en="Poisson Regression" data-def="Poisson 回归用于建模非负整数计数结局，核心思想是在 log 尺度上把期望计数表示成协变量的线性组合。">Poisson回归（Poisson Regression）</a></li>
-<li><a class="xlink" href="m-generalized-linear-model-glm.html" data-cn="广义线性模型" data-en="Generalized Linear Model, GLM" data-def="广义线性模型是把线性模型推广到非高斯结局的一套统一框架，通过“分布族 + 线性预测子 + 连接函数”来建模连续、二分类和计数等不同类型的结局。">广义线性模型（Generalized Linear Model, GLM）</a></li>
-<li><a class="xlink" href="m-generalized-estimating-equations-gee.html" data-cn="广义估计方程" data-en="Generalized Estimating Equations, GEE" data-def="GEE 是把 quasi-likelihood 思想扩展到相关数据的一类边际模型，重点估计总体平均效应，并通过工作相关结构和 sandwich 方差来处理重复测量相关性。">广义估计方程（Generalized Estimating Equations, GEE）</a></li>
+<li>用 quasi 模型做 AIC 比较。</li>
+<li>把过度离散一律归为需 quasi（可能是零膨胀/模型误设）。</li>
+<li>忽略 $\phi\lt1$ 的欠离散情形。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
+<li>和 <strong>Poisson/二项</strong>：拟似然是它们的过度离散修正版。</li>
+<li>和<strong>负二项</strong>：quasi 方差 $\phi\mu$（无似然）；NB 方差 $\mu+\alpha\mu^2$（有似然、可 AIC）。</li>
+<li>和<strong>稳健(三明治)SE</strong>：都不承诺完整分布；三明治更一般、拟似然用参数化方差函数。</li>
+<li>如何选择：只想放大 SE、不比模型 → quasi；要似然/AIC → 负二项。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>过度离散的发病/事件计数的稳健率比推断。</li>
+<li>分组二元数据（比例）的过度离散修正。</li>
+<li>不确定分布时的稳健计数分析。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>拟似然（Quasi-Likelihood）</strong>：只设定均值-方差、不需完整分布的估计框架。</li>
+<li><strong>离散因子（$\phi$）</strong>：观测方差相对基准方差的倍数。</li>
+<li><strong>方差函数（$V(\mu)$）</strong>：分布隐含的均值-方差关系。</li>
+<li><strong>Pearson $\chi^2$</strong>：Pearson 残差平方和，用于估 $\phi$。</li>
+<li><strong>欠离散（Underdispersion）</strong>：$\phi\lt1$，方差小于预期。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-poisson-regression.html" data-cn="Poisson回归" data-en="Poisson Regression" data-def="Poisson 回归对「事件发生的次数」建模：用 log 连接把「平均计数」连到协变量的线性组合，系数取指数后就是率比（某因素让事件发生率变为几倍）。">Poisson回归（Poisson Regression）</a></li>
+<li><a class="xlink" href="m-negative-binomial-regression.html" data-cn="负二项回归" data-en="Negative Binomial Regression" data-def="负二项回归是 Poisson 回归的「加宽版」：它多带一个离散参数，允许方差大于均值，从而正确处理真实计数里普遍存在的「过度离散」。">负二项回归（Negative Binomial Regression）</a></li>
+<li><a class="xlink" href="m-generalized-estimating-equations-gee.html" data-cn="广义估计方程" data-en="Generalized Estimating Equations, GEE" data-def="GEE 是把 quasi-likelihood 思想扩展到相关数据的一类边际模型，重点估计总体平均效应，并通过工作相关结构和 sandwich 方差来处理重复测量相关性。">广义估计方程（Generalized Estimating Equations, GEE）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Wedderburn RWM. Quasi-likelihood functions, generalized linear models, and the Gauss-Newton method. <em>Biometrika</em>. 1974;61(3):439-447.</li>
 <li>McCullagh P, Nelder JA. <em>Generalized Linear Models</em>. 2nd ed. Chapman &amp; Hall; 1989.</li>
-<li>statsmodels Developers. <code>statsmodels.genmod.generalized_linear_model.GLM</code>. statsmodels API Reference. <a href="https://www.statsmodels.org/stable/generated/statsmodels.genmod.generalized_linear_model.GLM.html">https://www.statsmodels.org/stable/generated/statsmodels.genmod.generalized_linear_model.GLM.html</a> （访问日期：2026-07-02）</li>
-<li>R Core Team. <code>glm</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/glm.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/glm.html</a> （访问日期：2026-07-02）</li>
+<li>Ver Hoef JM, Boveng PL. Quasi-Poisson vs. negative binomial regression. <em>Ecology</em>. 2007;88(11):2766-2772.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-poisson-regression.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">Poisson回归</div></a><a class="pg pg-next" href="m-polynomial-regression.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">多项式回归</div></a></div>

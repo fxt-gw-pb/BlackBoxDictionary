@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -47,218 +47,274 @@
       <div class="detail-en">Poisson Regression</div>
       <div class="detail-meta">
         <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
-        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
-        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 回归分析 / 计数数据 / GLM</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 计数数据 / GLM / 率比</b></span>
       </div>
     </div>
     <div class="intro-note"><h1>Poisson回归（Poisson Regression）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>Poisson 回归用于建模非负整数计数结局，核心思想是在 log 尺度上把期望计数表示成协变量的线性组合。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>Poisson 回归对「事件发生的次数」建模：用 log 连接把「平均计数」连到协变量的线性组合，系数取指数后就是<strong>率比</strong>（某因素让事件发生率变为几倍）。</p>
+<h3>1.2 定义</h3>
+<p>Poisson 回归是结局为计数（非负整数）的 GLM，假设结局服从泊松分布、用对数连接。配合 offset 还能建模「率」（单位人时的事件数）。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：哪些因素会影响某类事件“发生多少次”。</li>
-<li>适用任务：计数结局建模、率建模、带 offset 的发生率建模。</li>
-<li>常见医学场景：住院次数、随访期间事件次数、某类短信词数、病房感染事件率。</li>
+<li>研究问题：哪些因素影响某事件的发生次数或发生率？</li>
+<li>适用任务：计数/率结局的关联分析与预测。</li>
+<li>常见医学场景：一年内住院/发作次数、每千人年的发病率、单位随访时间内的事件数。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>Poisson 回归不是在原始计数上加减，而是在 log 尺度上建模，因此协变量通常对应“计数乘上多少倍”的解释，而不是“多几个”。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>计数数据有几个「怪脾气」：只能是 0、1、2…（非负整数）、通常右偏、且「事件多的时候波动也大」。直接用线性回归会预测出负的次数、还假设波动恒定，全错。Poisson 回归顺着计数的天性来：在 log 尺度上建线性模型，保证预测的平均次数永远为正，并自带「均值越大、方差越大」的特性。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-\begin{aligned}
-Y_i &amp;\sim \mathrm{Poisson}(\mu_i) \\
-\log(\mu_i) &amp;= \mathbf{X}_i^\top \boldsymbol{\beta}
-\end{aligned}
-$$</p>
-<p>若建模率（rate），则常写成：</p>
-<p>$$
-\log(\mu_i) = \log(t_i) + \mathbf{X}_i^\top \boldsymbol{\beta}
-$$</p>
-<p>其中 $\log(t_i)$ 是 offset。</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>计数结局非负、离散、右偏，且方差随均值增大。线性回归的「可取任意实数、方差恒定、正态」假设全部不成立。根本困难是：<strong>如何建模一个只能取非负整数、且波动随水平变化的结局？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>选泊松分布作随机成分（它天生描述「固定时间/空间里稀有事件的计数」），并用 <strong>log 连接</strong> $\log\mu=X\boldsymbol{\beta}$。log 连接一举两得：反连接 $\mu=e^{\eta}$ 保证均值恒正；且系数进入的是「乘法尺度」——$x$ 增 1 使率<strong>乘以</strong> $e^{\beta}$，正好符合「率比」这一流行病学核心量。泊松的「均值=方差」特性还内建了「计数越多越波动」。用 <strong>offset</strong>（把 $\log(\text{暴露时间})$ 作为系数固定为 1 的项）即可从「计数」切换到「率」。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$\mu_i$：第 $i$ 个观测的期望计数。</li>
-<li>$\beta_j$：协变量在 log-mean 尺度上的效应。</li>
-<li>$\exp(\beta_j)$：协变量每增加 1 单位，对期望计数的乘法因子。</li>
-<li>offset：暴露时间、人口规模、观察窗口等已知基准量。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>观测独立。</li>
-<li>结局是计数型非负整数。</li>
-<li>在标准 Poisson 假设下，$\mathrm{Var}(Y_i)=E(Y_i)=\mu_i$。</li>
-<li>log 尺度上的均值模型正确。</li>
+<li>相对<strong>线性回归</strong>：Poisson 不会预测负计数、方差结构正确。</li>
+<li>相对<strong>对计数取对数再线性回归</strong>：Poisson 在均值的 log 尺度建模、能处理零、解释为率比。</li>
+<li>相对<strong>负二项/quasi</strong>：当出现过度离散（方差远大于均值）时，Poisson 会低估 SE，需换负二项或 quasi-Poisson。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>$$
+Y_i\sim\mathrm{Poisson}(\mu_i),\qquad
+\log(\mu_i)=X_i^\top\boldsymbol{\beta}\ (+\ \log t_i)
+$$</p>
+<p>其中 $t_i$ 为暴露时间/人口（offset）。这个式子在说：结局是均值为 $\mu$ 的泊松计数；$\mu$ 的对数是协变量的线性组合；加 $\log t_i$ 就把「计数」变成「率」。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>自变量类型：连续、二分类、多分类都可。</li>
-<li>因变量类型：计数型。</li>
-<li>数据结构：独立样本宽表，或聚合后的计数表。</li>
-<li>是否适合高维数据：可以，但常需正则化或特征筛选。</li>
-<li>是否适合缺失较多数据：需先明确缺失处理策略。</li>
-<li>是否适合删失数据：不适合；删失事件数据应转向生存分析。</li>
-<li>是否适合重复测量数据：普通 Poisson 回归不适合，应考虑 GEE 或 GLMM。</li>
+<li>泊松分布 $P(Y=k)=\dfrac{\mu^k e^{-\mu}}{k!}$，均值与方差都等于 $\mu$（等离散）。</li>
+<li>作为 GLM：随机成分=泊松、连接=log、$\mathrm{Var}(Y)=\mu$。</li>
+<li>参数用最大似然（IRLS）估计。</li>
+<li>offset：率模型 $\log(\mu_i/t_i)=X\beta\Rightarrow\log\mu_i=X\beta+\log t_i$，$\log t_i$ 系数固定为 1。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>为了给计数结局一个简单而直观的示例，下面用短信文本中的 <code>word_count</code>（词数）作为计数型响应，<code>label</code> 作为分组变量：</p>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$\mu_i$：第 $i$ 个观测的期望计数。</li>
+<li>$\beta_j$：log 尺度效应；$\exp(\beta_j)$ = <strong>率比（IRR）</strong>，$x_j$ 增 1 使率变为几倍。</li>
+<li>offset $\log t_i$：把计数标准化为率。</li>
+<li>偏差/自由度：检查过度离散。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>label</th>
-<th>word_count</th>
-<th>message_length</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>ham</td>
-<td>20</td>
-<td>111</td>
+<td>等离散</td>
+<td>方差=均值</td>
+<td>过度离散→SE 过小、假显著</td>
+<td>偏差/自由度、Pearson χ²/df</td>
 </tr>
 <tr>
-<td>ham</td>
-<td>6</td>
-<td>29</td>
+<td>log 线性</td>
+<td>log 率与 X 线性</td>
+<td>效应有偏</td>
+<td>残差图</td>
 </tr>
 <tr>
-<td>spam</td>
-<td>28</td>
-<td>155</td>
+<td>独立</td>
+<td>事件/观测独立</td>
+<td>SE 失真</td>
+<td>看设计；聚集用负二项/GEE</td>
 </tr>
 <tr>
-<td>ham</td>
-<td>11</td>
-<td>49</td>
+<td>无过多零</td>
+<td>零不异常多</td>
+<td>零膨胀→偏差</td>
+<td>零的比例</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>比较两组一年内的发作次数（率）：A 组 100 人年发生 30 次，B 组 100 人年发生 15 次。</p>
+<p><strong>一步步计算：</strong></p>
+<ul>
+<li>两组率：$r_A=30/100=0.30$/人年，$r_B=15/100=0.15$/人年。</li>
+<li>率比：$\mathrm{IRR}=r_A/r_B=0.30/0.15=2.0$。</li>
+<li>在 Poisson 模型 $\log(\mu)=\beta_0+\beta_1\cdot\text{组}$（B 为参照、含 offset $\log(\text{人年})$）中：</li>
+<li>$\beta_0=\log(r_B)=\log(0.15)=-1.90$（参照组的对数率）。</li>
+<li>$\beta_1=\log(\mathrm{IRR})=\log(2.0)=0.69$，故 $\exp(\beta_1)=2.0$，即 A 组事件率是 B 组的 2 倍。</li>
+</ul>
+<p><strong>结论：</strong> 系数指数化恰好还原出率比 2.0——<strong>Poisson 回归把列率表写成了回归形式</strong>，多变量时再推广为「调整其他因素后的率比」。注意这里用了 offset 把「计数」变「率」：若两组人年不同（如 A 组 50 人年 30 次），率会是 0.60、率比变 4.0，直接比「计数 30 vs 15」就会误导。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续、分类均可。</li>
+<li>因变量类型：计数（非负整数）。</li>
+<li>数据结构：每行一个观测 + 计数（+ 暴露量）。</li>
+<li>是否适合高维数据：可结合正则化。</li>
+<li>是否适合缺失较多数据：需先处理。</li>
+<li>是否适合删失数据：率模型经 offset 部分处理随访差异。</li>
+<li>是否适合重复测量数据：不适合；用 Poisson GLMM/GEE。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>组</th>
+<th>事件数</th>
+<th>人年</th>
+<th>率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>30</td>
+<td>100</td>
+<td>0.30</td>
 </tr>
 <tr>
-<td>ham</td>
-<td>13</td>
-<td>61</td>
+<td>B</td>
+<td>15</td>
+<td>100</td>
+<td>0.15</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：计数型结局和协变量。</li>
-<li>关键变量：计数结局、分组变量、连续预测变量、exposure/offset。</li>
-<li>需要预处理的内容：缺失处理、必要时构造 rate 的 offset。</li>
+<li>输入数据：计数结局 + 协变量（+ 暴露量）。</li>
+<li>关键变量：计数、offset（暴露）、协变量。</li>
+<li>需要预处理的内容：构造 offset、检查过度离散与零膨胀。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：系数估计、标准误、deviance、Pearson 统计量。</li>
-<li>参数估计：log-rate 系数或 rate ratio。</li>
-<li>预测结果：期望计数或期望率。</li>
-<li>不确定性指标：标准误、区间估计、稳健方差。</li>
+<li>模型对象/统计结果：系数、SE、偏差、AIC。</li>
+<li>参数估计：$\beta$ 与率比 IRR。</li>
+<li>预测结果：期望计数/率。</li>
+<li>不确定性指标：IRR 的置信区间。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：计数结局、事件率、暴露时间不同的率比较。</li>
-<li>不适合：连续结局、极端过度离散而又不做修正的计数数据。</li>
-<li>使用前需要特别检查的点：是否存在大量 0、是否有过度离散、是否需要 offset。</li>
+<li>适合：计数/率结局、等离散、事件相对稀有。</li>
+<li>不适合：过度离散（用负二项/quasi）、零过多（用零膨胀）、连续/二分类结局。</li>
+<li>使用前需要特别检查的点：过度离散、零膨胀、offset 是否需要。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="poisson-regression" data-i="0">Python</button><button class="codetab" data-uid="poisson-regression" data-i="1">R</button></div><div class="codepanel active" data-uid="poisson-regression" data-i="0"><p>常用包：</p>
 <ul>
-<li><code>scikit-learn</code></li>
 <li><code>statsmodels</code></li>
 </ul>
-<pre><code class="language-python">import pandas as pd
-from sklearn.linear_model import PoissonRegressor
+<pre><code class="language-python">import statsmodels.api as sm
+import statsmodels.formula.api as smf
+import numpy as np
 
-df = pd.read_csv(&quot;spam.csv&quot;, encoding=&quot;ISO-8859-1&quot;)[[&quot;v1&quot;, &quot;v2&quot;]]
-df[&quot;word_count&quot;] = df[&quot;v2&quot;].astype(str).str.split().str.len()
-df[&quot;is_spam&quot;] = (df[&quot;v1&quot;] == &quot;spam&quot;).astype(int)
-
-X = df[[&quot;is_spam&quot;]]
-y = df[&quot;word_count&quot;]
-
-fit = PoissonRegressor(alpha=0, max_iter=1000)
-fit.fit(X, y)
-print(fit.intercept_, fit.coef_)
-print(fit.predict([[0], [1]]))
+# events ~ group, 以 log(人年) 为 offset 建模率
+fit = smf.glm(&quot;events ~ group&quot;, data=df,
+              family=sm.families.Poisson(),
+              offset=np.log(df[&quot;person_years&quot;])).fit()
+print(np.exp(fit.params))       # 率比 IRR
 </code></pre></div><div class="codepanel" data-uid="poisson-regression" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>stats</code></li>
 </ul>
-<pre><code class="language-r">df$word_count &lt;- lengths(strsplit(df$message, &quot; &quot;))
-fit &lt;- glm(word_count ~ label, family = poisson(link = &quot;log&quot;), data = df)
-summary(fit)
-exp(coef(fit))  # rate ratios
+<pre><code class="language-r">fit &lt;- glm(events ~ group + offset(log(person_years)),
+           family = poisson(link = &quot;log&quot;), data = df)
+exp(cbind(IRR = coef(fit), confint(fit)))
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：系数符号、rate ratio、deviance 与过度离散迹象。</li>
-<li>每个主要参数如何解释：若 $\exp(\beta)=1.20$，可解释为协变量增加 1 单位时，期望计数增加 20%。</li>
-<li>临床或医学意义如何表达：更适合解释“发生次数”或“发生率倍数变化”。</li>
-<li>常见误读：Poisson 系数不是均值差；rate ratio 也不是 odds ratio。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>组间均值计数比较图。</li>
-<li>观测均值 vs 拟合均值图。</li>
-<li>rate 或 count 的分组箱线图 / 散点图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图比较不同短信类别下词数的观测均值与 Poisson 模型拟合均值。</p>
-<p><img alt="" src="img/poisson_wordcount_label.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：率比 IRR 及区间、偏差/自由度（过度离散）。</li>
+<li>每个主要参数如何解读：$\exp(\beta)=2$ 即该因素使事件率翻倍。</li>
+<li>临床或医学意义如何表达：报告 IRR 与区间，说明是「率」还是「计数」。</li>
+<li>常见误读：忽视过度离散把窄 SE 当真；不加 offset 直接比不同暴露量下的计数。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>过度离散：Pearson $\chi^2/\text{df}$ 或偏差/df 明显大于 1 → 用 quasi-Poisson（放大 SE）或负二项（建模离散）。</li>
+<li>零膨胀：零远多于泊松预期 → 零膨胀/障碍模型。</li>
+<li>线性：log 尺度部分残差图。</li>
+<li>相关/聚集：用 Poisson GLMM 或带稳健 SE 的 GEE。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>观测 vs 预测计数。</li>
+<li>率随协变量变化曲线。</li>
+<li>IRR 森林图。</li>
+</ul>
+<h3>10.1 图像示例</h3>
+<p>下图展示按类别的计数分布与泊松拟合。</p>
+<p><img alt="" src="img/poisson_wordcount_label.png" /></p></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>对计数结局解释自然。</li>
-<li>可方便扩展到率建模和 offset。</li>
-<li>与 GLM 框架完全兼容。</li>
+<li>天然适配计数/率，系数即率比。</li>
+<li>经 offset 灵活处理暴露差异。</li>
+<li>是计数建模的标准起点。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>标准 Poisson 假设要求均值和方差相等。</li>
-<li>过度离散时标准误会偏小。</li>
-<li>对零膨胀数据不一定合适。</li>
+<li>等离散假设常被违反（过度离散）。</li>
+<li>零过多时失效。</li>
+<li>不处理相关数据。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>把连续变量硬当计数变量。</li>
-<li>忽略过度离散。</li>
-<li>忘记在率模型中加入 exposure offset。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 Logistic 回归的区别：Poisson 建模计数或率，Logistic 建模事件概率。</li>
-<li>和负二项回归的区别：负二项回归额外允许方差大于均值。</li>
-<li>和 Quasi-Likelihood 的区别：Quasi-Likelihood 保持同样的均值模型，但允许更灵活的方差结构。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>建模随访期间住院次数。</li>
-<li>建模不同暴露时间下的事件率。</li>
-<li>描述文本、行为或服务事件的发生频率。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-generalized-linear-model-glm.html" data-cn="广义线性模型" data-en="Generalized Linear Model, GLM" data-def="广义线性模型是把线性模型推广到非高斯结局的一套统一框架，通过“分布族 + 线性预测子 + 连接函数”来建模连续、二分类和计数等不同类型的结局。">广义线性模型（Generalized Linear Model, GLM）</a></li>
-<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
-<li><a class="xlink" href="m-quasi-likelihood-and-overdispersion.html" data-cn="Quasi-Likelihood与过度离散" data-en="Quasi-Likelihood and Overdispersion" data-def="Quasi-Likelihood 是 GLM 的半参数扩展，不要求完整指定响应分布，只需要指定均值模型和方差模型，因此常被用来处理过度离散和稳健方差估计问题。">Quasi-Likelihood与过度离散（Quasi-Likelihood and Overdispersion）</a></li>
+<li>不检查过度离散，SE 过小、结论过度自信。</li>
+<li>忘记 offset，比较不可比的计数。</li>
+<li>零膨胀数据硬套普通泊松。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
+<li>和<strong>负二项回归</strong>：过度离散时用负二项（额外离散参数）。</li>
+<li>和 <strong>quasi-Poisson</strong>：quasi 只放大 SE、不指定完整分布。</li>
+<li>和<strong>零膨胀模型</strong>：零异常多时用 ZIP/ZINB。</li>
+<li>和 <strong>Logistic 回归</strong>：二分类用 Logistic、计数用 Poisson。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>每千人年发病率的危险因素分析。</li>
+<li>随访期内住院/发作次数建模。</li>
+<li>生态学/传染病计数数据分析。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>泊松分布</strong>：稀有事件计数的分布，均值=方差。</li>
+<li><strong>率比（IRR）</strong>：$\exp(\beta)$，事件率的倍数。</li>
+<li><strong>offset</strong>：把计数转为率的暴露项（系数固定为 1）。</li>
+<li><strong>等离散（Equidispersion）</strong>：方差等于均值。</li>
+<li><strong>过度离散</strong>：方差大于均值。</li>
+<li><strong>log 连接</strong>：Poisson 的典范连接。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-generalized-linear-model-glm.html" data-cn="广义线性模型" data-en="Generalized Linear Model, GLM" data-def="GLM 把线性回归推广到「非正态结局」：它不直接对结局本身做线性拟合，而是先用一个连接函数把「结局的期望」变换到实数轴上，再对这个变换后的量做线性回归，并用合适的分布族描述随机波动。">广义线性模型（Generalized Linear Model, GLM）</a></li>
+<li><a class="xlink" href="m-negative-binomial-regression.html" data-cn="负二项回归" data-en="Negative Binomial Regression" data-def="负二项回归是 Poisson 回归的「加宽版」：它多带一个离散参数，允许方差大于均值，从而正确处理真实计数里普遍存在的「过度离散」。">负二项回归（Negative Binomial Regression）</a></li>
+<li><a class="xlink" href="m-quasi-likelihood-and-overdispersion.html" data-cn="Quasi-Likelihood与过度离散" data-en="Quasi-Likelihood and Overdispersion" data-def="拟似然不承诺结局的完整分布，只规定「均值-方差关系」：它用一个离散因子 $\phi$ 把标准误按实际观测到的分散程度放大，从而在过度离散时得到诚实的推断，而系数点估计不变。">Quasi-Likelihood与过度离散（Quasi-Likelihood and Overdispersion）</a></li>
+<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Cameron AC, Trivedi PK. <em>Regression Analysis of Count Data</em>. 2nd ed. Cambridge University Press; 2013.</li>
+<li>McCullagh P, Nelder JA. <em>Generalized Linear Models</em>. 2nd ed. Chapman &amp; Hall; 1989.</li>
 <li>Hilbe JM. <em>Modeling Count Data</em>. Cambridge University Press; 2014.</li>
-<li>scikit-learn Developers. <code>sklearn.linear_model.PoissonRegressor</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.PoissonRegressor.html">https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.PoissonRegressor.html</a> （访问日期：2026-07-02）</li>
-<li>R Core Team. <code>glm</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/glm.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/glm.html</a> （访问日期：2026-07-02）</li>
-<li>Venables WN, Ripley BD. <code>glm.nb</code>. MASS Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/glm.nb.html">https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/glm.nb.html</a> （访问日期：2026-07-02）</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-logistic-regression.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">Logistic回归</div></a><a class="pg pg-next" href="m-quasi-likelihood-and-overdispersion.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">Quasi-Likelihood与过度离散</div></a></div>

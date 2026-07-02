@@ -365,10 +365,10 @@ exp(cbind(OR = coef(fit), confint(fit)))   # OR 及其 95% CI
     </section><section id="sec-15" data-sec="15" class="sec">
       <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-generalized-linear-model-glm.html" data-cn="广义线性模型" data-en="Generalized Linear Model, GLM" data-def="广义线性模型是把线性模型推广到非高斯结局的一套统一框架，通过“分布族 + 线性预测子 + 连接函数”来建模连续、二分类和计数等不同类型的结局。">广义线性模型（Generalized Linear Model, GLM）</a></li>
+<li><a class="xlink" href="m-generalized-linear-model-glm.html" data-cn="广义线性模型" data-en="Generalized Linear Model, GLM" data-def="GLM 把线性回归推广到「非正态结局」：它不直接对结局本身做线性拟合，而是先用一个连接函数把「结局的期望」变换到实数轴上，再对这个变换后的量做线性回归，并用合适的分布族描述随机波动。">广义线性模型（Generalized Linear Model, GLM）</a></li>
 <li><a class="xlink" href="m-multinomial-logistic-regression.html" data-cn="多项Logistic回归" data-en="Multinomial Logistic Regression" data-def="多项 Logistic 回归把二分类 Logistic 推广到三类及以上的无序结局，通过对每个类别相对参考类别建 logit，估计协变量对各类别相对概率的影响。">多项Logistic回归（Multinomial Logistic Regression）</a></li>
 <li><a class="xlink" href="m-ordinal-logistic-regression.html" data-cn="有序Logistic回归" data-en="Ordinal Logistic Regression" data-def="有序 Logistic 回归（比例优势模型）用于结局为有序类别的建模，通过对「累积概率」建 logit，估计协变量如何把个体推向更高等级。">有序Logistic回归（Ordinal Logistic Regression）</a></li>
-<li><a class="xlink" href="m-poisson-regression.html" data-cn="Poisson回归" data-en="Poisson Regression" data-def="Poisson 回归用于建模非负整数计数结局，核心思想是在 log 尺度上把期望计数表示成协变量的线性组合。">Poisson回归（Poisson Regression）</a></li>
+<li><a class="xlink" href="m-poisson-regression.html" data-cn="Poisson回归" data-en="Poisson Regression" data-def="Poisson 回归对「事件发生的次数」建模：用 log 连接把「平均计数」连到协变量的线性组合，系数取指数后就是率比（某因素让事件发生率变为几倍）。">Poisson回归（Poisson Regression）</a></li>
 <li><a class="xlink" href="m-receiver-operating-characteristic-and-auc.html" data-cn="ROC曲线与AUC" data-en="Receiver Operating Characteristic and AUC" data-def="ROC 曲线（受试者工作特征曲线）把一个连续评分或预测概率在所有可能阈值下的敏感度与（1−特异度）连成一条曲线；AUC 是曲线下面积，用一个 0–1 的数概括模型的整体区分能力。">ROC曲线与AUC（Receiver Operating Characteristic and AUC）</a></li>
 </ul></div>
     </section><section id="sec-16" data-sec="16" class="sec">
