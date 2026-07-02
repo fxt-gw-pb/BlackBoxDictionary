@@ -188,8 +188,8 @@ def split_sections(body):
 
 
 def render_impl(content, index, uid):
-    """§5 实现：按 ### 5.x 标签拆分为 Python/R 代码分栏。"""
-    parts = re.split(r"(?m)^###\s+(5\.\d+)\s+(.+?)\s*$", content)
+    """「实现」节：按 ### x.y 语言标签拆分为 Python/R 代码分栏。"""
+    parts = re.split(r"(?m)^###\s+(\d+\.\d+)\s+(.+?)\s*$", content)
     if len(parts) < 4:
         return md_to_html(content, index)
     pre = parts[0].strip()
@@ -391,7 +391,9 @@ def render_detail(c, cats, index):
             f'<span class="toc-num">{num.zfill(2)}</span>'
             f'<span class="toc-title">{html.escape(title)}</span></a>'
         )
-        if num == "5":
+        # 「实现」节按 ### x.y 语言标签拆成 Python/R 代码分栏；按标题识别，
+        # 不再依赖固定的节号，以兼容新旧模板的不同编号。
+        if "实现" in title and re.search(r"(?m)^###\s+\d+\.\d+\s", content):
             inner = render_impl(content, index, c["slug"])
         else:
             inner = md_to_html(content, index)

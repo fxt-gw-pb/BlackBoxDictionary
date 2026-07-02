@@ -213,7 +213,7 @@ pwr.t.test(d = 0.5, sig.level = 0.05, power = 0.8, type = &quot;two.sample&quot;
     </section><section id="sec-9" data-sec="9" class="sec">
       <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和具体检验（如 <a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="两独立样本 t 检验用于比较两个独立组的连续型结局均值是否存在差异。医学研究里最常见的是标准 t 检验和更稳健的 Welch t 检验。">两独立样本t检验（Two-Sample t-Test）</a>）的关系：效能分析在设计阶段服务于将来要做的检验。</li>
+<li>和具体检验（如 <a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="它把「两组均值的差」除以「这个差本身的随机波动（标准误）」，得到一个信噪比 $t$：差异相对波动足够大，就判断两组总体均值真的不同。">两独立样本t检验（Two-Sample t-Test）</a>）的关系：效能分析在设计阶段服务于将来要做的检验。</li>
 <li>和 <a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 是一种从原始样本中“有放回重抽样”的方法，用来近似统计量的抽样分布，从而估计标准误、方差和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a> 的关系：复杂设计可用模拟（含 bootstrap/蒙特卡洛）估计把握度。</li>
 <li>和 <a class="xlink" href="m-multiple-testing-and-error-rate-control.html" data-cn="多重检验与错误率控制" data-en="Multiple Testing and Error Rate Control" data-def="多重检验与错误率控制关注的是：当同时进行很多次假设检验时，如何控制整体假阳性风险或错误发现比例。">多重检验与错误率控制（Multiple Testing and Error Rate Control）</a> 的关系：多重终点会改变有效 $\alpha$，需在样本量中体现。</li>
 </ul></div>
@@ -227,7 +227,7 @@ pwr.t.test(d = 0.5, sig.level = 0.05, power = 0.8, type = &quot;two.sample&quot;
     </section><section id="sec-11" data-sec="11" class="sec">
       <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="两独立样本 t 检验用于比较两个独立组的连续型结局均值是否存在差异。医学研究里最常见的是标准 t 检验和更稳健的 Welch t 检验。">两独立样本t检验（Two-Sample t-Test）</a></li>
+<li><a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="它把「两组均值的差」除以「这个差本身的随机波动（标准误）」，得到一个信噪比 $t$：差异相对波动足够大，就判断两组总体均值真的不同。">两独立样本t检验（Two-Sample t-Test）</a></li>
 <li><a class="xlink" href="m-log-rank-test.html" data-cn="Log-rank检验" data-en="Log-rank Test" data-def="Log-rank 检验是比较两组或多组生存曲线是否存在统计学差异的最常用非参数检验。">Log-rank检验（Log-rank Test）</a></li>
 <li><a class="xlink" href="m-multiple-testing-and-error-rate-control.html" data-cn="多重检验与错误率控制" data-en="Multiple Testing and Error Rate Control" data-def="多重检验与错误率控制关注的是：当同时进行很多次假设检验时，如何控制整体假阳性风险或错误发现比例。">多重检验与错误率控制（Multiple Testing and Error Rate Control）</a></li>
 </ul></div>

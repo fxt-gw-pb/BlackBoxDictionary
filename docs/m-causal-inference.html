@@ -289,7 +289,7 @@ summary(fit)
     </section><section id="sec-9" data-sec="9" class="sec">
       <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归是最经典的二分类结局回归模型，用 logit 连接函数把事件概率映射到线性预测子上，从而估计协变量与事件发生 odds 的关系。">Logistic回归（Logistic Regression）</a> 的区别：Logistic 回归可用于结局建模或倾向评分估计，但因果推断还需要识别假设和可比性检查。</li>
+<li>和 <a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a> 的区别：Logistic 回归可用于结局建模或倾向评分估计，但因果推断还需要识别假设和可比性检查。</li>
 <li>和 <a class="xlink" href="m-conditional-logistic-regression.html" data-cn="条件Logistic回归" data-en="Conditional Logistic Regression" data-def="条件 Logistic 回归用于分析匹配设计中的二元结局，通过对匹配组进行条件化来消去组特异截距，从而估计暴露效应。">条件Logistic回归（Conditional Logistic Regression）</a> 的区别：条件 Logistic 回归处理匹配数据关联分析，因果推断关注处理效应识别与估计。</li>
 <li>和 <a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 比例风险模型是最常用的生存回归模型，在不指定基线风险函数具体形式的情况下，估计协变量对危险率的相对影响。">Cox比例风险模型（Cox Proportional Hazards Model）</a> 的区别：Cox 模型用于时间到事件结局建模，因果问题还需处理混杂、删失和目标效应。</li>
 </ul></div>
@@ -304,7 +304,7 @@ summary(fit)
       <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
       <div class="sec-body"><ul>
 <li><a class="xlink" href="m-propensity-score-matching.html" data-cn="倾向评分匹配" data-en="Propensity Score Matching" data-def="倾向评分匹配先估计每个个体接受处理的条件概率（倾向评分），再把处理组个体与倾向评分相近的对照组个体配对，从而在已测混杂上构造可比的两组，估计处理效应。">倾向评分匹配（Propensity Score Matching）</a></li>
-<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归是最经典的二分类结局回归模型，用 logit 连接函数把事件概率映射到线性预测子上，从而估计协变量与事件发生 odds 的关系。">Logistic回归（Logistic Regression）</a></li>
+<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
 <li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 比例风险模型是最常用的生存回归模型，在不指定基线风险函数具体形式的情况下，估计协变量对危险率的相对影响。">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
 <li><a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 是一种从原始样本中“有放回重抽样”的方法，用来近似统计量的抽样分布，从而估计标准误、方差和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a></li>
 </ul></div>

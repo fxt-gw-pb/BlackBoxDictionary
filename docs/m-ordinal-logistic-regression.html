@@ -217,7 +217,7 @@ exp(cbind(OR = coef(fit), confint(fit)))   # 累积 OR
     </section><section id="sec-9" data-sec="9" class="sec">
       <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归是最经典的二分类结局回归模型，用 logit 连接函数把事件概率映射到线性预测子上，从而估计协变量与事件发生 odds 的关系。">Logistic回归（Logistic Regression）</a> 的区别：后者用于二分类，前者用于有序多分类。</li>
+<li>和 <a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a> 的区别：后者用于二分类，前者用于有序多分类。</li>
 <li>和多项 Logistic 回归的区别：多项 Logistic 不假设顺序、参数更多；有序模型利用顺序更简洁。</li>
 <li>和 <a class="xlink" href="m-generalized-linear-model-glm.html" data-cn="广义线性模型" data-en="Generalized Linear Model, GLM" data-def="广义线性模型是把线性模型推广到非高斯结局的一套统一框架，通过“分布族 + 线性预测子 + 连接函数”来建模连续、二分类和计数等不同类型的结局。">广义线性模型（Generalized Linear Model, GLM）</a> 的关系：属累积 link 的 GLM 扩展。</li>
 </ul></div>
@@ -231,7 +231,7 @@ exp(cbind(OR = coef(fit), confint(fit)))   # 累积 OR
     </section><section id="sec-11" data-sec="11" class="sec">
       <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归是最经典的二分类结局回归模型，用 logit 连接函数把事件概率映射到线性预测子上，从而估计协变量与事件发生 odds 的关系。">Logistic回归（Logistic Regression）</a></li>
+<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
 <li><a class="xlink" href="m-generalized-linear-model-glm.html" data-cn="广义线性模型" data-en="Generalized Linear Model, GLM" data-def="广义线性模型是把线性模型推广到非高斯结局的一套统一框架，通过“分布族 + 线性预测子 + 连接函数”来建模连续、二分类和计数等不同类型的结局。">广义线性模型（Generalized Linear Model, GLM）</a></li>
 <li><a class="xlink" href="m-multinomial-logistic-regression.html" data-cn="多项Logistic回归" data-en="Multinomial Logistic Regression" data-def="多项 Logistic 回归把二分类 Logistic 推广到三类及以上的无序结局，通过对每个类别相对参考类别建 logit，估计协变量对各类别相对概率的影响。">多项Logistic回归（Multinomial Logistic Regression）</a></li>
 </ul></div>

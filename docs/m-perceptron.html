@@ -237,7 +237,7 @@ pred = model.predict(X)
     </section><section id="sec-9" data-sec="9" class="sec">
       <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归是最经典的二分类结局回归模型，用 logit 连接函数把事件概率映射到线性预测子上，从而估计协变量与事件发生 odds 的关系。">Logistic回归（Logistic Regression）</a> 的区别：Logistic 回归输出概率并通过似然估计训练，感知机更强调误分类驱动的更新。</li>
+<li>和 <a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a> 的区别：Logistic 回归输出概率并通过似然估计训练，感知机更强调误分类驱动的更新。</li>
 <li>和 <a class="xlink" href="m-support-vector-machine-svm.html" data-cn="支持向量机" data-en="Support Vector Machine, SVM" data-def="支持向量机是一类通过最大化分类间隔来学习判别边界的监督学习方法。它最经典的用途是二分类，也可以扩展到多分类和非线性分类。">支持向量机（Support Vector Machine, SVM）</a> 的区别：SVM 追求最大间隔，感知机只要求分开样本，不控制边界间隔。</li>
 <li>和 <a class="xlink" href="m-multilayer-perceptron-classifier-mlp.html" data-cn="多层感知机分类器" data-en="Multilayer Perceptron Classifier, MLP" data-def="多层感知机分类器是一类前馈神经网络模型。它通过若干隐藏层和非线性激活函数，把输入特征映射到输出类别概率，适合学习复杂的非线性判别边界。">多层感知机分类器（Multilayer Perceptron Classifier, MLP）</a> 的区别：感知机是单层线性判别器，MLP 通过隐藏层学习非线性映射。</li>
 </ul></div>
@@ -251,7 +251,7 @@ pred = model.predict(X)
     </section><section id="sec-11" data-sec="11" class="sec">
       <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归是最经典的二分类结局回归模型，用 logit 连接函数把事件概率映射到线性预测子上，从而估计协变量与事件发生 odds 的关系。">Logistic回归（Logistic Regression）</a></li>
+<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
 <li><a class="xlink" href="m-support-vector-machine-svm.html" data-cn="支持向量机" data-en="Support Vector Machine, SVM" data-def="支持向量机是一类通过最大化分类间隔来学习判别边界的监督学习方法。它最经典的用途是二分类，也可以扩展到多分类和非线性分类。">支持向量机（Support Vector Machine, SVM）</a></li>
 <li><a class="xlink" href="m-artificial-neural-network-ann.html" data-cn="人工神经网络" data-en="Artificial Neural Network, ANN" data-def="人工神经网络是由多层神经元节点组成的一类函数逼近模型。它通过权重、偏置和非线性激活函数，把输入数据映射到分类、回归或表征学习目标上。">人工神经网络（Artificial Neural Network, ANN）</a></li>
 <li><a class="xlink" href="m-multilayer-perceptron-classifier-mlp.html" data-cn="多层感知机分类器" data-en="Multilayer Perceptron Classifier, MLP" data-def="多层感知机分类器是一类前馈神经网络模型。它通过若干隐藏层和非线性激活函数，把输入特征映射到输出类别概率，适合学习复杂的非线性判别边界。">多层感知机分类器（Multilayer Perceptron Classifier, MLP）</a></li>

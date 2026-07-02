@@ -267,7 +267,7 @@ pred &lt;- predict(fit, newdata = df_test, type = &quot;raw&quot;)
       <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
       <div class="sec-body"><ul>
 <li><a class="xlink" href="m-bayesian-regression.html" data-cn="贝叶斯回归" data-en="Bayesian Regression" data-def="贝叶斯回归是一类把回归参数本身视为随机变量、通过先验分布和观测数据共同得到后验分布的回归方法。">贝叶斯回归（Bayesian Regression）</a></li>
-<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归是最经典的二分类结局回归模型，用 logit 连接函数把事件概率映射到线性预测子上，从而估计协变量与事件发生 odds 的关系。">Logistic回归（Logistic Regression）</a></li>
+<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
 <li><a class="xlink" href="m-k-nearest-neighbors-knn.html" data-cn="K近邻算法" data-en="K-Nearest Neighbors, KNN" data-def="K 近邻算法是一类基于实例的非参数方法。它不显式拟合一个全局模型，而是在预测时直接寻找距离目标样本最近的 $K$ 个训练样本，并用这些近邻的标签做多数投票或平均。">K近邻算法（K-Nearest Neighbors, KNN）</a></li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
