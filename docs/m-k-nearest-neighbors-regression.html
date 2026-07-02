@@ -241,7 +241,7 @@ pred &lt;- knn.reg(train = X_train, test = X_test, y = y_train, k = 12)$pred
       <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
       <div class="sec-body"><ul>
 <li><a class="xlink" href="m-k-nearest-neighbors-knn.html" data-cn="K近邻算法" data-en="K-Nearest Neighbors, KNN" data-def="K 近邻算法是一类基于实例的非参数方法。它不显式拟合一个全局模型，而是在预测时直接寻找距离目标样本最近的 $K$ 个训练样本，并用这些近邻的标签做多数投票或平均。">K近邻算法（K-Nearest Neighbors, KNN）</a></li>
-<li><a class="xlink" href="m-locally-weighted-regression.html" data-cn="局部加权回归" data-en="Locally Weighted Regression" data-def="局部加权回归是一种在每个预测点附近单独拟合局部模型的非参数回归方法，距离预测点越近的样本权重越大。">局部加权回归（Locally Weighted Regression）</a></li>
+<li><a class="xlink" href="m-locally-weighted-regression.html" data-cn="局部加权回归" data-en="Locally Weighted Regression" data-def="局部加权回归不去拟合一条全局曲线，而是「走到哪拟合到哪」：在每个查询点附近，只用它的近邻、按远近加权做一个小小的线性回归，把这些局部拟合值串起来，就得到一条自动贴合数据形状的光滑曲线。">局部加权回归（Locally Weighted Regression）</a></li>
 <li><a class="xlink" href="m-decision-tree-regression.html" data-cn="决策树回归" data-en="Decision Tree Regression" data-def="决策树回归是一种通过递归划分特征空间，把连续结局映射到一系列区域均值上的非参数回归方法。">决策树回归（Decision Tree Regression）</a></li>
 <li><a class="xlink" href="m-support-vector-regression-svr.html" data-cn="支持向量回归" data-en="Support Vector Regression, SVR" data-def="支持向量回归是支持向量机在回归问题中的扩展，它通过引入 $\epsilon$-不敏感损失函数，在允许一定误差带的同时寻找最平滑的回归函数。">支持向量回归（Support Vector Regression, SVR）</a></li>
 </ul></div>

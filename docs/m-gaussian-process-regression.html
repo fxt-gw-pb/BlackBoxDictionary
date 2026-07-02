@@ -235,9 +235,9 @@ pred &lt;- predict(fit, X_test)
     </section><section id="sec-11" data-sec="11" class="sec">
       <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-bayesian-regression.html" data-cn="贝叶斯回归" data-en="Bayesian Regression" data-def="贝叶斯回归是一类把回归参数本身视为随机变量、通过先验分布和观测数据共同得到后验分布的回归方法。">贝叶斯回归（Bayesian Regression）</a></li>
+<li><a class="xlink" href="m-bayesian-regression.html" data-cn="贝叶斯回归" data-en="Bayesian Regression" data-def="贝叶斯回归把回归系数当作有先验分布的随机量，用数据把先验更新成后验分布——输出不再是一个点估计加区间，而是参数与预测的整条概率分布，不确定性天然内建。">贝叶斯回归（Bayesian Regression）</a></li>
 <li><a class="xlink" href="m-support-vector-regression-svr.html" data-cn="支持向量回归" data-en="Support Vector Regression, SVR" data-def="支持向量回归是支持向量机在回归问题中的扩展，它通过引入 $\epsilon$-不敏感损失函数，在允许一定误差带的同时寻找最平滑的回归函数。">支持向量回归（Support Vector Regression, SVR）</a></li>
-<li><a class="xlink" href="m-locally-weighted-regression.html" data-cn="局部加权回归" data-en="Locally Weighted Regression" data-def="局部加权回归是一种在每个预测点附近单独拟合局部模型的非参数回归方法，距离预测点越近的样本权重越大。">局部加权回归（Locally Weighted Regression）</a></li>
+<li><a class="xlink" href="m-locally-weighted-regression.html" data-cn="局部加权回归" data-en="Locally Weighted Regression" data-def="局部加权回归不去拟合一条全局曲线，而是「走到哪拟合到哪」：在每个查询点附近，只用它的近邻、按远近加权做一个小小的线性回归，把这些局部拟合值串起来，就得到一条自动贴合数据形状的光滑曲线。">局部加权回归（Locally Weighted Regression）</a></li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
       <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>

@@ -111,7 +111,7 @@
           <span class="entry-cn">多项式回归</span>
           <span class="entry-en">Polynomial Regression</span>
         </div>
-        <p class="entry-def">多项式回归是在普通线性回归的基础上加入自变量的高次项，从而用一条更灵活的曲线来拟合非线性关系。</p>
+        <p class="entry-def">多项式回归是线性回归最直接的「弯曲」扩展：把 $x,x^2,x^3,\dots$ 当作新的自变量一起塞进线性回归，就能拟合曲线——而模型对系数依然是线性的，仍用普通最小二乘求解。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -124,7 +124,7 @@
           <span class="entry-cn">贝叶斯回归</span>
           <span class="entry-en">Bayesian Regression</span>
         </div>
-        <p class="entry-def">贝叶斯回归是一类把回归参数本身视为随机变量、通过先验分布和观测数据共同得到后验分布的回归方法。</p>
+        <p class="entry-def">贝叶斯回归把回归系数当作有先验分布的随机量，用数据把先验更新成后验分布——输出不再是一个点估计加区间，而是参数与预测的整条概率分布，不确定性天然内建。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -137,7 +137,7 @@
           <span class="entry-cn">局部加权回归</span>
           <span class="entry-en">Locally Weighted Regression</span>
         </div>
-        <p class="entry-def">局部加权回归是一种在每个预测点附近单独拟合局部模型的非参数回归方法，距离预测点越近的样本权重越大。</p>
+        <p class="entry-def">局部加权回归不去拟合一条全局曲线，而是「走到哪拟合到哪」：在每个查询点附近，只用它的近邻、按远近加权做一个小小的线性回归，把这些局部拟合值串起来，就得到一条自动贴合数据形状的光滑曲</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -163,7 +163,7 @@
           <span class="entry-cn">有序Logistic回归</span>
           <span class="entry-en">Ordinal Logistic Regression</span>
         </div>
-        <p class="entry-def">有序 Logistic 回归（比例优势模型）用于结局为有序类别的建模，通过对「累积概率」建 logit，估计协变量如何把个体推向更高等级。</p>
+        <p class="entry-def">有序 Logistic 回归（比例优势模型）对「累积概率」建 logit，并让所有切点共享同一组斜率——于是一个比值比就能概括「协变量把个体推向更高等级」的整体倾向。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -176,7 +176,7 @@
           <span class="entry-cn">限制性立方样条</span>
           <span class="entry-en">Restricted Cubic Splines, RCS</span>
         </div>
-        <p class="entry-def">限制性立方样条是一种把连续协变量展开为若干基函数的建模技术，在结点之间用三次多项式平滑拟合，并强制两端呈线性，从而灵活刻画非线性关系而不过度摆动。</p>
+        <p class="entry-def">限制性立方样条把连续变量切成几段，每段用三次曲线平滑拟合、段与段在结点处光滑衔接，并强制两端呈直线——既能灵活刻画弯曲关系，又不像高次多项式那样在两端狂摆。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -189,7 +189,7 @@
           <span class="entry-cn">多项Logistic回归</span>
           <span class="entry-en">Multinomial Logistic Regression</span>
         </div>
-        <p class="entry-def">多项 Logistic 回归把二分类 Logistic 推广到三类及以上的无序结局，通过对每个类别相对参考类别建 logit，估计协变量对各类别相对概率的影响。</p>
+        <p class="entry-def">多项 Logistic 把二分类 Logistic 推广到三类以上无序结局：选一类作参照，对其余每一类各建一条「该类 vs 参照类」的 logit，用 softmax 保证所有类别</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>

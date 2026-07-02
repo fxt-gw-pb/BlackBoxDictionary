@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -48,202 +48,266 @@
       <div class="detail-meta">
         <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
         <span>难度&nbsp;·&nbsp;<b>basic</b></span>
-        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 回归分析 / 非线性</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 回归分析 / 非线性 / 特征扩展</b></span>
       </div>
     </div>
     <div class="intro-note"><h1>多项式回归（Polynomial Regression）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>多项式回归是在普通线性回归的基础上加入自变量的高次项，从而用一条更灵活的曲线来拟合非线性关系。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>多项式回归是线性回归最直接的「弯曲」扩展：把 $x,x^2,x^3,\dots$ 当作新的自变量一起塞进线性回归，就能拟合曲线——而模型对系数依然是线性的，仍用普通最小二乘求解。</p>
+<h3>1.2 定义</h3>
+<p>多项式回归通过引入自变量的幂次项，用线性回归框架拟合自变量与连续结局之间的非线性关系。它是「对参数线性、对自变量非线性」的模型。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：当变量关系明显不是直线而是弯曲趋势时，如何在仍保持较好可解释性的前提下做回归建模。</li>
-<li>适用任务：平滑非线性关系拟合、低维连续结局预测。</li>
-<li>常见医学场景：剂量-反应曲线、年龄与风险评分的非线性变化、某些生物标志物的 U 型或弯曲关系。</li>
+<li>研究问题：自变量与结局呈曲线关系（U 形、饱和、加速）时如何建模？</li>
+<li>适用任务：连续结局的非线性趋势拟合与预测。</li>
+<li>常见医学场景：年龄与某指标的 U 形关系、剂量-反应的非线性、生长曲线。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>多项式回归本质上还是线性回归，只不过把原始变量扩展成了 <code>x, x^2, x^3 ...</code>。它不是改了“求解方式”，而是改了“输入特征表示”。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>直线只能表达「一路上升」或「一路下降」。但很多关系会拐弯——比如 BMI 与死亡风险是 U 形（太瘦太胖都不好）。多项式回归的窍门是：既然直线不够，就给回归多喂几样「原料」——不只喂 $x$，还喂 $x^2$（让它能弯一次）、$x^3$（能弯两次）。回归照旧是那台线性机器，但有了这些原料，就能画出曲线。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-y = \beta_0 + \beta_1 x + \beta_2 x^2 + \cdots + \beta_d x^d + \epsilon
-$$</p>
-<p>矩阵形式下仍可写作：</p>
-<p>$$
-\mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\epsilon}
-$$</p>
-<p>其中设计矩阵 $\mathbf{X}$ 包含多项式扩展后的列。</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>真实关系常是弯的，直线拟合会系统性地偏（在曲线两端要么高估要么低估）。根本困难是：<strong>如何在不放弃线性回归那套成熟、可解的框架的前提下，拟合弯曲的关系？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>区分两种「线性」：模型对<strong>参数</strong> $\beta$ 线性（可用 OLS），不代表对<strong>自变量</strong> $x$ 线性。把 $x^2,x^3$ 视为新造的特征列，模型 $y=\beta_0+\beta_1 x+\beta_2 x^2+\dots$ 仍是关于 $\beta$ 的线性模型，正规方程照样解。代价是<strong>次数的选择</strong>是一场偏差-方差权衡：次数太低欠拟合（抓不住弯曲），太高过拟合（追噪声、两端剧烈摆动）。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$d$：多项式阶数。</li>
-<li>$\beta_j$：第 $j$ 次项的系数。</li>
-<li>高次项：负责给模型引入弯曲能力。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>结局为连续型。</li>
-<li>非线性关系可以被低到中等阶的多项式近似。</li>
-<li>阶数不能过高，否则容易过拟合和数值不稳定。</li>
+<li>相对<strong>线性回归</strong>：多项式能拟合曲线，是特征扩展后的线性回归。</li>
+<li>相对<strong>限制性立方样条（RCS）</strong>：多项式是<strong>全局</strong>的，高次时两端（外推）会剧烈震荡（龙格现象）；样条<strong>分段局部</strong>、两端线性，更稳。</li>
+<li>相对<strong>局部加权回归（LOWESS）</strong>：LOWESS 完全非参数、更灵活；多项式给出简洁的参数方程。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>$$
+y_i=\beta_0+\beta_1 x_i+\beta_2 x_i^2+\dots+\beta_d x_i^d+\varepsilon_i
+$$</p>
+<p>这个式子在说：把自变量的各次幂作为独立的项加权求和；$d$ 是多项式次数，控制曲线能弯几次。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>自变量类型：一个或少数几个连续变量最合适。</li>
-<li>因变量类型：连续型。</li>
-<li>数据结构：宽表数据，低维连续变量回归。</li>
-<li>是否适合高维数据：不适合默认用于高维。</li>
-<li>是否适合缺失较多数据：需先处理缺失值。</li>
-<li>是否适合删失数据：不适合。</li>
-<li>是否适合重复测量数据：不直接适合。</li>
+<li>构造设计矩阵 $X=[1,x,x^2,\dots,x^d]$，问题化为普通多元线性回归。</li>
+<li>用 OLS 闭式解 $\hat{\boldsymbol{\beta}}=(X^\top X)^{-1}X^\top y$。</li>
+<li>次数 $d$ 用交叉验证或信息准则（AIC）选择；幂次高度共线，宜<strong>中心化/标准化</strong> $x$ 或用正交多项式改善数值稳定。</li>
+<li>次数越高，模型越灵活但方差越大、边界外推越危险（龙格现象）。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>一个典型的一维非线性拟合表格如下：</p>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$d$：多项式次数（关键超参数）。</li>
+<li>$\beta_j$：第 $j$ 次幂项系数；单个系数<strong>无直观意义</strong>，需看整条曲线。</li>
+<li>$R^2$/调整 $R^2$：拟合优度（高次易虚高）。</li>
+<li>交叉验证误差：选次数的依据。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>X</th>
-<th>y</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>0.026</td>
-<td>0.045</td>
+<td>次数合适</td>
+<td>$d$ 匹配真实弯曲</td>
+<td>欠拟合/过拟合</td>
+<td>交叉验证</td>
 </tr>
 <tr>
-<td>1.126</td>
-<td>0.735</td>
+<td>误差同方差正态</td>
+<td>同线性回归</td>
+<td>推断失真</td>
+<td>残差图</td>
 </tr>
 <tr>
-<td>1.392</td>
-<td>0.979</td>
+<td>不外推</td>
+<td>预测在数据范围内</td>
+<td>尾部剧烈发散</td>
+<td>看 x 范围</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>3 个点呈明显 U 形：$x=\{-1,0,1\}$，$y=\{2,1,2\}$。直线拟合会失败（斜率 0、$R^2=0$），二次多项式能完美拟合。</p>
+<p><strong>一步步计算（拟合 $y=\beta_0+\beta_1 x+\beta_2 x^2$）：</strong></p>
+<ul>
+<li>由对称性猜 $\beta_1=0$（数据关于 $x=0$ 对称）。</li>
+<li>在 $x=0$：$y=\beta_0=1$，故 $\beta_0=1$。</li>
+<li>在 $x=1$：$y=\beta_0+\beta_2=2\Rightarrow\beta_2=1$；在 $x=-1$ 校验：$1+0+1=2$ ✓。</li>
+<li>拟合方程：$\hat{y}=1+x^2$，三点全中，$R^2=1$。</li>
+</ul>
+<p><strong>结论：</strong> 同样 3 个点，<strong>直线只能给出一条水平线（完全抓不住 U 形）</strong>，而加入 $x^2$ 后立刻完美拟合——这就是特征扩展的威力。但要警惕另一面：若把次数一路加到很高，模型会穿过每个点却在点与点之间、尤其在数据边界剧烈摆动（龙格现象），对新数据预测极差。所以次数要靠交叉验证节制，且<strong>绝不向数据范围外外推</strong>。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续（做幂次扩展）。</li>
+<li>因变量类型：连续型。</li>
+<li>数据结构：表格。</li>
+<li>是否适合高维数据：多变量高次会维度爆炸，慎用。</li>
+<li>是否适合缺失较多数据：需先处理。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：不适合；用混合模型。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>x</th>
+<th>y</th>
+<th>直线拟合</th>
+<th>二次拟合</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>−1</td>
+<td>2</td>
+<td>1.67</td>
+<td>2</td>
 </tr>
 <tr>
-<td>1.501</td>
-<td>1.123</td>
+<td>0</td>
+<td>1</td>
+<td>1.67</td>
+<td>1</td>
 </tr>
 <tr>
-<td>1.515</td>
-<td>0.756</td>
-</tr>
-<tr>
-<td>2.340</td>
-<td>0.636</td>
+<td>1</td>
+<td>2</td>
+<td>1.67</td>
+<td>2</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：连续型结局和一个或多个连续特征。</li>
-<li>关键变量：多项式阶数 <code>degree</code>。</li>
-<li>需要预处理的内容：特征扩展、必要时标准化、训练测试集划分。</li>
+<li>输入数据：连续自变量 + 结局。</li>
+<li>关键变量：待扩展变量、次数 $d$。</li>
+<li>需要预处理的内容：中心化/标准化、决定次数。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：多项式项系数、最佳阶数、预测曲线。</li>
-<li>参数估计：各阶次项的系数。</li>
-<li>预测结果：连续型预测值和拟合曲线。</li>
-<li>不确定性指标：测试集误差、交叉验证误差、过拟合风险。</li>
+<li>模型对象/统计结果：系数、$R^2$、CV 误差。</li>
+<li>参数估计：$\hat{\boldsymbol{\beta}}$。</li>
+<li>预测结果：拟合曲线与预测。</li>
+<li>不确定性指标：预测区间（边界处很宽）。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：低维、平滑的非线性关系。</li>
-<li>不适合：高维复杂非线性、大样本高噪声且局部结构复杂的场景。</li>
-<li>使用前需要特别检查的点：阶数选择、过拟合、数值稳定性。</li>
+<li>适合：单变量、低次（2–3 次）的平滑弯曲关系。</li>
+<li>不适合：高次外推、复杂局部形状（用样条/LOWESS）、多变量高次。</li>
+<li>使用前需要特别检查的点：次数选择、中心化、不外推。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="polynomial-regression" data-i="0">Python</button><button class="codetab" data-uid="polynomial-regression" data-i="1">R</button></div><div class="codepanel active" data-uid="polynomial-regression" data-i="0"><p>常用包：</p>
 <ul>
+<li><code>numpy</code></li>
 <li><code>scikit-learn</code></li>
 </ul>
-<pre><code class="language-python">from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.linear_model import LinearRegression
-
-fit = make_pipeline(
-    PolynomialFeatures(degree=3, include_bias=False),
-    LinearRegression()
-)
-fit.fit(X_train, y_train)
-y_pred = fit.predict(X_test)
+<pre><code class="language-python">import numpy as np
+x = np.array([-1, 0, 1]); y = np.array([2, 1, 2])
+coef = np.polyfit(x, y, deg=2)      # [1, 0, 1] → 1 + 0*x + 1*x^2
+print(coef)
+print(np.polyval(coef, 0.5))        # 预测 x=0.5
 </code></pre></div><div class="codepanel" data-uid="polynomial-regression" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>stats</code></li>
 </ul>
-<pre><code class="language-r">fit &lt;- lm(y ~ poly(x, degree = 3, raw = TRUE), data = df)
+<pre><code class="language-r">x &lt;- c(-1,0,1); y &lt;- c(2,1,2)
+fit &lt;- lm(y ~ poly(x, 2, raw = TRUE))   # 或 poly(x,2) 正交多项式
 summary(fit)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：曲线形状、预测性能、阶数是否过高。</li>
-<li>每个主要参数如何解释：单个高次项系数通常不如整体曲线形状重要。</li>
-<li>临床或医学意义如何表达：更适合解释“趋势形状”，而不是逐个高次项系数。</li>
-<li>常见误读：高 $R^2$ 不一定是好事，可能只是高阶过拟合。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>原始散点图 + 拟合曲线。</li>
-<li>不同阶数模型对比图。</li>
-<li>残差图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图展示一组非线性数据上的多项式回归拟合结果，体现了它对弯曲趋势的刻画能力。</p>
-<p><img alt="" src="img/polynomial_regression_curve.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：拟合曲线形状、交叉验证误差、是否过拟合。</li>
+<li>每个主要参数如何解读：单系数无意义，看整条曲线与拐点位置。</li>
+<li>临床或医学意义如何表达：描述关系形状（U 形、饱和）与最低/拐点位置。</li>
+<li>常见误读：追求高 $R^2$ 而过拟合；解读单个高次系数；向数据外外推。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>次数选择：用交叉验证/AIC，别只看 $R^2$。</li>
+<li>共线性/数值：中心化或用正交多项式避免高次幂强共线。</li>
+<li>边界与外推：预测尽量落在数据范围内，边界预测区间会很宽。</li>
+<li>与样条对比：若尾部行为怪异，改用 RCS 更稳。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>散点 + 不同次数拟合曲线对比。</li>
+<li>训练/验证误差随次数变化（选次数）。</li>
+<li>拟合曲线 + 预测区间（看边界发散）。</li>
+</ul>
+<h3>10.1 图像示例</h3>
+<p>下图展示多项式拟合的非线性曲线。</p>
+<p><img alt="" src="img/polynomial_regression_curve.png" /></p></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>简单、直观、易解释。</li>
-<li>能处理平滑非线性关系。</li>
-<li>与线性回归求解框架兼容。</li>
+<li>简单，直接扩展线性回归。</li>
+<li>给出简洁的参数化曲线。</li>
+<li>低次时可解释、稳定。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>高阶时容易过拟合。</li>
-<li>数值稳定性会变差。</li>
-<li>对高维问题不友好。</li>
+<li>高次过拟合、边界剧烈摆动（龙格现象）。</li>
+<li>外推极不可靠。</li>
+<li>幂次强共线。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>盲目提高阶数。</li>
-<li>不做验证就只看训练集拟合效果。</li>
-<li>把局部复杂非线性都试图交给多项式处理。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和线性回归的区别：多项式回归通过特征扩展引入非线性。</li>
-<li>和样条回归的区别：多项式回归是全局曲线，样条更适合局部灵活变化。</li>
-<li>和 SVR 的区别：SVR 更适合复杂非线性，但解释性更弱。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>剂量-反应关系拟合。</li>
-<li>年龄与某连续风险指标之间的弯曲关系建模。</li>
-<li>低维连续变量的非线性预测。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a></li>
-<li><a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归是在普通线性回归的损失函数中加入 L2 正则化项的一种方法，用来缓解多重共线性、减少过拟合，并提升模型在新数据上的稳定性。">Ridge回归（Ridge Regression）</a></li>
-<li><a class="xlink" href="m-support-vector-regression-svr.html" data-cn="支持向量回归" data-en="Support Vector Regression, SVR" data-def="支持向量回归是支持向量机在回归问题中的扩展，它通过引入 $\epsilon$-不敏感损失函数，在允许一定误差带的同时寻找最平滑的回归函数。">支持向量回归（Support Vector Regression, SVR）</a></li>
+<li>用高次追高 $R^2$。</li>
+<li>不中心化导致数值不稳。</li>
+<li>向数据范围外预测。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Hastie T, Tibshirani R, Friedman J. <em>The Elements of Statistical Learning</em>. 2nd ed. Springer; 2009.</li>
-<li>scikit-learn Developers. <code>sklearn.preprocessing.PolynomialFeatures</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.PolynomialFeatures.html">https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.PolynomialFeatures.html</a> （访问日期：2026-07-02）</li>
-<li>R Core Team. <code>poly</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/poly.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/poly.html</a> （访问日期：2026-07-02）</li>
+<li>和<strong>线性回归</strong>：多项式是加了幂次特征的线性回归。</li>
+<li>和<strong>限制性立方样条</strong>：样条分段局部、两端线性，比全局多项式稳得多。</li>
+<li>和<strong>局部加权回归</strong>：LOWESS 非参数、更灵活；多项式给参数方程。</li>
+<li>如何选择：轻度弯曲 → 低次多项式；复杂/尾部敏感 → 样条；探索性 → LOWESS。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>年龄/BMI 与结局的 U 形或饱和关系初探。</li>
+<li>剂量-反应的非线性拟合。</li>
+<li>生长/时间趋势的曲线建模。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>次数（Degree, $d$）</strong>：多项式最高幂，控制弯曲能力。</li>
+<li><strong>特征扩展</strong>：用 $x$ 的幂次造新自变量。</li>
+<li><strong>对参数线性</strong>：模型关于系数线性，可用 OLS。</li>
+<li><strong>龙格现象</strong>：高次多项式在边界剧烈震荡。</li>
+<li><strong>过拟合</strong>：过度贴合训练数据、泛化差。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a></li>
+<li><a class="xlink" href="m-restricted-cubic-splines-rcs.html" data-cn="限制性立方样条" data-en="Restricted Cubic Splines, RCS" data-def="限制性立方样条把连续变量切成几段，每段用三次曲线平滑拟合、段与段在结点处光滑衔接，并强制两端呈直线——既能灵活刻画弯曲关系，又不像高次多项式那样在两端狂摆。">限制性立方样条（Restricted Cubic Splines, RCS）</a></li>
+<li><a class="xlink" href="m-locally-weighted-regression.html" data-cn="局部加权回归" data-en="Locally Weighted Regression" data-def="局部加权回归不去拟合一条全局曲线，而是「走到哪拟合到哪」：在每个查询点附近，只用它的近邻、按远近加权做一个小小的线性回归，把这些局部拟合值串起来，就得到一条自动贴合数据形状的光滑曲线。">局部加权回归（Locally Weighted Regression）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Montgomery DC, Peck EA, Vining GG. <em>Introduction to Linear Regression Analysis</em>. 5th ed. Wiley; 2012.</li>
+<li>Harrell FE. <em>Regression Modeling Strategies</em>. 2nd ed. Springer; 2015.</li>
+<li>James G, et al. <em>An Introduction to Statistical Learning</em>. 2nd ed. Springer; 2021.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-quasi-likelihood-and-overdispersion.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">Quasi-Likelihood与过度离散</div></a><a class="pg pg-next" href="m-bayesian-regression.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">贝叶斯回归</div></a></div>
