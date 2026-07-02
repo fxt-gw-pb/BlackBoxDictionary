@@ -5,7 +5,7 @@ aliases: [GLMM, generalized mixed model, "广义线性混合效应模型（Gener
 category: 生存分析与纵向数据
 subcategory: 纵向非高斯结局
 tags: [医学统计, 数据科学, 纵向数据, 混合效应模型, 二分类]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 重复测量二元/计数结局建模
 data_type: [纵向数据, 表格数据]

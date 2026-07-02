@@ -5,7 +5,7 @@ aliases: [McNemar's test, "McNemar检验（McNemar Test）"]
 category: 描述统计与统计推断
 subcategory: 分类数据分析
 tags: [医学统计, 数据科学, 分类数据分析, 配对数据]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 配对分类数据比较
 data_type: [列联表, 配对数据]

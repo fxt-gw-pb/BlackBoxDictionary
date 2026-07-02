@@ -5,7 +5,7 @@ aliases: [GMM, gaussian mixture model, 高斯混合, "高斯混合模型（Gauss
 category: 聚类与无监督学习
 subcategory: 概率聚类
 tags: [医学统计, 数据科学, 聚类, 无监督学习, 概率模型]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 软聚类与密度估计
 data_type: [表格数据]

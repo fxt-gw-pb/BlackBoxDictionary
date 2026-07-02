@@ -5,7 +5,7 @@ aliases: [GPR, gaussian process regression, 高斯过程回归, "高斯过程回
 category: 支持向量机与核方法
 subcategory: 核方法与概率回归
 tags: [医学统计, 数据科学, 高斯过程, 核方法, 贝叶斯方法]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 连续结局非线性概率回归
 data_type: [表格数据]

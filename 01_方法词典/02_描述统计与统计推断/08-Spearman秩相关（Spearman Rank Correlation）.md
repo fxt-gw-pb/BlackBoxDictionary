@@ -5,7 +5,7 @@ aliases: [Spearman correlation, Spearman rho, "Spearman秩相关（Spearman Rank
 category: 描述统计与统计推断
 subcategory: 相关分析
 tags: [医学统计, 数据科学, 非参数统计, 相关分析]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 相关性分析
 data_type: [表格数据]

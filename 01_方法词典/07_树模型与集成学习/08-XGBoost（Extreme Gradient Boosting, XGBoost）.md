@@ -5,7 +5,7 @@ aliases: [xgboost, extreme gradient boosting, "XGBoost（Extreme Gradient Boosti
 category: 树模型与集成学习
 subcategory: Boosting集成
 tags: [医学统计, 数据科学, 集成学习, 提升方法, 树模型]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 高性能梯度提升建模
 data_type: [表格数据]

@@ -5,7 +5,7 @@ aliases: [Bonferroni, "Bonferroni校正（Bonferroni Correction）"]
 category: 模型评估与解释
 subcategory: 多重比较
 tags: [医学统计, 数据科学, 多重检验, FWER]
-status: draft
+status: 已建
 difficulty: basic
 question_type: FWER控制
 data_type: [P值列表]

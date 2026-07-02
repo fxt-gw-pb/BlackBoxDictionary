@@ -5,7 +5,7 @@ aliases: [Bootstrap, 自助法, "Bootstrap重抽样（Bootstrap Resampling）"]
 category: 描述统计与统计推断
 subcategory: 重抽样方法
 tags: [医学统计, 数据科学, 非参数统计, 重抽样]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 区间估计与不确定性评估
 data_type: [表格数据]

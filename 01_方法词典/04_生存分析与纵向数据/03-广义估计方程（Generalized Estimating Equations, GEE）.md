@@ -5,7 +5,7 @@ aliases: [GEE, "广义估计方程（Generalized Estimating Equations, GEE）"]
 category: 生存分析与纵向数据
 subcategory: 纵向边际模型
 tags: [医学统计, 数据科学, 纵向数据, GEE, 稳健方差]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 重复测量边际效应建模
 data_type: [纵向数据, 表格数据]

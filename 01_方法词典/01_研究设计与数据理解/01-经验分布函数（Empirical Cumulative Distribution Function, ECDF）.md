@@ -5,7 +5,7 @@ aliases: [ECDF, 经验CDF, "经验分布函数（Empirical Cumulative Distributi
 category: 研究设计与数据理解
 subcategory: 非参数估计
 tags: [医学统计, 数据科学, 非参数统计, 分布探索]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 分布描述
 data_type: [表格数据, 一维连续数据, 一维离散数据]

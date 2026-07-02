@@ -5,7 +5,7 @@ aliases: [ridge regression, L2 regularization, 岭回归, "Ridge回归（Ridge R
 category: 正则化与变量选择
 subcategory: L2正则化
 tags: [医学统计, 数据科学, 正则化, 回归分析]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 连续结局建模与正则化
 data_type: [表格数据]

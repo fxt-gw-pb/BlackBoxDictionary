@@ -5,7 +5,7 @@ aliases: [KNN, K-nearest neighbors, 最近邻算法, "K近邻算法（K-Nearest 
 category: 分类与判别方法
 subcategory: 基于实例的判别
 tags: [医学统计, 数据科学, 分类, 近邻方法]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 相似样本判别与预测
 data_type: [表格数据]

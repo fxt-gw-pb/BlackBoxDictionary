@@ -5,7 +5,7 @@ aliases: [quasi likelihood, quasipoisson, quasibinomial, "Quasi-Likelihood与过
 category: 回归与广义线性模型
 subcategory: 稳健方差与过度离散
 tags: [医学统计, 数据科学, 回归分析, 过度离散, 稳健方差]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 过度离散修正
 data_type: [表格数据]

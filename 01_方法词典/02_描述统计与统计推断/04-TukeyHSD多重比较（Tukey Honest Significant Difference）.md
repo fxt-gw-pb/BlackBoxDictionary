@@ -5,7 +5,7 @@ aliases: [Tukey HSD, Tukey post hoc test, "TukeyHSD多重比较（Tukey Honest S
 category: 描述统计与统计推断
 subcategory: 多重比较
 tags: [医学统计, 数据科学, 方差分析, 多重比较]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 事后两两比较
 data_type: [表格数据]

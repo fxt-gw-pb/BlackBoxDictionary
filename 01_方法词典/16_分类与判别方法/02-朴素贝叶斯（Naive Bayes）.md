@@ -5,7 +5,7 @@ aliases: [naive bayes, 贝叶斯分类器, "朴素贝叶斯（Naive Bayes）"]
 category: 分类与判别方法
 subcategory: 概率判别
 tags: [医学统计, 数据科学, 分类, 贝叶斯方法]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 概率分类
 data_type: [表格数据, 文本向量]

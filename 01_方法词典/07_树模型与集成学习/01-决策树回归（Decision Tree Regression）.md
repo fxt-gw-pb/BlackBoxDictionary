@@ -5,7 +5,7 @@ aliases: [decision tree regression, 回归树, "决策树回归（Decision Tree 
 category: 树模型与集成学习
 subcategory: 单棵树模型
 tags: [医学统计, 数据科学, 树模型, 回归分析]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 连续结局非参数回归
 data_type: [表格数据]

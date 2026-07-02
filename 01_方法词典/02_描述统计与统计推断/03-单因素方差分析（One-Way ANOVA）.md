@@ -5,7 +5,7 @@ aliases: [one-way ANOVA, 方差分析, "单因素方差分析（One-Way ANOVA）
 category: 描述统计与统计推断
 subcategory: 均值比较
 tags: [医学统计, 数据科学, 假设检验, 方差分析]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 多组均值比较
 data_type: [表格数据]

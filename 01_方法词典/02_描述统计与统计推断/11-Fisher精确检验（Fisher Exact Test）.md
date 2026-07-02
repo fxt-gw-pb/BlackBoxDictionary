@@ -5,7 +5,7 @@ aliases: [Fisher exact test, "Fisher精确检验（Fisher Exact Test）"]
 category: 描述统计与统计推断
 subcategory: 分类数据分析
 tags: [医学统计, 数据科学, 分类数据分析, 假设检验]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 2x2小样本关联分析
 data_type: [列联表, 表格数据]

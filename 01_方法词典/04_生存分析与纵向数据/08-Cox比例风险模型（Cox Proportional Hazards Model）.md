@@ -5,7 +5,7 @@ aliases: [Cox PH model, Cox model, "Cox比例风险模型（Cox Proportional Haz
 category: 生存分析与纵向数据
 subcategory: 生存回归
 tags: [医学统计, 数据科学, 生存分析, Cox模型]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 时间到事件回归建模
 data_type: [生存数据]

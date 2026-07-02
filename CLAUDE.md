@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 这是一个 Obsidian 中文知识库（非代码项目）：「医学统计与数据科学方法字典」。核心产出是 Markdown 方法卡片，把每个统计/机器学习方法的概念、公式、适用场景、Python/R 实现和结果解释放在同一页里。没有构建、测试或 lint 命令；唯一的可执行代码是 `N个数据分析案例/code/` 下的演示脚本和方法卡内嵌的代码示例。
 
+本库是 git 仓库，远程为 `git@github.com:fxt-gw-pb/BlackBoxDictionary.git`（与 GitHub 交互一律用 SSH 地址）。大型原始数据集不入库：实际存放在 `~/Datasets/黑箱字典/dataset/`，库内 `N个数据分析案例/code/dataset` 是指向它的符号链接，已被 .gitignore 排除。
+
 所有内容用中文撰写（方法名、包名、图像文件名保留英文）。README.md 是本项目的权威规范文档，包含完整的编写规范、分类框架和数据资产说明。
 
 ## 目录结构与职责
@@ -16,17 +18,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `02_模板/01-方法卡模板.md` — 方法卡的唯一模板（12 个主标题 + YAML frontmatter），新卡必须从它出发
 - `03_索引/01-方法总索引.md` — 全库进度跟踪表（状态：已建/待写），新增或完成方法卡后必须同步更新
 - `04_示例图像/` — 方法卡配套 PNG 图像，文件名用英文 snake_case（如 `cox_hr_forest.png`）
-- `N个数据分析案例/` — 10 个数据分析案例笔记 + `code/`（脚本 001-010.py）+ `code/dataset/NNN/`（对应数据集）+ Framingham 数据
+- `N个数据分析案例/` — 10 个数据分析案例笔记 + `code/`（脚本 001-010.py）+ `code/dataset`（符号链接 → `~/Datasets/黑箱字典/dataset/NNN/`，见 `代码&数据集.md`）+ Framingham 数据（512K，留在库内）
 
 ## 新增方法卡的工作流
 
 1. 确定所属分类目录，文件名格式为 `NN-中文名（英文名）.md`，NN 为目录内顺序编号
 2. 复制 `02_模板/01-方法卡模板.md`，保留全部 12 个主标题结构和 YAML frontmatter 字段（title、english_name、category、status、python_packages、r_packages、related_methods 等）
-3. 代码示例给 Python 和 R 两个版本，写「最小、清晰、可解释」的演示代码
-4. 配图存入 `04_示例图像/`，在卡内用相对路径引用：`![](../../04_示例图像/xxx.png)`
-5. 相关方法用 Obsidian 双链 `[[方法名]]` 互联
-6. 更新 `03_索引/01-方法总索引.md` 中的对应行（或新增行）
-7. 参考资料只列教材、方法论文和官方文档，不把本地笔记列为正式参考文献
+3. **aliases 必须包含全名**（文件名去掉 `NN-` 前缀，即 `中文名（英文名）`）——全库双链都以这个全名为目标，漏填会让指向该卡的链接全部失效
+4. `status` 词表全库统一：待写（尚无文件，仅索引）→ 草稿 → 已建（内容完整）→ 已校（已复核）；卡片 frontmatter 与索引状态列必须同步更新
+5. 代码示例给 Python 和 R 两个版本，写「最小、清晰、可解释」的演示代码
+6. 配图存入 `04_示例图像/`，在卡内用相对路径引用：`![](../../04_示例图像/xxx.png)`
+7. 相关方法用 Obsidian 双链互联，链接目标统一写全名：`[[中文名（英文名）]]`
+8. 更新 `03_索引/01-方法总索引.md` 中的对应行（或新增行）；「方法」列写成 `[[全名\|短名]]` 形式的可点击链接
+9. 参考资料只列教材、方法论文和官方文档，不把本地笔记列为正式参考文献
 
 ## 演示数据的选用规则
 

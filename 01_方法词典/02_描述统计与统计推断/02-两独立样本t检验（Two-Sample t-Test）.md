@@ -5,7 +5,7 @@ aliases: [independent samples t test, Welch t-test, "两独立样本t检验（Tw
 category: 描述统计与统计推断
 subcategory: 参数检验
 tags: [医学统计, 数据科学, 假设检验, 参数检验]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 两组均值比较
 data_type: [表格数据]

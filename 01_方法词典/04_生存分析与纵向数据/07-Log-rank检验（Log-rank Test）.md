@@ -5,7 +5,7 @@ aliases: [log-rank test, Mantel-Cox test, "Log-rank检验（Log-rank Test）"]
 category: 生存分析与纵向数据
 subcategory: 生存曲线比较
 tags: [医学统计, 数据科学, 生存分析, 假设检验]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 生存曲线比较
 data_type: [生存数据]

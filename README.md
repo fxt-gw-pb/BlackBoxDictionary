@@ -128,7 +128,7 @@
 ├── N个数据分析案例/
 │   ├── 001-*.md
 │   ├── code/
-│   │   └── dataset/
+│   │   └── dataset -> ~/Datasets/黑箱字典/dataset（符号链接，原始数据集在库外，不入 git）
 │   ├── attachments/
 │   └── framingham research/
 ├── 04_示例图像/
@@ -144,6 +144,7 @@
 - 一个方法一篇笔记
 - 同一目录内建议按阅读顺序加前缀编号，文件名建议使用 `NN-中文名（英文名）.md`
 - 首次出现时写全称，后文再用简称
+- **aliases 必须包含全名**：每篇方法卡的 YAML `aliases` 中必须包含「文件名去掉 `NN-` 前缀后的全名」（即 `中文名（英文名）`）。全库卡片之间的双链统一写 `[[中文名（英文名）]]`，靠这个 alias 解析；漏填会导致所有指向该卡的链接失效
 
 例如：
 
@@ -178,10 +179,11 @@
 ---
 title: 方法名
 english_name: English Name
+aliases: ["方法名（English Name）"]
 category: 一级分类
 subcategory: 二级分类
 tags: [医学统计, 数据科学]
-status: draft
+status: 草稿
 difficulty: basic
 question_type: 关联分析
 data_type: [表格数据]
@@ -191,6 +193,17 @@ r_packages: []
 related_methods: []
 ---
 ```
+
+### 状态词表
+
+`status` 字段与 `03_索引/01-方法总索引.md` 中的「状态」列使用同一套词表，两处必须保持一致：
+
+| 状态 | 含义 |
+| --- | --- |
+| 待写 | 已列入计划，尚未建立文件（仅出现在索引中） |
+| 草稿 | 文件已建立，内容未写完 |
+| 已建 | 十二个部分内容完整，未经复核 |
+| 已校 | 内容已复核定稿 |
 
 ## 首批优先建设的方法
 

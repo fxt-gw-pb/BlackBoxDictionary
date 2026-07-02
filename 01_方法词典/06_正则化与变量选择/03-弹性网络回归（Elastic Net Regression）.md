@@ -5,7 +5,7 @@ aliases: [elastic net, elastic net regression, "弹性网络回归（Elastic Net
 category: 正则化与变量选择
 subcategory: L1与L2混合正则化
 tags: [医学统计, 数据科学, 正则化, 变量选择]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 连续结局建模与变量选择
 data_type: [表格数据]

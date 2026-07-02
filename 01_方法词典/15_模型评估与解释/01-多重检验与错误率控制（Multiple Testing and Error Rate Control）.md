@@ -5,7 +5,7 @@ aliases: [multiple testing, FWER, FDR, "多重检验与错误率控制（Multipl
 category: 模型评估与解释
 subcategory: 多重比较
 tags: [医学统计, 数据科学, 多重检验, FWER, FDR]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 假阳性控制
 data_type: [P值列表, 多重检验结果]

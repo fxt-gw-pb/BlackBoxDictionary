@@ -5,7 +5,7 @@ aliases: [AFT, survreg model, "加速失效时间模型（Accelerated Failure Ti
 category: 生存分析与纵向数据
 subcategory: 参数生存回归
 tags: [医学统计, 数据科学, 生存分析, AFT]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 生存时间回归建模
 data_type: [生存数据]

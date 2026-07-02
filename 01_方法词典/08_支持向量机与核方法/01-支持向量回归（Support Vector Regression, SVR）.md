@@ -5,7 +5,7 @@ aliases: [SVR, support vector regression, "支持向量回归（Support Vector R
 category: 支持向量机与核方法
 subcategory: 支持向量回归
 tags: [医学统计, 数据科学, 支持向量机, 回归分析]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 连续结局非线性建模
 data_type: [表格数据]

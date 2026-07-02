@@ -5,7 +5,7 @@ aliases: [GLM, "广义线性模型（Generalized Linear Model, GLM）"]
 category: 回归与广义线性模型
 subcategory: 广义线性模型框架
 tags: [医学统计, 数据科学, 回归分析, 广义线性模型]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 非高斯结局建模
 data_type: [表格数据]

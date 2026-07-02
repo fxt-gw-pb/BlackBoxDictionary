@@ -5,7 +5,7 @@ aliases: [SVM, support vector machine, "支持向量机（Support Vector Machine
 category: 支持向量机与核方法
 subcategory: 间隔最大化分类
 tags: [医学统计, 数据科学, 支持向量机, 分类]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 间隔最大化分类
 data_type: [表格数据]

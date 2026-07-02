@@ -5,7 +5,7 @@ aliases: [ID3, iterative dichotomiser 3, "ID3决策树（ID3 Decision Tree）"]
 category: 树模型与集成学习
 subcategory: 决策树特征选择
 tags: [医学统计, 数据科学, 树模型, 分类]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 离散特征分类规则学习
 data_type: [表格数据]

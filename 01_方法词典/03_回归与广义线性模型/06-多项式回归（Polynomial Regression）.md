@@ -5,7 +5,7 @@ aliases: [polynomial regression, 多项式回归, "多项式回归（Polynomial 
 category: 回归与广义线性模型
 subcategory: 非线性回归扩展
 tags: [医学统计, 数据科学, 回归分析, 非线性]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 连续结局非线性建模
 data_type: [表格数据]

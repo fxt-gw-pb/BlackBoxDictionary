@@ -5,7 +5,7 @@ aliases: [random forest regression, RF regression, "随机森林回归（Random 
 category: 树模型与集成学习
 subcategory: Bagging集成
 tags: [医学统计, 数据科学, 集成学习, 树模型]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 连续结局集成建模
 data_type: [表格数据]

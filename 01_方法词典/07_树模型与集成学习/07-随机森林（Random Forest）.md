@@ -5,7 +5,7 @@ aliases: [random forest, RF, "随机森林（Random Forest）"]
 category: 树模型与集成学习
 subcategory: Bagging集成
 tags: [医学统计, 数据科学, 集成学习, 树模型, 分类]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 非线性分类与回归预测
 data_type: [表格数据]

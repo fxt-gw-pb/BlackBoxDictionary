@@ -5,7 +5,7 @@ aliases: [logistic regression, logit model, "Logistic回归（Logistic Regressio
 category: 回归与广义线性模型
 subcategory: 二分类结局建模
 tags: [医学统计, 数据科学, 回归分析, 二分类, GLM]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 二分类建模
 data_type: [表格数据]

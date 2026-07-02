@@ -5,7 +5,7 @@ aliases: [LMM, linear mixed model, "线性混合效应模型（Linear Mixed-Effe
 category: 生存分析与纵向数据
 subcategory: 纵向连续结局
 tags: [医学统计, 数据科学, 纵向数据, 混合效应模型]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 重复测量连续结局建模
 data_type: [纵向数据, 表格数据]

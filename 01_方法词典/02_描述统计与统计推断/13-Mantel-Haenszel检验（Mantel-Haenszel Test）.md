@@ -5,7 +5,7 @@ aliases: [Cochran-Mantel-Haenszel test, MH test, "Mantel-Haenszel检验（Mantel
 category: 描述统计与统计推断
 subcategory: 分类数据分析
 tags: [医学统计, 数据科学, 分类数据分析, 分层分析]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 分层2x2关联分析
 data_type: [分层列联表, 表格数据]

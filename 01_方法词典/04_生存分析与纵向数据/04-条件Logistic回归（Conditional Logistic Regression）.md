@@ -5,7 +5,7 @@ aliases: [conditional logistic regression, clogit, "条件Logistic回归（Condi
 category: 生存分析与纵向数据
 subcategory: 匹配与成组二元结局
 tags: [医学统计, 数据科学, 匹配设计, Logistic回归]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 匹配数据建模
 data_type: [配对数据, 匹配病例对照数据]

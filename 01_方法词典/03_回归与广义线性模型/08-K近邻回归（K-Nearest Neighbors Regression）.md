@@ -5,7 +5,7 @@ aliases: [KNN regression, kNN regression, "K近邻回归（K-Nearest Neighbors R
 category: 回归与广义线性模型
 subcategory: 基于实例的回归
 tags: [医学统计, 数据科学, 非参数回归, 近邻方法]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 连续结局局部预测
 data_type: [表格数据]

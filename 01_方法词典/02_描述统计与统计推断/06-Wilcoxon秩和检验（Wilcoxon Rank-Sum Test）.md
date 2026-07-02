@@ -5,7 +5,7 @@ aliases: [Mann-Whitney U test, Mann-Whitney检验, "Wilcoxon秩和检验（Wilco
 category: 描述统计与统计推断
 subcategory: 非参数检验
 tags: [医学统计, 数据科学, 非参数统计, 假设检验]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 两独立组位置比较
 data_type: [表格数据]

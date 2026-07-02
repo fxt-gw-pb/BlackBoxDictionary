@@ -5,7 +5,7 @@ aliases: [符号秩检验, paired wilcoxon test, "Wilcoxon符号秩检验（Wilc
 category: 描述统计与统计推断
 subcategory: 非参数检验
 tags: [医学统计, 数据科学, 非参数统计, 假设检验]
-status: draft
+status: 已建
 difficulty: basic
 question_type: 单样本或配对位置比较
 data_type: [表格数据]

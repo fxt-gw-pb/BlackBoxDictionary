@@ -5,7 +5,7 @@ aliases: [bayesian regression, BayesianRidge, "贝叶斯回归（Bayesian Regres
 category: 回归与广义线性模型
 subcategory: 概率回归
 tags: [医学统计, 数据科学, 贝叶斯方法, 回归分析]
-status: draft
+status: 已建
 difficulty: intermediate
 question_type: 连续结局概率回归
 data_type: [表格数据]
