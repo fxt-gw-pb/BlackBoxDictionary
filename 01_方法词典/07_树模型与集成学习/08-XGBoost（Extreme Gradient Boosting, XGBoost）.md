@@ -1,6 +1,7 @@
 ---
 title: XGBoost
 english_name: Extreme Gradient Boosting, XGBoost
+slug: extreme-gradient-boosting-xgboost
 aliases: [xgboost, extreme gradient boosting, "XGBoost（Extreme Gradient Boosting, XGBoost）"]
 category: 树模型与集成学习
 subcategory: Boosting集成
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [二分类, 多分类, 连续型]
 python_packages: [xgboost, scikit-learn]
 r_packages: [xgboost]
-related_methods: [梯度提升回归, LightGBM, 随机森林]
 ---
 
 # XGBoost（Extreme Gradient Boosting, XGBoost）

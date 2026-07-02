@@ -1,6 +1,7 @@
 ---
 title: Logistic回归
 english_name: Logistic Regression
+slug: logistic-regression
 aliases: [logistic regression, logit model, "Logistic回归（Logistic Regression）"]
 category: 回归与广义线性模型
 subcategory: 二分类结局建模
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [二分类]
 python_packages: [scikit-learn, statsmodels]
 r_packages: [stats]
-related_methods: [广义线性模型, Poisson回归, 条件Logistic回归, 广义线性混合效应模型, 广义估计方程]
 ---
 
 # Logistic回归（Logistic Regression）

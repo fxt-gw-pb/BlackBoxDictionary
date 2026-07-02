@@ -1,6 +1,7 @@
 ---
 title: Benjamini-Hochberg程序
 english_name: Benjamini-Hochberg Procedure
+slug: benjamini-hochberg-procedure
 aliases: [BH procedure, FDR control, "Benjamini-Hochberg程序（Benjamini-Hochberg Procedure）"]
 category: 模型评估与解释
 subcategory: 多重比较
@@ -12,7 +13,6 @@ data_type: [P值列表]
 outcome_type: [多重假设检验]
 python_packages: [statsmodels]
 r_packages: [stats]
-related_methods: [Bonferroni校正, Holm程序, 多重检验与错误率控制]
 ---
 
 # Benjamini-Hochberg程序（Benjamini-Hochberg Procedure）

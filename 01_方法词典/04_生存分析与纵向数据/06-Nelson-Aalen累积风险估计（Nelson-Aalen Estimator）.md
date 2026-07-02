@@ -1,6 +1,7 @@
 ---
 title: Nelson-Aalen累积风险估计
 english_name: Nelson-Aalen Estimator
+slug: nelson-aalen-estimator
 aliases: [Nelson-Aalen, cumulative hazard estimator, "Nelson-Aalen累积风险估计（Nelson-Aalen Estimator）"]
 category: 生存分析与纵向数据
 subcategory: 累积风险非参数估计
@@ -12,7 +13,6 @@ data_type: [生存数据]
 outcome_type: [时间到事件]
 python_packages: [lifelines]
 r_packages: [survival]
-related_methods: [Kaplan-Meier生存曲线, Cox比例风险模型]
 ---
 
 # Nelson-Aalen累积风险估计（Nelson-Aalen Estimator）

@@ -1,6 +1,7 @@
 ---
 title: LightGBM
 english_name: Light Gradient Boosting Machine
+slug: light-gradient-boosting-machine
 aliases: [lightgbm, lgbm, "LightGBM（Light Gradient Boosting Machine）"]
 category: 树模型与集成学习
 subcategory: Boosting集成
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [二分类, 多分类, 连续型]
 python_packages: [lightgbm, scikit-learn]
 r_packages: [lightgbm]
-related_methods: [XGBoost, 梯度提升回归, 随机森林]
 ---
 
 # LightGBM（Light Gradient Boosting Machine）

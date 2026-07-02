@@ -1,6 +1,7 @@
 ---
 title: 广义线性模型
 english_name: Generalized Linear Model, GLM
+slug: generalized-linear-model-glm
 aliases: [GLM, "广义线性模型（Generalized Linear Model, GLM）"]
 category: 回归与广义线性模型
 subcategory: 广义线性模型框架
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型, 二分类, 计数型]
 python_packages: [statsmodels]
 r_packages: [stats]
-related_methods: [线性回归, Logistic回归, Poisson回归, Quasi-Likelihood与过度离散]
 ---
 
 # 广义线性模型（Generalized Linear Model, GLM）

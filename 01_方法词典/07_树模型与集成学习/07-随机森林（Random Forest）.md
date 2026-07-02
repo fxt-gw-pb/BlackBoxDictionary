@@ -1,6 +1,7 @@
 ---
 title: 随机森林
 english_name: Random Forest
+slug: random-forest
 aliases: [random forest, RF, "随机森林（Random Forest）"]
 category: 树模型与集成学习
 subcategory: Bagging集成
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [二分类, 多分类, 连续型]
 python_packages: [scikit-learn]
 r_packages: [ranger, randomForest]
-related_methods: [决策树, 随机森林回归, 梯度提升回归]
 ---
 
 # 随机森林（Random Forest）

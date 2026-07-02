@@ -1,6 +1,7 @@
 ---
 title: McNemar检验
 english_name: McNemar Test
+slug: mcnemar-test
 aliases: [McNemar's test, "McNemar检验（McNemar Test）"]
 category: 描述统计与统计推断
 subcategory: 分类数据分析
@@ -12,7 +13,6 @@ data_type: [列联表, 配对数据]
 outcome_type: [二分类]
 python_packages: [statsmodels]
 r_packages: [stats]
-related_methods: [Pearson卡方独立性检验, Fisher精确检验, Mantel-Haenszel检验]
 ---
 
 # McNemar检验（McNemar Test）

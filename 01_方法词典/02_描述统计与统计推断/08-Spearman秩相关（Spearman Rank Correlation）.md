@@ -1,6 +1,7 @@
 ---
 title: Spearman秩相关
 english_name: Spearman Rank Correlation
+slug: spearman-rank-correlation
 aliases: [Spearman correlation, Spearman rho, "Spearman秩相关（Spearman Rank Correlation）"]
 category: 描述统计与统计推断
 subcategory: 相关分析
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型, 等级型]
 python_packages: [scipy]
 r_packages: [stats]
-related_methods: [Pearson相关, Kendall秩相关, Bootstrap]
 ---
 
 # Spearman秩相关（Spearman Rank Correlation）
@@ -188,6 +188,8 @@ cor.test(x, y, method = "spearman")
 - [[Bootstrap重抽样（Bootstrap Resampling）]]
 - [[单样本t检验（One-Sample t-Test）]]
 - [[线性回归（Linear Regression）]]
+- [[Pearson相关（Pearson Correlation）]]
+- [[Kendall秩相关（Kendall Rank Correlation）]]
 
 ## 12. 参考资料
 

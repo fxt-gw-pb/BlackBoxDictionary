@@ -1,6 +1,7 @@
 ---
 title: Mantel-Haenszel检验
 english_name: Mantel-Haenszel Test
+slug: mantel-haenszel-test
 aliases: [Cochran-Mantel-Haenszel test, MH test, "Mantel-Haenszel检验（Mantel-Haenszel Test）"]
 category: 描述统计与统计推断
 subcategory: 分类数据分析
@@ -12,7 +13,6 @@ data_type: [分层列联表, 表格数据]
 outcome_type: [二分类]
 python_packages: [statsmodels]
 r_packages: [stats]
-related_methods: [Pearson卡方独立性检验, Fisher精确检验, 线性回归]
 ---
 
 # Mantel-Haenszel检验（Mantel-Haenszel Test）

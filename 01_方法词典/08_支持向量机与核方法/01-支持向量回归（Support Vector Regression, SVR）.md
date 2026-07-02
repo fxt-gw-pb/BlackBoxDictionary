@@ -1,6 +1,7 @@
 ---
 title: 支持向量回归
 english_name: Support Vector Regression, SVR
+slug: support-vector-regression-svr
 aliases: [SVR, support vector regression, "支持向量回归（Support Vector Regression, SVR）"]
 category: 支持向量机与核方法
 subcategory: 支持向量回归
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [scikit-learn]
 r_packages: [e1071]
-related_methods: [支持向量机, 多项式回归, Ridge回归, 线性回归]
 ---
 
 # 支持向量回归（Support Vector Regression, SVR）
@@ -173,6 +173,10 @@ pred <- predict(fit, newdata = df_test)
 下图展示 SVR 在一组非线性数据上的拟合曲线，体现了核方法对复杂曲线关系的刻画能力。
 
 ![](../../04_示例图像/svr_nonlinear_curve.png)
+
+下图为 SVR 在房价数据上的真实值 vs 预测值散点图，点越贴近对角线说明预测越准确。
+
+![](../../04_示例图像/svr_actual_vs_pred_houseprice.png)
 
 ## 8. 优势、局限与常见坑
 

@@ -1,6 +1,7 @@
 ---
 title: 两独立样本t检验
 english_name: Two-Sample t-Test
+slug: two-sample-t-test
 aliases: [independent samples t test, Welch t-test, "两独立样本t检验（Two-Sample t-Test）"]
 category: 描述统计与统计推断
 subcategory: 参数检验
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [scipy]
 r_packages: [stats]
-related_methods: [单样本t检验, Wilcoxon秩和检验, 单因素方差分析]
 ---
 
 # 两独立样本t检验（Two-Sample t-Test）

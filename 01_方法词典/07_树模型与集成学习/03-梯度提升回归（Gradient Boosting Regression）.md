@@ -1,6 +1,7 @@
 ---
 title: 梯度提升回归
 english_name: Gradient Boosting Regression
+slug: gradient-boosting-regression
 aliases: [GBDT, gradient boosting regression, 梯度提升回归, "梯度提升回归（Gradient Boosting Regression）"]
 category: 树模型与集成学习
 subcategory: Boosting集成
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [scikit-learn]
 r_packages: [gbm]
-related_methods: [XGBoost, LightGBM, 随机森林回归, 决策树回归]
 ---
 
 # 梯度提升回归（Gradient Boosting Regression）

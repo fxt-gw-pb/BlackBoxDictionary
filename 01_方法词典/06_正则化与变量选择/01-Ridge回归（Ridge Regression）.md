@@ -1,6 +1,7 @@
 ---
 title: Ridge回归
 english_name: Ridge Regression
+slug: ridge-regression
 aliases: [ridge regression, L2 regularization, 岭回归, "Ridge回归（Ridge Regression）"]
 category: 正则化与变量选择
 subcategory: L2正则化
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [scikit-learn]
 r_packages: [glmnet]
-related_methods: [线性回归, Lasso回归, 弹性网络回归]
 ---
 
 # Ridge回归（Ridge Regression）

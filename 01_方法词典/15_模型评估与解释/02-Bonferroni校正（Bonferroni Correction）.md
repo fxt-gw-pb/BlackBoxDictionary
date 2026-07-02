@@ -1,6 +1,7 @@
 ---
 title: Bonferroni校正
 english_name: Bonferroni Correction
+slug: bonferroni-correction
 aliases: [Bonferroni, "Bonferroni校正（Bonferroni Correction）"]
 category: 模型评估与解释
 subcategory: 多重比较
@@ -12,7 +13,6 @@ data_type: [P值列表]
 outcome_type: [多重假设检验]
 python_packages: [statsmodels]
 r_packages: [stats]
-related_methods: [多重检验与错误率控制, Holm程序, Benjamini-Hochberg程序]
 ---
 
 # Bonferroni校正（Bonferroni Correction）

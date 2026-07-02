@@ -1,6 +1,7 @@
 ---
 title: 高斯过程回归
 english_name: Gaussian Process Regression
+slug: gaussian-process-regression
 aliases: [GPR, gaussian process regression, 高斯过程回归, "高斯过程回归（Gaussian Process Regression）"]
 category: 支持向量机与核方法
 subcategory: 核方法与概率回归
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [scikit-learn]
 r_packages: [kernlab]
-related_methods: [贝叶斯回归, 支持向量回归, 局部加权回归]
 ---
 
 # 高斯过程回归（Gaussian Process Regression）

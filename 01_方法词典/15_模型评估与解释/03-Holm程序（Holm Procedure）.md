@@ -1,6 +1,7 @@
 ---
 title: Holm程序
 english_name: Holm Procedure
+slug: holm-procedure
 aliases: [Holm correction, Holm step-down, "Holm程序（Holm Procedure）"]
 category: 模型评估与解释
 subcategory: 多重比较
@@ -12,7 +13,6 @@ data_type: [P值列表]
 outcome_type: [多重假设检验]
 python_packages: [statsmodels]
 r_packages: [stats]
-related_methods: [Bonferroni校正, Benjamini-Hochberg程序]
 ---
 
 # Holm程序（Holm Procedure）

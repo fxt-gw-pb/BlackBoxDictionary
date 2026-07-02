@@ -1,6 +1,7 @@
 ---
 title: Log-rank检验
 english_name: Log-rank Test
+slug: log-rank-test
 aliases: [log-rank test, Mantel-Cox test, "Log-rank检验（Log-rank Test）"]
 category: 生存分析与纵向数据
 subcategory: 生存曲线比较
@@ -12,7 +13,6 @@ data_type: [生存数据]
 outcome_type: [时间到事件]
 python_packages: [lifelines]
 r_packages: [survival]
-related_methods: [Kaplan-Meier生存曲线, Cox比例风险模型]
 ---
 
 # Log-rank检验（Log-rank Test）

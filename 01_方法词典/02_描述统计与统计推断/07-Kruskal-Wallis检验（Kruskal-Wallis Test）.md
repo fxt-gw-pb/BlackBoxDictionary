@@ -1,6 +1,7 @@
 ---
 title: Kruskal-Wallis检验
 english_name: Kruskal-Wallis Test
+slug: kruskal-wallis-test
 aliases: [Kruskal-Wallis rank-sum test, "Kruskal-Wallis检验（Kruskal-Wallis Test）"]
 category: 描述统计与统计推断
 subcategory: 非参数检验
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型, 等级型]
 python_packages: [scipy]
 r_packages: [stats]
-related_methods: [Wilcoxon秩和检验, 单因素方差分析, TukeyHSD多重比较]
 ---
 
 # Kruskal-Wallis检验（Kruskal-Wallis Test）

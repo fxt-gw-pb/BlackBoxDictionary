@@ -1,6 +1,7 @@
 ---
 title: Wilcoxon秩和检验
 english_name: Wilcoxon Rank-Sum Test
+slug: wilcoxon-rank-sum-test
 aliases: [Mann-Whitney U test, Mann-Whitney检验, "Wilcoxon秩和检验（Wilcoxon Rank-Sum Test）"]
 category: 描述统计与统计推断
 subcategory: 非参数检验
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型, 等级型]
 python_packages: [scipy]
 r_packages: [stats]
-related_methods: [两独立样本t检验, Wilcoxon符号秩检验, Kruskal-Wallis检验]
 ---
 
 # Wilcoxon秩和检验（Wilcoxon Rank-Sum Test）

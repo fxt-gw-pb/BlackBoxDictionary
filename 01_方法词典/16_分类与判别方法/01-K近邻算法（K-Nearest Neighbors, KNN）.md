@@ -1,6 +1,7 @@
 ---
 title: K近邻算法
 english_name: K-Nearest Neighbors, KNN
+slug: k-nearest-neighbors-knn
 aliases: [KNN, K-nearest neighbors, 最近邻算法, "K近邻算法（K-Nearest Neighbors, KNN）"]
 category: 分类与判别方法
 subcategory: 基于实例的判别
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [二分类, 多分类, 连续型]
 python_packages: [scikit-learn]
 r_packages: [FNN]
-related_methods: [K近邻回归, 局部加权回归, 朴素贝叶斯]
 ---
 
 # K近邻算法（K-Nearest Neighbors, KNN）

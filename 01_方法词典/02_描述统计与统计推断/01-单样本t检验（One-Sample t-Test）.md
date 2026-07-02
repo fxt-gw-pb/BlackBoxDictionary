@@ -1,6 +1,7 @@
 ---
 title: 单样本t检验
 english_name: One-Sample t-Test
+slug: one-sample-t-test
 aliases: [one-sample t test, "单样本t检验（One-Sample t-Test）"]
 category: 描述统计与统计推断
 subcategory: 参数检验
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [scipy]
 r_packages: [stats]
-related_methods: [两独立样本t检验, Wilcoxon符号秩检验, 置信区间]
 ---
 
 # 单样本t检验（One-Sample t-Test）
@@ -184,6 +184,7 @@ t.test(x, mu = 125, alternative = "less")
 - [[两独立样本t检验（Two-Sample t-Test）]]
 - [[Wilcoxon符号秩检验（Wilcoxon Signed-Rank Test）]]
 - [[Bootstrap重抽样（Bootstrap Resampling）]]
+- [[置信区间（Confidence Interval）]]
 
 ## 12. 参考资料
 

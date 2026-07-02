@@ -1,6 +1,7 @@
 ---
 title: 决策树回归
 english_name: Decision Tree Regression
+slug: decision-tree-regression
 aliases: [decision tree regression, 回归树, "决策树回归（Decision Tree Regression）"]
 category: 树模型与集成学习
 subcategory: 单棵树模型
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [scikit-learn]
 r_packages: [rpart]
-related_methods: [决策树, 随机森林回归, 梯度提升回归, K近邻回归]
 ---
 
 # 决策树回归（Decision Tree Regression）
@@ -201,6 +201,7 @@ pred <- predict(fit, newdata = df_test)
 - [[随机森林回归（Random Forest Regression）]]
 - [[梯度提升回归（Gradient Boosting Regression）]]
 - [[线性回归（Linear Regression）]]
+- [[K近邻回归（K-Nearest Neighbors Regression）]]
 
 ## 12. 参考资料
 

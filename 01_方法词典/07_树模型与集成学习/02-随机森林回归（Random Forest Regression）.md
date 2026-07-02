@@ -1,6 +1,7 @@
 ---
 title: 随机森林回归
 english_name: Random Forest Regression
+slug: random-forest-regression
 aliases: [random forest regression, RF regression, "随机森林回归（Random Forest Regression）"]
 category: 树模型与集成学习
 subcategory: Bagging集成
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [scikit-learn]
 r_packages: [randomForest]
-related_methods: [随机森林, 决策树回归, 梯度提升回归]
 ---
 
 # 随机森林回归（Random Forest Regression）

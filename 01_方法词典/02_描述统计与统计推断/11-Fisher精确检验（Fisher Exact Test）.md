@@ -1,6 +1,7 @@
 ---
 title: Fisher精确检验
 english_name: Fisher Exact Test
+slug: fisher-exact-test
 aliases: [Fisher exact test, "Fisher精确检验（Fisher Exact Test）"]
 category: 描述统计与统计推断
 subcategory: 分类数据分析
@@ -12,7 +13,6 @@ data_type: [列联表, 表格数据]
 outcome_type: [分类变量]
 python_packages: [scipy]
 r_packages: [stats]
-related_methods: [Pearson卡方独立性检验, McNemar检验, Mantel-Haenszel检验]
 ---
 
 # Fisher精确检验（Fisher Exact Test）

@@ -1,6 +1,7 @@
 ---
 title: 弹性网络回归
 english_name: Elastic Net Regression
+slug: elastic-net-regression
 aliases: [elastic net, elastic net regression, "弹性网络回归（Elastic Net Regression）"]
 category: 正则化与变量选择
 subcategory: L1与L2混合正则化
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [scikit-learn]
 r_packages: [glmnet]
-related_methods: [Ridge回归, Lasso回归, 线性回归]
 ---
 
 # 弹性网络回归（Elastic Net Regression）

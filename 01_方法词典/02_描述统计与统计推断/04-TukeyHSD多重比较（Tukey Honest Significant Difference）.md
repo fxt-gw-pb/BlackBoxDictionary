@@ -1,6 +1,7 @@
 ---
 title: TukeyHSD多重比较
 english_name: Tukey Honest Significant Difference
+slug: tukey-honest-significant-difference
 aliases: [Tukey HSD, Tukey post hoc test, "TukeyHSD多重比较（Tukey Honest Significant Difference）"]
 category: 描述统计与统计推断
 subcategory: 多重比较
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [statsmodels]
 r_packages: [stats]
-related_methods: [单因素方差分析, 两独立样本t检验, Kruskal-Wallis检验]
 ---
 
 # TukeyHSD多重比较（Tukey Honest Significant Difference）

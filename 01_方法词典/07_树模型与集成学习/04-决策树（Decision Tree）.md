@@ -1,6 +1,7 @@
 ---
 title: 决策树
 english_name: Decision Tree
+slug: decision-tree
 aliases: [decision tree, 分类树, 决策树分类, "决策树（Decision Tree）"]
 category: 树模型与集成学习
 subcategory: 单棵树模型
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [二分类, 多分类]
 python_packages: [scikit-learn]
 r_packages: [rpart]
-related_methods: [ID3决策树, C4.5决策树, 随机森林, 决策树回归]
 ---
 
 # 决策树（Decision Tree）

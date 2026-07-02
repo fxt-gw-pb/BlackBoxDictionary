@@ -1,6 +1,7 @@
 ---
 title: 多项式核回归
 english_name: Polynomial Kernel Regression
+slug: polynomial-kernel-regression
 aliases: [polynomial kernel regression, SVR with polynomial kernel, "多项式核回归（Polynomial Kernel Regression）"]
 category: 支持向量机与核方法
 subcategory: 多项式核方法
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [scikit-learn]
 r_packages: [e1071]
-related_methods: [支持向量回归, 多项式回归, 高斯过程回归]
 ---
 
 # 多项式核回归（Polynomial Kernel Regression）

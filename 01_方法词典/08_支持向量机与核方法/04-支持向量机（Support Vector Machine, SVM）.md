@@ -1,6 +1,7 @@
 ---
 title: 支持向量机
 english_name: Support Vector Machine, SVM
+slug: support-vector-machine-svm
 aliases: [SVM, support vector machine, "支持向量机（Support Vector Machine, SVM）"]
 category: 支持向量机与核方法
 subcategory: 间隔最大化分类
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [二分类, 多分类]
 python_packages: [scikit-learn]
 r_packages: [e1071]
-related_methods: [支持向量回归, Logistic回归, 随机森林]
 ---
 
 # 支持向量机（Support Vector Machine, SVM）

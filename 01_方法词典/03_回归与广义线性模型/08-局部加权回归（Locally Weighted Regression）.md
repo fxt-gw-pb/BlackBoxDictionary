@@ -1,6 +1,7 @@
 ---
 title: 局部加权回归
 english_name: Locally Weighted Regression
+slug: locally-weighted-regression
 aliases: [LWR, LOESS-style local regression, 局部加权回归, "局部加权回归（Locally Weighted Regression）"]
 category: 回归与广义线性模型
 subcategory: 局部平滑回归
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [numpy, statsmodels]
 r_packages: [stats]
-related_methods: [K近邻回归, 多项式回归, 高斯过程回归]
 ---
 
 # 局部加权回归（Locally Weighted Regression）

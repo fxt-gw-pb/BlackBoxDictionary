@@ -1,6 +1,7 @@
 ---
 title: Pearson卡方独立性检验
 english_name: Pearson Chi-Squared Test of Independence
+slug: pearson-chi-squared-test-of-independence
 aliases: [卡方独立性检验, chi-square test, "Pearson卡方独立性检验（Pearson Chi-Squared Test of Independence）"]
 category: 描述统计与统计推断
 subcategory: 分类数据分析
@@ -12,7 +13,6 @@ data_type: [列联表, 表格数据]
 outcome_type: [分类变量]
 python_packages: [scipy, pandas]
 r_packages: [stats]
-related_methods: [Fisher精确检验, McNemar检验, Mantel-Haenszel检验]
 ---
 
 # Pearson卡方独立性检验（Pearson Chi-Squared Test of Independence）

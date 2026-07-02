@@ -1,6 +1,7 @@
 ---
 title: 单因素方差分析
 english_name: One-Way ANOVA
+slug: one-way-anova
 aliases: [one-way ANOVA, 方差分析, "单因素方差分析（One-Way ANOVA）"]
 category: 描述统计与统计推断
 subcategory: 均值比较
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [statsmodels]
 r_packages: [stats]
-related_methods: [两独立样本t检验, Kruskal-Wallis检验, TukeyHSD多重比较]
 ---
 
 # 单因素方差分析（One-Way ANOVA）

@@ -1,6 +1,7 @@
 ---
 title: 线性混合效应模型
 english_name: Linear Mixed-Effects Model, LMM
+slug: linear-mixed-effects-model-lmm
 aliases: [LMM, linear mixed model, "线性混合效应模型（Linear Mixed-Effects Model, LMM）"]
 category: 生存分析与纵向数据
 subcategory: 纵向连续结局
@@ -12,7 +13,6 @@ data_type: [纵向数据, 表格数据]
 outcome_type: [连续型]
 python_packages: [statsmodels]
 r_packages: [nlme, lme4]
-related_methods: [广义线性混合效应模型, 广义估计方程, 线性回归]
 ---
 
 # 线性混合效应模型（Linear Mixed-Effects Model, LMM）

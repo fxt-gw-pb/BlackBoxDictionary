@@ -1,6 +1,7 @@
 ---
 title: Bootstrap重抽样
 english_name: Bootstrap Resampling
+slug: bootstrap-resampling
 aliases: [Bootstrap, 自助法, "Bootstrap重抽样（Bootstrap Resampling）"]
 category: 描述统计与统计推断
 subcategory: 重抽样方法
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型, 二分类, 计数型, 任意统计量]
 python_packages: [scipy, numpy]
 r_packages: [boot]
-related_methods: [经验分布函数, 单样本t检验, Spearman秩相关]
 ---
 
 # Bootstrap重抽样（Bootstrap Resampling）
@@ -207,6 +207,7 @@ boot.ci(fit, type = "perc")
 - [[经验分布函数（Empirical Cumulative Distribution Function, ECDF）]]
 - [[Spearman秩相关（Spearman Rank Correlation）]]
 - [[线性回归（Linear Regression）]]
+- [[单样本t检验（One-Sample t-Test）]]
 
 ## 12. 参考资料
 

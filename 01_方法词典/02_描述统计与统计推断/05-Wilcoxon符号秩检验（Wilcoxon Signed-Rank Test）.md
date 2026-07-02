@@ -1,6 +1,7 @@
 ---
 title: Wilcoxon符号秩检验
 english_name: Wilcoxon Signed-Rank Test
+slug: wilcoxon-signed-rank-test
 aliases: [符号秩检验, paired wilcoxon test, "Wilcoxon符号秩检验（Wilcoxon Signed-Rank Test）"]
 category: 描述统计与统计推断
 subcategory: 非参数检验
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型, 等级型]
 python_packages: [scipy]
 r_packages: [stats]
-related_methods: [单样本t检验, Wilcoxon秩和检验, Kruskal-Wallis检验]
 ---
 
 # Wilcoxon符号秩检验（Wilcoxon Signed-Rank Test）

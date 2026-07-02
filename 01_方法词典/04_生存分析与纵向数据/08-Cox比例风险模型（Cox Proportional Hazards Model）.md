@@ -1,6 +1,7 @@
 ---
 title: Cox比例风险模型
 english_name: Cox Proportional Hazards Model
+slug: cox-proportional-hazards-model
 aliases: [Cox PH model, Cox model, "Cox比例风险模型（Cox Proportional Hazards Model）"]
 category: 生存分析与纵向数据
 subcategory: 生存回归
@@ -12,7 +13,6 @@ data_type: [生存数据]
 outcome_type: [时间到事件]
 python_packages: [lifelines]
 r_packages: [survival]
-related_methods: [Kaplan-Meier生存曲线, Log-rank检验, 加速失效时间模型]
 ---
 
 # Cox比例风险模型（Cox Proportional Hazards Model）

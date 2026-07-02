@@ -1,6 +1,7 @@
 ---
 title: 广义估计方程
 english_name: Generalized Estimating Equations, GEE
+slug: generalized-estimating-equations-gee
 aliases: [GEE, "广义估计方程（Generalized Estimating Equations, GEE）"]
 category: 生存分析与纵向数据
 subcategory: 纵向边际模型
@@ -12,7 +13,6 @@ data_type: [纵向数据, 表格数据]
 outcome_type: [连续型, 二分类, 计数型]
 python_packages: [statsmodels]
 r_packages: [geepack]
-related_methods: [广义线性混合效应模型, 线性混合效应模型, Quasi-Likelihood与过度离散]
 ---
 
 # 广义估计方程（Generalized Estimating Equations, GEE）

@@ -1,8 +1,9 @@
 ---
 title: K近邻回归
 english_name: K-Nearest Neighbors Regression
+slug: k-nearest-neighbors-regression
 aliases: [KNN regression, kNN regression, "K近邻回归（K-Nearest Neighbors Regression）"]
-category: 回归与广义线性模型
+category: 分类与判别方法
 subcategory: 基于实例的回归
 tags: [医学统计, 数据科学, 非参数回归, 近邻方法]
 status: 已建
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [scikit-learn]
 r_packages: [FNN]
-related_methods: [K近邻算法, 局部加权回归, 决策树回归, 支持向量回归]
 ---
 
 # K近邻回归（K-Nearest Neighbors Regression）

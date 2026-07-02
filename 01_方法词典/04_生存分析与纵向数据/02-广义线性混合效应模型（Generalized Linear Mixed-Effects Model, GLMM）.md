@@ -1,6 +1,7 @@
 ---
 title: 广义线性混合效应模型
 english_name: Generalized Linear Mixed-Effects Model, GLMM
+slug: generalized-linear-mixed-effects-model-glmm
 aliases: [GLMM, generalized mixed model, "广义线性混合效应模型（Generalized Linear Mixed-Effects Model, GLMM）"]
 category: 生存分析与纵向数据
 subcategory: 纵向非高斯结局
@@ -12,7 +13,6 @@ data_type: [纵向数据, 表格数据]
 outcome_type: [二分类, 计数型]
 python_packages: [statsmodels]
 r_packages: [lme4]
-related_methods: [线性混合效应模型, Logistic回归, 广义估计方程]
 ---
 
 # 广义线性混合效应模型（Generalized Linear Mixed-Effects Model, GLMM）

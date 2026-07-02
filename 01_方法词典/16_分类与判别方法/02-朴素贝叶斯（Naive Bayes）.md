@@ -1,6 +1,7 @@
 ---
 title: 朴素贝叶斯
 english_name: Naive Bayes
+slug: naive-bayes
 aliases: [naive bayes, 贝叶斯分类器, "朴素贝叶斯（Naive Bayes）"]
 category: 分类与判别方法
 subcategory: 概率判别
@@ -12,7 +13,6 @@ data_type: [表格数据, 文本向量]
 outcome_type: [二分类, 多分类]
 python_packages: [scikit-learn]
 r_packages: [e1071]
-related_methods: [贝叶斯回归, Logistic回归, K近邻算法]
 ---
 
 # 朴素贝叶斯（Naive Bayes）

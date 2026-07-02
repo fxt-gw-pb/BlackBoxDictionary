@@ -1,6 +1,7 @@
 ---
 title: 多项式回归
 english_name: Polynomial Regression
+slug: polynomial-regression
 aliases: [polynomial regression, 多项式回归, "多项式回归（Polynomial Regression）"]
 category: 回归与广义线性模型
 subcategory: 非线性回归扩展
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [scikit-learn]
 r_packages: [stats]
-related_methods: [线性回归, Ridge回归, 支持向量回归]
 ---
 
 # 多项式回归（Polynomial Regression）

@@ -1,6 +1,7 @@
 ---
 title: 多层感知机分类器
 english_name: Multilayer Perceptron Classifier, MLP
+slug: multilayer-perceptron-classifier-mlp
 aliases: [MLP, multilayer perceptron classifier, 前馈神经网络, "多层感知机分类器（Multilayer Perceptron Classifier, MLP）"]
 category: 神经网络与深度学习
 subcategory: 前馈神经网络
@@ -12,7 +13,6 @@ data_type: [表格数据, 图像向量]
 outcome_type: [二分类, 多分类]
 python_packages: [scikit-learn]
 r_packages: [nnet]
-related_methods: [Logistic回归, 支持向量机, 随机森林]
 ---
 
 # 多层感知机分类器（Multilayer Perceptron Classifier, MLP）

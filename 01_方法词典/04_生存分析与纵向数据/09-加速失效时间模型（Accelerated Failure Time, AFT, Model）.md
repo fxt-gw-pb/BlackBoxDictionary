@@ -1,6 +1,7 @@
 ---
 title: 加速失效时间模型
 english_name: Accelerated Failure Time, AFT, Model
+slug: accelerated-failure-time-aft-model
 aliases: [AFT, survreg model, "加速失效时间模型（Accelerated Failure Time, AFT, Model）"]
 category: 生存分析与纵向数据
 subcategory: 参数生存回归
@@ -12,7 +13,6 @@ data_type: [生存数据]
 outcome_type: [时间到事件]
 python_packages: [lifelines]
 r_packages: [survival]
-related_methods: [Cox比例风险模型, Kaplan-Meier生存曲线]
 ---
 
 # 加速失效时间模型（Accelerated Failure Time, AFT, Model）

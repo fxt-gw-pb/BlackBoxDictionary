@@ -1,6 +1,7 @@
 ---
 title: 核密度估计
 english_name: Kernel Density Estimation, KDE
+slug: kernel-density-estimation-kde
 aliases: [KDE, 核密度曲线, "核密度估计（Kernel Density Estimation, KDE）"]
 category: 研究设计与数据理解
 subcategory: 非参数估计
@@ -12,7 +13,6 @@ data_type: [表格数据, 一维连续数据]
 outcome_type: [连续型]
 python_packages: [statsmodels, seaborn, matplotlib]
 r_packages: [stats]
-related_methods: [经验分布函数, 直方图, Bootstrap]
 ---
 
 # 核密度估计（Kernel Density Estimation, KDE）
@@ -191,6 +191,7 @@ plot(d, main = "Kernel Density Estimate")
 - [[经验分布函数（Empirical Cumulative Distribution Function, ECDF）]]
 - [[单样本t检验（One-Sample t-Test）]]
 - [[Bootstrap重抽样（Bootstrap Resampling）]]
+- [[直方图（Histogram）]]
 
 ## 12. 参考资料
 

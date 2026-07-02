@@ -1,6 +1,7 @@
 ---
 title: 多重检验与错误率控制
 english_name: Multiple Testing and Error Rate Control
+slug: multiple-testing-and-error-rate-control
 aliases: [multiple testing, FWER, FDR, "多重检验与错误率控制（Multiple Testing and Error Rate Control）"]
 category: 模型评估与解释
 subcategory: 多重比较
@@ -12,7 +13,6 @@ data_type: [P值列表, 多重检验结果]
 outcome_type: [多重假设检验]
 python_packages: [statsmodels]
 r_packages: [stats]
-related_methods: [Bonferroni校正, Holm程序, Benjamini-Hochberg程序]
 ---
 
 # 多重检验与错误率控制（Multiple Testing and Error Rate Control）

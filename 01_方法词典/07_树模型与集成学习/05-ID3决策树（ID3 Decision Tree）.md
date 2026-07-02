@@ -1,6 +1,7 @@
 ---
 title: ID3决策树
 english_name: ID3 Decision Tree
+slug: id3-decision-tree
 aliases: [ID3, iterative dichotomiser 3, "ID3决策树（ID3 Decision Tree）"]
 category: 树模型与集成学习
 subcategory: 决策树特征选择
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [二分类, 多分类]
 python_packages: [scikit-learn]
 r_packages: [RWeka]
-related_methods: [决策树, C4.5决策树, 随机森林]
 ---
 
 # ID3决策树（ID3 Decision Tree）

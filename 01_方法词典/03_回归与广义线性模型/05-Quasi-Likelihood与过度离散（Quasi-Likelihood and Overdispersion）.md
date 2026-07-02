@@ -1,6 +1,7 @@
 ---
 title: Quasi-Likelihood与过度离散
 english_name: Quasi-Likelihood and Overdispersion
+slug: quasi-likelihood-and-overdispersion
 aliases: [quasi likelihood, quasipoisson, quasibinomial, "Quasi-Likelihood与过度离散（Quasi-Likelihood and Overdispersion）"]
 category: 回归与广义线性模型
 subcategory: 稳健方差与过度离散
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [计数型, 分组二分类]
 python_packages: [statsmodels]
 r_packages: [stats, geepack]
-related_methods: [Poisson回归, 广义线性模型, 广义估计方程]
 ---
 
 # Quasi-Likelihood与过度离散（Quasi-Likelihood and Overdispersion）

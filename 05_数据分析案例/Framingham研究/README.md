@@ -54,7 +54,7 @@ knitr::purl("report.Rmd", "code.R")
 ## 目录结构
 
 ```
-framingham research/
+Framingham研究/
 ├── README.md                 项目总览（本文件）
 ├── rawdata/                  原始数据与变量字典
 │   ├── Framingham_data.csv

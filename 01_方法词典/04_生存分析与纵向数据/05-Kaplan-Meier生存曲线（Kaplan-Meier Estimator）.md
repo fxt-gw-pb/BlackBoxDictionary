@@ -1,6 +1,7 @@
 ---
 title: Kaplan-Meier生存曲线
 english_name: Kaplan-Meier Estimator
+slug: kaplan-meier-estimator
 aliases: [Kaplan-Meier, KM curve, product-limit estimator, "Kaplan-Meier生存曲线（Kaplan-Meier Estimator）"]
 category: 生存分析与纵向数据
 subcategory: 生存函数非参数估计
@@ -12,7 +13,6 @@ data_type: [生存数据]
 outcome_type: [时间到事件]
 python_packages: [lifelines]
 r_packages: [survival]
-related_methods: [Nelson-Aalen累积风险估计, Log-rank检验, Cox比例风险模型]
 ---
 
 # Kaplan-Meier生存曲线（Kaplan-Meier Estimator）

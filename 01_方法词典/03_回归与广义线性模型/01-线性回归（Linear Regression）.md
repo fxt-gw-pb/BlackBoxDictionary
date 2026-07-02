@@ -1,6 +1,7 @@
 ---
 title: 线性回归
 english_name: Linear Regression
+slug: linear-regression
 aliases: [OLS回归, Ordinary Least Squares, "线性回归（Linear Regression）"]
 category: 回归与广义线性模型
 subcategory: 线性模型
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [statsmodels]
 r_packages: [stats]
-related_methods: [单因素方差分析, Spearman秩相关, Logistic回归]
 ---
 
 # 线性回归（Linear Regression）

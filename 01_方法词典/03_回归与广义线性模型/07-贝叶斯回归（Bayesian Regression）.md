@@ -1,6 +1,7 @@
 ---
 title: 贝叶斯回归
 english_name: Bayesian Regression
+slug: bayesian-regression
 aliases: [bayesian regression, BayesianRidge, "贝叶斯回归（Bayesian Regression）"]
 category: 回归与广义线性模型
 subcategory: 概率回归
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [scikit-learn]
 r_packages: [rstanarm, brms]
-related_methods: [线性回归, Ridge回归, 高斯过程回归]
 ---
 
 # 贝叶斯回归（Bayesian Regression）

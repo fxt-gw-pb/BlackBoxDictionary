@@ -1,6 +1,7 @@
 ---
 title: 条件Logistic回归
 english_name: Conditional Logistic Regression
+slug: conditional-logistic-regression
 aliases: [conditional logistic regression, clogit, "条件Logistic回归（Conditional Logistic Regression）"]
 category: 生存分析与纵向数据
 subcategory: 匹配与成组二元结局
@@ -12,7 +13,6 @@ data_type: [配对数据, 匹配病例对照数据]
 outcome_type: [二分类]
 python_packages: [statsmodels]
 r_packages: [survival]
-related_methods: [Logistic回归, McNemar检验, 广义线性混合效应模型]
 ---
 
 # 条件Logistic回归（Conditional Logistic Regression）

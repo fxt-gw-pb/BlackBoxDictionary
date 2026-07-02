@@ -1,6 +1,7 @@
 ---
 title: 高斯混合模型
 english_name: Gaussian Mixture Model, GMM
+slug: gaussian-mixture-model-gmm
 aliases: [GMM, gaussian mixture model, 高斯混合, "高斯混合模型（Gaussian Mixture Model, GMM）"]
 category: 聚类与无监督学习
 subcategory: 概率聚类
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [无监督分群]
 python_packages: [scikit-learn]
 r_packages: [mclust]
-related_methods: [K-means聚类, 主成分分析, 朴素贝叶斯]
 ---
 
 # 高斯混合模型（Gaussian Mixture Model, GMM）
@@ -216,6 +216,7 @@ prob <- fit$z
 - [[K-means聚类（K-means Clustering）]]
 - [[核密度估计（Kernel Density Estimation, KDE）]]
 - [[朴素贝叶斯（Naive Bayes）]]
+- [[主成分分析（Principal Component Analysis, PCA）]]
 
 ## 12. 参考资料
 

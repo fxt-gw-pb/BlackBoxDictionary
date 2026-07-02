@@ -1,6 +1,7 @@
 ---
 title: 经验分布函数
 english_name: Empirical Cumulative Distribution Function, ECDF
+slug: empirical-cumulative-distribution-function-ecdf
 aliases: [ECDF, 经验CDF, "经验分布函数（Empirical Cumulative Distribution Function, ECDF）"]
 category: 研究设计与数据理解
 subcategory: 非参数估计
@@ -12,7 +13,6 @@ data_type: [表格数据, 一维连续数据, 一维离散数据]
 outcome_type: [连续型, 离散型]
 python_packages: [statsmodels, seaborn, matplotlib]
 r_packages: [stats]
-related_methods: [核密度估计, Kolmogorov-Smirnov检验, Bootstrap]
 ---
 
 # 经验分布函数（Empirical Cumulative Distribution Function, ECDF）

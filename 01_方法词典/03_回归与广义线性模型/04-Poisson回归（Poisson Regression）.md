@@ -1,6 +1,7 @@
 ---
 title: Poisson回归
 english_name: Poisson Regression
+slug: poisson-regression
 aliases: [poisson regression, loglinear model, "Poisson回归（Poisson Regression）"]
 category: 回归与广义线性模型
 subcategory: 计数结局建模
@@ -12,7 +13,6 @@ data_type: [表格数据]
 outcome_type: [计数型]
 python_packages: [scikit-learn, statsmodels]
 r_packages: [stats, MASS]
-related_methods: [广义线性模型, Quasi-Likelihood与过度离散, Logistic回归]
 ---
 
 # Poisson回归（Poisson Regression）
