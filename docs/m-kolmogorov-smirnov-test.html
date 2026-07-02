@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,51 +54,161 @@
     <div class="intro-note"><h1>Kolmogorov-Smirnov检验（Kolmogorov-Smirnov Test）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>Kolmogorov-Smirnov 检验是一种基于经验分布函数的非参数检验，用经验分布与理论分布（单样本）或两组经验分布之间的最大距离，判断分布是否一致。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>KS 检验用「两条累积分布曲线之间的最大垂直距离」作为分布是否相同的证据——距离越大，越有理由说它们来自不同分布。</p>
+<h3>1.2 定义</h3>
+<p>Kolmogorov-Smirnov 检验是基于经验分布函数的非参数检验，有两种用法：单样本版检验数据是否服从某指定分布（拟合优度）；两样本版检验两组数据是否来自同一分布。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：一份数据是否服从某个指定分布，或两组数据是否来自同一分布。</li>
+<li>研究问题：一份数据是否服从某分布（如正态）？两组数据的整体分布是否不同？</li>
 <li>适用任务：分布拟合优度检验、两样本分布比较、正态性初查。</li>
-<li>常见医学场景：检查指标是否近似正态、比较两组连续指标的整体分布差异。</li>
+<li>常见医学场景：检查指标是否近似正态以决定用参数还是非参数方法、比较两组连续指标的整体分布差异。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>把数据画成经验分布函数（ECDF）阶梯曲线，KS 统计量就是这条曲线与参照曲线之间“上下张开”的最大缝隙。缝隙越大，越有理由认为两条分布不同。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>把两条累积曲线想成两条并行的登山路径。如果两条路是「同一座山」（同一分布），它们应当处处贴近；哪怕某段暂时分开，也不会拉开太大。KS 统计量就是量出「两条路在哪一点分得最开、开了多远」。分得越开，越说明它们是两座不同的山。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>单样本：经验分布 $F_n(x)$ 与理论分布 $F_0(x)$ 的最大绝对差；两样本：两经验分布之差：</p>
-<p>$$
-D_n=\sup_x\,|F_n(x)-F_0(x)|,\qquad
-D_{m,n}=\sup_x\,|F_{1,m}(x)-F_{2,n}(x)|
-$$</p>
-<p>大样本下 $\sqrt{n}\,D_n$ 收敛到 Kolmogorov 分布，用于计算 p 值。</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>比较两个分布，最朴素的做法是比均值（t 检验）或比方差，但那只抓住分布的某一个侧面——两个分布可以均值相同却形状迥异。根本困难是：<strong>如何一次性比较分布的「整体」，而不只是某个矩？</strong> KS 用整条累积曲线的最大偏离来概括「整体差异」。</p>
+<h3>2.2 关键洞察</h3>
+<p>累积分布函数唯一地刻画一个分布——两个分布相同当且仅当 CDF 处处相同。于是「分布差异」可以浓缩成「两条 CDF 的最大距离」这一个数 $D$。更妙的洞察是：在原假设（分布相同、连续）下，这个 $D$ 的分布<strong>不依赖于具体是什么分布</strong>（distribution-free），因为经由概率积分变换 $F(X)\sim\mathrm{Uniform}(0,1)$，一切连续分布都被「拉平」成均匀分布——所以同一张临界值表对任何连续分布都适用。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$F_n(x)$：样本的经验分布函数。</li>
-<li>$D$：最大分布距离，即 KS 统计量。</li>
-<li>p 值：在原假设（分布相同）下观察到该距离的概率。</li>
-<li>对分布中部差异较敏感，对尾部相对不敏感。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>变量为连续型；参照分布若含估计参数，需用校正版本（如 Lilliefors）。</li>
-<li>观测独立同分布。</li>
-<li>结点（重复值）会削弱检验，理论基于连续分布。</li>
+<li>相对 <strong>t 检验/秩和检验</strong>：它们查「位置（中位/均值）」差异；KS 查「整体分布」差异，对形状/尺度差异也敏感。</li>
+<li>相对 <strong>Shapiro-Wilk</strong>：Shapiro-Wilk 专为正态性设计、小样本功效更高；KS 更通用但功效较低。</li>
+<li>相对<strong>卡方拟合优度</strong>：卡方要分箱、适合离散；KS 不分箱、适合连续。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>单样本（数据 vs 理论 $F_0$）与两样本（两经验分布）的最大距离：</p>
+<p>$$
+D_n=\sup_x\,\big|F_n(x)-F_0(x)\big|,\qquad
+D_{m,n}=\sup_x\,\big|F_{1,m}(x)-F_{2,n}(x)\big|
+$$</p>
+<p>这个式子在说：$D$ 是「所有 $x$ 上、两条曲线纵向差的绝对值」的最大者——就是那道最宽的缝。</p>
+<h3>3.2 推导脉络</h3>
+<ul>
+<li>因 ECDF 是阶梯函数，上确界只可能出现在观测点处，故 $D$ 只需在各数据点检查（每点比较跳跃前后两个值）。</li>
+<li>原假设下用概率积分变换把任意连续 $F_0$ 变成均匀分布，故 $D_n$ 的分布与 $F_0$ 无关。</li>
+<li>大样本下 $\sqrt{n}\,D_n$ 收敛到 <strong>Kolmogorov 分布</strong>，其分布函数 $P(\sqrt{n}D_n\le t)=1-2\sum_{k\ge 1}(-1)^{k-1}e^{-2k^2t^2}$，据此算 p 值与临界值。</li>
+<li>若参照分布的参数是从同一数据估计的（如用样本均值方差检验正态），标准 KS 过于保守，应改用 <strong>Lilliefors</strong> 校正。</li>
+</ul>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$F_n(x)$：样本的经验分布函数（ECDF）。</li>
+<li>$D$：KS 统计量，即最大分布距离，取值 0 到 1。</li>
+<li>p 值：原假设下观察到不小于该 $D$ 的概率。</li>
+<li>特性：对分布<strong>中部</strong>差异较敏感，对<strong>尾部</strong>相对不敏感。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>连续分布</td>
+<td>变量连续、无大量结点</td>
+<td>结点多则检验保守、失真</td>
+<td>看重复值比例</td>
+</tr>
+<tr>
+<td>参数非估计</td>
+<td>$F_0$ 参数事先给定</td>
+<td>用数据估参后过保守</td>
+<td>改用 Lilliefors</td>
+</tr>
+<tr>
+<td>独立同分布</td>
+<td>观测独立</td>
+<td>p 值失真</td>
+<td>看设计</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>单样本 KS：检验 5 个观测 $\{1,2,3,4,9\}$ 是否服从 $\mathrm{Uniform}(0,10)$（理论 $F_0(x)=x/10$）。</p>
+<p><strong>一步步计算</strong>（在每个观测点比较 ECDF 与 $F_0$，注意 ECDF 在该点跳跃前后各比一次）：</p>
+<table>
+<thead>
+<tr>
+<th>$x_i$</th>
+<th>$F_0=x/10$</th>
+<th>$F_n$（跳后）</th>
+<th>$F_n$（跳前）</th>
+<th>$\|F_n^{后}-F_0\|$</th>
+<th>$\|F_0-F_n^{前}\|$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>0.1</td>
+<td>0.2</td>
+<td>0.0</td>
+<td>0.1</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0.2</td>
+<td>0.4</td>
+<td>0.2</td>
+<td>0.2</td>
+<td>0.0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>0.3</td>
+<td>0.6</td>
+<td>0.4</td>
+<td>0.3</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0.4</td>
+<td>0.8</td>
+<td>0.6</td>
+<td>0.4</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>9</td>
+<td>0.9</td>
+<td>1.0</td>
+<td>0.8</td>
+<td>0.1</td>
+<td>0.1</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>取全表最大值：$D=\max=0.4$，出现在 $x=4$。</li>
+<li>查 $n=5$、$\alpha=0.05$ 的 KS 临界值约 $0.563$。</li>
+<li>因 $D=0.4\lt 0.563$，<strong>不拒绝</strong>「服从均匀分布」。</li>
+</ul>
+<p><strong>结论：</strong> 最大缝隙 0.4 出在 $x=4$（数据在低端偏挤，比均匀预期靠左），但 $n=5$ 太小，临界值高达 0.56——<strong>即便看到偏离，小样本也没有足够功效下结论</strong>。这正好说明 KS（及一切分布检验）在小样本上「不显著」往往只是证据不足，而非「证明服从」。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
 <li>自变量类型：单个连续变量（单样本）或两组连续变量（两样本）。</li>
 <li>因变量类型：不区分。</li>
 <li>数据结构：一维数值数组或两数组。</li>
-<li>是否适合高维数据：为一维检验；多维需专门扩展。</li>
+<li>是否适合高维数据：一维检验；多维需专门扩展。</li>
 <li>是否适合缺失较多数据：需先处理缺失。</li>
 <li>是否适合删失数据：不直接适用。</li>
 <li>是否适合重复测量数据：独立性破坏时不适用。</li>
 </ul>
-<h3>3.2 示例表格</h3>
+<h3>5.2 示例表格</h3>
 <table>
 <thead>
 <tr>
@@ -120,10 +230,10 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：一维数值向量（及参照分布）。</li>
+<li>输入数据：一维数值向量（及参照分布或第二组）。</li>
 <li>关键变量：待检数据、参照分布或第二组数据。</li>
 <li>需要预处理的内容：确认连续、避免用同一数据估参再检验（否则需校正）。</li>
 </ul>
@@ -134,15 +244,15 @@ $$</p>
 <li>预测结果：无。</li>
 <li>不确定性指标：p 值。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
 <li>适合：连续变量的分布拟合优度、两组整体分布比较。</li>
-<li>不适合：小样本（功效低）、对尾部差异敏感的问题、离散/多结点数据。</li>
+<li>不适合：小样本（功效低）、对尾部差异敏感的问题、离散/多结点数据、用同一数据估参又检验（改用 Lilliefors）。</li>
 <li>使用前需要特别检查的点：参照分布参数是否来自同一数据、结点比例、样本量。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="kolmogorov-smirnov-test" data-i="0">Python</button><button class="codetab" data-uid="kolmogorov-smirnov-test" data-i="1">R</button></div><div class="codepanel active" data-uid="kolmogorov-smirnov-test" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>scipy</code></li>
@@ -150,38 +260,44 @@ $$</p>
 <pre><code class="language-python">from scipy import stats
 import numpy as np
 
-x = np.random.normal(0, 1, 200)
-# 单样本: 与标准正态比较
-print(stats.kstest(x, &quot;norm&quot;))
-# 两样本
-y = np.random.normal(0.3, 1, 200)
-print(stats.ks_2samp(x, y))
+x = np.array([1, 2, 3, 4, 9])
+print(stats.kstest(x, &quot;uniform&quot;, args=(0, 10)))   # 单样本 vs U(0,10)
+y = np.array([2, 3, 5, 6, 8])
+print(stats.ks_2samp(x, y))                        # 两样本
 </code></pre></div><div class="codepanel" data-uid="kolmogorov-smirnov-test" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>stats</code></li>
 </ul>
-<pre><code class="language-r">x &lt;- rnorm(200)
-ks.test(x, &quot;pnorm&quot;)          # 单样本
-y &lt;- rnorm(200, 0.3)
-ks.test(x, y)                # 两样本
+<pre><code class="language-r">x &lt;- c(1, 2, 3, 4, 9)
+ks.test(x, &quot;punif&quot;, min = 0, max = 10)   # 单样本
+y &lt;- c(2, 3, 5, 6, 8)
+ks.test(x, y)                            # 两样本
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
       <div class="sec-body"><ul>
 <li>核心结果看什么：$D$ 的大小与 p 值。</li>
-<li>每个主要参数如何解释：p 小说明有证据认为分布不同；$D$ 反映最大分布偏离处。</li>
+<li>每个主要参数如何解读：p 小说明有证据认为分布不同；$D$ 反映最大分布偏离处（可回看 ECDF 找出在哪偏）。</li>
 <li>临床或医学意义如何表达：拒绝正态性提示后续应考虑非参数方法或变换。</li>
-<li>常见误读：不拒绝≠证明分布相同；大样本下极小差异也会显著。</li>
+<li>常见误读：不拒绝 ≠ 证明分布相同；大样本下极小差异也会显著（要看 $D$ 的实际大小）。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
       <div class="sec-body"><ul>
-<li>两条 ECDF 叠加图并标出最大缝隙 $D$。</li>
-<li>与直方图/QQ 图配合判断分布。</li>
+<li>参数是否估计：若用样本均值方差检验正态，必须用 Lilliefors 或 Anderson-Darling，否则 p 偏大、过保守。</li>
+<li>结点：大量重复值破坏「连续」假设，使 KS 保守；离散数据改用卡方拟合优度。</li>
+<li>样本量：小样本功效低（如上例），大样本又对无关紧要的偏离过度敏感——务必结合 $D$ 的实际大小与 ECDF 图判断。</li>
+<li>尾部：KS 对尾部不敏感，若关心尾部差异改用 Anderson-Darling。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>两条 ECDF 叠加，标出最大缝隙 $D$ 的位置与高度。</li>
+<li>ECDF 与理论 CDF 叠加。</li>
 <li>两样本 ECDF 差异曲线。</li>
 </ul></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
 <li>非参数、无需假设具体分布族。</li>
@@ -192,41 +308,52 @@ ks.test(x, y)                # 两样本
 <ul>
 <li>小样本功效低。</li>
 <li>对尾部差异不如中部敏感。</li>
-<li>参数由数据估计时标准版会过于保守，需校正。</li>
+<li>参数由数据估计时标准版过保守，需校正。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>用同一数据估计正态参数后直接 ks.test(x,"pnorm")（应用 Lilliefors）。</li>
-<li>把“不显著”当作“服从该分布”。</li>
+<li>用同一数据估计正态参数后直接 <code>ks.test(x,&quot;pnorm&quot;)</code>（应用 Lilliefors）。</li>
+<li>把「不显著」当作「服从该分布」。</li>
 <li>忽略结点对连续假设的破坏。</li>
 </ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-empirical-cumulative-distribution-function-ecdf.html" data-cn="经验分布函数" data-en="Empirical Cumulative Distribution Function, ECDF" data-def="经验分布函数是对总体分布函数 $F(x)=P(X\le x)$ 的非参数估计。它直接用样本中“不大于某个阈值的比例”来近似总体累计概率。">经验分布函数（Empirical Cumulative Distribution Function, ECDF）</a> 的区别：ECDF 是描述工具，KS 在其上做假设检验。</li>
-<li>和 Shapiro-Wilk 正态性检验的区别：Shapiro-Wilk 专为正态性、小样本功效更高；KS 更通用但功效较低。</li>
-<li>和 <a class="xlink" href="m-wilcoxon-rank-sum-test.html" data-cn="Wilcoxon秩和检验" data-en="Wilcoxon Rank-Sum Test" data-def="Wilcoxon 秩和检验是两独立样本的非参数检验，通过比较两组观测的秩来判断它们是否来自相同位置分布。">Wilcoxon秩和检验（Wilcoxon Rank-Sum Test）</a> 的区别：后者聚焦位置差异，KS 检验整体分布差异。</li>
+<li>和<strong>经验分布函数（ECDF）</strong>：ECDF 是描述工具，KS 在其上做假设检验。</li>
+<li>和 <strong>Shapiro-Wilk</strong>：后者专为正态性、小样本功效更高；KS 更通用但功效较低。</li>
+<li>和 <strong>Anderson-Darling</strong>：AD 给尾部更高权重，检尾部差异更灵；KS 偏中部。</li>
+<li>和 <strong>Wilcoxon 秩和检验</strong>：秩和聚焦位置差异，KS 检整体分布差异。</li>
 </ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
       <div class="sec-body"><ul>
 <li>建模前检查连续变量是否近似正态。</li>
 <li>比较两组患者某指标的整体分布是否不同。</li>
 <li>校验模拟/插补数据与原始分布的一致性。</li>
 </ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-empirical-cumulative-distribution-function-ecdf.html" data-cn="经验分布函数" data-en="Empirical Cumulative Distribution Function, ECDF" data-def="经验分布函数是对总体分布函数 $F(x)=P(X\le x)$ 的非参数估计。它直接用样本中“不大于某个阈值的比例”来近似总体累计概率。">经验分布函数（Empirical Cumulative Distribution Function, ECDF）</a></li>
-<li><a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计是一种用局部加权平均来估计连续型变量概率密度函数的非参数方法。它常用来替代粗糙的直方图，给出更平滑的分布形状。">核密度估计（Kernel Density Estimation, KDE）</a></li>
+<li><strong>拟合优度（Goodness of Fit）</strong>：数据与某理论分布吻合程度的检验。</li>
+<li><strong>KS 统计量 $D$</strong>：两条累积分布曲线的最大垂直距离。</li>
+<li><strong>上确界（sup）</strong>：一组数的最小上界，此处即最大缝隙。</li>
+<li><strong>概率积分变换</strong>：$F(X)$ 服从均匀分布的性质，是 KS「分布无关」的原因。</li>
+<li><strong>Lilliefors 校正</strong>：参照分布参数由数据估计时对 KS 的修正版本。</li>
+<li><strong>Kolmogorov 分布</strong>：$\sqrt{n}D_n$ 的极限分布，用于算 p 值。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-empirical-cumulative-distribution-function-ecdf.html" data-cn="经验分布函数" data-en="Empirical Cumulative Distribution Function, ECDF" data-def="经验分布函数是「用数据本身当作分布」：在每个观测值处向上跳一小步 $1/n$，画出「有多大比例的数据不超过 $x$」这条阶梯曲线，它是真实累积分布函数（CDF）最诚实的估计。">经验分布函数（Empirical Cumulative Distribution Function, ECDF）</a></li>
+<li><a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计给每个观测放上一个小小的、光滑的「山包」（核），再把所有山包叠加平均，得到一条连续平滑的密度曲线——本质是把直方图的硬台阶抹圆。">核密度估计（Kernel Density Estimation, KDE）</a></li>
 <li><a class="xlink" href="m-wilcoxon-rank-sum-test.html" data-cn="Wilcoxon秩和检验" data-en="Wilcoxon Rank-Sum Test" data-def="Wilcoxon 秩和检验是两独立样本的非参数检验，通过比较两组观测的秩来判断它们是否来自相同位置分布。">Wilcoxon秩和检验（Wilcoxon Rank-Sum Test）</a></li>
 </ul></div>
-    </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Massey FJ. The Kolmogorov-Smirnov test for goodness of fit. <em>J Am Stat Assoc</em>. 1951;46(253):68-78.</li>
 <li>Conover WJ. <em>Practical Nonparametric Statistics</em>. 3rd ed. Wiley; 1999.</li>
-<li>R Core Team. <code>ks.test</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/ks.test.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/ks.test.html</a> （访问日期：2026-07-02）</li>
+<li>Lilliefors HW. On the Kolmogorov-Smirnov test for normality with mean and variance unknown. <em>J Am Stat Assoc</em>. 1967;62(318):399-402.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-kernel-density-estimation-kde.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">核密度估计</div></a><span></span></div>

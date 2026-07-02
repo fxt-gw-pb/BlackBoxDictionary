@@ -248,7 +248,7 @@ table(cluster)
       <div class="sec-body"><ul>
 <li>和 <a class="xlink" href="m-dbscan-density-based-spatial-clustering-of-applications-with-noise.html" data-cn="DBSCAN" data-en="Density-Based Spatial Clustering of Applications with Noise" data-def="DBSCAN 是一种基于密度的聚类方法。它把高密度区域连接成簇，并把低密度区域中的点标记为噪声或离群点。">DBSCAN（Density-Based Spatial Clustering of Applications with Noise）</a> 的区别：DBSCAN 以密度连通定义簇，均值漂移以密度峰吸引盆定义簇。</li>
 <li>和 <a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a> 的区别：K-means 需要预设 $K$，均值漂移通过密度峰自动形成簇。</li>
-<li>和 <a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计是一种用局部加权平均来估计连续型变量概率密度函数的非参数方法。它常用来替代粗糙的直方图，给出更平滑的分布形状。">核密度估计（Kernel Density Estimation, KDE）</a> 的区别：KDE 是密度估计工具，均值漂移利用 KDE 的梯度思想做聚类。</li>
+<li>和 <a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计给每个观测放上一个小小的、光滑的「山包」（核），再把所有山包叠加平均，得到一条连续平滑的密度曲线——本质是把直方图的硬台阶抹圆。">核密度估计（Kernel Density Estimation, KDE）</a> 的区别：KDE 是密度估计工具，均值漂移利用 KDE 的梯度思想做聚类。</li>
 </ul></div>
     </section><section id="sec-10" data-sec="10" class="sec">
       <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
@@ -262,7 +262,7 @@ table(cluster)
       <div class="sec-body"><ul>
 <li><a class="xlink" href="m-dbscan-density-based-spatial-clustering-of-applications-with-noise.html" data-cn="DBSCAN" data-en="Density-Based Spatial Clustering of Applications with Noise" data-def="DBSCAN 是一种基于密度的聚类方法。它把高密度区域连接成簇，并把低密度区域中的点标记为噪声或离群点。">DBSCAN（Density-Based Spatial Clustering of Applications with Noise）</a></li>
 <li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a></li>
-<li><a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计是一种用局部加权平均来估计连续型变量概率密度函数的非参数方法。它常用来替代粗糙的直方图，给出更平滑的分布形状。">核密度估计（Kernel Density Estimation, KDE）</a></li>
+<li><a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计给每个观测放上一个小小的、光滑的「山包」（核），再把所有山包叠加平均，得到一条连续平滑的密度曲线——本质是把直方图的硬台阶抹圆。">核密度估计（Kernel Density Estimation, KDE）</a></li>
 <li><a class="xlink" href="m-spectral-clustering.html" data-cn="谱聚类" data-en="Spectral Clustering" data-def="谱聚类是一种基于图的聚类方法。它先把样本表示成相似度图，再利用图拉普拉斯矩阵的特征向量把样本嵌入到低维空间，最后在该空间中进行聚类。">谱聚类（Spectral Clustering）</a></li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">

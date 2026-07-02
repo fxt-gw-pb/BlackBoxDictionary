@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,41 +54,102 @@
     <div class="intro-note"><h1>直方图（Histogram）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>直方图把连续变量的取值范围切成若干等宽区间（bin），统计每个区间内的观测数（或频率），用相邻柱形展示数据的分布形状。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>直方图把连续变量的取值范围切成一排等宽格子，数一数每格里落了多少观测——它其实是密度函数最朴素的「分段常数」估计。</p>
+<h3>1.2 定义</h3>
+<p>直方图通过把数据分箱（bin）并统计每箱的频数或频率密度，用相邻柱形展示一个连续变量的分布形状。它是认识数据的第一张图，也是核密度估计的前身。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：一个连续变量长什么样——中心在哪、有多分散、是否偏态、有几个峰、有无异常值。</li>
+<li>研究问题：一个连续变量长什么样——中心在哪、多分散、是否偏态、有几个峰、有无异常值？</li>
 <li>适用任务：分布探索、建模前的分布假设检查、异常值与截断的初步识别。</li>
 <li>常见医学场景：年龄、血压、生物标志物浓度的分布描述与数据质控。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>直方图是把散落的数据“堆”进一排格子里，格子越高说明落在该区间的观测越多。它是认识一份数据的第一张图，几乎所有分布判断都从这里开始。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>想象把每个观测当成一颗豆子，按它的数值扔进对应的格子里，格子越高说明落进去的豆子越多。堆出来的形状，就是数据分布的「侧影」。格子的宽窄决定这张侧影是粗糙还是平滑——这正是直方图最需要小心的地方。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>给定 bin 宽 $h$、区间 $B_k=[x_0+kh,\,x_0+(k+1)h)$，频数与频率密度为：</p>
-<p>$$
-n_k=\sum_{i=1}^{n}\mathbf{1}\{x_i\in B_k\},\qquad
-\hat{f}(x)=\frac{n_k}{n\,h},\ x\in B_k
-$$</p>
-<p>密度化后柱面积之和为 1，可与 <a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计是一种用局部加权平均来估计连续型变量概率密度函数的非参数方法。它常用来替代粗糙的直方图，给出更平滑的分布形状。">核密度估计（Kernel Density Estimation, KDE）</a> 叠加比较。</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>我们想知道数据背后的<strong>概率密度</strong>，但密度是个连续函数，样本只有有限个点。根本困难是：<strong>如何用有限的点估计一条连续的密度曲线？</strong> 直方图给出最简单的答案——在每个小区间上用「落入的比例」近似该处的密度，得到一条阶梯状的密度估计。</p>
+<h3>2.2 关键洞察</h3>
+<p>密度在一个小区间上的平均值 ≈ 该区间的概率 / 区间宽度。于是「频数 / (总数 × 箱宽)」就是密度的一个估计。关键机制在于<strong>箱宽 $h$ 的取舍</strong>：$h$ 太大，把细节抹平（偏差大）；$h$ 太小，每箱点太少、忽高忽低（方差大）。这就是统计学里无处不在的<strong>偏差-方差权衡</strong>在最简单场景的现身。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$h$：bin 宽（或 bin 数），决定平滑程度。</li>
-<li>$n_k$：第 $k$ 个区间的频数。</li>
-<li>$\hat{f}(x)$：频率密度估计，使不同 bin 宽下纵轴可比。</li>
-<li>常见 bin 规则：Sturges、Scott、Freedman-Diaconis。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>变量为可分箱的数值量。</li>
-<li>结果对 bin 宽和起点敏感，无“唯一正确”的直方图。</li>
-<li>样本量太小时形状不稳定。</li>
+<li>相对「只报均值和标准差」：直方图保留了分布形状（偏态、多峰），而两个数字会把它们藏起来。</li>
+<li>相对<strong>核密度估计（KDE）</strong>：直方图是「硬边界、分段常数」，KDE 用平滑核得到连续曲线，是直方图的光滑化推广。</li>
+<li>相对<strong>箱线图</strong>：箱线图擅长多组比较与异常值，但看不出多峰；直方图能看出多峰但不便并排比较。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>设箱宽 $h$、第 $k$ 个箱区间 $B_k=[x_0+kh,\,x_0+(k+1)h)$，落入的频数与频率密度为：</p>
+<p>$$
+n_k=\sum_{i=1}^{n}\mathbf{1}\{x_i\in B_k\},\qquad
+\hat{f}(x)=\frac{n_k}{n\,h},\quad x\in B_k
+$$</p>
+<p>这个式子在说：某点的密度估计 = 它所在箱的观测数，除以「总数 × 箱宽」；除以 $nh$ 是为了让所有柱形的<strong>面积之和等于 1</strong>，从而成为合格的密度。</p>
+<h3>3.2 推导脉络</h3>
+<ul>
+<li>密度定义：$f(x)=\lim_{h\to 0}\dfrac{P(x\le X\lt x+h)}{h}$。</li>
+<li>用样本频率估计概率：$\hat{P}(X\in B_k)=n_k/n$。</li>
+<li>除以箱宽还原为「密度」：$\hat{f}(x)=\dfrac{n_k/n}{h}$，即上式。</li>
+<li>箱宽选择有经验法则：Sturges（$k\approx\log_2 n+1$，假设近正态）、Scott（$h=3.49\,s\,n^{-1/3}$）、Freedman-Diaconis（$h=2\,\mathrm{IQR}\,n^{-1/3}$，用四分位距，对偏态与异常值更稳健）。</li>
+</ul>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$h$（或箱数）：平滑程度的旋钮，最关键的选择。</li>
+<li>$n_k$：第 $k$ 箱的频数；$n_k/n$ 为频率。</li>
+<li>$\hat{f}(x)$：频率密度，使不同箱宽下纵轴可比、可叠加理论密度。</li>
+<li>起点 $x_0$：箱的对齐位置，也会影响形状（尤其小样本）。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>变量可分箱</td>
+<td>是数值型连续量</td>
+<td>类别变量不该用直方图</td>
+<td>用条形图代替</td>
+</tr>
+<tr>
+<td>样本量足够</td>
+<td>每箱有一定观测</td>
+<td>小样本形状不稳、锯齿</td>
+<td>换更宽箱或用 KDE</td>
+</tr>
+<tr>
+<td>观测同质</td>
+<td>非多层混合</td>
+<td>混合层级掩盖真结构</td>
+<td>分层/分面</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>对 10 个收缩压读数手工做一张直方图：数据 = 118, 122, 125, 128, 130, 131, 134, 138, 142, 149。取箱宽 $h=10$，起点 $x_0=110$。</p>
+<p><strong>一步步计算：</strong></p>
+<ul>
+<li>分箱计数：</li>
+<li>$[110,120)$：118 → <strong>1</strong> 个</li>
+<li>$[120,130)$：122,125,128 → <strong>3</strong> 个</li>
+<li>$[130,140)$：130,131,134,138 → <strong>4</strong> 个</li>
+<li>$[140,150)$：142,149 → <strong>2</strong> 个</li>
+<li>频率（频数/10）：0.1, 0.3, 0.4, 0.2。</li>
+<li>频率密度（频率/$h$）：0.010, 0.030, 0.040, 0.020。</li>
+<li>校验面积：$(0.010+0.030+0.040+0.020)\times 10=1.0$ ✓。</li>
+</ul>
+<p><strong>结论：</strong> 分布中心在 130 附近、略右偏（右侧有 142、149 拖尾）。若把箱宽改成 5，$[120,125)$ 只有 1 个、$[125,130)$ 有 2 个……柱形会更细碎、噪声更大——<strong>同一份数据、换个箱宽就换个面孔</strong>，这正是解读直方图时必须记住的第一课。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
 <li>自变量类型：单个连续变量（可按分组分面）。</li>
 <li>因变量类型：不区分因变量。</li>
@@ -98,61 +159,66 @@ $$</p>
 <li>是否适合删失数据：删失需专门处理，不宜直接画。</li>
 <li>是否适合重复测量数据：混合层级会掩盖结构，宜分层。</li>
 </ul>
-<h3>3.2 示例表格</h3>
+<h3>5.2 示例表格</h3>
 <table>
 <thead>
 <tr>
 <th>bin 区间</th>
 <th>频数</th>
 <th>频率</th>
+<th>频率密度</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>[110,120)</td>
-<td>24</td>
-<td>0.12</td>
+<td>1</td>
+<td>0.10</td>
+<td>0.010</td>
 </tr>
 <tr>
 <td>[120,130)</td>
-<td>58</td>
-<td>0.29</td>
+<td>3</td>
+<td>0.30</td>
+<td>0.030</td>
 </tr>
 <tr>
 <td>[130,140)</td>
-<td>71</td>
-<td>0.36</td>
+<td>4</td>
+<td>0.40</td>
+<td>0.040</td>
 </tr>
 <tr>
 <td>[140,150)</td>
-<td>47</td>
-<td>0.23</td>
+<td>2</td>
+<td>0.20</td>
+<td>0.020</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
 <li>输入数据：一维数值向量。</li>
-<li>关键变量：待描述的连续变量、bin 设置。</li>
-<li>需要预处理的内容：处理缺失、决定 bin 宽/规则、是否密度化。</li>
+<li>关键变量：待描述的连续变量、箱宽/箱数设置。</li>
+<li>需要预处理的内容：处理缺失、决定箱宽/规则、是否密度化。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：各 bin 频数/频率。</li>
+<li>模型对象/统计结果：各箱频数/频率/密度。</li>
 <li>参数估计：无（描述性）。</li>
 <li>预测结果：无。</li>
 <li>不确定性指标：可叠加分组或密度曲线辅助判断。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
 <li>适合：单变量分布的快速探索与质控。</li>
 <li>不适合：小样本、需要精确密度、比较多组分布（可用密度曲线或箱线图）。</li>
-<li>使用前需要特别检查的点：bin 宽是否掩盖或制造了峰、坐标是否被异常值拉伸。</li>
+<li>使用前需要特别检查的点：箱宽是否掩盖或制造了峰、坐标是否被异常值拉伸。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="histogram" data-i="0">Python</button><button class="codetab" data-uid="histogram" data-i="1">R</button></div><div class="codepanel active" data-uid="histogram" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>matplotlib</code></li>
@@ -161,75 +227,94 @@ $$</p>
 <pre><code class="language-python">import matplotlib.pyplot as plt
 import numpy as np
 
-x = np.random.normal(130, 12, size=400)
-plt.hist(x, bins=&quot;fd&quot;, density=True, color=&quot;#B0A895&quot;, edgecolor=&quot;white&quot;)
+x = np.array([118,122,125,128,130,131,134,138,142,149])
+plt.hist(x, bins=&quot;fd&quot;, density=True,          # density=True 使面积=1
+         color=&quot;#B0A895&quot;, edgecolor=&quot;white&quot;)
 plt.xlabel(&quot;收缩压&quot;); plt.ylabel(&quot;频率密度&quot;)
 plt.show()
 </code></pre></div><div class="codepanel" data-uid="histogram" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>graphics</code></li>
 </ul>
-<pre><code class="language-r">x &lt;- rnorm(400, 130, 12)
-hist(x, breaks = &quot;FD&quot;, freq = FALSE,
+<pre><code class="language-r">x &lt;- c(118,122,125,128,130,131,134,138,142,149)
+hist(x, breaks = &quot;FD&quot;, freq = FALSE,   # freq=FALSE 画密度
      xlab = &quot;收缩压&quot;, main = &quot;&quot;)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
       <div class="sec-body"><ul>
 <li>核心结果看什么：中心位置、离散程度、偏态、峰数、异常值。</li>
-<li>每个主要参数如何解释：右偏（长尾在右）常见于浓度/时间类指标；双峰提示可能存在亚群。</li>
-<li>临床或医学意义如何表达：分布形状影响后续检验/模型选择（如是否需要变换）。</li>
-<li>常见误读：把 bin 宽造成的锯齿当真实结构；用单一直方图比较多组分布。</li>
+<li>每个主要参数如何解读：右偏（长尾在右）常见于浓度/时间类指标；双峰提示可能存在亚群。</li>
+<li>临床或医学意义如何表达：分布形状影响后续检验/模型选择（如是否需对数变换）。</li>
+<li>常见误读：把箱宽造成的锯齿当真实结构；用单一直方图比较多组分布。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
       <div class="sec-body"><ul>
-<li>直方图叠加核密度曲线。</li>
-<li>分组分面直方图。</li>
+<li>箱宽敏感性：至少用两三个箱宽（如 Sturges、FD）各画一张，看结论是否稳健。</li>
+<li>起点敏感性：小样本时移动起点会改变形状，稳健结论应不依赖起点（可转向 KDE）。</li>
+<li>异常值：极端值会拉长横轴、压扁主体，必要时截断显示或对数刻度。</li>
+<li>与理论分布对比：density=True 后可叠加正态密度曲线，直观看偏离。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>直方图叠加核密度曲线（互相印证）。</li>
+<li>分组分面直方图（比较多组）。</li>
 <li>与箱线图/小提琴图并列查看。</li>
 </ul></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
 <li>直观、计算简单，是分布探索的第一图。</li>
-<li>可密度化以叠加理论分布或 KDE。</li>
+<li>密度化后可叠加理论分布或 KDE。</li>
 <li>易于分组分面。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>强烈依赖 bin 宽与起点。</li>
+<li>强烈依赖箱宽与起点。</li>
 <li>小样本下形状不稳。</li>
 <li>多组比较能力弱。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>默认 bin 数不当导致误判分布。</li>
-<li>未密度化就跨不同 bin 宽比较纵轴。</li>
+<li>默认箱数不当导致误判分布。</li>
+<li>未密度化就跨不同箱宽比较纵轴。</li>
 <li>用直方图代替正态性检验下结论。</li>
 </ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计是一种用局部加权平均来估计连续型变量概率密度函数的非参数方法。它常用来替代粗糙的直方图，给出更平滑的分布形状。">核密度估计（Kernel Density Estimation, KDE）</a> 的区别：KDE 用平滑核给出连续密度，避免 bin 边界的锯齿。</li>
-<li>和 <a class="xlink" href="m-empirical-cumulative-distribution-function-ecdf.html" data-cn="经验分布函数" data-en="Empirical Cumulative Distribution Function, ECDF" data-def="经验分布函数是对总体分布函数 $F(x)=P(X\le x)$ 的非参数估计。它直接用样本中“不大于某个阈值的比例”来近似总体累计概率。">经验分布函数（Empirical Cumulative Distribution Function, ECDF）</a> 的区别：ECDF 无需分箱、无信息损失地展示累积分布。</li>
-<li>和箱线图的区别：箱线图概括分位数、便于多组比较，但看不出多峰。</li>
+<li>和<strong>核密度估计（KDE）</strong>：KDE 用平滑核给出连续密度，避免箱边界的锯齿。</li>
+<li>和<strong>经验分布函数（ECDF）</strong>：ECDF 无需分箱、无信息损失地展示累积分布。</li>
+<li>和<strong>箱线图</strong>：箱线图概括分位数、便于多组比较，但看不出多峰。</li>
+<li>如何选择：单组看形状用直方图/KDE；多组比较用箱线图/小提琴图。</li>
 </ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
       <div class="sec-body"><ul>
 <li>基线连续变量（年龄、BMI、检验值）的分布描述。</li>
 <li>数据清洗中识别异常值、截断与录入错误。</li>
 <li>判断是否需要对数变换等预处理。</li>
 </ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计是一种用局部加权平均来估计连续型变量概率密度函数的非参数方法。它常用来替代粗糙的直方图，给出更平滑的分布形状。">核密度估计（Kernel Density Estimation, KDE）</a></li>
-<li><a class="xlink" href="m-empirical-cumulative-distribution-function-ecdf.html" data-cn="经验分布函数" data-en="Empirical Cumulative Distribution Function, ECDF" data-def="经验分布函数是对总体分布函数 $F(x)=P(X\le x)$ 的非参数估计。它直接用样本中“不大于某个阈值的比例”来近似总体累计概率。">经验分布函数（Empirical Cumulative Distribution Function, ECDF）</a></li>
+<li><strong>箱 / bin</strong>：把取值范围切成的等宽区间。</li>
+<li><strong>箱宽（Bin width, $h$）</strong>：每个区间的宽度，控制平滑程度。</li>
+<li><strong>频率密度（Density）</strong>：频率除以箱宽，使柱形面积之和为 1。</li>
+<li><strong>偏差-方差权衡</strong>：箱宽大偏差大、箱宽小方差大的取舍。</li>
+<li><strong>Freedman-Diaconis 规则</strong>：用四分位距定箱宽的稳健经验法则。</li>
 </ul></div>
-    </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计给每个观测放上一个小小的、光滑的「山包」（核），再把所有山包叠加平均，得到一条连续平滑的密度曲线——本质是把直方图的硬台阶抹圆。">核密度估计（Kernel Density Estimation, KDE）</a></li>
+<li><a class="xlink" href="m-empirical-cumulative-distribution-function-ecdf.html" data-cn="经验分布函数" data-en="Empirical Cumulative Distribution Function, ECDF" data-def="经验分布函数是「用数据本身当作分布」：在每个观测值处向上跳一小步 $1/n$，画出「有多大比例的数据不超过 $x$」这条阶梯曲线，它是真实累积分布函数（CDF）最诚实的估计。">经验分布函数（Empirical Cumulative Distribution Function, ECDF）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Freedman D, Diaconis P. On the histogram as a density estimator: L2 theory. <em>Z Wahrscheinlichkeitstheorie</em>. 1981;57(4):453-476.</li>
 <li>Scott DW. <em>Multivariate Density Estimation: Theory, Practice, and Visualization</em>. 2nd ed. Wiley; 2015.</li>

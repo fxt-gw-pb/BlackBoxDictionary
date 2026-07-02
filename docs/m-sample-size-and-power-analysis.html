@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -48,112 +48,169 @@
       <div class="detail-meta">
         <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
         <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
-        <span>标签&nbsp;·&nbsp;<b>医学统计 / 研究设计 / 样本量 / 检验效能</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 研究设计 / 样本量 / 检验效能 / 临床试验</b></span>
       </div>
     </div>
     <div class="intro-note"><h1>样本量与检验效能（Sample Size and Power Analysis）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>样本量与检验效能分析在研究开始前，根据预期效应、显著性水平和目标把握度，计算需要多少样本，或评估给定样本量下能检出多大效应。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>样本量估计是在<strong>收集数据之前</strong>，把「想检出的效应大小、数据的变异、可接受的假阳性率、想要的把握度」四者放进同一个等式，反解出「需要多少人」。</p>
+<h3>1.2 定义</h3>
+<p>检验效能（power）是「当真效应确实存在时，研究能把它检出（拒绝原假设）的概率」。样本量估计就是在给定效应量、显著性水平 $\alpha$ 与目标效能 $1-\beta$ 下反推所需样本量；也可反过来在给定样本量下评估能达到的效能。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：要有把握检出临床上有意义的效应，需要招募多少受试者。</li>
-<li>适用任务：临床试验/观察研究的样本量估计、事后效能与最小可检测效应评估、方案设计。</li>
-<li>常见医学场景：RCT 组间比较、诊断/预后研究、生存终点试验的事件数规划。</li>
+<li>研究问题：这项研究要招募多少受试者，才有足够把握检出有临床意义的效应？</li>
+<li>适用任务：临床试验/队列/病例对照的样本量规划、事后效能评估、可行性论证。</li>
+<li>常见医学场景：RCT 主要终点的样本量计算、诊断研究所需病例数、基金申请与伦理审查的样本量依据。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>样本量、效应大小、显著性水平 $\alpha$ 与把握度（power）$1-\beta$ 四者相互牵制：固定其三可解出第四。效应越小、要求把握度越高，所需样本越多。规划阶段做这件事，能避免“做完发现没把握检出真效应”。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>样本量像相机的曝光时间。光线弱（效应小、变异大）时，需要更长曝光（更大样本）才能拍清楚；光线强（效应大）时，短曝光就够。曝光不足（样本太少），照片一片噪点——真效应也被淹没，得出「无差异」的假阴性结论，这几乎是临床研究最常见、也最浪费的错误。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>把握度是在效应真实存在时拒绝原假设的概率：</p>
-<p>$$
-\text{power}=1-\beta=P(\text{拒绝}H_0\mid H_1\ \text{为真})
-$$</p>
-<p>两组均值比较（每组 $n$、双侧 $\alpha$、效应量 $d=\Delta/\sigma$）的近似样本量：</p>
-<p>$$
-n=\frac{2\,(z_{1-\alpha/2}+z_{1-\beta})^2}{d^2}
-$$</p>
-<p>生存终点常按所需事件数规划（Schoenfeld）：</p>
-<p>$$
-D=\frac{4\,(z_{1-\alpha/2}+z_{1-\beta})^2}{(\ln \mathrm{HR})^2}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>假设检验有两类错误：把无效当有效（I 类错误 $\alpha$）和把有效当无效（II 类错误 $\beta$）。传统上大家只盯着 $\alpha=0.05$，却忽视 $\beta$。根本困难是：<strong>样本太小时，即使真有效应，检验统计量也常落不到拒绝域里</strong>——研究注定「看不见」真相。样本量估计就是在设计阶段把 $\beta$ 也控制住。</p>
+<h3>2.2 关键洞察</h3>
+<p>效能不是单独存在的，它由四个量互相牵制：<strong>效应量、变异、$\alpha$、样本量</strong>。固定其中三个，第四个就被决定了。关键机制是：备择假设为真时，检验统计量的分布会<strong>整体平移</strong>（非中心分布），平移距离正比于 $\sqrt{n}\cdot(\text{效应}/\text{标准差})$；样本越大，这个分布越深地探进拒绝域，落入拒绝域的概率（效能）就越高。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$\alpha$：一类错误率（假阳性），常取 0.05。</li>
-<li>$1-\beta$：把握度，常取 0.8 或 0.9。</li>
-<li>效应量：如 Cohen's $d$、风险差、$\ln\mathrm{HR}$。</li>
-<li>$\sigma$：结局的（预期）标准差；$D$：所需事件数。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>预期效应量、方差、事件率等来自既往研究或临床判断。</li>
-<li>检验方法、分配比例、单/双侧已预先确定。</li>
-<li>计入脱落、多重比较、聚类等设计因素后再定最终样本量。</li>
+<li>相对「凭经验拍脑袋定 n」：正式计算把假设透明化，可复现、可审查。</li>
+<li>相对「事后再算效能」：事后效能（尤其用观测效应算的）几乎无信息量，规划必须在<strong>事前</strong>。</li>
+<li>与「精度导向」互补：也可按「置信区间半宽不超过某值」定样本量，思路等价。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>比较两组均值（等方差、双侧）时，每组所需样本量：</p>
+<p>$$
+n_{\text{每组}}=\frac{2\,(z_{1-\alpha/2}+z_{1-\beta})^2\,\sigma^2}{\delta^2}
+$$</p>
+<p>这个式子在说：需要的样本量与「变异 $\sigma^2$」成正比、与「想检出的差 $\delta$ 的平方」成反比——差越小、越难测，所需样本以平方速度暴涨。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>自变量类型：分组/暴露变量。</li>
-<li>因变量类型：连续、二分类或时间到事件（各有对应公式）。</li>
-<li>数据结构：设计阶段的参数假设，而非已有数据。</li>
-<li>是否适合高维数据：高维/多重检验需相应校正 $\alpha$ 或采用 FDR 视角。</li>
-<li>是否适合缺失较多数据：预期脱落率应纳入膨胀。</li>
-<li>是否适合删失数据：生存终点按事件数而非人数规划。</li>
-<li>是否适合重复测量数据：需用设计效应/混合模型效能。</li>
+<li>检验统计量 $Z=\dfrac{\bar{x}_1-\bar{x}_2}{\sigma\sqrt{2/n}}$，原假设下 $Z\sim N(0,1)$。</li>
+<li>备择假设（真差为 $\delta$）下，$Z$ 的均值平移到非中心参数 $\lambda=\dfrac{\delta}{\sigma\sqrt{2/n}}=\dfrac{\delta}{\sigma}\sqrt{\dfrac{n}{2}}$。</li>
+<li>要求「在 $\alpha$ 下拒绝的概率」达到 $1-\beta$，即 $\lambda\ge z_{1-\alpha/2}+z_{1-\beta}$。</li>
+<li>代入 $\lambda$ 反解 $n$ 即得上式。其他设计（比例、生存、相关）思路相同，只是把「效应/标准差」换成对应效应量。</li>
 </ul>
-<h3>3.2 示例表格</h3>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$\delta$：想检出的<strong>均值差</strong>（应取有临床意义的最小差 MCID，而非「希望的」大差）。</li>
+<li>$\sigma$：结局的标准差（来自既往文献或预试验）。</li>
+<li>$\alpha$：显著性水平（I 类错误率，常 0.05）；$z_{1-\alpha/2}=1.96$。</li>
+<li>$1-\beta$：目标效能（常 0.8 或 0.9）；效能 0.8 时 $z_{1-\beta}=0.84$。</li>
+<li>标准化效应量 $d=\delta/\sigma$：真正决定样本量的是它，而非 $\delta$ 或 $\sigma$ 单独。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>结局类型</th>
-<th>关键输入</th>
-<th>输出</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>两组均值</td>
-<td>Δ, σ, α, power</td>
-<td>每组样本量</td>
+<td>$\sigma$ 估计可靠</td>
+<td>用的变异接近真实</td>
+<td>低估 $\sigma$ → 样本不足、效能虚高</td>
+<td>敏感性分析、取保守值</td>
 </tr>
 <tr>
-<td>两组率</td>
-<td>p1, p2, α, power</td>
-<td>每组样本量</td>
+<td>效应量合理</td>
+<td>$\delta$ 取的是 MCID</td>
+<td>取值过大 → 样本偏小</td>
+<td>与临床共识对照</td>
 </tr>
 <tr>
-<td>生存 HR</td>
-<td>HR, α, power, 事件率</td>
-<td>所需事件数与总样本</td>
+<td>无过多脱落</td>
+<td>实际可分析样本≈计划</td>
+<td>有效样本缩水、效能下降</td>
+<td>按脱落率上调 $n$</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>设计一项 RCT，比较新药与安慰剂对收缩压的降幅：临床上认为<strong>降幅相差 5 mmHg 才有意义</strong>（$\delta=5$），已知收缩压标准差 $\sigma=10$，取 $\alpha=0.05$（双侧）、效能 $1-\beta=0.8$。</p>
+<p><strong>一步步计算：</strong></p>
+<ul>
+<li>查标准正态分位：$z_{1-\alpha/2}=z_{0.975}=1.96$，$z_{1-\beta}=z_{0.80}=0.84$。</li>
+<li>两分位之和的平方：$(1.96+0.84)^2=2.80^2=7.84$。</li>
+<li>代入公式：$n=\dfrac{2\times 7.84\times 10^2}{5^2}=\dfrac{2\times 7.84\times 100}{25}=\dfrac{1568}{25}=62.7$。</li>
+<li>向上取整：<strong>每组 63 人</strong>，两组共 126 人。</li>
+<li>若预计 15% 脱落，需上调：$126/(1-0.15)\approx 149$ 人。</li>
+</ul>
+<p><strong>结论：</strong> 想稳定检出 5 mmHg 的差异，每组约需 63 人。若把目标差改成 3 mmHg，$n$ 会涨到约 $63\times(5/3)^2\approx175$/组——<strong>这直观展示了「越小的效应，样本量以平方暴涨」</strong>，也是为什么设计阶段必须诚实地设定 MCID。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：设计变量（分组、暴露）。</li>
+<li>因变量类型：连续、二分类、时间到事件、相关等（各有对应公式）。</li>
+<li>数据结构：尚无数据，基于假设参数计算。</li>
+<li>是否适合高维数据：多重比较需相应调整 $\alpha$。</li>
+<li>是否适合缺失较多数据：应按预期脱落率上调样本量。</li>
+<li>是否适合删失数据：生存设计按「所需事件数」而非人数计算。</li>
+<li>是否适合重复测量数据：需考虑组内相关（如 ICC、设计效应）。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>输入参数</th>
+<th>取值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>最小重要差 δ</td>
+<td>5 mmHg</td>
+<td>临床共识</td>
+</tr>
+<tr>
+<td>标准差 σ</td>
+<td>10 mmHg</td>
+<td>既往研究</td>
+</tr>
+<tr>
+<td>α（双侧）</td>
+<td>0.05</td>
+<td>惯例</td>
+</tr>
+<tr>
+<td>效能 1−β</td>
+<td>0.80</td>
+<td>惯例</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：预期效应、方差/基线率、$\alpha$、目标 power、分配比例。</li>
-<li>关键变量：效应量、显著性水平、把握度。</li>
-<li>需要预处理的内容：确定检验类型、单/双侧、脱落与多重性调整。</li>
+<li>输入数据：效应量、变异、$\alpha$、目标效能、分配比例。</li>
+<li>关键变量：结局类型、检验类型、单/双侧、脱落率。</li>
+<li>需要预处理的内容：把参数换算为标准化效应量。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：所需样本量或事件数。</li>
-<li>参数估计：给定 n 下的把握度、最小可检测效应。</li>
-<li>预测结果：样本量–把握度曲线。</li>
-<li>不确定性指标：对效应/方差假设的敏感性分析。</li>
+<li>模型对象/统计结果：所需样本量或达到的效能。</li>
+<li>参数估计：无（是设计计算）。</li>
+<li>预测结果：效能曲线（样本量 vs 效能）。</li>
+<li>不确定性指标：对参数假设的敏感性分析。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：研究方案设计、基金/伦理申请、终点与样本规划。</li>
-<li>不适合：用“事后把握度”为已获阴性结果辩护（是常见谬误）。</li>
-<li>使用前需要特别检查的点：效应量来源是否可信、是否计入脱落与多重比较、单双侧设定。</li>
+<li>适合：任何前瞻性研究的设计阶段、基金/伦理申请、可行性评估。</li>
+<li>不适合：用观测到的效应做「事后效能」为阴性结果开脱（无信息量）。</li>
+<li>使用前需要特别检查的点：效应量是否取 MCID、$\sigma$ 是否可靠、是否计入脱落与多重比较。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="sample-size-and-power-analysis" data-i="0">Python</button><button class="codetab" data-uid="sample-size-and-power-analysis" data-i="1">R</button></div><div class="codepanel active" data-uid="sample-size-and-power-analysis" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>statsmodels</code></li>
@@ -161,82 +218,99 @@ $$</p>
 <pre><code class="language-python">from statsmodels.stats.power import TTestIndPower
 
 analysis = TTestIndPower()
-n = analysis.solve_power(effect_size=0.5, alpha=0.05, power=0.8, ratio=1.0)
-print(&quot;每组所需样本量:&quot;, round(n, 1))
+n = analysis.solve_power(effect_size=5/10,   # d = δ/σ
+                         alpha=0.05, power=0.8, ratio=1.0,
+                         alternative=&quot;two-sided&quot;)
+print(f&quot;每组样本量 ≈ {n:.1f}&quot;)
 </code></pre></div><div class="codepanel" data-uid="sample-size-and-power-analysis" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>pwr</code></li>
 </ul>
 <pre><code class="language-r">library(pwr)
-
-# 两组均值, Cohen&#x27;s d = 0.5
-pwr.t.test(d = 0.5, sig.level = 0.05, power = 0.8, type = &quot;two.sample&quot;)
-
-# 两组率
-# power.prop.test(p1 = 0.30, p2 = 0.45, sig.level = 0.05, power = 0.8)
+pwr.t.test(d = 5/10, sig.level = 0.05, power = 0.8,
+           type = &quot;two.sample&quot;, alternative = &quot;two.sided&quot;)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：所需样本量/事件数，以及对关键假设的敏感性。</li>
-<li>每个主要参数如何解释：报告应写明假设的效应量、$\alpha$、power 与来源，便于同行判断合理性。</li>
-<li>临床或医学意义如何表达：把效应量与“临床最小重要差异”对齐，而非追求统计上最易检出的效应。</li>
-<li>常见误读：把事后把握度当作阴性结果的解释；用观测效应反算 power（循环论证）。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>样本量–把握度曲线（不同效应量）。</li>
-<li>敏感性分析热图（效应量 × 方差）。</li>
-<li>招募/脱落调整后的样本量条形图。</li>
-</ul></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：所需样本量（含脱落上调后的实际招募目标）。</li>
+<li>每个主要参数如何解读：效应量翻倍，样本量降为约 1/4；效能从 0.8 提到 0.9，样本量约增 34%。</li>
+<li>临床或医学意义如何表达：报告「为在 α=0.05、效能 80% 下检出 δ 的差异，需 N 人」，并给出参数来源。</li>
+<li>常见误读：把「未达显著」当「证明无效」；用夸大的效应量把样本量压小。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>效应量来源：优先用最小临床重要差（MCID），而非既往研究里可能被夸大的观测效应。</li>
+<li>变异来源：$\sigma$ 用文献或预试验；不确定时取偏大的保守值，并做敏感性分析（画多条效能曲线）。</li>
+<li>脱落与依从：按预期失访率上调样本量，长随访研究尤其重要。</li>
+<li>多重性与聚类：多主终点需调 $\alpha$；整群随机需乘设计效应 $1+(m-1)\rho$。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>效能曲线：横轴样本量、纵轴效能，标出目标 0.8/0.9。</li>
+<li>敏感性热图：效应量 × 变异 对样本量的影响。</li>
+<li>不同 α 或分配比例下的样本量对比。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>提升研究的可行性与伦理合理性，避免不足或过度招募。</li>
-<li>迫使研究者事先明确效应量与假设。</li>
-<li>可比较不同设计的效率。</li>
+<li>让研究「有足够眼力」看见真效应，减少浪费与伦理风险。</li>
+<li>把设计假设透明化，可复现、可审查。</li>
+<li>是基金与伦理申请的硬性要求。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>高度依赖预期参数，假设错则结论错。</li>
-<li>不同软件/公式的近似与连续性校正可能有差异。</li>
-<li>复杂设计（聚类、适应性、多终点）需专门方法。</li>
+<li>强依赖对效应量与变异的事前假设。</li>
+<li>简化公式未涵盖复杂设计（需模拟）。</li>
+<li>事后效能几乎无意义。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>效应量凭“希望值”而非临床意义设定。</li>
-<li>忽略脱落率与多重比较膨胀。</li>
-<li>用事后把握度为阴性结果开脱。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和具体检验（如 <a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="它把「两组均值的差」除以「这个差本身的随机波动（标准误）」，得到一个信噪比 $t$：差异相对波动足够大，就判断两组总体均值真的不同。">两独立样本t检验（Two-Sample t-Test）</a>）的关系：效能分析在设计阶段服务于将来要做的检验。</li>
-<li>和 <a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 是一种从原始样本中“有放回重抽样”的方法，用来近似统计量的抽样分布，从而估计标准误、方差和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a> 的关系：复杂设计可用模拟（含 bootstrap/蒙特卡洛）估计把握度。</li>
-<li>和 <a class="xlink" href="m-multiple-testing-and-error-rate-control.html" data-cn="多重检验与错误率控制" data-en="Multiple Testing and Error Rate Control" data-def="多重检验与错误率控制关注的是：当同时进行很多次假设检验时，如何控制整体假阳性风险或错误发现比例。">多重检验与错误率控制（Multiple Testing and Error Rate Control）</a> 的关系：多重终点会改变有效 $\alpha$，需在样本量中体现。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>RCT 主要终点的样本量估计与方案撰写。</li>
-<li>生存试验按事件数规划随访与入组。</li>
-<li>诊断/预后研究达到目标区间宽度所需样本。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="它把「两组均值的差」除以「这个差本身的随机波动（标准误）」，得到一个信噪比 $t$：差异相对波动足够大，就判断两组总体均值真的不同。">两独立样本t检验（Two-Sample t-Test）</a></li>
-<li><a class="xlink" href="m-log-rank-test.html" data-cn="Log-rank检验" data-en="Log-rank Test" data-def="Log-rank 检验是比较两组或多组生存曲线是否存在统计学差异的最常用非参数检验。">Log-rank检验（Log-rank Test）</a></li>
-<li><a class="xlink" href="m-multiple-testing-and-error-rate-control.html" data-cn="多重检验与错误率控制" data-en="Multiple Testing and Error Rate Control" data-def="多重检验与错误率控制关注的是：当同时进行很多次假设检验时，如何控制整体假阳性风险或错误发现比例。">多重检验与错误率控制（Multiple Testing and Error Rate Control）</a></li>
+<li>用「期望的大效应」而非 MCID，导致样本严重不足。</li>
+<li>忘记脱落、忘记多重比较调整。</li>
+<li>把 p 大解读为「证明等效」（等效性需专门设计）。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Chow SC, Shao J, Wang H, Lokhnygina Y. <em>Sample Size Calculations in Clinical Research</em>. 3rd ed. Chapman and Hall/CRC; 2017.</li>
-<li>Schoenfeld DA. Sample-size formula for the proportional-hazards regression model. <em>Biometrics</em>. 1983;39(2):499-503.</li>
-<li>Champely S. pwr: Basic Functions for Power Analysis. <a href="https://cran.r-project.org/package=pwr">https://cran.r-project.org/package=pwr</a> （访问日期：2026-07-02）</li>
+<li>和<strong>假设检验</strong>：检验是数据到手后的推断，样本量是数据之前的规划，二者用同一套分布理论。</li>
+<li>和<strong>置信区间/精度法</strong>：可按「区间半宽」定样本量，与效能法互为表里。</li>
+<li>和<strong>等效性/非劣效性设计</strong>：目标不是「检出差异」而是「排除有意义的差异」，公式与边界不同。</li>
+<li>如何选择：优效试验用效能法定 δ；纯估计研究用精度法定区间宽度。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>RCT 主要终点的样本量计算与方案撰写。</li>
+<li>诊断准确性研究所需阳性/阴性病例数。</li>
+<li>队列研究在给定暴露率下检出某 RR 所需人数。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>检验效能（Power, $1-\beta$）</strong>：真效应存在时能检出它的概率。</li>
+<li><strong>I 类错误（$\alpha$）</strong>：无效应却判为有效（假阳性）。</li>
+<li><strong>II 类错误（$\beta$）</strong>：有效应却判为无效（假阴性）。</li>
+<li><strong>效应量（Effect Size）</strong>：标准化的差异大小，如 $d=\delta/\sigma$，决定样本量的核心量。</li>
+<li><strong>最小临床重要差（MCID）</strong>：小到临床仍在意的差异，应作为 $\delta$。</li>
+<li><strong>非中心参数（Noncentrality）</strong>：备择假设下检验统计量分布的平移量，正比于 $\sqrt{n}\cdot d$。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="它把「两组均值的差」除以「这个差本身的随机波动（标准误）」，得到一个信噪比 $t$：差异相对波动足够大，就判断两组总体均值真的不同。">两独立样本t检验（Two-Sample t-Test）</a></li>
+<li><a class="xlink" href="m-confidence-interval.html" data-cn="置信区间" data-en="Confidence Interval" data-def="置信区间是围绕点估计构造的一段取值范围，用来表达对未知参数的估计不确定性；在反复抽样意义下，一定比例（如 95%）的区间会覆盖真值。">置信区间（Confidence Interval）</a></li>
+<li><a class="xlink" href="m-multiple-testing-and-error-rate-control.html" data-cn="多重检验与错误率控制" data-en="Multiple Testing and Error Rate Control" data-def="多重检验与错误率控制关注的是：当同时进行很多次假设检验时，如何控制整体假阳性风险或错误发现比例。">多重检验与错误率控制（Multiple Testing and Error Rate Control）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Cohen J. <em>Statistical Power Analysis for the Behavioral Sciences</em>. 2nd ed. Routledge; 1988.</li>
+<li>Chow SC, Shao J, Wang H. <em>Sample Size Calculations in Clinical Research</em>. 3rd ed. CRC Press; 2017.</li>
+<li>Julious SA. Sample sizes for clinical trials with normal data. <em>Stat Med</em>. 2004;23(12):1921-1986.</li>
 </ul></div>
     </section>
     <div class="pager"><span></span><a class="pg pg-next" href="m-histogram.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">直方图</div></a></div>

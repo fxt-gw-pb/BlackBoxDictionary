@@ -46,7 +46,7 @@
           <span class="entry-cn">样本量与检验效能</span>
           <span class="entry-en">Sample Size and Power Analysis</span>
         </div>
-        <p class="entry-def">样本量与检验效能分析在研究开始前，根据预期效应、显著性水平和目标把握度，计算需要多少样本，或评估给定样本量下能检出多大效应。</p>
+        <p class="entry-def">样本量估计是在收集数据之前，把「想检出的效应大小、数据的变异、可接受的假阳性率、想要的把握度」四者放进同一个等式，反解出「需要多少人」。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -59,7 +59,7 @@
           <span class="entry-cn">直方图</span>
           <span class="entry-en">Histogram</span>
         </div>
-        <p class="entry-def">直方图把连续变量的取值范围切成若干等宽区间（bin），统计每个区间内的观测数（或频率），用相邻柱形展示数据的分布形状。</p>
+        <p class="entry-def">直方图把连续变量的取值范围切成一排等宽格子，数一数每格里落了多少观测——它其实是密度函数最朴素的「分段常数」估计。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -72,7 +72,7 @@
           <span class="entry-cn">经验分布函数</span>
           <span class="entry-en">Empirical Cumulative Distribution Function, ECDF</span>
         </div>
-        <p class="entry-def">经验分布函数是对总体分布函数 $F(x)=P(X\le x)$ 的非参数估计。它直接用样本中“不大于某个阈值的比例”来近似总体累计概率。</p>
+        <p class="entry-def">经验分布函数是「用数据本身当作分布」：在每个观测值处向上跳一小步 $1/n$，画出「有多大比例的数据不超过 $x$」这条阶梯曲线，它是真实累积分布函数（CDF）最诚实的估计。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -85,11 +85,11 @@
           <span class="entry-cn">核密度估计</span>
           <span class="entry-en">Kernel Density Estimation, KDE</span>
         </div>
-        <p class="entry-def">核密度估计是一种用局部加权平均来估计连续型变量概率密度函数的非参数方法。它常用来替代粗糙的直方图，给出更平滑的分布形状。</p>
+        <p class="entry-def">核密度估计给每个观测放上一个小小的、光滑的「山包」（核），再把所有山包叠加平均，得到一条连续平滑的密度曲线——本质是把直方图的硬台阶抹圆。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
-        <span class="entry-diff">basic</span>
+        <span class="entry-diff">intermediate</span>
       </div>
     </a><a class="entry" href="m-kolmogorov-smirnov-test.html">
       <span class="entry-no">01·05</span>
@@ -98,7 +98,7 @@
           <span class="entry-cn">Kolmogorov-Smirnov检验</span>
           <span class="entry-en">Kolmogorov-Smirnov Test</span>
         </div>
-        <p class="entry-def">Kolmogorov-Smirnov 检验是一种基于经验分布函数的非参数检验，用经验分布与理论分布（单样本）或两组经验分布之间的最大距离，判断分布是否一致。</p>
+        <p class="entry-def">KS 检验用「两条累积分布曲线之间的最大垂直距离」作为分布是否相同的证据——距离越大，越有理由说它们来自不同分布。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>

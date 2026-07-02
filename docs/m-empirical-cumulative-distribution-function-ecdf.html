@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -48,217 +48,306 @@
       <div class="detail-meta">
         <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
         <span>难度&nbsp;·&nbsp;<b>basic</b></span>
-        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 非参数统计 / 分布探索</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 描述统计 / 非参数 / 分布探索</b></span>
       </div>
     </div>
     <div class="intro-note"><h1>经验分布函数（Empirical Cumulative Distribution Function, ECDF）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>经验分布函数是对总体分布函数 $F(x)=P(X\le x)$ 的非参数估计。它直接用样本中“不大于某个阈值的比例”来近似总体累计概率。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>经验分布函数是「用数据本身当作分布」：在每个观测值处向上跳一小步 $1/n$，画出「有多大比例的数据不超过 $x$」这条阶梯曲线，它是真实累积分布函数（CDF）最诚实的估计。</p>
+<h3>1.2 定义</h3>
+<p>ECDF 是一个阶梯函数 $F_n(x)$，等于样本中「小于等于 $x$ 的观测所占比例」。它不假设任何分布形式，是完全非参数的分布描述工具，也是 KS 检验、分位数、生存曲线等方法的基石。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：样本在不同阈值以下累计了多少概率质量。</li>
-<li>适用任务：描述分布、比较两组分布、查看尾部行为、为非参数方法提供基础。</li>
-<li>常见医学场景：比较两组患者的生物标志物分布、查看住院天数或实验室指标的整体分布差异。</li>
+<li>研究问题：数据在各个取值以下的累积占比是多少？中位数、四分位数在哪？</li>
+<li>适用任务：分布探索、分位数读取、两组分布比较、分布拟合检验的可视化。</li>
+<li>常见医学场景：比较两组指标的整体分布、读取某阈值以下的患者比例、检查分布是否近似某理论分布。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>ECDF 可以理解成“从左往右数人头”。给定一个阈值 $x$，看看样本里有多少比例已经落在 $x$ 左边，这个比例就是对真实累计概率的直接估计。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>把所有数据从小到大排成一队，站到某个数值 $x$ 前面，回头数「队伍里有多大比例排在我（含）前面」——这个比例随 $x$ 从 0 爬到 1，就是 ECDF。它像一部「累积点票」的记录：每来一票（一个观测），累计比例就往上跳一格。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-\hat F(x) = \frac{1}{n}\sum_{i=1}^n I(X_i \le x)
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>我们想知道总体的 CDF $F(x)=P(X\le x)$，但总体不可见，只有样本。直方图和 KDE 要选箱宽/带宽这类「旋钮」，结果会随旋钮变。根本困难是：<strong>能不能不调任何旋钮、不损失信息地估计分布？</strong> ECDF 正是答案——它把每个观测原封不动地放进曲线，无参数、无平滑、无信息损失。</p>
+<h3>2.2 关键洞察</h3>
+<p>用「频率」估「概率」：$P(X\le x)$ 用样本里「$\le x$ 的比例」来估。每个观测是否 $\le x$ 是一次伯努利试验，$F_n(x)$ 就是这些 0/1 的平均值。由此它<strong>无偏</strong>（期望正好是 $F(x)$），且由大数定律<strong>逐点收敛</strong>、由 Glivenko-Cantelli 定理<strong>一致收敛</strong>到真 CDF——样本越大，阶梯越贴合真实曲线。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$I(X_i \le x)$：指示函数，若第 $i$ 个观测不超过 $x$ 则取 1。</li>
-<li>$n$：样本量。</li>
-<li>$\hat F(x)$：样本中不超过 $x$ 的经验比例。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>样本可视为来自同一目标总体。</li>
-<li>观测值相互独立是最常见设定。</li>
-<li>不需要预设正态、对数正态等具体分布形式。</li>
+<li>相对<strong>直方图</strong>：直方图要分箱、会丢信息且随箱宽变；ECDF 不分箱、无信息损失。</li>
+<li>相对<strong>核密度估计（KDE）</strong>：KDE 估的是密度（导数）、需带宽；ECDF 估的是累积分布、无需调参。</li>
+<li>代价：ECDF 是阶梯状（不平滑），看「密度形状」不如直方图/KDE 直观，但看「累积比例、分位数、分布比较」更准。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>$$
+F_n(x)=\frac{1}{n}\sum_{i=1}^{n}\mathbf{1}\{x_i\le x\}
+$$</p>
+<p>这个式子在说：$x$ 处的函数值 = 样本中「不超过 $x$ 的观测个数」除以总数 $n$；每遇到一个观测，曲线就向上跳 $1/n$。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>自变量类型：通常是一维数值变量，也可按分组分别作图。</li>
-<li>因变量类型：不涉及监督学习中的因变量。</li>
-<li>数据结构：独立样本的一维观测最常见。</li>
-<li>是否适合高维数据：不适合直接处理高维，但可对每个变量分别作 ECDF。</li>
-<li>是否适合缺失较多数据：可用，但应先明确缺失处理策略。</li>
-<li>是否适合删失数据：不适合；有删失时更适合 Kaplan-Meier。</li>
-<li>是否适合重复测量数据：单次探索可以做，但推断需考虑相关性。</li>
+<li>令指示变量 $I_i=\mathbf{1}\{x_i\le x\}$，它服从 $\mathrm{Bernoulli}(F(x))$。</li>
+<li>$F_n(x)=\frac{1}{n}\sum_i I_i$ 是这些伯努利变量的样本均值。</li>
+<li>期望：$E[F_n(x)]=F(x)$（<strong>无偏</strong>）；方差：$\mathrm{Var}[F_n(x)]=\dfrac{F(x)(1-F(x))}{n}$（随 $n$ 收缩）。</li>
+<li>一致收敛：Glivenko-Cantelli 定理保证 $\sup_x|F_n(x)-F(x)|\to 0$（几乎必然）；DKW 不等式还给出置信带 $F_n(x)\pm\varepsilon$，其中 $\varepsilon=\sqrt{\ln(2/\alpha)/(2n)}$。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>以 <code>Framingham_data.csv</code> 的基线连续变量为例，ECDF 很适合描述单个连续指标在总体中的累计分布：</p>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$F_n(x)$：截至 $x$ 的累积比例，取值 0 到 1。</li>
+<li>跳跃高度 $1/n$：每个观测的「权重」；重复值处跳 $k/n$。</li>
+<li>分位数：$F_n$ 的反函数，如中位数 = $F_n(x)=0.5$ 处的 $x$。</li>
+<li>DKW 半宽 $\varepsilon$：给整条曲线的同时置信带宽度。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>RANDID</th>
-<th>PERIOD</th>
-<th>SEX</th>
-<th>BMI</th>
-<th>TOTCHOL</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>2448</td>
+<td>独立同分布</td>
+<td>观测来自同一总体、互不影响</td>
+<td>曲线不代表单一分布</td>
+<td>分层看</td>
+</tr>
+<tr>
+<td>无严重截断</td>
+<td>样本能覆盖分布主体</td>
+<td>尾部估计失真</td>
+<td>结合数据来源判断</td>
+</tr>
+<tr>
+<td>无删失</td>
+<td>结局完整观测</td>
+<td>有删失应改用 Kaplan-Meier</td>
+<td>看是否随访删失</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>对 5 个观测手工画 ECDF：数据 = 2, 4, 4, 6, 9（$n=5$，注意 4 出现两次）。</p>
+<p><strong>一步步计算</strong>（$F_n(x)$ = ≤x 的个数 / 5）：</p>
+<table>
+<thead>
+<tr>
+<th>$x$</th>
+<th>≤x 的个数</th>
+<th>$F_n(x)$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
 <td>1</td>
 <td>0</td>
-<td>26.97</td>
-<td>195</td>
+<td>0.0</td>
 </tr>
 <tr>
-<td>6238</td>
+<td>2</td>
 <td>1</td>
-<td>1</td>
-<td>28.73</td>
-<td>250</td>
+<td>0.2</td>
 </tr>
 <tr>
-<td>9428</td>
+<td>3</td>
 <td>1</td>
-<td>0</td>
-<td>25.34</td>
-<td>245</td>
+<td>0.2</td>
 </tr>
 <tr>
-<td>10552</td>
-<td>1</td>
-<td>1</td>
-<td>28.58</td>
-<td>225</td>
+<td>4</td>
+<td>3</td>
+<td>0.6</td>
 </tr>
 <tr>
-<td>11252</td>
-<td>1</td>
-<td>1</td>
-<td>23.10</td>
-<td>285</td>
+<td>6</td>
+<td>4</td>
+<td>0.8</td>
+</tr>
+<tr>
+<td>9</td>
+<td>5</td>
+<td>1.0</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<ul>
+<li>曲线在 2 处跳 $1/5=0.2$，在 4 处一次跳 $2/5=0.4$（因为有两个 4），在 6、9 处各跳 0.2。</li>
+<li>读中位数：$F_n$ 首次达到 0.5 的位置在 4（$F_n(4)=0.6$），故样本中位数为 4。</li>
+</ul>
+<p><strong>结论：</strong> 无需任何分箱或参数，5 个点就唯一确定了这条阶梯。重复值让台阶更高，说明 ECDF 忠实记录了「数据在哪扎堆」。样本越大，台阶越密、越逼近真实的平滑 CDF。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：单个数值变量（连续或离散）。</li>
+<li>因变量类型：不区分。</li>
+<li>数据结构：一维数值数组。</li>
+<li>是否适合高维数据：一维；多维需边际或专门方法。</li>
+<li>是否适合缺失较多数据：需先剔除或说明缺失。</li>
+<li>是否适合删失数据：不适合，删失用 Kaplan-Meier（它是删失版 ECDF）。</li>
+<li>是否适合重复测量数据：混合层级会掩盖结构，宜分层。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>$x$</th>
+<th>$F_n(x)$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0.6</td>
+</tr>
+<tr>
+<td>6</td>
+<td>0.8</td>
+</tr>
+<tr>
+<td>9</td>
+<td>1.0</td>
+</tr>
+</tbody>
+</table>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：一组数值型观测。</li>
-<li>关键变量：待描述的数值变量，可附加一个分组变量。</li>
-<li>需要预处理的内容：缺失值处理、必要时按组拆分。</li>
+<li>输入数据：一维数值向量。</li>
+<li>关键变量：待描述变量。</li>
+<li>需要预处理的内容：排序（软件自动）、处理缺失。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：一个阶梯函数。</li>
-<li>参数估计：每个阈值对应的累计概率估计。</li>
-<li>预测结果：无预测意义，主要用于描述。</li>
-<li>不确定性指标：通常不单独给；若需要可通过 DKW 不等式或 Bootstrap 构建带状区间。</li>
+<li>模型对象/统计结果：阶梯函数 $F_n$、各分位数。</li>
+<li>参数估计：无（非参数）。</li>
+<li>预测结果：任意 $x$ 处的累积比例。</li>
+<li>不确定性指标：DKW 置信带。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：描述分布、比较组间整体分布、观察中位数和尾部差异。</li>
-<li>不适合：需要平滑密度曲线时；有明显删失时；需要调整协变量时。</li>
-<li>使用前需要特别检查的点：是否存在大量重复值、是否需要分层展示、是否有删失或极端异常值。</li>
+<li>适合：分布探索、分位数读取、两组分布整体比较、拟合检验可视化。</li>
+<li>不适合：直接看密度形状（用直方图/KDE）、删失数据（用 KM）。</li>
+<li>使用前需要特别检查的点：独立同分布、是否存在删失或截断。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="empirical-cumulative-distribution-function-ecdf" data-i="0">Python</button><button class="codetab" data-uid="empirical-cumulative-distribution-function-ecdf" data-i="1">R</button></div><div class="codepanel active" data-uid="empirical-cumulative-distribution-function-ecdf" data-i="0"><p>常用包：</p>
 <ul>
-<li><code>statsmodels</code></li>
-<li><code>seaborn</code></li>
+<li><code>numpy</code></li>
+<li><code>matplotlib</code></li>
 </ul>
 <pre><code class="language-python">import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-from statsmodels.distributions.empirical_distribution import ECDF
 
-x = np.array([2.1, 2.4, 2.9, 3.5, 4.0, 4.8])
-ecdf = ECDF(x)
-grid = np.linspace(x.min(), x.max(), 200)
-
-plt.step(grid, ecdf(grid), where=&quot;post&quot;)
-sns.rugplot(x=x)
-plt.xlabel(&quot;Biomarker&quot;)
-plt.ylabel(&quot;ECDF&quot;)
+x = np.array([2, 4, 4, 6, 9])
+xs = np.sort(x)
+ys = np.arange(1, len(xs) + 1) / len(xs)   # 每步 1/n
+plt.step(xs, ys, where=&quot;post&quot;)
+plt.xlabel(&quot;x&quot;); plt.ylabel(&quot;F_n(x)&quot;); plt.ylim(0, 1)
 plt.show()
 </code></pre></div><div class="codepanel" data-uid="empirical-cumulative-distribution-function-ecdf" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>stats</code></li>
 </ul>
-<pre><code class="language-r">x &lt;- c(2.1, 2.4, 2.9, 3.5, 4.0, 4.8)
-Fhat &lt;- ecdf(x)
-plot(Fhat, main = &quot;ECDF&quot;, xlab = &quot;Biomarker&quot;, ylab = &quot;F(x)&quot;)
+<pre><code class="language-r">x &lt;- c(2, 4, 4, 6, 9)
+plot(ecdf(x), main = &quot;&quot;, xlab = &quot;x&quot;, ylab = &quot;F_n(x)&quot;)
+quantile(x, 0.5)          # 中位数
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：在任意阈值 $x$ 处，有多少比例的样本不超过该值。</li>
-<li>每个主要参数如何解释：ECDF 没有回归系数，重点在阶梯的位置和增长速度。</li>
-<li>临床或医学意义如何表达：例如“约 80% 的患者 CRP 低于某个阈值”。</li>
-<li>常见误读：不要把 ECDF 当作密度；阶梯陡峭意味着该区间观测多，不代表风险函数。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>阶梯型 ECDF 曲线。</li>
-<li>分组叠加 ECDF 曲线。</li>
-<li>ECDF 配合 rug plot 或箱线图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图给出总胆固醇按性别分层后的 ECDF，适合放在“数据探索”“组间分布比较”或“非参数方法引入”场景中。</p>
-<p><img alt="" src="img/ecdf_totchol_by_sex.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：曲线的整体位置与陡缓、各分位数、两组曲线的分离程度。</li>
+<li>每个主要参数如何解读：曲线越靠左，分布整体越小；某处越陡，说明数据在该区间越密集。</li>
+<li>临床或医学意义如何表达：如「80% 的患者胆固醇在 X 以下」直接从曲线读出。</li>
+<li>常见误读：把阶梯的锯齿当分布细节（小样本本就如此）；忽略删失直接画 ECDF。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>与理论分布对比：把理论 CDF 叠加在 ECDF 上，最大缝隙即 KS 统计量。</li>
+<li>置信带：用 DKW 不等式画同时置信带，判断偏离是否显著。</li>
+<li>删失识别：若数据有随访删失，ECDF 会低估尾部，应改用 Kaplan-Meier。</li>
+<li>稳健性：ECDF 对异常值天然稳健（一个极端值只贡献 $1/n$ 的跳跃）。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>单组 ECDF 阶梯图（读分位数）。</li>
+<li>两组 ECDF 叠加（比较整体分布、标注最大缝隙）。</li>
+<li>ECDF + DKW 置信带。</li>
+</ul>
+<h3>10.1 图像示例</h3>
+<p>下图用 ECDF 比较不同性别的总胆固醇累积分布。</p>
+<p><img alt="" src="img/ecdf_totchol_by_sex.png" /></p></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>不依赖分布假设。</li>
-<li>对尾部和分位数信息表达直观。</li>
-<li>是许多非参数方法和 Bootstrap 的基础对象。</li>
+<li>无参数、无平滑、无信息损失，唯一确定。</li>
+<li>对异常值稳健，便于读分位数。</li>
+<li>是分布比较与拟合检验的天然工具。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>不平滑。</li>
-<li>对高维数据不直接适用。</li>
-<li>不处理删失。</li>
+<li>阶梯不平滑，看密度形状不直观。</li>
+<li>一维为主。</li>
+<li>有删失时不能直接用。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>把 ECDF 当作概率密度函数解释。</li>
-<li>忽视分组样本量差异导致图形误判。</li>
-<li>有删失数据时仍直接拿 ECDF 代替生存曲线。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和核密度估计的区别：ECDF 估计累计分布，KDE 估计密度。</li>
-<li>和直方图的区别：ECDF 不依赖分箱。</li>
-<li>应该如何选择：想看累计比例用 ECDF，想看平滑分布形状用 KDE。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>比较治疗前后某实验室指标的整体分布。</li>
-<li>比较病例组与对照组生物标志物分布。</li>
-<li>为 K-S 检验和 Bootstrap 提供基础分布对象。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计是一种用局部加权平均来估计连续型变量概率密度函数的非参数方法。它常用来替代粗糙的直方图，给出更平滑的分布形状。">核密度估计（Kernel Density Estimation, KDE）</a></li>
-<li><a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 是一种从原始样本中“有放回重抽样”的方法，用来近似统计量的抽样分布，从而估计标准误、方差和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a></li>
-<li><a class="xlink" href="m-kolmogorov-smirnov-test.html" data-cn="Kolmogorov-Smirnov检验" data-en="Kolmogorov-Smirnov Test" data-def="Kolmogorov-Smirnov 检验是一种基于经验分布函数的非参数检验，用经验分布与理论分布（单样本）或两组经验分布之间的最大距离，判断分布是否一致。">Kolmogorov-Smirnov检验（Kolmogorov-Smirnov Test）</a></li>
+<li>用 ECDF 判断「密度峰」（应看直方图/KDE）。</li>
+<li>小样本时过度解读锯齿。</li>
+<li>忽略删失导致尾部偏差。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Wasserman L. <em>All of Statistics: A Concise Course in Statistical Inference</em>. Springer; 2004.</li>
-<li>statsmodels Developers. <code>statsmodels.distributions.empirical_distribution.ECDF</code>. statsmodels API Reference. <a href="https://www.statsmodels.org/stable/generated/statsmodels.distributions.empirical_distribution.ECDF.html">https://www.statsmodels.org/stable/generated/statsmodels.distributions.empirical_distribution.ECDF.html</a> （访问日期：2026-07-02）</li>
-<li>seaborn Developers. <code>seaborn.ecdfplot</code>. seaborn documentation. <a href="https://seaborn.pydata.org/generated/seaborn.ecdfplot.html">https://seaborn.pydata.org/generated/seaborn.ecdfplot.html</a> （访问日期：2026-07-02）</li>
+<li>和<strong>直方图</strong>：直方图估密度、要分箱；ECDF 估累积分布、不分箱。</li>
+<li>和<strong>核密度估计</strong>：KDE 平滑估密度；ECDF 是密度的积分（累积）估计。</li>
+<li>和 <strong>Kaplan-Meier 曲线</strong>：KM 是能处理右删失的「生存版 ECDF」。</li>
+<li>如何选择：看累积比例/分位数/分布比较用 ECDF；看形状用直方图/KDE；有删失用 KM。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>比较治疗组与对照组某连续指标的整体分布。</li>
+<li>报告「某阈值以下的患者比例」。</li>
+<li>作为 KS 检验与分位数分析的可视化基础。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>累积分布函数（CDF）</strong>：$F(x)=P(X\le x)$，随机变量不超过 $x$ 的概率。</li>
+<li><strong>经验分布函数（ECDF）</strong>：用样本频率估计的 CDF，阶梯函数。</li>
+<li><strong>指示函数（$\mathbf{1}\{\cdot\}$）</strong>：条件成立取 1、否则取 0。</li>
+<li><strong>Glivenko-Cantelli 定理</strong>：ECDF 一致收敛到真 CDF 的定理。</li>
+<li><strong>DKW 不等式</strong>：给 ECDF 同时置信带宽度的不等式。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-histogram.html" data-cn="直方图" data-en="Histogram" data-def="直方图把连续变量的取值范围切成一排等宽格子，数一数每格里落了多少观测——它其实是密度函数最朴素的「分段常数」估计。">直方图（Histogram）</a></li>
+<li><a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计给每个观测放上一个小小的、光滑的「山包」（核），再把所有山包叠加平均，得到一条连续平滑的密度曲线——本质是把直方图的硬台阶抹圆。">核密度估计（Kernel Density Estimation, KDE）</a></li>
+<li><a class="xlink" href="m-kolmogorov-smirnov-test.html" data-cn="Kolmogorov-Smirnov检验" data-en="Kolmogorov-Smirnov Test" data-def="KS 检验用「两条累积分布曲线之间的最大垂直距离」作为分布是否相同的证据——距离越大，越有理由说它们来自不同分布。">Kolmogorov-Smirnov检验（Kolmogorov-Smirnov Test）</a></li>
+<li><a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 生存曲线是生存分析中最经典的非参数估计方法，用于在存在删失时估计生存函数 $S(t)=P(T&gt;t)$。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>van der Vaart AW. <em>Asymptotic Statistics</em>. Cambridge University Press; 1998.</li>
+<li>Wasserman L. <em>All of Statistics</em>. Springer; 2004.</li>
+<li>Dvoretzky A, Kiefer J, Wolfowitz J. Asymptotic minimax character of the sample distribution function. <em>Ann Math Stat</em>. 1956;27(3):642-669.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-histogram.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">直方图</div></a><a class="pg pg-next" href="m-kernel-density-estimation-kde.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">核密度估计</div></a></div>
