@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wilcoxon秩和检验 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-02.html">描述统计与统计推断</a><span class="sep">/</span><span class="cur">Wilcoxon秩和检验</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">描述统计与统计推断 · 02·08</div>
+      <h1 class="detail-h1">Wilcoxon秩和检验</h1>
+      <div class="detail-en">Wilcoxon Rank-Sum Test</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 非参数统计 / 假设检验</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>Wilcoxon秩和检验（Wilcoxon Rank-Sum Test）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>Wilcoxon 秩和检验是两独立样本的非参数检验，通过比较两组观测的秩来判断它们是否来自相同位置分布。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：两组独立样本的中心位置是否存在差异。</li>
+<li>适用任务：偏态数据、等级数据、异常值较多时的两组比较。</li>
+<li>常见医学场景：比较治疗组与对照组的住院天数、中位数炎症指标、评分量表。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>如果某组整体更大，那么这组样本在合并排序后会更常拿到靠后的高秩，于是秩和会系统性偏大。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>$$
+W = \sum_{i=1}^{n_1} R_{1i}
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$W$：某一组样本秩和。</li>
+<li>零假设下，若两组分布相同，则秩应大致均匀混合。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>两组样本独立。</li>
+<li>数据至少可排序。</li>
+<li>若要解释为位置差异，通常还需要两组分布形状相近。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：二分类分组变量。</li>
+<li>因变量类型：连续型或等级型。</li>
+<li>数据结构：两独立组。</li>
+<li>是否适合高维数据：不适合批量高维未经校正的反复检验。</li>
+<li>是否适合缺失较多数据：可用，但组间缺失不平衡会影响解释。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：不适合。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>一个典型场景是用 <code>Framingham_data.csv</code> 基线数据比较不同高血压状态下的 BMI 分布：</p>
+<table>
+<thead>
+<tr>
+<th>RANDID</th>
+<th>PREVHYP</th>
+<th>BMI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2448</td>
+<td>0</td>
+<td>26.97</td>
+</tr>
+<tr>
+<td>6238</td>
+<td>0</td>
+<td>28.73</td>
+</tr>
+<tr>
+<td>9428</td>
+<td>0</td>
+<td>25.34</td>
+</tr>
+<tr>
+<td>10552</td>
+<td>1</td>
+<td>28.58</td>
+</tr>
+<tr>
+<td>11263</td>
+<td>1</td>
+<td>30.30</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：两组独立观测。</li>
+<li>关键变量：组别、连续或等级结局。</li>
+<li>需要预处理的内容：缺失值、ties 处理。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：U 统计量或秩和统计量、p 值。</li>
+<li>参数估计：有时可补充 Hodges-Lehmann 位置差估计。</li>
+<li>预测结果：无。</li>
+<li>不确定性指标：主要是检验结果，可补充区间估计。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：两组独立样本、偏态分布、等级数据。</li>
+<li>不适合：配对设计、三组及以上比较。</li>
+<li>使用前需要特别检查的点：独立性、分布形状是否差异过大。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="wilcoxon-rank-sum-test" data-i="0">Python</button><button class="codetab" data-uid="wilcoxon-rank-sum-test" data-i="1">R</button></div><div class="codepanel active" data-uid="wilcoxon-rank-sum-test" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scipy</code></li>
+</ul>
+<pre><code class="language-python">import numpy as np
+from scipy import stats
+
+group1 = np.array([5, 7, 9, 10, 12])
+group2 = np.array([8, 11, 13, 15, 16])
+
+res = stats.mannwhitneyu(group1, group2, alternative=&quot;two-sided&quot;)
+print(res.statistic, res.pvalue)
+</code></pre></div><div class="codepanel" data-uid="wilcoxon-rank-sum-test" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>stats</code></li>
+</ul>
+<pre><code class="language-r">group1 &lt;- c(5, 7, 9, 10, 12)
+group2 &lt;- c(8, 11, 13, 15, 16)
+wilcox.test(group1, group2, paired = FALSE)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：两组观测是否存在系统性高低排序差异。</li>
+<li>每个主要参数如何解释：p 值反映秩混合程度是否偏离零假设。</li>
+<li>临床或医学意义如何表达：最好同时给中位数、IQR 或位置差估计。</li>
+<li>常见误读：它并不总是检验“中位数差”，只有在特定形状假设下才可这样理解。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>箱线图。</li>
+<li>小提琴图。</li>
+<li>ECDF 叠加图。</li>
+</ul>
+<h3>7.1 图像示例</h3>
+<p>下图给出 BMI 按高血压状态分组后的箱线图，适合与 Wilcoxon 秩和检验一起出现。</p>
+<p><img alt="" src="img/ranksum_bmi_prevhyp.png" /></p></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>对异常值更稳健。</li>
+<li>可处理等级数据。</li>
+<li>实现简单。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>不能自动控制混杂。</li>
+<li>分布形状不同会影响解释。</li>
+<li>多 ties 时近似会变复杂。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>把秩差异误解为均值差异。</li>
+<li>忽略两组并非独立。</li>
+<li>用它替代所有两组比较而不看研究设计。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和两独立样本 t 检验的区别：本方法更稳健，不依赖均值和正态性。</li>
+<li>和 Kruskal-Wallis 的区别：后者是多组推广。</li>
+<li>应该如何选择：两组偏态数据且关心位置差异时优先考虑本方法。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>比较两组住院天数。</li>
+<li>比较两组疼痛评分或等级量表。</li>
+<li>用于小样本且异常值明显的两组连续变量比较。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="两独立样本 t 检验用于比较两个独立组的连续型结局均值是否存在差异。医学研究里最常见的是标准 t 检验和更稳健的 Welch t 检验。">两独立样本t检验（Two-Sample t-Test）</a></li>
+<li><a class="xlink" href="m-wilcoxon-signed-rank-test.html" data-cn="Wilcoxon符号秩检验" data-en="Wilcoxon Signed-Rank Test" data-def="Wilcoxon 符号秩检验是单样本或配对样本的非参数检验，用于判断数据的中心位置是否等于某参考值，或配对差值的中心位置是否为 0。">Wilcoxon符号秩检验（Wilcoxon Signed-Rank Test）</a></li>
+<li><a class="xlink" href="m-kruskal-wallis-test.html" data-cn="Kruskal-Wallis检验" data-en="Kruskal-Wallis Test" data-def="Kruskal-Wallis 检验是比较三组及以上独立样本位置差异的非参数方法，可视为 Wilcoxon 秩和检验向多组情形的推广。">Kruskal-Wallis检验（Kruskal-Wallis Test）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Conover WJ. <em>Practical Nonparametric Statistics</em>. 3rd ed. Wiley; 1999.</li>
+<li>SciPy Developers. <code>scipy.stats.mannwhitneyu</code>. SciPy API Reference. <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.mannwhitneyu.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.mannwhitneyu.html</a> （访问日期：2026-07-02）</li>
+<li>R Core Team. <code>wilcox.test</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/wilcox.test.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/wilcox.test.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-wilcoxon-signed-rank-test.html"><div class="pg-lab">← 前一则</div><div class="pg-t">Wilcoxon符号秩检验</div></a><a class="pg pg-next" href="m-kruskal-wallis-test.html"><div class="pg-lab">后一则 →</div><div class="pg-t">Kruskal-Wallis检验</div></a></div>
+    <div class="colophon">— 黑盒词典 · 02·08 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

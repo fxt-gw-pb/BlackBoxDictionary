@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>嵌入式特征选择 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-13.html">数据预处理与特征工程</a><span class="sep">/</span><span class="cur">嵌入式特征选择</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">数据预处理与特征工程 · 13·06</div>
+      <h1 class="detail-h1">嵌入式特征选择</h1>
+      <div class="detail-en">Embedded Feature Selection</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 特征选择 / 正则化 / 模型选择</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>嵌入式特征选择（Embedded Feature Selection）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>嵌入式特征选择是在模型训练过程中同步完成特征评价或筛选的方法。常见形式包括 L1 正则化模型、树模型特征重要性和基于模型系数的 <code>SelectFromModel</code>。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：如何让模型在学习预测规律的同时自动判断哪些特征重要。</li>
+<li>适用任务：分类、回归、高维特征筛选、预测建模。</li>
+<li>常见医学场景：Lasso 影像组学特征筛选、树模型变量重要性筛选、临床风险模型候选变量压缩。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>过滤法是建模前先筛一遍特征，嵌入式方法则是“边建模边筛选”。它更贴近最终模型目标，但也更依赖所选模型本身的偏好。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>以 L1 正则化为例，嵌入式选择通过稀疏化系数实现：</p>
+<p>$$
+\hat\beta
+=
+\arg\min_{\beta}
+\left[
+L(y,X\beta)+\lambda\sum_{j=1}^{p}|\beta_j|
+\right]
+$$</p>
+<p>选择规则可写为：</p>
+<p>$$
+\text{keep}(X_j)=I(\hat\beta_j\neq 0)
+$$</p>
+<p>对基于模型重要性的选择，若模型给出重要性 $I_j$，阈值为 $\theta$：</p>
+<p>$$
+\text{keep}(X_j)=I(I_j\geq \theta)
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$\lambda$：正则化强度。</li>
+<li>$\hat\beta_j$：模型估计的第 $j$ 个特征系数。</li>
+<li>$I_j$：模型给出的特征重要性。</li>
+<li>阈值 $\theta$：保留特征的重要性或系数阈值。</li>
+<li>基模型：用于选择特征的模型，如 Lasso、随机森林、梯度提升树。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>所选模型适合当前任务和数据结构。</li>
+<li>模型的系数或重要性可作为特征价值的代理。</li>
+<li>选择过程必须嵌入交叉验证或训练流程，避免信息泄露。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续、分类编码变量、高维特征。</li>
+<li>因变量类型：二分类、多分类或连续型。</li>
+<li>数据结构：监督学习特征矩阵。</li>
+<li>是否适合高维数据：适合，尤其是 L1/Elastic Net。</li>
+<li>是否适合缺失较多数据：需按基模型要求处理。</li>
+<li>是否适合删失数据：需使用支持删失结局的嵌入式模型。</li>
+<li>是否适合重复测量数据：需使用分组验证或相应纵向模型。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以影像组学特征筛选为例：</p>
+<table>
+<thead>
+<tr>
+<th>Age</th>
+<th>Radiomics_1</th>
+<th>Radiomics_2</th>
+<th>Radiomics_3</th>
+<th>Radiomics_4</th>
+<th>Recurrence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>64</td>
+<td>0.28</td>
+<td>1.42</td>
+<td>-0.12</td>
+<td>0.88</td>
+<td>1</td>
+</tr>
+<tr>
+<td>52</td>
+<td>-0.31</td>
+<td>0.40</td>
+<td>0.05</td>
+<td>-0.22</td>
+<td>0</td>
+</tr>
+<tr>
+<td>70</td>
+<td>0.76</td>
+<td>1.91</td>
+<td>-0.41</td>
+<td>1.12</td>
+<td>1</td>
+</tr>
+<tr>
+<td>47</td>
+<td>-0.22</td>
+<td>0.15</td>
+<td>0.11</td>
+<td>-0.34</td>
+<td>0</td>
+</tr>
+<tr>
+<td>61</td>
+<td>0.33</td>
+<td>0.98</td>
+<td>-0.18</td>
+<td>0.55</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：特征矩阵和目标变量。</li>
+<li>关键变量：基模型、正则化强度或重要性阈值、交叉验证方案。</li>
+<li>需要预处理的内容：缺失处理、标准化、类别编码、训练测试拆分。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：选择器、基模型、特征系数或重要性。</li>
+<li>参数估计：模型系数、重要性得分或正则化参数。</li>
+<li>预测结果：若直接使用该模型，也可输出预测。</li>
+<li>不确定性指标：交叉验证性能、特征选择稳定性、测试集表现。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：希望特征选择服务于最终预测模型的场景。</li>
+<li>不适合：只想做模型无关初筛，或需要与具体模型无关的变量解释。</li>
+<li>使用前需要特别检查的点：是否标准化、基模型是否稳定、选择结果是否随重采样变化很大。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="embedded-feature-selection" data-i="0">Python</button><button class="codetab" data-uid="embedded-feature-selection" data-i="1">R</button></div><div class="codepanel active" data-uid="embedded-feature-selection" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+from sklearn.feature_selection import SelectFromModel
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv(&quot;radiomics_recurrence.csv&quot;)
+X = df&amp;quot;Age&amp;quot;, &amp;quot;Radiomics_1&amp;quot;, &amp;quot;Radiomics_2&amp;quot;, &amp;quot;Radiomics_3&amp;quot;, &amp;quot;Radiomics_4&amp;quot;
+y = df[&quot;Recurrence&quot;].astype(int)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+lasso_logit = LogisticRegression(
+    penalty=&quot;l1&quot;,
+    solver=&quot;liblinear&quot;,
+    C=0.2,
+    random_state=42
+)
+
+selector = make_pipeline(
+    StandardScaler(),
+    SelectFromModel(lasso_logit)
+)
+X_train_sel = selector.fit_transform(X_train, y_train)
+X_test_sel = selector.transform(X_test)
+</code></pre></div><div class="codepanel" data-uid="embedded-feature-selection" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>glmnet</code></li>
+</ul>
+<pre><code class="language-r">library(glmnet)
+
+x &lt;- model.matrix(Recurrence ~ Age + Radiomics_1 + Radiomics_2 + Radiomics_3 + Radiomics_4 - 1, data = df_train)
+y &lt;- df_train$Recurrence
+
+fit &lt;- cv.glmnet(x, y, family = &quot;binomial&quot;, alpha = 1)
+coef_fit &lt;- coef(fit, s = &quot;lambda.min&quot;)
+selected &lt;- rownames(coef_fit)[as.vector(coef_fit != 0)]
+selected &lt;- setdiff(selected, &quot;(Intercept)&quot;)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：被保留特征、模型性能、选择稳定性。</li>
+<li>每个主要参数如何解释：正则化越强或阈值越高，保留特征越少。</li>
+<li>临床或医学意义如何表达：保留特征是当前模型认为有预测贡献的变量，不等于独立危险因素或因果变量。</li>
+<li>常见误读：把模型重要性当作无条件通用的重要性。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>正则化路径图。</li>
+<li>特征重要性或系数条形图。</li>
+<li>重采样下特征入选频率图。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>与模型目标一致。</li>
+<li>可利用正则化控制复杂度。</li>
+<li>常比纯过滤法更贴近最终预测性能。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>依赖基模型选择。</li>
+<li>选择结果可能不稳定。</li>
+<li>解释性受模型偏倚影响。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>在交叉验证外先做嵌入式选择。</li>
+<li>用 Lasso 但不标准化特征。</li>
+<li>把树模型 impurity importance 当作完全无偏的重要性。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-univariate-feature-selection.html" data-cn="单变量特征选择" data-en="Univariate Feature Selection" data-def="单变量特征选择是一类过滤式方法。它逐个评估每个特征与目标变量之间的关系，根据统计量、P 值或信息量得分选择排名靠前或达到阈值的特征。">单变量特征选择（Univariate Feature Selection）</a> 的区别：单变量方法先独立打分；嵌入式方法在模型训练中打分或稀疏化。</li>
+<li>和 <a class="xlink" href="m-lasso-regression.html" data-cn="Lasso回归" data-en="Lasso Regression" data-def="Lasso 回归是在普通线性回归中加入 L1 正则化项的一种方法，它不仅能做回归拟合，还能自动把部分不重要特征的系数压缩到 0，从而实现变量选择。">Lasso回归（Lasso Regression）</a> 的区别：Lasso 是嵌入式特征选择的典型实现之一。</li>
+<li>和 <a class="xlink" href="m-tree-based-feature-selection.html" data-cn="基于树模型的特征选择" data-en="Tree-based Feature Selection" data-def="基于树模型的特征选择利用决策树、随机森林、梯度提升树等模型产生的特征重要性，对特征进行排序或筛选。常用重要性包括不纯度减少、分裂次数、置换重要性和 SHAP 重要性。">基于树模型的特征选择（Tree-based Feature Selection）</a> 的区别：树模型选择是嵌入式方法中的一个重要分支。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>Lasso 选择影像组学或组学特征。</li>
+<li>随机森林筛选非线性预测变量。</li>
+<li>Elastic Net 在高相关生物标志物中做稳定筛选。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-lasso-regression.html" data-cn="Lasso回归" data-en="Lasso Regression" data-def="Lasso 回归是在普通线性回归中加入 L1 正则化项的一种方法，它不仅能做回归拟合，还能自动把部分不重要特征的系数压缩到 0，从而实现变量选择。">Lasso回归（Lasso Regression）</a></li>
+<li><a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归是在普通线性回归的损失函数中加入 L2 正则化项的一种方法，用来缓解多重共线性、减少过拟合，并提升模型在新数据上的稳定性。">Ridge回归（Ridge Regression）</a></li>
+<li><a class="xlink" href="m-elastic-net-regression.html" data-cn="弹性网络回归" data-en="Elastic Net Regression" data-def="弹性网络回归结合了 Lasso 的 L1 正则化和 Ridge 的 L2 正则化，既能做变量选择，也能在高度相关特征中保持更稳定的系数结构。">弹性网络回归（Elastic Net Regression）</a></li>
+<li><a class="xlink" href="m-tree-based-feature-selection.html" data-cn="基于树模型的特征选择" data-en="Tree-based Feature Selection" data-def="基于树模型的特征选择利用决策树、随机森林、梯度提升树等模型产生的特征重要性，对特征进行排序或筛选。常用重要性包括不纯度减少、分裂次数、置换重要性和 SHAP 重要性。">基于树模型的特征选择（Tree-based Feature Selection）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Guyon I, Elisseeff A. An introduction to variable and feature selection. <em>J Mach Learn Res</em>. 2003;3:1157-1182.</li>
+<li>Tibshirani R. Regression shrinkage and selection via the lasso. <em>J R Stat Soc Series B</em>. 1996;58(1):267-288.</li>
+<li>scikit-learn Developers. <code>SelectFromModel</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectFromModel.html">https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectFromModel.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-mutual-information-feature-selection.html"><div class="pg-lab">← 前一则</div><div class="pg-t">互信息特征选择</div></a><a class="pg pg-next" href="m-tree-based-feature-selection.html"><div class="pg-lab">后一则 →</div><div class="pg-t">基于树模型的特征选择</div></a></div>
+    <div class="colophon">— 黑盒词典 · 13·06 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K近邻算法 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-16.html">分类与判别方法</a><span class="sep">/</span><span class="cur">K近邻算法</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">分类与判别方法 · 16·01</div>
+      <h1 class="detail-h1">K近邻算法</h1>
+      <div class="detail-en">K-Nearest Neighbors, KNN</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 分类 / 近邻方法</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>K近邻算法（K-Nearest Neighbors, KNN）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>K 近邻算法是一类基于实例的非参数方法。它不显式拟合一个全局模型，而是在预测时直接寻找距离目标样本最近的 $K$ 个训练样本，并用这些近邻的标签做多数投票或平均。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：如何利用“与目标样本最相似的一组历史个体”来完成分类或预测。</li>
+<li>适用任务：二分类、多分类、连续结局预测、相似病例检索。</li>
+<li>常见医学场景：基于相似患者进行疾病亚型判别、辅助诊断、连续评分估计。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>KNN 的核心想法很直接：如果一个新病人的各项特征和某些既往病人非常像，那么他们的诊断结果或风险水平往往也更接近。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>给定目标样本 $x^*$，设 $\mathcal{N}_K(x^*)$ 为与其距离最近的 $K$ 个样本集合。</p>
+<p>分类时：</p>
+<p>$$
+\hat y(x^*) = \operatorname{mode}\{y_i : i \in \mathcal{N}_K(x^*)\}
+$$</p>
+<p>回归时：</p>
+<p>$$
+\hat y(x^*) = \frac{1}{K}\sum_{i \in \mathcal{N}_K(x^*)} y_i
+$$</p>
+<p>常见距离度量为欧氏距离：</p>
+<p>$$
+d(x, z) = \sqrt{\sum_{j=1}^{p}(x_j - z_j)^2}
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$K$：参与投票或平均的近邻数。</li>
+<li>$d(x, z)$：距离函数，可取欧氏、曼哈顿、闵可夫斯基等。</li>
+<li><code>weights</code>：是否按距离加权，距离越近的邻居影响越大。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>相似输入对应相似输出。</li>
+<li>特征空间中的距离有实际意义。</li>
+<li>特征量纲需要可比，通常需要标准化。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续变量或数值化后的离散变量。</li>
+<li>因变量类型：二分类、多分类，也可扩展到连续型。</li>
+<li>数据结构：宽表数据。</li>
+<li>是否适合高维数据：高维下容易出现维数灾难。</li>
+<li>是否适合缺失较多数据：需先处理缺失值。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：不直接适合。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以糖尿病视网膜病变筛查为例：</p>
+<table>
+<thead>
+<tr>
+<th>Age</th>
+<th>HbA1c</th>
+<th>DiabetesYears</th>
+<th>SBP</th>
+<th>Albuminuria</th>
+<th>RetinopathyClass</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>68</td>
+<td>8.2</td>
+<td>16</td>
+<td>142</td>
+<td>1</td>
+<td>severe</td>
+</tr>
+<tr>
+<td>45</td>
+<td>6.5</td>
+<td>4</td>
+<td>126</td>
+<td>0</td>
+<td>none</td>
+</tr>
+<tr>
+<td>59</td>
+<td>7.4</td>
+<td>10</td>
+<td>138</td>
+<td>1</td>
+<td>mild</td>
+</tr>
+<tr>
+<td>51</td>
+<td>6.9</td>
+<td>7</td>
+<td>130</td>
+<td>0</td>
+<td>none</td>
+</tr>
+<tr>
+<td>63</td>
+<td>8.0</td>
+<td>13</td>
+<td>146</td>
+<td>1</td>
+<td>severe</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：带标签的训练样本和待预测样本。</li>
+<li>关键变量：近邻数 <code>k</code>、距离度量、是否距离加权。</li>
+<li>需要预处理的内容：标准化、异常值检查、训练测试集划分。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：近邻搜索规则、最优 <code>k</code>、预测标签或数值。</li>
+<li>参数估计：没有全局回归系数或判别参数。</li>
+<li>预测结果：类别标签、类别概率或连续值。</li>
+<li>不确定性指标：交叉验证准确率、F1、AUC、测试集误差。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：局部相似性强、样本规模中小、希望保留“相似病例”直觉的任务。</li>
+<li>不适合：高维稀疏、超大样本、需要明确全局参数解释的场景。</li>
+<li>使用前需要特别检查的点：特征标准化、距离定义、<code>k</code> 的选择、类别不平衡。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="k-nearest-neighbors-knn" data-i="0">Python</button><button class="codetab" data-uid="k-nearest-neighbors-knn" data-i="1">R</button></div><div class="codepanel active" data-uid="k-nearest-neighbors-knn" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+
+df = pd.read_csv(&quot;retinopathy.csv&quot;)
+X = df&amp;quot;Age&amp;quot;, &amp;quot;HbA1c&amp;quot;, &amp;quot;DiabetesYears&amp;quot;, &amp;quot;SBP&amp;quot;, &amp;quot;Albuminuria&amp;quot;
+y = df[&quot;RetinopathyClass&quot;]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+fit = make_pipeline(
+    StandardScaler(),
+    KNeighborsClassifier(n_neighbors=7, weights=&quot;distance&quot;)
+)
+fit.fit(X_train, y_train)
+</code></pre></div><div class="codepanel" data-uid="k-nearest-neighbors-knn" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>FNN</code></li>
+</ul>
+<pre><code class="language-r">library(FNN)
+
+pred &lt;- knn(
+  train = X_train,
+  test = X_test,
+  cl = y_train,
+  k = 7
+)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：最优 <code>k</code>、测试集表现、邻域是否稳定。</li>
+<li>每个主要参数如何解释：<code>k</code> 越小越灵活但方差更大；<code>k</code> 越大越平滑但可能欠拟合。</li>
+<li>临床或医学意义如何表达：适合解释为“该患者的判别主要参考了若干最相似患者的结果”。</li>
+<li>常见误读：KNN 不会自动学习全局规律，它只基于局部邻域做判断。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>不同 <code>k</code> 值下的交叉验证性能曲线。</li>
+<li>降维后的近邻分布图。</li>
+<li>混淆矩阵或类别召回率图。</li>
+</ul>
+<h3>7.1 图像示例</h3>
+<p>下图给出 KNN 案例中交叉验证准确率随 <code>k</code> 变化的曲线，适合说明近邻数选择对模型偏差和方差平衡的影响。</p>
+<p><img alt="" src="img/knn_best_k_curve.png" /></p></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>简单直观。</li>
+<li>非参数，无需显式模型假设。</li>
+<li>能很好体现“相似病例”思路。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>对特征尺度和噪声敏感。</li>
+<li>高维下效果下降明显。</li>
+<li>预测阶段计算成本较高。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>不标准化特征。</li>
+<li>在高维稀疏数据上直接使用欧氏距离。</li>
+<li>只凭经验选 <code>k</code>，不做验证。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 K近邻回归的区别：KNN 回归处理连续结局，这里主条目更强调分类与判别。</li>
+<li>和局部加权回归的区别：局部加权回归会在局部拟合模型，KNN 更多是邻域投票或平均。</li>
+<li>和朴素贝叶斯的区别：KNN 基于距离与实例相似性，朴素贝叶斯基于概率分解和条件独立假设。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>相似患者辅助诊断。</li>
+<li>小样本疾病分型。</li>
+<li>相似病例驱动的风险筛查与推荐。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-k-nearest-neighbors-regression.html" data-cn="K近邻回归" data-en="K-Nearest Neighbors Regression" data-def="K近邻回归是一种非参数回归方法，它通过寻找离目标样本最近的 $K$ 个邻居，并对这些邻居的目标值做平均或加权平均来完成预测。">K近邻回归（K-Nearest Neighbors Regression）</a></li>
+<li><a class="xlink" href="m-locally-weighted-regression.html" data-cn="局部加权回归" data-en="Locally Weighted Regression" data-def="局部加权回归是一种在每个预测点附近单独拟合局部模型的非参数回归方法，距离预测点越近的样本权重越大。">局部加权回归（Locally Weighted Regression）</a></li>
+<li><a class="xlink" href="m-naive-bayes.html" data-cn="朴素贝叶斯" data-en="Naive Bayes" data-def="朴素贝叶斯是一类基于贝叶斯定理的概率分类方法。它假设在给定类别后，各特征彼此条件独立，因此可以把联合概率拆成一组一维条件概率的乘积。">朴素贝叶斯（Naive Bayes）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Hastie T, Tibshirani R, Friedman J. <em>The Elements of Statistical Learning</em>. 2nd ed. Springer; 2009.</li>
+<li>scikit-learn Developers. <code>sklearn.neighbors.KNeighborsClassifier</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html">https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html</a> （访问日期：2026-07-02）</li>
+<li>Beygelzimer A, Kakade S, Langford J. Package <code>FNN</code>. CRAN. <a href="https://cran.r-project.org/package=FNN">https://cran.r-project.org/package=FNN</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><span></span><a class="pg pg-next" href="m-k-nearest-neighbors-regression.html"><div class="pg-lab">后一则 →</div><div class="pg-t">K近邻回归</div></a></div>
+    <div class="colophon">— 黑盒词典 · 16·01 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

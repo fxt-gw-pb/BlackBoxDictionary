@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>向量自回归滑动平均模型 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-12.html">时间序列与时序建模</a><span class="sep">/</span><span class="cur">向量自回归滑动平均模型</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">时间序列与时序建模 · 12·06</div>
+      <h1 class="detail-h1">向量自回归滑动平均模型</h1>
+      <div class="detail-en">Vector Autoregressive Moving Average Model, VARMA</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>advanced</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 时间序列 / 多变量 / 状态空间 / 预测</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>向量自回归滑动平均模型（Vector Autoregressive Moving Average Model, VARMA）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>VARMA 是多变量时间序列模型，同时包含向量自回归 VAR 部分和向量移动平均 VMA 部分。它既用多个变量的历史值，也用多个变量的过去创新项解释当前向量序列。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：多个时间序列之间既有滞后联动，又有短期共同冲击传播时，如何联合建模。</li>
+<li>适用任务：多变量预测、系统动态建模、状态空间估计、冲击响应分析。</li>
+<li>常见医学场景：多项生命体征联动预测，医院运营指标联合预测，污染-气象-病例系统动态建模。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>VARMA 比 VAR 更灵活：VAR 看“过去观测”，VARMA 还看“过去没有解释掉的冲击”。如果多个指标受到共同突发冲击，而且冲击会在系统中短期延续，VARMA 可以表达这种结构。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>设 $y_t\in\mathbb{R}^K$，VARMA($p,q$) 写作：</p>
+<p>$$
+y_t=c+\sum_{i=1}^{p}A_i y_{t-i}
++u_t+\sum_{j=1}^{q}M_j u_{t-j}
+$$</p>
+<p>其中：</p>
+<p>$$
+u_t\sim WN(0,\Sigma_u)
+$$</p>
+<p>滞后算子形式为：</p>
+<p>$$
+A(B)y_t=c+M(B)u_t
+$$</p>
+<p>其中：</p>
+<p>$$
+A(B)=I-A_1B-\cdots-A_pB^p,\quad
+M(B)=I+M_1B+\cdots+M_qB^q
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$p$：向量自回归阶数。</li>
+<li>$q$：向量移动平均阶数。</li>
+<li>$A_i$：第 $i$ 阶滞后观测系数矩阵。</li>
+<li>$M_j$：第 $j$ 阶滞后创新系数矩阵。</li>
+<li>$\Sigma_u$：创新协方差矩阵。</li>
+<li>状态空间表示：常用于估计、滤波和预测。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>多变量序列平稳或已处理为平稳。</li>
+<li>模型满足稳定性和可逆性。</li>
+<li>参数可识别，阶数选择合理。</li>
+<li>样本量足以支持较多参数估计。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：多个变量的滞后值和滞后创新项。</li>
+<li>因变量类型：多个连续时间序列。</li>
+<li>数据结构：等间隔多变量时间序列。</li>
+<li>是否适合高维数据：变量多时参数爆炸，通常不适合高维。</li>
+<li>是否适合缺失较多数据：状态空间方法可处理部分缺失，但需谨慎。</li>
+<li>是否适合删失数据：不直接处理删失结局。</li>
+<li>是否适合重复测量数据：适合总体级多序列；个体级需面板扩展。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以 ICU 小时级监测为例：</p>
+<table>
+<thead>
+<tr>
+<th>Time</th>
+<th>HeartRate</th>
+<th>MAP</th>
+<th>SpO2</th>
+<th>RespiratoryRate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-01-01 00:00</td>
+<td>88</td>
+<td>74</td>
+<td>97</td>
+<td>18</td>
+</tr>
+<tr>
+<td>2026-01-01 01:00</td>
+<td>91</td>
+<td>72</td>
+<td>96</td>
+<td>19</td>
+</tr>
+<tr>
+<td>2026-01-01 02:00</td>
+<td>95</td>
+<td>70</td>
+<td>95</td>
+<td>21</td>
+</tr>
+<tr>
+<td>2026-01-01 03:00</td>
+<td>90</td>
+<td>73</td>
+<td>96</td>
+<td>18</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：多个同步时间序列。</li>
+<li>关键变量：$p,q$ 阶数、趋势项、状态空间估计设置。</li>
+<li>需要预处理的内容：频率对齐、缺失处理、平稳性检查、变量标准化、阶数选择。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：AR/MA 系数矩阵、残差协方差、预测值、状态估计。</li>
+<li>参数估计：$A_i$、$M_j$、$\Sigma_u$。</li>
+<li>预测结果：多变量未来路径和预测区间。</li>
+<li>不确定性指标：标准误、预测区间、残差诊断、IRF 不确定性。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：多变量序列有复杂短期冲击传播，VAR 残差仍有结构，样本量足够的场景。</li>
+<li>不适合：样本短、变量多、模型识别困难、只需要简单预测基线的场景。</li>
+<li>使用前需要特别检查的点：可识别性、收敛、残差白噪声、阶数选择、估计稳定性。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="vector-autoregressive-moving-average-model-varma" data-i="0">Python</button><button class="codetab" data-uid="vector-autoregressive-moving-average-model-varma" data-i="1">R</button></div><div class="codepanel active" data-uid="vector-autoregressive-moving-average-model-varma" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>statsmodels</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+from statsmodels.tsa.statespace.varmax import VARMAX
+
+df = pd.read_csv(&quot;icu_hourly_vitals.csv&quot;, parse_dates=[&quot;Time&quot;])
+y = df.set_index(&quot;Time&quot;)&amp;quot;HeartRate&amp;quot;, &amp;quot;MAP&amp;quot;, &amp;quot;SpO2&amp;quot;, &amp;quot;RespiratoryRate&amp;quot;.asfreq(&quot;H&quot;)
+y = y.interpolate()
+
+fit = VARMAX(y, order=(1, 1), trend=&quot;c&quot;).fit(disp=False, maxiter=200)
+forecast = fit.get_forecast(steps=6).summary_frame()
+
+print(fit.summary())
+print(forecast.head())
+</code></pre></div><div class="codepanel" data-uid="vector-autoregressive-moving-average-model-varma" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>MTS</code></li>
+</ul>
+<pre><code class="language-r">library(MTS)
+
+y &lt;- as.matrix(df[, c(&quot;HeartRate&quot;, &quot;MAP&quot;, &quot;SpO2&quot;, &quot;RespiratoryRate&quot;)])
+fit &lt;- VARMA(y, p = 1, q = 1)
+
+fit
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：AR 矩阵、MA 矩阵、残差相关、预测表现、模型是否收敛。</li>
+<li>每个主要参数如何解释：AR 矩阵描述过去观测联动，MA 矩阵描述过去创新冲击的传播。</li>
+<li>临床或医学意义如何表达：可用于描述多项指标动态系统，但解释需谨慎，特别是冲击响应依赖模型设定。</li>
+<li>常见误读：VARMA 更复杂不一定预测更好，尤其在样本量不足时。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>多变量原始序列图。</li>
+<li>多变量预测路径和区间。</li>
+<li>残差相关热图。</li>
+<li>脉冲响应和预测误差方差分解图。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>比 VAR 更灵活，能刻画短期创新传播。</li>
+<li>可用状态空间框架处理估计和预测。</li>
+<li>适合多变量动态系统建模。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>参数多，估计困难。</li>
+<li>识别和收敛问题常见。</li>
+<li>对样本量和平稳性要求高。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>在短序列上拟合高阶 VARMA。</li>
+<li>忽略收敛警告。</li>
+<li>不做残差诊断就解释系数。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-vector-autoregression-var.html" data-cn="向量自回归模型" data-en="Vector Autoregression, VAR" data-def="向量自回归模型是多变量时间序列模型，用每个变量自身和其他变量的历史值共同预测当前多个变量。VAR($p$) 可看作多变量版 AR 模型。">向量自回归模型（Vector Autoregression, VAR）</a> 的区别：VARMA 增加向量移动平均项，能表达创新冲击的滞后传播。</li>
+<li>和 <a class="xlink" href="m-autoregressive-moving-average-model-arma.html" data-cn="自回归滑动平均模型" data-en="Autoregressive Moving Average Model, ARMA" data-def="ARMA 模型把自回归 AR 部分和移动平均 MA 部分组合起来，用于建模平稳单变量时间序列。ARMA($p,q$) 同时利用过去观测值和过去误差项预测当前值。">自回归滑动平均模型（Autoregressive Moving Average Model, ARMA）</a> 的区别：ARMA 是单变量，VARMA 是多变量系统。</li>
+<li>和 <a class="xlink" href="m-long-short-term-memory-for-time-series-forecasting.html" data-cn="LSTM时间序列预测" data-en="Long Short-Term Memory for Time Series Forecasting" data-def="LSTM 是循环神经网络的一种改进结构，通过门控机制保存、遗忘和输出序列信息。本条目聚焦 [[长短期记忆网络（Long Short-Term Memory, LSTM）]] 在时间序列预测中的应用型变体，强调窗口构造、时间切分和预测评估。">LSTM时间序列预测（Long Short-Term Memory for Time Series Forecasting）</a> 的区别：VARMA 是线性统计模型，LSTM 是非线性神经网络模型。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>ICU 多生命体征联合预测。</li>
+<li>医院多运营指标动态建模。</li>
+<li>环境暴露、气象因素和病例数的多变量系统分析。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-vector-autoregression-var.html" data-cn="向量自回归模型" data-en="Vector Autoregression, VAR" data-def="向量自回归模型是多变量时间序列模型，用每个变量自身和其他变量的历史值共同预测当前多个变量。VAR($p$) 可看作多变量版 AR 模型。">向量自回归模型（Vector Autoregression, VAR）</a></li>
+<li><a class="xlink" href="m-autoregressive-moving-average-model-arma.html" data-cn="自回归滑动平均模型" data-en="Autoregressive Moving Average Model, ARMA" data-def="ARMA 模型把自回归 AR 部分和移动平均 MA 部分组合起来，用于建模平稳单变量时间序列。ARMA($p,q$) 同时利用过去观测值和过去误差项预测当前值。">自回归滑动平均模型（Autoregressive Moving Average Model, ARMA）</a></li>
+<li><a class="xlink" href="m-long-short-term-memory-for-time-series-forecasting.html" data-cn="LSTM时间序列预测" data-en="Long Short-Term Memory for Time Series Forecasting" data-def="LSTM 是循环神经网络的一种改进结构，通过门控机制保存、遗忘和输出序列信息。本条目聚焦 [[长短期记忆网络（Long Short-Term Memory, LSTM）]] 在时间序列预测中的应用型变体，强调窗口构造、时间切分和预测评估。">LSTM时间序列预测（Long Short-Term Memory for Time Series Forecasting）</a></li>
+<li><a class="xlink" href="m-prophet-forecasting-model.html" data-cn="Prophet时间序列模型" data-en="Prophet Forecasting Model" data-def="Prophet 是一种面向业务时间序列预测的可加性模型。它把序列分解为趋势、季节性、节假日效应和误差项，并通过变化点捕捉趋势斜率的改变。">Prophet时间序列模型（Prophet Forecasting Model）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Lutkepohl H. <em>New Introduction to Multiple Time Series Analysis</em>. Springer; 2005.</li>
+<li>Tsay RS. <em>Multivariate Time Series Analysis: With R and Financial Applications</em>. Wiley; 2014.</li>
+<li>statsmodels Developers. <code>statsmodels.tsa.statespace.varmax.VARMAX</code>. <a href="https://www.statsmodels.org/">https://www.statsmodels.org/</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-vector-autoregression-var.html"><div class="pg-lab">← 前一则</div><div class="pg-t">向量自回归模型</div></a><a class="pg pg-next" href="m-prophet-forecasting-model.html"><div class="pg-lab">后一则 →</div><div class="pg-t">Prophet时间序列模型</div></a></div>
+    <div class="colophon">— 黑盒词典 · 12·06 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>关于 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html" class="nav-on">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap about">
+  <div class="cat-head">
+    <div>
+      <div class="kicker dark-ink">关于 · Colophon</div>
+      <h2 class="page-h2">关于本词典</h2>
+    </div>
+  </div>
+  <div class="about-body">
+    <p>黑盒词典是一部面向医学研究与数据科学的统计方法词典，收录 132 张方法卡，分属 16 部。每张方法卡按同一套结构编写：方法概览、数学形式、数据形式与输入输出、适用场景、Python/R 实现、结果解释、推荐可视化、优势局限与常见坑、与相近方法的区别、医学应用、相关方法与参考资料。</p>
+    <p>编纂原则是「先说解决什么问题，再讲怎么推导」：公式配参数解释，代码给最小可运行版本，并为医学场景标注结局类型、缺失机制、删失与混杂等关键前提。方法卡之间以相关方法互链，构成一张可检索的方法网络。</p>
+    <p>本站由知识库中的 Markdown 方法卡自动生成，源码见 <a href="https://github.com/fxt-gw-pb/BlackBoxDictionary" class="xlink">GitHub · BlackBoxDictionary</a>。</p>
+    <div class="kicker dark-ink" style="margin-top:40px;">部类一览</div>
+    <ul class="about-cats"><li><span class="ab-no">01</span> 研究设计与数据理解 <span class="ab-c">5 则</span></li><li><span class="ab-no">02</span> 描述统计与统计推断 <span class="ab-c">17 则</span></li><li><span class="ab-no">03</span> 回归与广义线性模型 <span class="ab-c">9 则</span></li><li><span class="ab-no">04</span> 生存分析与纵向数据 <span class="ab-c">10 则</span></li><li><span class="ab-no">05</span> 因果推断 <span class="ab-c">3 则</span></li><li><span class="ab-no">06</span> 正则化与变量选择 <span class="ab-c">3 则</span></li><li><span class="ab-no">07</span> 树模型与集成学习 <span class="ab-c">16 则</span></li><li><span class="ab-no">08</span> 支持向量机与核方法 <span class="ab-c">4 则</span></li><li><span class="ab-no">09</span> 聚类与无监督学习 <span class="ab-c">10 则</span></li><li><span class="ab-no">10</span> 降维与表征学习 <span class="ab-c">10 则</span></li><li><span class="ab-no">11</span> 神经网络与深度学习 <span class="ab-c">13 则</span></li><li><span class="ab-no">12</span> 时间序列与时序建模 <span class="ab-c">10 则</span></li><li><span class="ab-no">13</span> 数据预处理与特征工程 <span class="ab-c">8 则</span></li><li><span class="ab-no">15</span> 模型评估与解释 <span class="ab-c">9 则</span></li><li><span class="ab-no">16</span> 分类与判别方法 <span class="ab-c">5 则</span></li></ul>
+  </div>
+</main>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

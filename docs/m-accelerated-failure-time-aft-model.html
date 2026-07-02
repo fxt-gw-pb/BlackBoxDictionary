@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>加速失效时间模型 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-04.html">生存分析与纵向数据</a><span class="sep">/</span><span class="cur">加速失效时间模型</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">生存分析与纵向数据 · 04·09</div>
+      <h1 class="detail-h1">加速失效时间模型</h1>
+      <div class="detail-en">Accelerated Failure Time, AFT, Model</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 生存分析 / AFT</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>加速失效时间模型（Accelerated Failure Time, AFT, Model）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>AFT 模型直接在生存时间尺度上建模，强调协变量如何“拉长”或“缩短”事件发生时间。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：某些因素会让事件更早发生，还是更晚发生。</li>
+<li>适用任务：参数生存回归、时间比解释、生存时间加速 / 减速效应分析。</li>
+<li>常见医学场景：治疗是否延长生存时间，危险因素是否缩短无事件时间。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>AFT 模型把协变量的作用理解为“时间轴的伸缩”。如果一个变量的 time ratio 大于 1，意味着在该变量较高时，事件时间整体被拉长；小于 1 则意味着事件时间被压缩。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>$$
+\log(T)=X^\top\beta+\epsilon
+$$</p>
+<p>因此</p>
+<p>$$
+T=e^{X^\top\beta}e^\epsilon
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$\beta_j$：协变量在 log survival time 尺度上的效应。</li>
+<li>$\exp(\beta_j)$：time ratio，表示事件时间被放大或缩小的倍数。</li>
+<li>常见分布：Weibull、log-normal、log-logistic。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>生存时间在某个参数分布族下可被合理近似。</li>
+<li>删失独立 / 非信息性。</li>
+<li>模型形式正确。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续、二分类、多分类都可。</li>
+<li>因变量类型：时间到事件结局。</li>
+<li>数据结构：每行一个个体，含 <code>time</code>、<code>event</code> 和协变量。</li>
+<li>是否适合高维数据：不是默认首选。</li>
+<li>是否适合缺失较多数据：可用，但需先处理缺失。</li>
+<li>是否适合删失数据：适合。</li>
+<li>是否适合重复测量数据：不适合 time-varying covariate 直接分析。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>下面是适合 AFT 模型的基本数据结构：</p>
+<table>
+<thead>
+<tr>
+<th>RANDID</th>
+<th>TIMEDTH</th>
+<th>DEATH</th>
+<th>SEX</th>
+<th>BMI</th>
+<th>AGE_group</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2448</td>
+<td>8766</td>
+<td>0</td>
+<td>0</td>
+<td>26.97</td>
+<td>1</td>
+</tr>
+<tr>
+<td>6238</td>
+<td>8766</td>
+<td>0</td>
+<td>1</td>
+<td>28.73</td>
+<td>1</td>
+</tr>
+<tr>
+<td>9428</td>
+<td>8766</td>
+<td>0</td>
+<td>0</td>
+<td>25.34</td>
+<td>1</td>
+</tr>
+<tr>
+<td>10552</td>
+<td>2956</td>
+<td>1</td>
+<td>1</td>
+<td>28.58</td>
+<td>2</td>
+</tr>
+<tr>
+<td>11252</td>
+<td>8766</td>
+<td>0</td>
+<td>1</td>
+<td>23.10</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>一个 Weibull AFT 示例模型的时间比（time ratio）可整理为：</p>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th>Time Ratio</th>
+<th>95% CI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BMI</td>
+<td>0.988</td>
+<td>0.981 - 0.995</td>
+</tr>
+<tr>
+<td>Female vs Male</td>
+<td>1.350</td>
+<td>1.269 - 1.435</td>
+</tr>
+<tr>
+<td>AGE_group 2 vs 1</td>
+<td>0.513</td>
+<td>0.479 - 0.550</td>
+</tr>
+<tr>
+<td>AGE_group 3 vs 1</td>
+<td>0.308</td>
+<td>0.271 - 0.351</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：时间、事件、协变量。</li>
+<li>关键变量：<code>time</code>、<code>event</code>、分布假设。</li>
+<li>需要预处理的内容：删失编码、时间单位、分布选择。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：系数、time ratio、分布参数。</li>
+<li>参数估计：$\boldsymbol{\beta}$ 及其 time ratio。</li>
+<li>预测结果：条件生存时间分布、分位数生存时间。</li>
+<li>不确定性指标：标准误、区间估计。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：希望直接从时间尺度解释效应时。</li>
+<li>不适合：难以假设生存时间分布时。</li>
+<li>使用前需要特别检查的点：分布拟合、删失模式、与 PH 解释的差异。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="accelerated-failure-time-aft-model" data-i="0">Python</button><button class="codetab" data-uid="accelerated-failure-time-aft-model" data-i="1">R</button></div><div class="codepanel active" data-uid="accelerated-failure-time-aft-model" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>lifelines</code></li>
+</ul>
+<pre><code class="language-python">from lifelines import WeibullAFTFitter
+
+aft = WeibullAFTFitter()
+aft.fit(df, duration_col=&quot;TIMEDTH&quot;, event_col=&quot;DEATH&quot;)
+aft.print_summary()
+</code></pre></div><div class="codepanel" data-uid="accelerated-failure-time-aft-model" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>survival</code></li>
+</ul>
+<pre><code class="language-r">library(survival)
+
+fit &lt;- survreg(Surv(TIMEDTH, DEATH) ~ BMI + sex_label + factor(AGE_group),
+               data = df, dist = &quot;weibull&quot;)
+summary(fit)
+exp(coef(fit))  # time ratios
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：time ratio 方向和大小。</li>
+<li>每个主要参数如何解释：例如 time ratio = 1.35 可理解为该组的事件时间大约延长 35%。</li>
+<li>临床或医学意义如何表达：AFT 的时间尺度往往更贴近“延长多久”这类问题。</li>
+<li>常见误读：AFT 的 time ratio 与 Cox 的 hazard ratio 不是一回事。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>time ratio 森林图。</li>
+<li>分组预测生存曲线。</li>
+<li>parametric fit 与 KM 曲线对照图。</li>
+</ul>
+<h3>7.1 图像示例</h3>
+<p>下图用区间图展示 Weibull AFT 模型中各协变量对应的时间比及其 95% 区间。</p>
+<p><img alt="" src="img/aft_time_ratio_forest.png" /></p></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>直接在时间尺度解释效应。</li>
+<li>适合回答“时间延长 / 缩短多少”的问题。</li>
+<li>在某些数据上比 PH 解释更自然。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>需要指定分布形式。</li>
+<li>对分布设定敏感。</li>
+<li>在实践中使用频率低于 Cox。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>把 time ratio 当成 hazard ratio。</li>
+<li>不检查所选分布是否合理。</li>
+<li>只因系数显著就忽略模型拟合质量。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 Cox 模型的区别：AFT 在时间尺度解释，Cox 在 hazard 尺度解释。</li>
+<li>和 Kaplan-Meier 的区别：AFT 是参数回归模型，KM 是非参数描述工具。</li>
+<li>和 Weibull PH 的关系：Weibull 是少数同时兼容 AFT 和 PH 解释的分布族。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>治疗是否延长生存时间。</li>
+<li>某风险因素是否加速事件发生。</li>
+<li>作为 Cox 模型之外的参数化补充分析。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 比例风险模型是最常用的生存回归模型，在不指定基线风险函数具体形式的情况下，估计协变量对危险率的相对影响。">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
+<li><a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 生存曲线是生存分析中最经典的非参数估计方法，用于在存在删失时估计生存函数 $S(t)=P(T&gt;t)$。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Klein JP, Moeschberger ML. <em>Survival Analysis: Techniques for Censored and Truncated Data</em>. 2nd ed. Springer; 2003.</li>
+<li>R Core Team / survival package. <code>survreg</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/survival/html/survreg.html">https://stat.ethz.ch/R-manual/R-devel/library/survival/html/survreg.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-cox-proportional-hazards-model.html"><div class="pg-lab">← 前一则</div><div class="pg-t">Cox比例风险模型</div></a><a class="pg pg-next" href="m-competing-risks-and-fine-gray-model.html"><div class="pg-lab">后一则 →</div><div class="pg-t">竞争风险模型</div></a></div>
+    <div class="colophon">— 黑盒词典 · 04·09 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

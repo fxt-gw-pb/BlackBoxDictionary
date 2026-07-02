@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nelson-Aalen累积风险估计 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-04.html">生存分析与纵向数据</a><span class="sep">/</span><span class="cur">Nelson-Aalen累积风险估计</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">生存分析与纵向数据 · 04·06</div>
+      <h1 class="detail-h1">Nelson-Aalen累积风险估计</h1>
+      <div class="detail-en">Nelson-Aalen Estimator</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 生存分析 / 非参数估计</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>Nelson-Aalen累积风险估计（Nelson-Aalen Estimator）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>Nelson-Aalen 估计是生存分析中对累积风险函数 $H(t)$ 的经典非参数估计方法。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：随着时间推移，累积风险增加了多少。</li>
+<li>适用任务：累积风险函数估计、与 Cox 模型基线累积风险的概念衔接。</li>
+<li>常见医学场景：描述随访期间风险累积速度，比较不同组风险积累模式。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>Nelson-Aalen 估计把每个事件时点的“单位风险增量”逐步累加起来，因此它描述的是风险如何不断积累，而不是剩余生存概率。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>$$
+\hat H(t)=\sum_{t_i \le t}\frac{d_i}{n_i}
+$$</p>
+<p>并可通过</p>
+<p>$$
+\hat S(t)=\exp[-\hat H(t)]
+$$</p>
+<p>得到对应的生存函数近似。</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$\hat H(t)$：累积风险函数估计。</li>
+<li>$d_i$：时点 $t_i$ 的事件数。</li>
+<li>$n_i$：时点 $t_i$ 前风险集人数。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>删失是独立 / 非信息性的。</li>
+<li>个体之间相互独立。</li>
+<li>事件时点定义正确。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：可无分组，也可加分组变量做分层累积风险曲线。</li>
+<li>因变量类型：时间到事件结局。</li>
+<li>数据结构：每行一个个体，至少有 <code>time</code> 和 <code>event</code> 两列。</li>
+<li>是否适合高维数据：不适合高维默认建模。</li>
+<li>是否适合缺失较多数据：时间或事件缺失需单独处理。</li>
+<li>是否适合删失数据：适合。</li>
+<li>是否适合重复测量数据：不适合 time-varying covariates 直接分析。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>Nelson-Aalen 估计和 Kaplan-Meier 使用的是同一类生存数据结构：</p>
+<table>
+<thead>
+<tr>
+<th>RANDID</th>
+<th>TIMEDTH</th>
+<th>DEATH</th>
+<th>SEX</th>
+<th>BMI</th>
+<th>AGE_group</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2448</td>
+<td>8766</td>
+<td>0</td>
+<td>0</td>
+<td>26.97</td>
+<td>1</td>
+</tr>
+<tr>
+<td>6238</td>
+<td>8766</td>
+<td>0</td>
+<td>1</td>
+<td>28.73</td>
+<td>1</td>
+</tr>
+<tr>
+<td>9428</td>
+<td>8766</td>
+<td>0</td>
+<td>0</td>
+<td>25.34</td>
+<td>1</td>
+</tr>
+<tr>
+<td>10552</td>
+<td>2956</td>
+<td>1</td>
+<td>1</td>
+<td>28.58</td>
+<td>2</td>
+</tr>
+<tr>
+<td>11252</td>
+<td>8766</td>
+<td>0</td>
+<td>1</td>
+<td>23.10</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：事件时间、事件指示变量、可选分组变量。</li>
+<li>关键变量：<code>time</code>、<code>event</code>、<code>group</code>。</li>
+<li>需要预处理的内容：删失编码、时间尺度、风险集定义。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：累积风险曲线。</li>
+<li>参数估计：非参数估计，无回归系数。</li>
+<li>预测结果：任意时点的累积风险。</li>
+<li>不确定性指标：可构造累积风险区间。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：关注风险积累过程、需要与 Cox 基线风险估计衔接的场景。</li>
+<li>不适合：只想展示“存活概率”的普通读者沟通场景。</li>
+<li>使用前需要特别检查的点：事件和删失定义、风险集人数。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="nelson-aalen-estimator" data-i="0">Python</button><button class="codetab" data-uid="nelson-aalen-estimator" data-i="1">R</button></div><div class="codepanel active" data-uid="nelson-aalen-estimator" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>lifelines</code></li>
+</ul>
+<pre><code class="language-python">from lifelines import NelsonAalenFitter
+
+naf = NelsonAalenFitter()
+naf.fit(durations=df[&quot;TIMEDTH&quot;], event_observed=df[&quot;DEATH&quot;])
+naf.plot_cumulative_hazard()
+</code></pre></div><div class="codepanel" data-uid="nelson-aalen-estimator" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>survival</code></li>
+</ul>
+<pre><code class="language-r">library(survival)
+
+fit &lt;- survfit(Surv(TIMEDTH, DEATH) ~ sex_label, data = df)
+plot(fit, fun = &quot;cumhaz&quot;)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：累积风险曲线斜率和组间分离。</li>
+<li>每个主要参数如何解释：$\hat H(t)$ 越大，表示到时间 $t$ 为止累积的风险越大。</li>
+<li>临床或医学意义如何表达：适合表达风险随时间“累加”的速度。</li>
+<li>常见误读：累积风险不是概率，不能直接按百分比解释。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>单组累积风险曲线。</li>
+<li>分组累积风险曲线。</li>
+<li>与 Kaplan-Meier 曲线配对展示。</li>
+</ul>
+<h3>7.1 图像示例</h3>
+<p>下图展示按性别分层后的累积风险曲线，适合用于呈现风险随时间的积累过程。</p>
+<p><img alt="" src="img/nelson_aalen_cumhaz_by_sex.png" /></p></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>对累积风险的解释自然。</li>
+<li>与 Cox 基线风险估计直接相关。</li>
+<li>与 Kaplan-Meier 渐近等价。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>对非统计背景读者不如 KM 直观。</li>
+<li>仍然不能调整协变量。</li>
+<li>尾部样本少时不稳定。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>把累积风险当成生存概率。</li>
+<li>忽略删失对风险集的影响。</li>
+<li>不区分瞬时风险和累积风险。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 Kaplan-Meier 的区别：Kaplan-Meier 估计的是生存概率，Nelson-Aalen 估计的是累积风险。</li>
+<li>和 Cox 模型的区别：Cox 是回归模型；Nelson-Aalen 是非参数描述性估计。</li>
+<li>应该如何选择：面向风险累积解释时更偏向 Nelson-Aalen，面向生存概率展示时更偏向 KM。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>展示不同人群的累积死亡风险。</li>
+<li>作为 Cox PH 基线风险估计概念的过渡。</li>
+<li>配合生存曲线一起帮助解释风险结构。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 生存曲线是生存分析中最经典的非参数估计方法，用于在存在删失时估计生存函数 $S(t)=P(T&gt;t)$。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a></li>
+<li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 比例风险模型是最常用的生存回归模型，在不指定基线风险函数具体形式的情况下，估计协变量对危险率的相对影响。">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Klein JP, Moeschberger ML. <em>Survival Analysis: Techniques for Censored and Truncated Data</em>. 2nd ed. Springer; 2003.</li>
+<li>R Core Team / survival package. <code>survfit</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/survival/html/survfit.html">https://stat.ethz.ch/R-manual/R-devel/library/survival/html/survfit.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-kaplan-meier-estimator.html"><div class="pg-lab">← 前一则</div><div class="pg-t">Kaplan-Meier生存曲线</div></a><a class="pg pg-next" href="m-log-rank-test.html"><div class="pg-lab">后一则 →</div><div class="pg-t">Log-rank检验</div></a></div>
+    <div class="colophon">— 黑盒词典 · 04·06 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

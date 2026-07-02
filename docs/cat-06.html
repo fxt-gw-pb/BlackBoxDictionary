@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>正则化与变量选择 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap category">
+  <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><span class="cur">正则化与变量选择</span></div>
+  <div class="cat-title">
+    <div class="cat-title-l">
+      <div class="kicker dark-ink">第 06 部</div>
+      <h2 class="page-h2">正则化与变量选择</h2>
+      <div class="cat-title-en">Regularization &amp; Variable Selection</div>
+      <p class="lede">筛选变量并控制模型复杂度。</p>
+    </div>
+    <div class="cat-title-r">
+      <div class="cat-big">3</div>
+      <div class="kicker">收录条目</div>
+    </div>
+  </div>
+  <div class="entries"><a class="entry" href="m-ridge-regression.html">
+      <span class="entry-no">06·01</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">Ridge回归</span>
+          <span class="entry-en">Ridge Regression</span>
+        </div>
+        <p class="entry-def">Ridge 回归是在普通线性回归的损失函数中加入 L2 正则化项的一种方法，用来缓解多重共线性、减少过拟合，并提升模型在新数据上的稳定性。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-lasso-regression.html">
+      <span class="entry-no">06·02</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">Lasso回归</span>
+          <span class="entry-en">Lasso Regression</span>
+        </div>
+        <p class="entry-def">Lasso 回归是在普通线性回归中加入 L1 正则化项的一种方法，它不仅能做回归拟合，还能自动把部分不重要特征的系数压缩到 0，从而实现变量选择。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-elastic-net-regression.html">
+      <span class="entry-no">06·03</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">弹性网络回归</span>
+          <span class="entry-en">Elastic Net Regression</span>
+        </div>
+        <p class="entry-def">弹性网络回归结合了 Lasso 的 L1 正则化和 Ridge 的 L2 正则化，既能做变量选择，也能在高度相关特征中保持更稳定的系数结构。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a></div>
+</main>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

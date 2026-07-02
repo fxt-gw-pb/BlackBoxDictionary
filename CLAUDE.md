@@ -14,6 +14,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - `README.md` — 项目地图 + 编写规范 + **AI 维护规则（权威）**
 - `scripts/check.py` — 一致性检查：双链解析、全名 alias、slug 唯一性、status 词表、图像引用、索引同步
+- `scripts/build_site.py` — 静态站点生成器：读 `01_方法词典/` 全部方法卡，按 `黑盒词典网站设计/` 的视觉稿输出到 `docs/`（GitHub Pages）；改动方法卡后需重跑
+- `docs/` — 生成的「黑盒词典」网站，勿手改（改内容后重跑生成器）；`黑盒词典网站设计/` 为 Claude Design 视觉稿源
 - `00_项目说明/` — 分类框架详解、首批方法清单、生物统计课程映射、网站设计 Brief
 - `01_方法词典/` — 主体内容，16 个编号分类目录（01_研究设计与数据理解 … 16_分类与判别方法），一个方法一张卡
 - `02_模板/01-方法卡模板.md` — 方法卡结构的唯一规范（12 个主标题 + YAML frontmatter，含 slug 与全名 alias 的填写说明）

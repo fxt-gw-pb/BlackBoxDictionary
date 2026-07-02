@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>奇异值分解 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-10.html">降维与表征学习</a><span class="sep">/</span><span class="cur">奇异值分解</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">降维与表征学习 · 10·06</div>
+      <h1 class="detail-h1">奇异值分解</h1>
+      <div class="detail-en">Singular Value Decomposition, SVD</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 降维 / 矩阵分解 / 特征压缩</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>奇异值分解（Singular Value Decomposition, SVD）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>奇异值分解是一种基础矩阵分解方法，可以把任意矩阵分解为左奇异向量、奇异值和右奇异向量三部分。截断 SVD 使用最大的若干奇异值构造低秩近似，从而实现降维、压缩和去噪。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：如何用低秩结构近似一个高维数据矩阵。</li>
+<li>适用任务：特征压缩、矩阵降噪、潜在语义分析、图像压缩、稀疏矩阵降维。</li>
+<li>常见医学场景：影像矩阵压缩，组学矩阵低秩表示，临床文本词频矩阵潜在主题探索。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>SVD 把数据矩阵拆成一组按重要性排序的“基础模式”。最大的奇异值对应最主要的变化模式，只保留前几个模式就能近似原矩阵，并丢掉一部分噪声和冗余。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>任意矩阵 $X\in\mathbb{R}^{n\times p}$ 可分解为：</p>
+<p>$$
+X=U\Sigma V^\top
+$$</p>
+<p>其中 $U^\top U=I$，$V^\top V=I$，$\Sigma$ 为非负奇异值构成的对角矩阵。截断到前 $k$ 个奇异值：</p>
+<p>$$
+X_k=U_k\Sigma_k V_k^\top
+$$</p>
+<p>根据 Eckart-Young 定理，$X_k$ 是 Frobenius 范数意义下最优的秩 $k$ 近似：</p>
+<p>$$
+X_k=\arg\min_{\operatorname{rank}(B)=k}\|X-B\|_F
+$$</p>
+<p>累计能量比例常写为：</p>
+<p>$$
+\frac{\sum_{j=1}^{k}\sigma_j^2}{\sum_{j=1}^{r}\sigma_j^2}
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$U$：左奇异向量，表示样本方向的正交基。</li>
+<li>$\Sigma$：奇异值，表示每个模式的重要性。</li>
+<li>$V$：右奇异向量，表示特征方向的正交基。</li>
+<li>$k$：保留的低秩维度。</li>
+<li>截断误差：原矩阵与低秩近似之间的差异。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>数据矩阵存在可利用的低秩结构。</li>
+<li>主要信息集中在较大的奇异值对应的方向上。</li>
+<li>输入尺度会影响分解结果，通常需根据场景决定是否中心化或标准化。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续特征矩阵、稀疏计数矩阵、图像像素矩阵。</li>
+<li>因变量类型：SVD 本身不需要结局变量。</li>
+<li>数据结构：样本乘以特征矩阵，或任意二维矩阵。</li>
+<li>是否适合高维数据：适合，尤其适合稀疏高维矩阵的截断分解。</li>
+<li>是否适合缺失较多数据：普通 SVD 不直接处理缺失。</li>
+<li>是否适合删失数据：不直接处理删失结局。</li>
+<li>是否适合重复测量数据：可分解整理后的矩阵，但不建模相关结构。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以临床文本词频矩阵为例：</p>
+<table>
+<thead>
+<tr>
+<th>PatientID</th>
+<th>fever</th>
+<th>cough</th>
+<th>pain</th>
+<th>tumor</th>
+<th>treatment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P001</td>
+<td>2</td>
+<td>4</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>P002</td>
+<td>0</td>
+<td>1</td>
+<td>3</td>
+<td>2</td>
+<td>4</td>
+</tr>
+<tr>
+<td>P003</td>
+<td>3</td>
+<td>5</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>P004</td>
+<td>0</td>
+<td>0</td>
+<td>4</td>
+<td>3</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：数值矩阵或稀疏矩阵。</li>
+<li>关键变量：保留维度 $k$、是否中心化、是否使用随机化 SVD。</li>
+<li>需要预处理的内容：缺失处理、标准化或归一化、稀疏矩阵构造。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：奇异值、左右奇异向量、低维表示、低秩重构矩阵。</li>
+<li>参数估计：$U_k$、$\Sigma_k$、$V_k$。</li>
+<li>预测结果：不直接预测，可作为后续模型输入。</li>
+<li>不确定性指标：可用重采样、重构误差或交叉验证选择 $k$。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：矩阵存在低秩结构、需要压缩或去噪、输入为稀疏高维矩阵的场景。</li>
+<li>不适合：主要结构强非线性、缺失值大量存在且未建模、需要直接解释原始变量效应的场景。</li>
+<li>使用前需要特别检查的点：是否中心化，奇异值衰减是否明显，低秩近似是否保留任务相关信息。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="singular-value-decomposition-svd" data-i="0">Python</button><button class="codetab" data-uid="singular-value-decomposition-svd" data-i="1">R</button></div><div class="codepanel active" data-uid="singular-value-decomposition-svd" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>numpy</code></li>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+from sklearn.decomposition import TruncatedSVD
+from sklearn.preprocessing import Normalizer
+from sklearn.pipeline import make_pipeline
+
+df = pd.read_csv(&quot;clinical_term_matrix.csv&quot;)
+X = df&amp;quot;fever&amp;quot;, &amp;quot;cough&amp;quot;, &amp;quot;pain&amp;quot;, &amp;quot;tumor&amp;quot;, &amp;quot;treatment&amp;quot;
+
+svd_pipe = make_pipeline(
+    TruncatedSVD(n_components=2, random_state=42),
+    Normalizer(copy=False)
+)
+
+Z = svd_pipe.fit_transform(X)
+svd = svd_pipe.named_steps[&quot;truncatedsvd&quot;]
+
+print(&quot;Explained variance ratio:&quot;, svd.explained_variance_ratio_)
+print(pd.DataFrame(Z, columns=[&quot;SVD1&quot;, &quot;SVD2&quot;]).head())
+</code></pre></div><div class="codepanel" data-uid="singular-value-decomposition-svd" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>irlba</code></li>
+</ul>
+<pre><code class="language-r">library(irlba)
+
+x &lt;- as.matrix(df[, c(&quot;fever&quot;, &quot;cough&quot;, &quot;pain&quot;, &quot;tumor&quot;, &quot;treatment&quot;)])
+fit &lt;- irlba(x, nv = 2, nu = 2)
+
+scores &lt;- fit$u %*% diag(fit$d)
+loadings &lt;- fit$v
+head(scores)
+fit$d
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：奇异值谱、累计能量比例、低维得分、右奇异向量中的主要变量贡献。</li>
+<li>每个主要参数如何解释：<code>n_components=2</code> 表示只保留前两个主导低秩模式。</li>
+<li>临床或医学意义如何表达：低维成分是原始变量的线性组合，需要结合载荷较大的变量和业务背景命名。</li>
+<li>常见误读：奇异值最大只表示矩阵能量最大，不一定表示最能预测临床结局。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>奇异值谱图。</li>
+<li>累计能量比例曲线。</li>
+<li>前两个 SVD 维度散点图。</li>
+<li>重构误差随 $k$ 变化曲线。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>适用于任意矩阵，理论基础清晰。</li>
+<li>截断 SVD 能提供最优低秩近似。</li>
+<li>对稀疏高维矩阵特别实用。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>成分可解释性有限。</li>
+<li>线性低秩结构不能表达复杂非线性流形。</li>
+<li>对尺度和中心化策略敏感。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>把 SVD 和 PCA 完全等同，忽略中心化和应用场景差异。</li>
+<li>在全数据上做 SVD 后再划分训练测试集。</li>
+<li>只看二维图，不检查保留能量和重构误差。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a> 的区别：PCA 通常对中心化数据的协方差结构做降维，SVD 是更一般的矩阵分解工具。</li>
+<li>和 <a class="xlink" href="m-factor-analysis.html" data-cn="因子分析" data-en="Factor Analysis" data-def="因子分析是一类潜变量模型，用少数不可直接观测的公共因子解释多个观测变量之间的相关结构。它常用于问卷量表、心理测量、症状维度和综合指标构建。">因子分析（Factor Analysis）</a> 的区别：因子分析是带误差结构和潜变量解释的统计模型，SVD 更偏代数低秩近似。</li>
+<li>和 <a class="xlink" href="m-kernel-principal-component-analysis-kpca.html" data-cn="核主成分分析" data-en="Kernel Principal Component Analysis, KPCA" data-def="核主成分分析是 [[主成分分析（Principal Component Analysis, PCA）]] 的非线性扩展。它通过核函数隐式地把样本映射到高维特征空间，再在该空间中执行 PCA，从而捕捉原始空间中的非线性结构。">核主成分分析（Kernel Principal Component Analysis, KPCA）</a> 的区别：KPCA 通过核矩阵处理非线性结构，SVD 本身是线性分解。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>影像矩阵或影像组学特征压缩。</li>
+<li>临床文本词频矩阵的潜在语义降维。</li>
+<li>组学表达矩阵的低秩去噪和主要模式提取。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
+<li><a class="xlink" href="m-factor-analysis.html" data-cn="因子分析" data-en="Factor Analysis" data-def="因子分析是一类潜变量模型，用少数不可直接观测的公共因子解释多个观测变量之间的相关结构。它常用于问卷量表、心理测量、症状维度和综合指标构建。">因子分析（Factor Analysis）</a></li>
+<li><a class="xlink" href="m-kernel-principal-component-analysis-kpca.html" data-cn="核主成分分析" data-en="Kernel Principal Component Analysis, KPCA" data-def="核主成分分析是 [[主成分分析（Principal Component Analysis, PCA）]] 的非线性扩展。它通过核函数隐式地把样本映射到高维特征空间，再在该空间中执行 PCA，从而捕捉原始空间中的非线性结构。">核主成分分析（Kernel Principal Component Analysis, KPCA）</a></li>
+<li><a class="xlink" href="m-multidimensional-scaling-mds.html" data-cn="多维尺度分析" data-en="Multidimensional Scaling, MDS" data-def="多维尺度分析是一类把样本间距离或不相似度表示为低维坐标的方法。它的目标是在二维或三维空间中尽量保留原始距离关系。">多维尺度分析（Multidimensional Scaling, MDS）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Golub GH, Van Loan CF. <em>Matrix Computations</em>. 4th ed. Johns Hopkins University Press; 2013.</li>
+<li>Eckart C, Young G. The approximation of one matrix by another of lower rank. <em>Psychometrika</em>. 1936;1:211-218.</li>
+<li>scikit-learn Developers. <code>sklearn.decomposition.TruncatedSVD</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html">https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-isometric-mapping.html"><div class="pg-lab">← 前一则</div><div class="pg-t">Isomap</div></a><a class="pg pg-next" href="m-t-distributed-stochastic-neighbor-embedding.html"><div class="pg-lab">后一则 →</div><div class="pg-t">t-SNE</div></a></div>
+    <div class="colophon">— 黑盒词典 · 10·06 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

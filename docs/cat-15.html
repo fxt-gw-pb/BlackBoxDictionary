@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>模型评估与解释 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap category">
+  <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><span class="cur">模型评估与解释</span></div>
+  <div class="cat-title">
+    <div class="cat-title-l">
+      <div class="kicker dark-ink">第 15 部</div>
+      <h2 class="page-h2">模型评估与解释</h2>
+      <div class="cat-title-en">Model Evaluation &amp; Interpretation</div>
+      <p class="lede">区分度、校准、临床效用与可解释性。</p>
+    </div>
+    <div class="cat-title-r">
+      <div class="cat-big">9</div>
+      <div class="kicker">收录条目</div>
+    </div>
+  </div>
+  <div class="entries"><a class="entry" href="m-multiple-testing-and-error-rate-control.html">
+      <span class="entry-no">15·01</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">多重检验与错误率控制</span>
+          <span class="entry-en">Multiple Testing and Error Rate Control</span>
+        </div>
+        <p class="entry-def">多重检验与错误率控制关注的是：当同时进行很多次假设检验时，如何控制整体假阳性风险或错误发现比例。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-bonferroni-correction.html">
+      <span class="entry-no">15·02</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">Bonferroni校正</span>
+          <span class="entry-en">Bonferroni Correction</span>
+        </div>
+        <p class="entry-def">Bonferroni 校正是控制 FWER 的最经典单步方法，把显著性水平 $\alpha$ 平均分配到每个检验上。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-holm-procedure.html">
+      <span class="entry-no">15·03</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">Holm程序</span>
+          <span class="entry-en">Holm Procedure</span>
+        </div>
+        <p class="entry-def">Holm 程序是控制 FWER 的逐步法（step-down procedure），通常比 Bonferroni 更有力。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-benjamini-hochberg-procedure.html">
+      <span class="entry-no">15·04</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">Benjamini-Hochberg程序</span>
+          <span class="entry-en">Benjamini-Hochberg Procedure</span>
+        </div>
+        <p class="entry-def">Benjamini-Hochberg（BH）程序是控制 FDR 的经典方法，特别适合高维发现型研究。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-receiver-operating-characteristic-and-auc.html">
+      <span class="entry-no">15·05</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">ROC曲线与AUC</span>
+          <span class="entry-en">Receiver Operating Characteristic and AUC</span>
+        </div>
+        <p class="entry-def">ROC 曲线（受试者工作特征曲线）把一个连续评分或预测概率在所有可能阈值下的敏感度与（1−特异度）连成一条曲线；AUC 是曲线下面积，用一个 0–1 的数概括模型的整体区分能力。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-calibration-curve.html">
+      <span class="entry-no">15·06</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">校准曲线</span>
+          <span class="entry-en">Calibration Curve</span>
+        </div>
+        <p class="entry-def">校准曲线（可靠性图）比较模型的预测概率与实际观察到的事件发生频率，用来判断“模型说的 20% 风险，是不是真的大约 20% 的人发生了事件”。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-decision-curve-analysis-dca.html">
+      <span class="entry-no">15·07</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">决策曲线分析</span>
+          <span class="entry-en">Decision Curve Analysis, DCA</span>
+        </div>
+        <p class="entry-def">决策曲线分析通过“净获益”指标，评估一个预测模型或诊断策略在不同决策阈值下相对于“全部干预”和“全部不干预”两个极端策略的临床价值。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-cross-validation.html">
+      <span class="entry-no">15·08</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">交叉验证</span>
+          <span class="entry-en">Cross-Validation</span>
+        </div>
+        <p class="entry-def">交叉验证是一类重采样方法，通过反复把数据切成训练与验证子集来估计模型在新数据上的表现，也常用于超参数选择。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-shapley-additive-explanations-shap.html">
+      <span class="entry-no">15·09</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">SHAP</span>
+          <span class="entry-en">Shapley Additive Explanations, SHAP</span>
+        </div>
+        <p class="entry-def">SHAP 是一种基于博弈论 Shapley 值的特征归因方法，把某次预测相对基线的偏移，公平地分配到各个特征上，给出统一的局部与全局解释。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a></div>
+</main>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

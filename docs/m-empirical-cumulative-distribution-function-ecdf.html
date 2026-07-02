@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>经验分布函数 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-01.html">研究设计与数据理解</a><span class="sep">/</span><span class="cur">经验分布函数</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">研究设计与数据理解 · 01·03</div>
+      <h1 class="detail-h1">经验分布函数</h1>
+      <div class="detail-en">Empirical Cumulative Distribution Function, ECDF</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 非参数统计 / 分布探索</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>经验分布函数（Empirical Cumulative Distribution Function, ECDF）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>经验分布函数是对总体分布函数 $F(x)=P(X\le x)$ 的非参数估计。它直接用样本中“不大于某个阈值的比例”来近似总体累计概率。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：样本在不同阈值以下累计了多少概率质量。</li>
+<li>适用任务：描述分布、比较两组分布、查看尾部行为、为非参数方法提供基础。</li>
+<li>常见医学场景：比较两组患者的生物标志物分布、查看住院天数或实验室指标的整体分布差异。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>ECDF 可以理解成“从左往右数人头”。给定一个阈值 $x$，看看样本里有多少比例已经落在 $x$ 左边，这个比例就是对真实累计概率的直接估计。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>$$
+\hat F(x) = \frac{1}{n}\sum_{i=1}^n I(X_i \le x)
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$I(X_i \le x)$：指示函数，若第 $i$ 个观测不超过 $x$ 则取 1。</li>
+<li>$n$：样本量。</li>
+<li>$\hat F(x)$：样本中不超过 $x$ 的经验比例。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>样本可视为来自同一目标总体。</li>
+<li>观测值相互独立是最常见设定。</li>
+<li>不需要预设正态、对数正态等具体分布形式。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：通常是一维数值变量，也可按分组分别作图。</li>
+<li>因变量类型：不涉及监督学习中的因变量。</li>
+<li>数据结构：独立样本的一维观测最常见。</li>
+<li>是否适合高维数据：不适合直接处理高维，但可对每个变量分别作 ECDF。</li>
+<li>是否适合缺失较多数据：可用，但应先明确缺失处理策略。</li>
+<li>是否适合删失数据：不适合；有删失时更适合 Kaplan-Meier。</li>
+<li>是否适合重复测量数据：单次探索可以做，但推断需考虑相关性。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以 <code>Framingham_data.csv</code> 的基线连续变量为例，ECDF 很适合描述单个连续指标在总体中的累计分布：</p>
+<table>
+<thead>
+<tr>
+<th>RANDID</th>
+<th>PERIOD</th>
+<th>SEX</th>
+<th>BMI</th>
+<th>TOTCHOL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2448</td>
+<td>1</td>
+<td>0</td>
+<td>26.97</td>
+<td>195</td>
+</tr>
+<tr>
+<td>6238</td>
+<td>1</td>
+<td>1</td>
+<td>28.73</td>
+<td>250</td>
+</tr>
+<tr>
+<td>9428</td>
+<td>1</td>
+<td>0</td>
+<td>25.34</td>
+<td>245</td>
+</tr>
+<tr>
+<td>10552</td>
+<td>1</td>
+<td>1</td>
+<td>28.58</td>
+<td>225</td>
+</tr>
+<tr>
+<td>11252</td>
+<td>1</td>
+<td>1</td>
+<td>23.10</td>
+<td>285</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：一组数值型观测。</li>
+<li>关键变量：待描述的数值变量，可附加一个分组变量。</li>
+<li>需要预处理的内容：缺失值处理、必要时按组拆分。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：一个阶梯函数。</li>
+<li>参数估计：每个阈值对应的累计概率估计。</li>
+<li>预测结果：无预测意义，主要用于描述。</li>
+<li>不确定性指标：通常不单独给；若需要可通过 DKW 不等式或 Bootstrap 构建带状区间。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：描述分布、比较组间整体分布、观察中位数和尾部差异。</li>
+<li>不适合：需要平滑密度曲线时；有明显删失时；需要调整协变量时。</li>
+<li>使用前需要特别检查的点：是否存在大量重复值、是否需要分层展示、是否有删失或极端异常值。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="empirical-cumulative-distribution-function-ecdf" data-i="0">Python</button><button class="codetab" data-uid="empirical-cumulative-distribution-function-ecdf" data-i="1">R</button></div><div class="codepanel active" data-uid="empirical-cumulative-distribution-function-ecdf" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>statsmodels</code></li>
+<li><code>seaborn</code></li>
+</ul>
+<pre><code class="language-python">import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from statsmodels.distributions.empirical_distribution import ECDF
+
+x = np.array([2.1, 2.4, 2.9, 3.5, 4.0, 4.8])
+ecdf = ECDF(x)
+grid = np.linspace(x.min(), x.max(), 200)
+
+plt.step(grid, ecdf(grid), where=&quot;post&quot;)
+sns.rugplot(x=x)
+plt.xlabel(&quot;Biomarker&quot;)
+plt.ylabel(&quot;ECDF&quot;)
+plt.show()
+</code></pre></div><div class="codepanel" data-uid="empirical-cumulative-distribution-function-ecdf" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>stats</code></li>
+</ul>
+<pre><code class="language-r">x &lt;- c(2.1, 2.4, 2.9, 3.5, 4.0, 4.8)
+Fhat &lt;- ecdf(x)
+plot(Fhat, main = &quot;ECDF&quot;, xlab = &quot;Biomarker&quot;, ylab = &quot;F(x)&quot;)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：在任意阈值 $x$ 处，有多少比例的样本不超过该值。</li>
+<li>每个主要参数如何解释：ECDF 没有回归系数，重点在阶梯的位置和增长速度。</li>
+<li>临床或医学意义如何表达：例如“约 80% 的患者 CRP 低于某个阈值”。</li>
+<li>常见误读：不要把 ECDF 当作密度；阶梯陡峭意味着该区间观测多，不代表风险函数。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>阶梯型 ECDF 曲线。</li>
+<li>分组叠加 ECDF 曲线。</li>
+<li>ECDF 配合 rug plot 或箱线图。</li>
+</ul>
+<h3>7.1 图像示例</h3>
+<p>下图给出总胆固醇按性别分层后的 ECDF，适合放在“数据探索”“组间分布比较”或“非参数方法引入”场景中。</p>
+<p><img alt="" src="img/ecdf_totchol_by_sex.png" /></p></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>不依赖分布假设。</li>
+<li>对尾部和分位数信息表达直观。</li>
+<li>是许多非参数方法和 Bootstrap 的基础对象。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>不平滑。</li>
+<li>对高维数据不直接适用。</li>
+<li>不处理删失。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>把 ECDF 当作概率密度函数解释。</li>
+<li>忽视分组样本量差异导致图形误判。</li>
+<li>有删失数据时仍直接拿 ECDF 代替生存曲线。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和核密度估计的区别：ECDF 估计累计分布，KDE 估计密度。</li>
+<li>和直方图的区别：ECDF 不依赖分箱。</li>
+<li>应该如何选择：想看累计比例用 ECDF，想看平滑分布形状用 KDE。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>比较治疗前后某实验室指标的整体分布。</li>
+<li>比较病例组与对照组生物标志物分布。</li>
+<li>为 K-S 检验和 Bootstrap 提供基础分布对象。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计是一种用局部加权平均来估计连续型变量概率密度函数的非参数方法。它常用来替代粗糙的直方图，给出更平滑的分布形状。">核密度估计（Kernel Density Estimation, KDE）</a></li>
+<li><a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 是一种从原始样本中“有放回重抽样”的方法，用来近似统计量的抽样分布，从而估计标准误、方差和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a></li>
+<li><a class="xlink" href="m-kolmogorov-smirnov-test.html" data-cn="Kolmogorov-Smirnov检验" data-en="Kolmogorov-Smirnov Test" data-def="Kolmogorov-Smirnov 检验是一种基于经验分布函数的非参数检验，用经验分布与理论分布（单样本）或两组经验分布之间的最大距离，判断分布是否一致。">Kolmogorov-Smirnov检验（Kolmogorov-Smirnov Test）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Wasserman L. <em>All of Statistics: A Concise Course in Statistical Inference</em>. Springer; 2004.</li>
+<li>statsmodels Developers. <code>statsmodels.distributions.empirical_distribution.ECDF</code>. statsmodels API Reference. <a href="https://www.statsmodels.org/stable/generated/statsmodels.distributions.empirical_distribution.ECDF.html">https://www.statsmodels.org/stable/generated/statsmodels.distributions.empirical_distribution.ECDF.html</a> （访问日期：2026-07-02）</li>
+<li>seaborn Developers. <code>seaborn.ecdfplot</code>. seaborn documentation. <a href="https://seaborn.pydata.org/generated/seaborn.ecdfplot.html">https://seaborn.pydata.org/generated/seaborn.ecdfplot.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-histogram.html"><div class="pg-lab">← 前一则</div><div class="pg-t">直方图</div></a><a class="pg pg-next" href="m-kernel-density-estimation-kde.html"><div class="pg-lab">后一则 →</div><div class="pg-t">核密度估计</div></a></div>
+    <div class="colophon">— 黑盒词典 · 01·03 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

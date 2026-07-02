@@ -198,6 +198,8 @@ coef(fit, s = "lambda.min")
 - [[Ridge回归（Ridge Regression）]]
 - [[弹性网络回归（Elastic Net Regression）]]
 - [[线性回归（Linear Regression）]]
+- [[嵌入式特征选择（Embedded Feature Selection）]]
+- [[单变量特征选择（Univariate Feature Selection）]]
 
 ## 12. 参考资料
 

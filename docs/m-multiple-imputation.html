@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>多重插补 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-13.html">数据预处理与特征工程</a><span class="sep">/</span><span class="cur">多重插补</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">数据预处理与特征工程 · 13·08</div>
+      <h1 class="detail-h1">多重插补</h1>
+      <div class="detail-en">Multiple Imputation</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 缺失数据 / 插补 / 不确定性</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>多重插补（Multiple Imputation）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>多重插补通过为每个缺失值生成多套（$m$ 套）“合理猜测”得到多份完整数据集，分别分析后按 Rubin 规则合并结果，使插补带来的不确定性被正确传播到最终推断中。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：数据有缺失时，如何在不丢弃样本、又不低估不确定性的前提下做有效推断。</li>
+<li>适用任务：缺失协变量/结局处理、含缺失数据的回归与生存分析、敏感性分析。</li>
+<li>常见医学场景：随访失访、实验室指标漏测、量表条目缺失、多中心数据字段不齐。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>单一插补（如用均值填补）假装“我们确切知道缺的是多少”，会人为缩小方差。多重插补做多套不同的合理填补，让“我们并不确定缺的是多少”这件事体现在结果的波动里，从而给出诚实的置信区间。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>对 $m$ 套插补数据分别得到估计 $\hat{\theta}_k$ 与方差 $U_k$，Rubin 合并规则为：</p>
+<p>$$
+\bar{\theta}=\frac{1}{m}\sum_{k=1}^{m}\hat{\theta}_k,\qquad
+\bar{U}=\frac{1}{m}\sum_{k=1}^{m}U_k,\qquad
+B=\frac{1}{m-1}\sum_{k=1}^{m}(\hat{\theta}_k-\bar{\theta})^2
+$$</p>
+<p>总方差与缺失信息比为：</p>
+<p>$$
+T=\bar{U}+\Big(1+\frac{1}{m}\Big)B,\qquad
+\mathrm{FMI}\approx\frac{(1+1/m)B}{T}
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$\bar{\theta}$：合并后的点估计。</li>
+<li>$\bar{U}$（within）：插补内方差；$B$（between）：插补间方差，反映缺失带来的额外不确定性。</li>
+<li>$T$：合并后总方差，用于构造区间。</li>
+<li>FMI：缺失信息比，衡量缺失对该参数的影响程度。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>缺失机制通常假设为 MAR（随机缺失，可由观测变量解释）。</li>
+<li>插补模型与分析模型“协调”（congenial），插补时应纳入结局与相关辅助变量。</li>
+<li>插补模型近似正确；MNAR 时需专门的敏感性分析。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续、二分类、多分类均可（分变量类型选插补模型）。</li>
+<li>因变量类型：连续、二分类或时间到事件。</li>
+<li>数据结构：含缺失的表格数据。</li>
+<li>是否适合高维数据：可用，但变量很多时需筛选辅助变量、控制共线。</li>
+<li>是否适合缺失较多数据：正是为此设计；但缺失比例极高时结论对模型更敏感。</li>
+<li>是否适合删失数据：可结合生存插补（如纳入 Nelson-Aalen 累积风险作为预测量）。</li>
+<li>是否适合重复测量数据：需用纵向/多层插补模型。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>个体</th>
+<th>Age</th>
+<th>SBP</th>
+<th>Chol</th>
+<th>是否缺失</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>61</td>
+<td>140</td>
+<td>5.2</td>
+<td>完整</td>
+</tr>
+<tr>
+<td>2</td>
+<td>58</td>
+<td>NA</td>
+<td>6.1</td>
+<td>SBP 缺失</td>
+</tr>
+<tr>
+<td>3</td>
+<td>72</td>
+<td>155</td>
+<td>NA</td>
+<td>Chol 缺失</td>
+</tr>
+<tr>
+<td>4</td>
+<td>49</td>
+<td>128</td>
+<td>4.8</td>
+<td>完整</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：含缺失的完整变量集合（含结局与辅助变量）。</li>
+<li>关键变量：缺失变量、预测变量、插补次数 $m$、每变量的插补模型。</li>
+<li>需要预处理的内容：判断缺失机制、选择插补方法、检查插补合理性。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：$m$ 套完整数据与各自分析结果。</li>
+<li>参数估计：Rubin 合并后的估计与区间。</li>
+<li>预测结果：可在合并层面报告。</li>
+<li>不确定性指标：合并方差、FMI、自由度调整后的检验。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：MAR 假设合理、缺失非极端、需要有效区间估计的分析。</li>
+<li>不适合：缺失强烈依赖未观测值（MNAR）且无敏感性框架、缺失比例极高时。</li>
+<li>使用前需要特别检查的点：缺失机制、是否纳入结局与辅助变量、插补诊断、$m$ 是否足够。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="multiple-imputation" data-i="0">Python</button><button class="codetab" data-uid="multiple-imputation" data-i="1">R</button></div><div class="codepanel active" data-uid="multiple-imputation" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>statsmodels</code></li>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">import numpy as np
+import statsmodels.api as sm
+from statsmodels.imputation import mice
+
+# df 含缺失; 用链式方程插补并按 Rubin 规则合并回归结果
+imp = mice.MICEData(df)
+fit = mice.MICE(&quot;Chol ~ Age + SBP&quot;, sm.OLS, imp).fit(n_burnin=10, n_imputations=20)
+print(fit.summary())   # 已按 Rubin 规则合并，含 FMI
+</code></pre></div><div class="codepanel" data-uid="multiple-imputation" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>mice</code></li>
+</ul>
+<pre><code class="language-r">library(mice)
+
+imp &lt;- mice(df, m = 20, method = &quot;pmm&quot;, seed = 1)   # 预测均值匹配
+fit &lt;- with(imp, lm(Chol ~ Age + SBP))
+pooled &lt;- pool(fit)
+summary(pooled)        # 合并估计、区间与 FMI
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：合并后的点估计与区间、FMI、插补诊断是否合理。</li>
+<li>每个主要参数如何解释：区间已包含插补不确定性；FMI 高说明该参数受缺失影响大。</li>
+<li>临床或医学意义如何表达：报告应说明缺失比例、机制假设与插补策略，而非默默删除缺失样本。</li>
+<li>常见误读：只取第一套插补分析；用单一插补冒充多重插补；忽略 MAR 假设的合理性。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>缺失模式图（缺失共现结构）。</li>
+<li>观测值与插补值的密度/分布对比（诊断插补合理性）。</li>
+<li>迭代收敛轨迹图（链式方程收敛检查）。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>保留全部样本，避免完整个案分析的效率损失与潜在偏倚。</li>
+<li>正确传播不确定性，给出诚实区间。</li>
+<li>框架通用，可配合各类分析模型。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>依赖 MAR 与插补模型设定，MNAR 需额外假设。</li>
+<li>实现与诊断比单一插补复杂。</li>
+<li>极高缺失比例下结论对模型很敏感。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>插补时漏掉结局变量，导致协变量与结局关系被削弱。</li>
+<li>先插补再单一分析（不合并），低估方差。</li>
+<li>用均值/末次观测结转（LOCF）冒充多重插补。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和完整个案分析（listwise deletion）的区别：后者在 MAR 下可能有偏且低效，MI 更稳健。</li>
+<li>和单一插补（均值/回归）的区别：单一插补低估方差，MI 通过多套插补修正。</li>
+<li>和 <a class="xlink" href="m-inverse-probability-of-treatment-weighting-iptw.html" data-cn="逆概率处理加权" data-en="Inverse Probability of Treatment Weighting, IPTW" data-def="IPTW 用倾向评分的倒数给每个个体加权，构造一个“伪人群”，在其中处理分配与已测混杂独立，从而估计边际（population-average）处理效应。">逆概率处理加权（Inverse Probability of Treatment Weighting, IPTW）</a> 的关系：IPW 用加权处理缺失/删失，MI 用生成数据，二者可视问题选择或结合。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>队列/RCT 中缺失协变量或结局的主分析与敏感性分析。</li>
+<li>多中心真实世界数据字段不齐时的统一分析。</li>
+<li>生存分析中缺失预后因子的处理。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归通过把连续型结局表示为若干自变量的线性组合，来估计变量与结局之间的方向、大小和不确定性，是医学统计最基础的建模方法之一。">线性回归（Linear Regression）</a></li>
+<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归是最经典的二分类结局回归模型，用 logit 连接函数把事件概率映射到线性预测子上，从而估计协变量与事件发生 odds 的关系。">Logistic回归（Logistic Regression）</a></li>
+<li><a class="xlink" href="m-causal-inference.html" data-cn="因果推断" data-en="Causal Inference" data-def="因果推断是一组用于估计干预或暴露对结局影响的方法框架。它关注的是“如果我们改变处理状态，结局会怎样变化”，而不是单纯描述变量之间是否相关。">因果推断（Causal Inference）</a></li>
+<li><a class="xlink" href="m-inverse-probability-of-treatment-weighting-iptw.html" data-cn="逆概率处理加权" data-en="Inverse Probability of Treatment Weighting, IPTW" data-def="IPTW 用倾向评分的倒数给每个个体加权，构造一个“伪人群”，在其中处理分配与已测混杂独立，从而估计边际（population-average）处理效应。">逆概率处理加权（Inverse Probability of Treatment Weighting, IPTW）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Rubin DB. <em>Multiple Imputation for Nonresponse in Surveys</em>. Wiley; 1987.</li>
+<li>van Buuren S. <em>Flexible Imputation of Missing Data</em>. 2nd ed. Chapman and Hall/CRC; 2018.</li>
+<li>White IR, Royston P, Wood AM. Multiple imputation using chained equations: issues and guidance for practice. <em>Stat Med</em>. 2011;30(4):377-399.</li>
+<li>van Buuren S, Groothuis-Oudshoorn K. mice: multivariate imputation by chained equations in R. <em>J Stat Softw</em>. 2011;45(3):1-67.</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-tree-based-feature-selection.html"><div class="pg-lab">← 前一则</div><div class="pg-t">基于树模型的特征选择</div></a><span></span></div>
+    <div class="colophon">— 黑盒词典 · 13·08 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

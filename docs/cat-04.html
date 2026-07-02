@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>生存分析与纵向数据 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap category">
+  <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><span class="cur">生存分析与纵向数据</span></div>
+  <div class="cat-title">
+    <div class="cat-title-l">
+      <div class="kicker dark-ink">第 04 部</div>
+      <h2 class="page-h2">生存分析与纵向数据</h2>
+      <div class="cat-title-en">Survival Analysis &amp; Longitudinal Data</div>
+      <p class="lede">处理事件时间、删失与重复测量的方法族。</p>
+    </div>
+    <div class="cat-title-r">
+      <div class="cat-big">10</div>
+      <div class="kicker">收录条目</div>
+    </div>
+  </div>
+  <div class="entries"><a class="entry" href="m-linear-mixed-effects-model-lmm.html">
+      <span class="entry-no">04·01</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">线性混合效应模型</span>
+          <span class="entry-en">Linear Mixed-Effects Model, LMM</span>
+        </div>
+        <p class="entry-def">线性混合效应模型用于分析重复测量或层级数据中的连续结局，在固定效应之外加入随机效应来刻画个体间异质性和组内相关性。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-generalized-linear-mixed-effects-model-glmm.html">
+      <span class="entry-no">04·02</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">广义线性混合效应模型</span>
+          <span class="entry-en">Generalized Linear Mixed-Effects Model, GLMM</span>
+        </div>
+        <p class="entry-def">GLMM 是把混合效应思想与广义线性模型结合起来的方法，适用于重复测量或层级数据中的二元、计数等非高斯结局。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-generalized-estimating-equations-gee.html">
+      <span class="entry-no">04·03</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">广义估计方程</span>
+          <span class="entry-en">Generalized Estimating Equations, GEE</span>
+        </div>
+        <p class="entry-def">GEE 是把 quasi-likelihood 思想扩展到相关数据的一类边际模型，重点估计总体平均效应，并通过工作相关结构和 sandwich 方差来处理重复测量相关性。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-conditional-logistic-regression.html">
+      <span class="entry-no">04·04</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">条件Logistic回归</span>
+          <span class="entry-en">Conditional Logistic Regression</span>
+        </div>
+        <p class="entry-def">条件 Logistic 回归用于分析匹配设计中的二元结局，通过对匹配组进行条件化来消去组特异截距，从而估计暴露效应。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-kaplan-meier-estimator.html">
+      <span class="entry-no">04·05</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">Kaplan-Meier生存曲线</span>
+          <span class="entry-en">Kaplan-Meier Estimator</span>
+        </div>
+        <p class="entry-def">Kaplan-Meier 生存曲线是生存分析中最经典的非参数估计方法，用于在存在删失时估计生存函数 $S(t)=P(T&gt;t)$。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-nelson-aalen-estimator.html">
+      <span class="entry-no">04·06</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">Nelson-Aalen累积风险估计</span>
+          <span class="entry-en">Nelson-Aalen Estimator</span>
+        </div>
+        <p class="entry-def">Nelson-Aalen 估计是生存分析中对累积风险函数 $H(t)$ 的经典非参数估计方法。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-log-rank-test.html">
+      <span class="entry-no">04·07</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">Log-rank检验</span>
+          <span class="entry-en">Log-rank Test</span>
+        </div>
+        <p class="entry-def">Log-rank 检验是比较两组或多组生存曲线是否存在统计学差异的最常用非参数检验。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-cox-proportional-hazards-model.html">
+      <span class="entry-no">04·08</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">Cox比例风险模型</span>
+          <span class="entry-en">Cox Proportional Hazards Model</span>
+        </div>
+        <p class="entry-def">Cox 比例风险模型是最常用的生存回归模型，在不指定基线风险函数具体形式的情况下，估计协变量对危险率的相对影响。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-accelerated-failure-time-aft-model.html">
+      <span class="entry-no">04·09</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">加速失效时间模型</span>
+          <span class="entry-en">Accelerated Failure Time, AFT, Model</span>
+        </div>
+        <p class="entry-def">AFT 模型直接在生存时间尺度上建模，强调协变量如何“拉长”或“缩短”事件发生时间。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-competing-risks-and-fine-gray-model.html">
+      <span class="entry-no">04·10</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">竞争风险模型</span>
+          <span class="entry-en">Competing Risks and Fine-Gray Model</span>
+        </div>
+        <p class="entry-def">竞争风险分析处理“存在多种互斥结局、某一事件的发生会阻止其他事件发生”的生存数据。它用累积发生率函数（CIF）描述各事件的发生，并用 cause-specific Cox 或 Fi</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">advanced</span>
+      </div>
+    </a></div>
+</main>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

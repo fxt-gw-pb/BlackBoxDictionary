@@ -209,6 +209,15 @@ r_packages: []
 
 要点：大型原始数据存放在库外 `~/Datasets/黑箱字典/dataset/`；医学统计主线优先用 Framingham 数据；案例脚本只作参考，方法卡示例代码一律重写。
 
+## 网站（黑盒词典）
+
+方法卡可一键生成为静态网站「黑盒词典」，供桌面深度阅读与检索：
+
+- 生成器：`python3 scripts/build_site.py`，读取 `01_方法词典/` 的全部方法卡，输出到 `docs/`（Hero 首页、检字表、各分类页、逐卡详情页）
+- 视觉沿用 `黑盒词典网站设计/` 的 Claude Design 稿：纸白/墨黑 + 朱砂强调，Noto Serif SC / Spectral / IBM Plex Mono 三字体，KaTeX 公式、Python/R 代码分栏、粘性目次、深色模式、全局检索
+- 部署：`docs/` 已含 `.nojekyll`；在 GitHub 仓库 Settings → Pages 中选择 `main` 分支 `/docs` 目录即可发布
+- 任何方法卡改动后，依次重跑 `python3 scripts/check.py` 与 `python3 scripts/build_site.py`，保持内容、索引与站点三者同步
+
 ## 当前进度与下一步
 
 建设进度以 `03_索引/01-方法总索引.md` 为准。首批清单中尚未完成、建议优先补齐的方向：

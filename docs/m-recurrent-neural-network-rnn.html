@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>循环神经网络 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-11.html">神经网络与深度学习</a><span class="sep">/</span><span class="cur">循环神经网络</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">神经网络与深度学习 · 11·04</div>
+      <h1 class="detail-h1">循环神经网络</h1>
+      <div class="detail-en">Recurrent Neural Network, RNN</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 深度学习 / 序列建模</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>循环神经网络（Recurrent Neural Network, RNN）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>循环神经网络是一类面向序列数据的神经网络。它在每个时间步共享同一组参数，并把前一时刻的隐藏状态传递到当前时刻，从而建模顺序依赖关系。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：当样本有明确时间顺序或位置顺序时，如何利用历史上下文预测当前或未来输出。</li>
+<li>适用任务：时间序列预测、序列分类、文本建模、事件序列建模。</li>
+<li>常见医学场景：生命体征序列分析、电子病历时间窗口风险预测、医疗文本序列标注。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>RNN 像一个一边读序列一边做笔记的模型。它在每个时间点读取新信息，同时把“上一步记住的东西”带到下一步，用来辅助当前判断。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>对时间步 $t$，基础 RNN 可写为：</p>
+<p>$$
+h_t = \phi(W_x x_t + W_h h_{t-1} + b_h)
+$$</p>
+<p>$$
+\hat y_t = g(W_y h_t + b_y)
+$$</p>
+<p>其中 $h_t$ 为隐藏状态，$\phi$ 常取 <code>tanh</code> 或 <code>relu</code>，$g$ 依任务而定。训练通常通过时间反向传播（BPTT）完成。</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$x_t$：第 $t$ 个时间步输入。</li>
+<li>$h_t$：第 $t$ 个时间步隐藏状态。</li>
+<li>$W_x, W_h, W_y$：输入到隐藏、隐藏到隐藏、隐藏到输出的权重。</li>
+<li>序列长度：决定模型可见上下文窗口。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>序列顺序有信息价值。</li>
+<li>相邻或远距离时间点之间存在可学习依赖。</li>
+<li>训练数据足以支持时序模式学习。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：单变量或多变量序列、token 序列、事件序列。</li>
+<li>因变量类型：当前时刻标签、未来值或整段序列标签。</li>
+<li>数据结构：三维张量，通常为样本数乘以时间步乘以特征数。</li>
+<li>是否适合高维数据：可以，但长序列和高维输入会显著增加训练难度。</li>
+<li>是否适合缺失较多数据：需先插补或引入缺失掩码。</li>
+<li>是否适合删失数据：不直接处理删失。</li>
+<li>是否适合重复测量数据：适合规则重复测量；不规则间隔需额外时间信息。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以 ICU 每小时生命体征序列分类为例：</p>
+<table>
+<thead>
+<tr>
+<th>PatientID</th>
+<th>Hour</th>
+<th>HR</th>
+<th>RR</th>
+<th>SpO2</th>
+<th>ShockIn6h</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P001</td>
+<td>1</td>
+<td>94</td>
+<td>20</td>
+<td>97</td>
+<td>0</td>
+</tr>
+<tr>
+<td>P001</td>
+<td>2</td>
+<td>101</td>
+<td>22</td>
+<td>96</td>
+<td>0</td>
+</tr>
+<tr>
+<td>P001</td>
+<td>3</td>
+<td>112</td>
+<td>26</td>
+<td>94</td>
+<td>1</td>
+</tr>
+<tr>
+<td>P002</td>
+<td>1</td>
+<td>78</td>
+<td>16</td>
+<td>99</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：按顺序排列的序列张量和标签。</li>
+<li>关键变量：序列长度、隐藏单元数、层数、学习率。</li>
+<li>需要预处理的内容：时间排序、标准化、窗口构造、mask 处理。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：训练好的 RNN 参数和验证指标。</li>
+<li>参数估计：共享循环权重。</li>
+<li>预测结果：分类标签、概率、序列表示或连续预测值。</li>
+<li>不确定性指标：验证集误差、分层性能、外部时间段测试表现。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：需要利用先后顺序和上下文信息的任务。</li>
+<li>不适合：序列很长且依赖跨度大、并行效率要求高的场景，此时常被 Transformer 取代。</li>
+<li>使用前需要特别检查的点：时间泄露、长序列梯度消失、样本独立划分。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="recurrent-neural-network-rnn" data-i="0">Python</button><button class="codetab" data-uid="recurrent-neural-network-rnn" data-i="1">R</button></div><div class="codepanel active" data-uid="recurrent-neural-network-rnn" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>torch</code></li>
+</ul>
+<pre><code class="language-python">import torch
+from torch import nn
+
+class SimpleRNNClassifier(nn.Module):
+    def __init__(self, n_features, hidden_size=32, n_classes=2):
+        super().__init__()
+        self.rnn = nn.RNN(n_features, hidden_size, batch_first=True)
+        self.head = nn.Linear(hidden_size, n_classes)
+
+    def forward(self, x):
+        output, _ = self.rnn(x)
+        return self.head(output[:, -1, :])
+</code></pre></div><div class="codepanel" data-uid="recurrent-neural-network-rnn" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>keras</code></li>
+</ul>
+<pre><code class="language-r">library(keras)
+
+model &lt;- keras_model_sequential() |&gt;
+  layer_simple_rnn(units = 32, input_shape = c(seq_len, n_features)) |&gt;
+  layer_dense(units = 2, activation = &quot;softmax&quot;)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：验证集性能、不同时间窗口下的稳定性、是否过拟合。</li>
+<li>每个主要参数如何解释：隐藏单元数和层数反映模型容量，序列长度影响可见历史范围。</li>
+<li>临床或医学意义如何表达：更适合用于动态风险预测，但需要明确预测时间窗和干预时点。</li>
+<li>常见误读：模型能利用顺序信息，不代表它一定真正学到长期依赖。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>预测概率随时间变化曲线。</li>
+<li>训练/验证损失曲线。</li>
+<li>不同序列长度下的性能比较图。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>能直接处理顺序输入。</li>
+<li>参数在各时间步共享，结构自然。</li>
+<li>是理解门控时序网络的基础。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>容易出现梯度消失或爆炸。</li>
+<li>对长距离依赖支持有限。</li>
+<li>并行效率不如 Transformer。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>随机拆分序列，导致相邻样本泄露。</li>
+<li>用普通 RNN 处理很长序列却不做梯度裁剪。</li>
+<li>只在单个时间段测试，忽略时移漂移。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-long-short-term-memory-lstm.html" data-cn="长短期记忆网络" data-en="Long Short-Term Memory, LSTM" data-def="LSTM 是循环神经网络的重要变体，通过遗忘门、输入门和输出门控制信息流动，专门用于缓解普通 RNN 难以学习长程依赖的问题。">长短期记忆网络（Long Short-Term Memory, LSTM）</a> 的区别：LSTM 在基础 RNN 上引入门控和记忆单元，更适合长依赖。</li>
+<li>和 <a class="xlink" href="m-gated-recurrent-unit-gru.html" data-cn="门控循环单元" data-en="Gated Recurrent Unit, GRU" data-def="GRU 是一种门控循环神经网络结构。它将 LSTM 的门控机制做了更紧凑的简化，通过更新门和重置门控制历史信息保留与新信息写入。">门控循环单元（Gated Recurrent Unit, GRU）</a> 的区别：GRU 结构更紧凑，训练常更高效。</li>
+<li>和 <a class="xlink" href="m-transformer.html" data-cn="Transformer" data-en="Transformer" data-def="Transformer 是以多头注意力为核心的序列建模架构。它不依赖传统递归结构，而是通过自注意力和位置编码并行建模序列中的全局依赖。">Transformer（Transformer）</a> 的区别：RNN 按时间步递归处理，Transformer 用注意力并行建模全局依赖。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>ICU 时序监测数据的短期风险预测。</li>
+<li>门诊随访序列的结局建模。</li>
+<li>医疗文本或事件流序列分析。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-long-short-term-memory-lstm.html" data-cn="长短期记忆网络" data-en="Long Short-Term Memory, LSTM" data-def="LSTM 是循环神经网络的重要变体，通过遗忘门、输入门和输出门控制信息流动，专门用于缓解普通 RNN 难以学习长程依赖的问题。">长短期记忆网络（Long Short-Term Memory, LSTM）</a></li>
+<li><a class="xlink" href="m-gated-recurrent-unit-gru.html" data-cn="门控循环单元" data-en="Gated Recurrent Unit, GRU" data-def="GRU 是一种门控循环神经网络结构。它将 LSTM 的门控机制做了更紧凑的简化，通过更新门和重置门控制历史信息保留与新信息写入。">门控循环单元（Gated Recurrent Unit, GRU）</a></li>
+<li><a class="xlink" href="m-transformer.html" data-cn="Transformer" data-en="Transformer" data-def="Transformer 是以多头注意力为核心的序列建模架构。它不依赖传统递归结构，而是通过自注意力和位置编码并行建模序列中的全局依赖。">Transformer（Transformer）</a></li>
+<li><a class="xlink" href="m-long-short-term-memory-for-time-series-forecasting.html" data-cn="LSTM时间序列预测" data-en="Long Short-Term Memory for Time Series Forecasting" data-def="LSTM 是循环神经网络的一种改进结构，通过门控机制保存、遗忘和输出序列信息。本条目聚焦 [[长短期记忆网络（Long Short-Term Memory, LSTM）]] 在时间序列预测中的应用型变体，强调窗口构造、时间切分和预测评估。">LSTM时间序列预测（Long Short-Term Memory for Time Series Forecasting）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Elman JL. Finding structure in time. <em>Cognitive Science</em>. 1990;14(2):179-211.</li>
+<li>Goodfellow I, Bengio Y, Courville A. <em>Deep Learning</em>. MIT Press; 2016.</li>
+<li>PyTorch Developers. <code>torch.nn.RNN</code>. <a href="https://pytorch.org/docs/stable/generated/torch.nn.RNN.html">https://pytorch.org/docs/stable/generated/torch.nn.RNN.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-convolutional-neural-network-cnn.html"><div class="pg-lab">← 前一则</div><div class="pg-t">卷积神经网络</div></a><a class="pg pg-next" href="m-long-short-term-memory-lstm.html"><div class="pg-lab">后一则 →</div><div class="pg-t">长短期记忆网络</div></a></div>
+    <div class="colophon">— 黑盒词典 · 11·04 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

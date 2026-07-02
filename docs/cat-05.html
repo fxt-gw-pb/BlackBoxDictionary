@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>因果推断 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap category">
+  <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><span class="cur">因果推断</span></div>
+  <div class="cat-title">
+    <div class="cat-title-l">
+      <div class="kicker dark-ink">第 05 部</div>
+      <h2 class="page-h2">因果推断</h2>
+      <div class="cat-title-en">Causal Inference</div>
+      <p class="lede">减少混杂、尽量逼近因果解释。</p>
+    </div>
+    <div class="cat-title-r">
+      <div class="cat-big">3</div>
+      <div class="kicker">收录条目</div>
+    </div>
+  </div>
+  <div class="entries"><a class="entry" href="m-causal-inference.html">
+      <span class="entry-no">05·01</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">因果推断</span>
+          <span class="entry-en">Causal Inference</span>
+        </div>
+        <p class="entry-def">因果推断是一组用于估计干预或暴露对结局影响的方法框架。它关注的是“如果我们改变处理状态，结局会怎样变化”，而不是单纯描述变量之间是否相关。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-propensity-score-matching.html">
+      <span class="entry-no">05·02</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">倾向评分匹配</span>
+          <span class="entry-en">Propensity Score Matching</span>
+        </div>
+        <p class="entry-def">倾向评分匹配先估计每个个体接受处理的条件概率（倾向评分），再把处理组个体与倾向评分相近的对照组个体配对，从而在已测混杂上构造可比的两组，估计处理效应。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-inverse-probability-of-treatment-weighting-iptw.html">
+      <span class="entry-no">05·03</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">逆概率处理加权</span>
+          <span class="entry-en">Inverse Probability of Treatment Weighting, IPTW</span>
+        </div>
+        <p class="entry-def">IPTW 用倾向评分的倒数给每个个体加权，构造一个“伪人群”，在其中处理分配与已测混杂独立，从而估计边际（population-average）处理效应。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a></div>
+</main>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

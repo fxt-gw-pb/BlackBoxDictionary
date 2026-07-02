@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prophet时间序列模型 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-12.html">时间序列与时序建模</a><span class="sep">/</span><span class="cur">Prophet时间序列模型</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">时间序列与时序建模 · 12·07</div>
+      <h1 class="detail-h1">Prophet时间序列模型</h1>
+      <div class="detail-en">Prophet Forecasting Model</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 时间序列 / 预测 / 趋势 / 季节性</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>Prophet时间序列模型（Prophet Forecasting Model）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>Prophet 是一种面向业务时间序列预测的可加性模型。它把序列分解为趋势、季节性、节假日效应和误差项，并通过变化点捕捉趋势斜率的改变。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：带趋势、季节性、节假日或政策节点的时间序列如何快速建模和预测。</li>
+<li>适用任务：运营指标预测、日/周/月频序列预测、可解释趋势分解、缺失和异常较多序列的稳健预测。</li>
+<li>常见医学场景：门诊量、急诊量、检验量、药品消耗、节假日影响下的医院服务需求预测。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>Prophet 把时间序列看成几种可解释成分的叠加：长期趋势、周期性波动、节假日影响和随机噪声。它的优势是把许多业务中常见的时间结构显式拆开。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>Prophet 的核心可加形式为：</p>
+<p>$$
+y(t)=g(t)+s(t)+h(t)+\varepsilon_t
+$$</p>
+<p>其中 $g(t)$ 是趋势，$s(t)$ 是季节性，$h(t)$ 是节假日效应。分段线性趋势可写作：</p>
+<p>$$
+g(t)=(k+a(t)^\top\delta)t+(m+a(t)^\top\gamma)
+$$</p>
+<p>季节性通常用 Fourier 级数表示：</p>
+<p>$$
+s(t)=\sum_{n=1}^{N}\left[
+a_n\cos\left(\frac{2\pi nt}{P}\right)+
+b_n\sin\left(\frac{2\pi nt}{P}\right)
+\right]
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$g(t)$：趋势项，可为线性或 logistic 增长。</li>
+<li>$s(t)$：季节性项，如周季节性、年季节性。</li>
+<li>$h(t)$：节假日或特殊日期效应。</li>
+<li><code>changepoint_prior_scale</code>：趋势变化点灵活度。</li>
+<li><code>seasonality_prior_scale</code>：季节性灵活度。</li>
+<li><code>interval_width</code>：预测区间宽度。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>序列可由趋势、季节性、节假日和噪声的可加结构近似。</li>
+<li>历史趋势变化规律对未来有参考价值。</li>
+<li>特殊事件可通过节假日或回归变量显式标注。</li>
+<li>预测区间主要来自模型设定下的不确定性，不覆盖所有外部突发风险。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：日期时间、节假日、额外回归变量。</li>
+<li>因变量类型：连续型时间序列。</li>
+<li>数据结构：至少包含 <code>ds</code> 时间列和 <code>y</code> 数值列。</li>
+<li>是否适合高维数据：不适合直接处理高维特征；额外回归变量需谨慎选择。</li>
+<li>是否适合缺失较多数据：能处理不规则缺失时间点，但长期缺口仍需谨慎。</li>
+<li>是否适合删失数据：不直接处理删失结局。</li>
+<li>是否适合重复测量数据：适合单条业务序列；多个个体序列需分层或批量建模。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以每日门诊量为例：</p>
+<table>
+<thead>
+<tr>
+<th>ds</th>
+<th>y</th>
+<th>holiday</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-01-01</td>
+<td>1820</td>
+<td>NewYear</td>
+</tr>
+<tr>
+<td>2026-01-02</td>
+<td>2460</td>
+<td>none</td>
+</tr>
+<tr>
+<td>2026-01-03</td>
+<td>2310</td>
+<td>none</td>
+</tr>
+<tr>
+<td>2026-01-04</td>
+<td>1980</td>
+<td>none</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：<code>ds</code> 和 <code>y</code> 两列，外加可选节假日、容量上限、回归变量。</li>
+<li>关键变量：趋势类型、变化点灵活度、季节性设置、节假日表。</li>
+<li>需要预处理的内容：异常值标记、缺失检查、频率确认、特殊事件编码。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：趋势、季节性、节假日效应、预测值。</li>
+<li>参数估计：趋势变化点、季节性 Fourier 系数、节假日效应。</li>
+<li>预测结果：<code>yhat</code>、<code>yhat_lower</code>、<code>yhat_upper</code>。</li>
+<li>不确定性指标：预测区间、交叉验证误差、成分不确定性。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：业务运营序列、明显周/年季节性、节假日效应明显、需要快速可解释预测的场景。</li>
+<li>不适合：强自相关残差、复杂多变量动态系统、短序列、突发结构变化无法标注的场景。</li>
+<li>使用前需要特别检查的点：变化点灵活度、节假日编码、交叉验证误差、残差是否仍有自相关。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="prophet-forecasting-model" data-i="0">Python</button><button class="codetab" data-uid="prophet-forecasting-model" data-i="1">R</button></div><div class="codepanel active" data-uid="prophet-forecasting-model" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>prophet</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+from prophet import Prophet
+
+df = pd.read_csv(&quot;daily_outpatient_visits.csv&quot;, parse_dates=[&quot;ds&quot;])
+holidays = pd.DataFrame({
+    &quot;holiday&quot;: [&quot;NewYear&quot;],
+    &quot;ds&quot;: pd.to_datetime([&quot;2026-01-01&quot;]),
+    &quot;lower_window&quot;: [0],
+    &quot;upper_window&quot;: [1]
+})
+
+model = Prophet(
+    weekly_seasonality=True,
+    yearly_seasonality=True,
+    holidays=holidays,
+    changepoint_prior_scale=0.05
+)
+model.fit(df&amp;quot;ds&amp;quot;, &amp;quot;y&amp;quot;)
+
+future = model.make_future_dataframe(periods=14, freq=&quot;D&quot;)
+forecast = model.predict(future)
+print(forecast&amp;quot;ds&amp;quot;, &amp;quot;yhat&amp;quot;, &amp;quot;yhat_lower&amp;quot;, &amp;quot;yhat_upper&amp;quot;.tail())
+</code></pre></div><div class="codepanel" data-uid="prophet-forecasting-model" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>prophet</code></li>
+</ul>
+<pre><code class="language-r">library(prophet)
+
+df$ds <- as.Date(df$ds)
+fit &lt;- prophet(
+  df[, c(&quot;ds&quot;, &quot;y&quot;)],
+  weekly.seasonality = TRUE,
+  yearly.seasonality = TRUE,
+  changepoint.prior.scale = 0.05
+)
+
+future &lt;- make_future_dataframe(fit, periods = 14)
+forecast &lt;- predict(fit, future)
+tail(forecast[, c(&quot;ds&quot;, &quot;yhat&quot;, &quot;yhat_lower&quot;, &quot;yhat_upper&quot;)])
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：预测曲线、预测区间、趋势变化点、周/年季节性和节假日效应。</li>
+<li>每个主要参数如何解释：<code>changepoint_prior_scale</code> 越大，趋势越灵活，也越可能过拟合。</li>
+<li>临床或医学意义如何表达：可用于解释服务量在工作日、季节和节假日前后的系统性变化。</li>
+<li>常见误读：Prophet 自动拟合趋势，不代表它能预测未出现过的政策或疫情冲击。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>历史值与预测值曲线。</li>
+<li>趋势、周季节性、年季节性和节假日成分图。</li>
+<li>交叉验证误差随预测 horizon 变化图。</li>
+<li>残差时间图。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>对趋势、季节性和节假日建模直观。</li>
+<li>对缺失日期和异常点相对稳健。</li>
+<li>上手快，适合运营预测。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>对强自相关和复杂动态系统表达有限。</li>
+<li>短序列难以稳定估计季节性。</li>
+<li>需要认真配置节假日和变化点。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>不做时间序列交叉验证。</li>
+<li>变化点设置过灵活导致过拟合。</li>
+<li>把默认节假日直接用于医疗场景而不结合本地排班和政策。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-autoregressive-integrated-moving-average-model-arima.html" data-cn="自回归积分滑动平均模型" data-en="Autoregressive Integrated Moving Average Model, ARIMA" data-def="ARIMA 是用于单变量时间序列预测的经典模型。它通过差分把非平稳序列转为平稳序列，再用 ARMA 模型刻画差分后序列的自相关结构。">自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）</a> 的区别：ARIMA 强调自相关结构，Prophet 强调趋势、季节性和节假日可加分解。</li>
+<li>和 <a class="xlink" href="m-holt-winters-exponential-smoothing.html" data-cn="Holt-Winters指数平滑" data-en="Holt-Winters Exponential Smoothing" data-def="Holt-Winters 指数平滑是一种用于带趋势和季节性的单变量时间序列预测方法。它递推更新水平、趋势和季节性三个成分，并用它们生成未来预测。">Holt-Winters指数平滑（Holt-Winters Exponential Smoothing）</a> 的区别：Holt-Winters 用递推平滑水平、趋势和季节性，Prophet 允许变化点和节假日效应。</li>
+<li>和 <a class="xlink" href="m-xgboost-for-time-series-forecasting.html" data-cn="XGBoost时间序列预测" data-en="XGBoost for Time Series Forecasting" data-def="XGBoost 时间序列预测是把时间序列问题转换为监督学习表格问题，再用 XGBoost 建模。核心做法是构造滞后特征、滚动统计量、日历特征和外部变量，用它们预测未来目标值。">XGBoost时间序列预测（XGBoost for Time Series Forecasting）</a> 的区别：XGBoost 依赖人工构造滞后和日历特征，Prophet 内置时间成分结构。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>医院门诊量、急诊量和检查量预测。</li>
+<li>节假日和工作日模式下的医疗资源需求预测。</li>
+<li>药品、耗材和床位需求的短中期运营预测。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-autoregressive-integrated-moving-average-model-arima.html" data-cn="自回归积分滑动平均模型" data-en="Autoregressive Integrated Moving Average Model, ARIMA" data-def="ARIMA 是用于单变量时间序列预测的经典模型。它通过差分把非平稳序列转为平稳序列，再用 ARMA 模型刻画差分后序列的自相关结构。">自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）</a></li>
+<li><a class="xlink" href="m-holt-winters-exponential-smoothing.html" data-cn="Holt-Winters指数平滑" data-en="Holt-Winters Exponential Smoothing" data-def="Holt-Winters 指数平滑是一种用于带趋势和季节性的单变量时间序列预测方法。它递推更新水平、趋势和季节性三个成分，并用它们生成未来预测。">Holt-Winters指数平滑（Holt-Winters Exponential Smoothing）</a></li>
+<li><a class="xlink" href="m-xgboost-for-time-series-forecasting.html" data-cn="XGBoost时间序列预测" data-en="XGBoost for Time Series Forecasting" data-def="XGBoost 时间序列预测是把时间序列问题转换为监督学习表格问题，再用 XGBoost 建模。核心做法是构造滞后特征、滚动统计量、日历特征和外部变量，用它们预测未来目标值。">XGBoost时间序列预测（XGBoost for Time Series Forecasting）</a></li>
+<li><a class="xlink" href="m-long-short-term-memory-for-time-series-forecasting.html" data-cn="LSTM时间序列预测" data-en="Long Short-Term Memory for Time Series Forecasting" data-def="LSTM 是循环神经网络的一种改进结构，通过门控机制保存、遗忘和输出序列信息。本条目聚焦 [[长短期记忆网络（Long Short-Term Memory, LSTM）]] 在时间序列预测中的应用型变体，强调窗口构造、时间切分和预测评估。">LSTM时间序列预测（Long Short-Term Memory for Time Series Forecasting）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Taylor SJ, Letham B. Forecasting at scale. <em>The American Statistician</em>. 2018;72(1):37-45.</li>
+<li>Prophet Developers. Prophet documentation. <a href="https://facebook.github.io/prophet/">https://facebook.github.io/prophet/</a> （访问日期：2026-07-02）</li>
+<li>Hyndman RJ, Athanasopoulos G. <em>Forecasting: Principles and Practice</em>. 3rd ed. OTexts; 2021. <a href="https://otexts.com/fpp3/">https://otexts.com/fpp3/</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-vector-autoregressive-moving-average-model-varma.html"><div class="pg-lab">← 前一则</div><div class="pg-t">向量自回归滑动平均模型</div></a><a class="pg pg-next" href="m-holt-winters-exponential-smoothing.html"><div class="pg-lab">后一则 →</div><div class="pg-t">Holt-Winters指数平滑</div></a></div>
+    <div class="colophon">— 黑盒词典 · 12·07 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

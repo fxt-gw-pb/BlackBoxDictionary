@@ -205,6 +205,8 @@ coef(fit, s = "lambda.min")
 - [[Ridge回归（Ridge Regression）]]
 - [[Lasso回归（Lasso Regression）]]
 - [[线性回归（Linear Regression）]]
+- [[嵌入式特征选择（Embedded Feature Selection）]]
+- [[相关系数特征选择（Correlation-based Feature Selection）]]
 
 ## 12. 参考资料
 

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kolmogorov-Smirnov检验 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-01.html">研究设计与数据理解</a><span class="sep">/</span><span class="cur">Kolmogorov-Smirnov检验</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">研究设计与数据理解 · 01·05</div>
+      <h1 class="detail-h1">Kolmogorov-Smirnov检验</h1>
+      <div class="detail-en">Kolmogorov-Smirnov Test</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 非参数检验 / 分布拟合</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>Kolmogorov-Smirnov检验（Kolmogorov-Smirnov Test）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>Kolmogorov-Smirnov 检验是一种基于经验分布函数的非参数检验，用经验分布与理论分布（单样本）或两组经验分布之间的最大距离，判断分布是否一致。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：一份数据是否服从某个指定分布，或两组数据是否来自同一分布。</li>
+<li>适用任务：分布拟合优度检验、两样本分布比较、正态性初查。</li>
+<li>常见医学场景：检查指标是否近似正态、比较两组连续指标的整体分布差异。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>把数据画成经验分布函数（ECDF）阶梯曲线，KS 统计量就是这条曲线与参照曲线之间“上下张开”的最大缝隙。缝隙越大，越有理由认为两条分布不同。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>单样本：经验分布 $F_n(x)$ 与理论分布 $F_0(x)$ 的最大绝对差；两样本：两经验分布之差：</p>
+<p>$$
+D_n=\sup_x\,|F_n(x)-F_0(x)|,\qquad
+D_{m,n}=\sup_x\,|F_{1,m}(x)-F_{2,n}(x)|
+$$</p>
+<p>大样本下 $\sqrt{n}\,D_n$ 收敛到 Kolmogorov 分布，用于计算 p 值。</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$F_n(x)$：样本的经验分布函数。</li>
+<li>$D$：最大分布距离，即 KS 统计量。</li>
+<li>p 值：在原假设（分布相同）下观察到该距离的概率。</li>
+<li>对分布中部差异较敏感，对尾部相对不敏感。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>变量为连续型；参照分布若含估计参数，需用校正版本（如 Lilliefors）。</li>
+<li>观测独立同分布。</li>
+<li>结点（重复值）会削弱检验，理论基于连续分布。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：单个连续变量（单样本）或两组连续变量（两样本）。</li>
+<li>因变量类型：不区分。</li>
+<li>数据结构：一维数值数组或两数组。</li>
+<li>是否适合高维数据：为一维检验；多维需专门扩展。</li>
+<li>是否适合缺失较多数据：需先处理缺失。</li>
+<li>是否适合删失数据：不直接适用。</li>
+<li>是否适合重复测量数据：独立性破坏时不适用。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>检验类型</th>
+<th>输入</th>
+<th>原假设</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单样本</td>
+<td>数据 + 理论分布</td>
+<td>数据服从该分布</td>
+</tr>
+<tr>
+<td>两样本</td>
+<td>两组数据</td>
+<td>两组同分布</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：一维数值向量（及参照分布）。</li>
+<li>关键变量：待检数据、参照分布或第二组数据。</li>
+<li>需要预处理的内容：确认连续、避免用同一数据估参再检验（否则需校正）。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：KS 统计量 $D$、p 值。</li>
+<li>参数估计：无。</li>
+<li>预测结果：无。</li>
+<li>不确定性指标：p 值。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：连续变量的分布拟合优度、两组整体分布比较。</li>
+<li>不适合：小样本（功效低）、对尾部差异敏感的问题、离散/多结点数据。</li>
+<li>使用前需要特别检查的点：参照分布参数是否来自同一数据、结点比例、样本量。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="kolmogorov-smirnov-test" data-i="0">Python</button><button class="codetab" data-uid="kolmogorov-smirnov-test" data-i="1">R</button></div><div class="codepanel active" data-uid="kolmogorov-smirnov-test" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scipy</code></li>
+</ul>
+<pre><code class="language-python">from scipy import stats
+import numpy as np
+
+x = np.random.normal(0, 1, 200)
+# 单样本: 与标准正态比较
+print(stats.kstest(x, &quot;norm&quot;))
+# 两样本
+y = np.random.normal(0.3, 1, 200)
+print(stats.ks_2samp(x, y))
+</code></pre></div><div class="codepanel" data-uid="kolmogorov-smirnov-test" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>stats</code></li>
+</ul>
+<pre><code class="language-r">x &lt;- rnorm(200)
+ks.test(x, &quot;pnorm&quot;)          # 单样本
+y &lt;- rnorm(200, 0.3)
+ks.test(x, y)                # 两样本
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：$D$ 的大小与 p 值。</li>
+<li>每个主要参数如何解释：p 小说明有证据认为分布不同；$D$ 反映最大分布偏离处。</li>
+<li>临床或医学意义如何表达：拒绝正态性提示后续应考虑非参数方法或变换。</li>
+<li>常见误读：不拒绝≠证明分布相同；大样本下极小差异也会显著。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>两条 ECDF 叠加图并标出最大缝隙 $D$。</li>
+<li>与直方图/QQ 图配合判断分布。</li>
+<li>两样本 ECDF 差异曲线。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>非参数、无需假设具体分布族。</li>
+<li>对整体分布差异敏感，直观（基于 ECDF）。</li>
+<li>有单样本与两样本两种形式。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>小样本功效低。</li>
+<li>对尾部差异不如中部敏感。</li>
+<li>参数由数据估计时标准版会过于保守，需校正。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>用同一数据估计正态参数后直接 ks.test(x,"pnorm")（应用 Lilliefors）。</li>
+<li>把“不显著”当作“服从该分布”。</li>
+<li>忽略结点对连续假设的破坏。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-empirical-cumulative-distribution-function-ecdf.html" data-cn="经验分布函数" data-en="Empirical Cumulative Distribution Function, ECDF" data-def="经验分布函数是对总体分布函数 $F(x)=P(X\le x)$ 的非参数估计。它直接用样本中“不大于某个阈值的比例”来近似总体累计概率。">经验分布函数（Empirical Cumulative Distribution Function, ECDF）</a> 的区别：ECDF 是描述工具，KS 在其上做假设检验。</li>
+<li>和 Shapiro-Wilk 正态性检验的区别：Shapiro-Wilk 专为正态性、小样本功效更高；KS 更通用但功效较低。</li>
+<li>和 <a class="xlink" href="m-wilcoxon-rank-sum-test.html" data-cn="Wilcoxon秩和检验" data-en="Wilcoxon Rank-Sum Test" data-def="Wilcoxon 秩和检验是两独立样本的非参数检验，通过比较两组观测的秩来判断它们是否来自相同位置分布。">Wilcoxon秩和检验（Wilcoxon Rank-Sum Test）</a> 的区别：后者聚焦位置差异，KS 检验整体分布差异。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>建模前检查连续变量是否近似正态。</li>
+<li>比较两组患者某指标的整体分布是否不同。</li>
+<li>校验模拟/插补数据与原始分布的一致性。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-empirical-cumulative-distribution-function-ecdf.html" data-cn="经验分布函数" data-en="Empirical Cumulative Distribution Function, ECDF" data-def="经验分布函数是对总体分布函数 $F(x)=P(X\le x)$ 的非参数估计。它直接用样本中“不大于某个阈值的比例”来近似总体累计概率。">经验分布函数（Empirical Cumulative Distribution Function, ECDF）</a></li>
+<li><a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计是一种用局部加权平均来估计连续型变量概率密度函数的非参数方法。它常用来替代粗糙的直方图，给出更平滑的分布形状。">核密度估计（Kernel Density Estimation, KDE）</a></li>
+<li><a class="xlink" href="m-wilcoxon-rank-sum-test.html" data-cn="Wilcoxon秩和检验" data-en="Wilcoxon Rank-Sum Test" data-def="Wilcoxon 秩和检验是两独立样本的非参数检验，通过比较两组观测的秩来判断它们是否来自相同位置分布。">Wilcoxon秩和检验（Wilcoxon Rank-Sum Test）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Massey FJ. The Kolmogorov-Smirnov test for goodness of fit. <em>J Am Stat Assoc</em>. 1951;46(253):68-78.</li>
+<li>Conover WJ. <em>Practical Nonparametric Statistics</em>. 3rd ed. Wiley; 1999.</li>
+<li>R Core Team. <code>ks.test</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/ks.test.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/ks.test.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-kernel-density-estimation-kde.html"><div class="pg-lab">← 前一则</div><div class="pg-t">核密度估计</div></a><span></span></div>
+    <div class="colophon">— 黑盒词典 · 01·05 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

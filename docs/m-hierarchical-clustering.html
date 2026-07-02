@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>层次聚类 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-09.html">聚类与无监督学习</a><span class="sep">/</span><span class="cur">层次聚类</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">聚类与无监督学习 · 09·03</div>
+      <h1 class="detail-h1">层次聚类</h1>
+      <div class="detail-en">Hierarchical Clustering</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 聚类 / 无监督学习 / 树状图</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>层次聚类（Hierarchical Clustering）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>层次聚类是一类把样本组织成树状层次结构的无监督方法。最常见的是凝聚式层次聚类：先把每个样本看作一个簇，再按相似性逐步合并，最终形成一棵树状图。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：样本之间是否存在从细到粗的层级分群结构。</li>
+<li>适用任务：探索性分群、样本相似性可视化、基因或患者层次结构展示。</li>
+<li>常见医学场景：热图行列聚类，组学样本分层，症状或表型相似性结构分析。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>层次聚类像是在不断把最相似的对象归并成更大的组。树状图的低处分叉表示样本很相似，高处分叉表示只有在较粗层次下才被合并。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>设两个簇为 $A$ 和 $B$，层次聚类需要定义簇间距离。常见 linkage 包括：</p>
+<p>单链接：</p>
+<p>$$
+d(A,B)=\min_{x_i\in A,x_j\in B} d(x_i,x_j)
+$$</p>
+<p>完全链接：</p>
+<p>$$
+d(A,B)=\max_{x_i\in A,x_j\in B} d(x_i,x_j)
+$$</p>
+<p>平均链接：</p>
+<p>$$
+d(A,B)=\frac{1}{|A||B|}\sum_{x_i\in A}\sum_{x_j\in B}d(x_i,x_j)
+$$</p>
+<p>Ward 方法每次合并使簇内平方和增加最小：</p>
+<p>$$
+\Delta(A,B)=\sum_{x_i\in A\cup B}\|x_i-\mu_{A\cup B}\|^2
+-\sum_{x_i\in A}\|x_i-\mu_A\|^2
+-\sum_{x_i\in B}\|x_i-\mu_B\|^2
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>距离度量：样本之间的距离，如欧氏距离、曼哈顿距离、相关距离。</li>
+<li>linkage：簇间距离定义，如 single、complete、average、ward。</li>
+<li>cut height：树状图剪切高度，用于得到最终簇标签。</li>
+<li>cophenetic correlation：树状图距离与原始距离的一致性指标。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>所选距离能表达研究问题中的相似性。</li>
+<li>层级结构对数据有意义。</li>
+<li>合并策略与簇形状相匹配。</li>
+<li>样本数不宜过大，否则树状图和距离矩阵都会变得沉重。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续特征、标准化特征或预先计算的距离矩阵。</li>
+<li>因变量类型：无监督方法，不需要结局变量。</li>
+<li>数据结构：样本乘以特征矩阵，或样本乘以样本距离矩阵。</li>
+<li>是否适合高维数据：可用，组学热图常见，但需注意距离稳定性。</li>
+<li>是否适合缺失较多数据：需先处理缺失，或选择能处理缺失的距离。</li>
+<li>是否适合删失数据：不直接处理删失结局。</li>
+<li>是否适合重复测量数据：需先定义样本单位或构造个体级特征。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以基因表达模块探索为例：</p>
+<table>
+<thead>
+<tr>
+<th>GeneA</th>
+<th>GeneB</th>
+<th>GeneC</th>
+<th>GeneD</th>
+<th>Group</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.2</td>
+<td>0.4</td>
+<td>-0.3</td>
+<td>0.8</td>
+<td>Case</td>
+</tr>
+<tr>
+<td>1.0</td>
+<td>0.5</td>
+<td>-0.2</td>
+<td>0.7</td>
+<td>Case</td>
+</tr>
+<tr>
+<td>-0.6</td>
+<td>1.5</td>
+<td>0.9</td>
+<td>-0.4</td>
+<td>Control</td>
+</tr>
+<tr>
+<td>-0.4</td>
+<td>1.2</td>
+<td>0.8</td>
+<td>-0.5</td>
+<td>Control</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：特征矩阵或距离矩阵。</li>
+<li>关键变量：距离度量、linkage、剪切高度或簇数。</li>
+<li>需要预处理的内容：缺失处理、标准化、异常值检查、变量筛选。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：树状图、合并矩阵、剪切后的簇标签。</li>
+<li>参数估计：每一步合并的簇和距离。</li>
+<li>预测结果：普通层次聚类不自然支持新样本快速预测。</li>
+<li>不确定性指标：bootstrap 稳定性、cophenetic correlation、不同 linkage 对比。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：样本量中小、希望观察层级结构、需要树状图或热图展示的场景。</li>
+<li>不适合：超大样本、需要在线更新、簇边界明显非层级或噪声点很多的场景。</li>
+<li>使用前需要特别检查的点：距离度量、linkage 选择、标准化策略、树状图剪切是否稳定。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="hierarchical-clustering" data-i="0">Python</button><button class="codetab" data-uid="hierarchical-clustering" data-i="1">R</button></div><div class="codepanel active" data-uid="hierarchical-clustering" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scipy</code></li>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+from scipy.cluster.hierarchy import linkage, fcluster
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv(&quot;omics_profiles.csv&quot;)
+X = df&amp;quot;GeneA&amp;quot;, &amp;quot;GeneB&amp;quot;, &amp;quot;GeneC&amp;quot;, &amp;quot;GeneD&amp;quot;
+X_scaled = StandardScaler().fit_transform(X)
+
+Z = linkage(X_scaled, method=&quot;ward&quot;)
+cluster = fcluster(Z, t=3, criterion=&quot;maxclust&quot;)
+
+df[&quot;cluster&quot;] = cluster
+print(df[&quot;cluster&quot;].value_counts().sort_index())
+</code></pre></div><div class="codepanel" data-uid="hierarchical-clustering" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>stats</code></li>
+</ul>
+<pre><code class="language-r">x &lt;- scale(df[, c(&quot;GeneA&quot;, &quot;GeneB&quot;, &quot;GeneC&quot;, &quot;GeneD&quot;)])
+d &lt;- dist(x, method = &quot;euclidean&quot;)
+fit &lt;- hclust(d, method = &quot;ward.D2&quot;)
+
+cluster &lt;- cutree(fit, k = 3)
+table(cluster)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：树状图分叉高度、主要分支、剪切后簇的特征模式。</li>
+<li>每个主要参数如何解释：Ward 方法倾向得到相对紧凑、方差较小的簇。</li>
+<li>临床或医学意义如何表达：可描述为“在所选特征和距离度量下，样本呈现若干层级相似性结构”。</li>
+<li>常见误读：树状图分支不等同于系统发育关系或因果演化关系。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>树状图。</li>
+<li>带行列聚类的热图。</li>
+<li>不同剪切高度下的簇数变化图。</li>
+<li>PCA/UMAP 上叠加层次聚类标签。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>不必先固定簇数，可以事后剪切树状图。</li>
+<li>树状图直观展示层级关系。</li>
+<li>适合与热图结合用于组学和临床特征展示。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>对距离和 linkage 选择敏感。</li>
+<li>早期合并一旦发生通常不会被撤销。</li>
+<li>大样本计算和可视化都较困难。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>混用不同尺度变量而不标准化。</li>
+<li>只看树状图视觉效果，不评估稳定性。</li>
+<li>随意剪切树状图并赋予过强医学意义。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a> 的区别：K-means 直接给定 $K$ 个互斥簇，层次聚类提供从细到粗的树状结构。</li>
+<li>和 <a class="xlink" href="m-balanced-iterative-reducing-and-clustering-using-hierarchies-birch.html" data-cn="BIRCH聚类" data-en="Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH" data-def="BIRCH 是一种面向大规模数据的聚类算法。它通过簇特征树（CF tree）把大量样本压缩成可管理的微簇摘要，再对这些摘要进行聚类。">BIRCH聚类（Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH）</a> 的区别：BIRCH 用 CF 树压缩数据，更适合大规模数据；传统层次聚类更适合中小样本解释。</li>
+<li>和 <a class="xlink" href="m-spectral-clustering.html" data-cn="谱聚类" data-en="Spectral Clustering" data-def="谱聚类是一种基于图的聚类方法。它先把样本表示成相似度图，再利用图拉普拉斯矩阵的特征向量把样本嵌入到低维空间，最后在该空间中进行聚类。">谱聚类（Spectral Clustering）</a> 的区别：谱聚类通过图拉普拉斯嵌入处理复杂形状簇，层次聚类主要依赖距离和合并策略。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>基因表达热图中的样本和基因聚类。</li>
+<li>患者临床表型层级相似性展示。</li>
+<li>多组学特征模块或样本分支结构探索。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a></li>
+<li><a class="xlink" href="m-balanced-iterative-reducing-and-clustering-using-hierarchies-birch.html" data-cn="BIRCH聚类" data-en="Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH" data-def="BIRCH 是一种面向大规模数据的聚类算法。它通过簇特征树（CF tree）把大量样本压缩成可管理的微簇摘要，再对这些摘要进行聚类。">BIRCH聚类（Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH）</a></li>
+<li><a class="xlink" href="m-spectral-clustering.html" data-cn="谱聚类" data-en="Spectral Clustering" data-def="谱聚类是一种基于图的聚类方法。它先把样本表示成相似度图，再利用图拉普拉斯矩阵的特征向量把样本嵌入到低维空间，最后在该空间中进行聚类。">谱聚类（Spectral Clustering）</a></li>
+<li><a class="xlink" href="m-multidimensional-scaling-mds.html" data-cn="多维尺度分析" data-en="Multidimensional Scaling, MDS" data-def="多维尺度分析是一类把样本间距离或不相似度表示为低维坐标的方法。它的目标是在二维或三维空间中尽量保留原始距离关系。">多维尺度分析（Multidimensional Scaling, MDS）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Murtagh F, Contreras P. Algorithms for hierarchical clustering: an overview. <em>WIREs Data Mining and Knowledge Discovery</em>. 2012;2(1):86-97.</li>
+<li>Ward JH Jr. Hierarchical grouping to optimize an objective function. <em>Journal of the American Statistical Association</em>. 1963;58(301):236-244.</li>
+<li>SciPy Developers. Hierarchical clustering documentation. <a href="https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html">https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-k-means-clustering.html"><div class="pg-lab">← 前一则</div><div class="pg-t">K-means聚类</div></a><a class="pg pg-next" href="m-dbscan-density-based-spatial-clustering-of-applications-with-noise.html"><div class="pg-lab">后一则 →</div><div class="pg-t">DBSCAN</div></a></div>
+    <div class="colophon">— 黑盒词典 · 09·03 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

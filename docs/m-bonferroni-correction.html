@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bonferroni校正 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-15.html">模型评估与解释</a><span class="sep">/</span><span class="cur">Bonferroni校正</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">模型评估与解释 · 15·02</div>
+      <h1 class="detail-h1">Bonferroni校正</h1>
+      <div class="detail-en">Bonferroni Correction</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 多重检验 / FWER</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>Bonferroni校正（Bonferroni Correction）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>Bonferroni 校正是控制 FWER 的最经典单步方法，把显著性水平 $\alpha$ 平均分配到每个检验上。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：在做 $m$ 次检验时，如何控制整体至少一次假阳性的风险。</li>
+<li>适用任务：严格控制 FWER。</li>
+<li>常见医学场景：高风险结论、不能容忍任何假阳性时的多重比较。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>如果总预算是 $\alpha=0.05$，做 $m$ 次检验时，Bonferroni 就像把这笔“假阳性预算”均分到每一个检验上。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>若一共进行 $m$ 次检验，则拒绝规则为：</p>
+<p>$$
+p_j \le \frac{\alpha}{m}
+$$</p>
+<p>等价的调整后 p 值写成：</p>
+<p>$$
+p_j^* = \min(1, mp_j)
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$m$：检验总数。</li>
+<li>$\alpha$：希望控制的 FWER 水平。</li>
+<li>$p_j^*$：Bonferroni 调整后 p 值。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>不要求检验独立。</li>
+<li>目标是控制 FWER，而不是 FDR。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：不适用。</li>
+<li>因变量类型：不适用。</li>
+<li>数据结构：一列原始 p 值即可。</li>
+<li>是否适合高维数据：能用，但会非常保守。</li>
+<li>是否适合缺失较多数据：缺失 p 值需先处理。</li>
+<li>是否适合删失数据：不适用。</li>
+<li>是否适合重复测量数据：可用于重复测量后衍生出的多重检验结果。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以一组有序 p 值为例：</p>
+<table>
+<thead>
+<tr>
+<th>hypothesis</th>
+<th>p_raw</th>
+<th>p_bonf</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>H1</td>
+<td>0.0008</td>
+<td>0.0080</td>
+</tr>
+<tr>
+<td>H2</td>
+<td>0.0030</td>
+<td>0.0300</td>
+</tr>
+<tr>
+<td>H3</td>
+<td>0.0080</td>
+<td>0.0800</td>
+</tr>
+<tr>
+<td>H4</td>
+<td>0.0110</td>
+<td>0.1100</td>
+</tr>
+<tr>
+<td>H5</td>
+<td>0.0180</td>
+<td>0.1800</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：一组原始 p 值。</li>
+<li>关键变量：检验总数 $m$、目标水平 $\alpha$。</li>
+<li>需要预处理的内容：明确多重检验家族。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：校正阈值或调整后 p 值。</li>
+<li>参数估计：无。</li>
+<li>预测结果：无。</li>
+<li>不确定性指标：体现在 FWER 控制目标。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：结论代价很高、需要最严格控制假阳性的场景。</li>
+<li>不适合：高维探索性研究。</li>
+<li>使用前需要特别检查的点：是否真的需要 FWER 级别的严格控制。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="bonferroni-correction" data-i="0">Python</button><button class="codetab" data-uid="bonferroni-correction" data-i="1">R</button></div><div class="codepanel active" data-uid="bonferroni-correction" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>statsmodels</code></li>
+</ul>
+<pre><code class="language-python">from statsmodels.stats.multitest import multipletests
+reject, p_adj, _, _ = multipletests(pvals, alpha=0.05, method=&quot;bonferroni&quot;)
+</code></pre></div><div class="codepanel" data-uid="bonferroni-correction" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>stats</code></li>
+</ul>
+<pre><code class="language-r">p.adjust(pvals, method = &quot;bonferroni&quot;)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：校正后仍显著的检验有多少。</li>
+<li>每个主要参数如何解释：若 $p_j^* < 0.05$，表示在 FWER 控制下该结果仍显著。</li>
+<li>临床或医学意义如何表达：适合用于“宁可漏掉也不愿误报”的场景。</li>
+<li>常见误读：Bonferroni 不等于“最合理”，它只是“最保守”的经典方法之一。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>原始 p 值和 Bonferroni 调整后 p 值对比图。</li>
+<li>显著性阈值对比图。</li>
+</ul>
+<h3>7.1 图像示例</h3>
+<p>下图中的红色折线展示了 Bonferroni 调整后的 p 值，相比原始 p 值抬升最明显。</p>
+<p><img alt="" src="img/multiple_testing_adjustments.png" /></p></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>简单直接。</li>
+<li>不依赖独立性假设。</li>
+<li>FWER 控制有明确保证。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>往往非常保守。</li>
+<li>检验数多时几乎很难发现信号。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>在探索性高维研究中机械使用。</li>
+<li>不区分 FWER 和 FDR 的不同目标。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 Holm 的区别：Holm 更灵活、通常更有力。</li>
+<li>和 BH 的区别：BH 控制 FDR，更适合发现型研究。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>高风险决策下的严格多重比较。</li>
+<li>小规模多终点研究中的保守校正。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-multiple-testing-and-error-rate-control.html" data-cn="多重检验与错误率控制" data-en="Multiple Testing and Error Rate Control" data-def="多重检验与错误率控制关注的是：当同时进行很多次假设检验时，如何控制整体假阳性风险或错误发现比例。">多重检验与错误率控制（Multiple Testing and Error Rate Control）</a></li>
+<li><a class="xlink" href="m-holm-procedure.html" data-cn="Holm程序" data-en="Holm Procedure" data-def="Holm 程序是控制 FWER 的逐步法（step-down procedure），通常比 Bonferroni 更有力。">Holm程序（Holm Procedure）</a></li>
+<li><a class="xlink" href="m-benjamini-hochberg-procedure.html" data-cn="Benjamini-Hochberg程序" data-en="Benjamini-Hochberg Procedure" data-def="Benjamini-Hochberg（BH）程序是控制 FDR 的经典方法，特别适合高维发现型研究。">Benjamini-Hochberg程序（Benjamini-Hochberg Procedure）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Shaffer JP. Multiple hypothesis testing. <em>Annu Rev Psychol</em>. 1995;46:561-584.</li>
+<li>R Core Team. <code>p.adjust</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-multiple-testing-and-error-rate-control.html"><div class="pg-lab">← 前一则</div><div class="pg-t">多重检验与错误率控制</div></a><a class="pg pg-next" href="m-holm-procedure.html"><div class="pg-lab">后一则 →</div><div class="pg-t">Holm程序</div></a></div>
+    <div class="colophon">— 黑盒词典 · 15·02 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

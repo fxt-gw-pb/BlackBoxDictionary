@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mini-Batch K-means聚类 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-09.html">聚类与无监督学习</a><span class="sep">/</span><span class="cur">Mini-Batch K-means聚类</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">聚类与无监督学习 · 09·07</div>
+      <h1 class="detail-h1">Mini-Batch K-means聚类</h1>
+      <div class="detail-en">Mini-Batch K-means Clustering</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 聚类 / 无监督学习 / 大规模学习</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>Mini-Batch K-means聚类（Mini-Batch K-means Clustering）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>Mini-Batch K-means 是 <a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a> 的大规模近似版本。它每次只用一小批样本更新质心，从而显著降低计算成本。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：样本量很大时，如何更快地近似 K-means 聚类结果。</li>
+<li>适用任务：大规模患者分群、图像颜色量化、在线或近在线聚类、快速原型学习。</li>
+<li>常见医学场景：大规模影像像素压缩，海量监测记录分组，大样本 EHR 表型聚类初筛。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>标准 K-means 每一轮都看完整数据，Mini-Batch K-means 则每次抽一小批数据来微调质心。它牺牲一点精确度，换取更快速度和更低内存占用。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>标准 K-means 目标仍是最小化：</p>
+<p>$$
+\sum_{i=1}^{n}\|x_i-\mu_{c_i}\|_2^2
+$$</p>
+<p>Mini-batch 版本在第 $t$ 次迭代抽取小批量 $B_t$，对 $x_i\in B_t$ 分配最近质心：</p>
+<p>$$
+c_i=\arg\min_k\|x_i-\mu_k^{(t)}\|_2^2
+$$</p>
+<p>若样本 $x_i$ 分给簇 $k$，质心可用递推均值更新：</p>
+<p>$$
+\mu_k^{(t+1)}=(1-\eta_{k,t})\mu_k^{(t)}+\eta_{k,t}x_i
+$$</p>
+<p>其中 $\eta_{k,t}$ 通常与该簇已经接收的样本数有关。</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li><code>n_clusters</code>：簇数。</li>
+<li><code>batch_size</code>：每次用于更新的小批量样本数。</li>
+<li><code>n_init</code>：不同初始化重复次数。</li>
+<li><code>max_iter</code>：最大迭代轮数。</li>
+<li>inertia：近似簇内平方和。</li>
+<li>reassignment ratio：控制低计数簇中心是否被重新分配。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>与 K-means 相同，簇大致紧凑且接近球形。</li>
+<li>小批量样本能代表整体数据分布。</li>
+<li>随机更新带来的近似误差在任务中可接受。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续型数值特征或像素/向量特征。</li>
+<li>因变量类型：无监督方法，不需要结局变量。</li>
+<li>数据结构：大样本特征矩阵。</li>
+<li>是否适合高维数据：可用于稀疏或高维数据，但需注意距离稳定性。</li>
+<li>是否适合缺失较多数据：需先处理缺失。</li>
+<li>是否适合删失数据：不直接处理删失结局。</li>
+<li>是否适合重复测量数据：需先构造样本级输入。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以大规模 EHR 表型特征为例：</p>
+<table>
+<thead>
+<tr>
+<th>Age</th>
+<th>BMI</th>
+<th>VisitCount</th>
+<th>MedicationCount</th>
+<th>LabAbnormalCount</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>71</td>
+<td>31.2</td>
+<td>14</td>
+<td>8</td>
+<td>5</td>
+</tr>
+<tr>
+<td>54</td>
+<td>24.8</td>
+<td>3</td>
+<td>2</td>
+<td>1</td>
+</tr>
+<tr>
+<td>67</td>
+<td>29.5</td>
+<td>10</td>
+<td>6</td>
+<td>4</td>
+</tr>
+<tr>
+<td>42</td>
+<td>22.9</td>
+<td>2</td>
+<td>1</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：大规模数值特征矩阵。</li>
+<li>关键变量：簇数、batch size、初始化次数。</li>
+<li>需要预处理的内容：缺失处理、标准化、异常值检查、必要时降维。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：簇标签、近似质心、inertia。</li>
+<li>参数估计：每个簇的质心。</li>
+<li>预测结果：新样本可分配到最近质心。</li>
+<li>不确定性指标：不同 batch size、随机种子和初始化下的稳定性。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：样本量大、需要快速近似 K-means、可接受少量随机误差的场景。</li>
+<li>不适合：样本量较小且需要最稳定的 K-means 结果、簇形状复杂、离群点很多的场景。</li>
+<li>使用前需要特别检查的点：batch size 是否足够、结果是否接近标准 K-means、簇中心是否稳定。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="mini-batch-k-means-clustering" data-i="0">Python</button><button class="codetab" data-uid="mini-batch-k-means-clustering" data-i="1">R</button></div><div class="codepanel active" data-uid="mini-batch-k-means-clustering" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+from sklearn.cluster import MiniBatchKMeans
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv(&quot;ehr_features_large.csv&quot;)
+X = df&amp;quot;Age&amp;quot;, &amp;quot;BMI&amp;quot;, &amp;quot;VisitCount&amp;quot;, &amp;quot;MedicationCount&amp;quot;, &amp;quot;LabAbnormalCount&amp;quot;
+
+model = make_pipeline(
+    StandardScaler(),
+    MiniBatchKMeans(
+        n_clusters=4,
+        batch_size=512,
+        n_init=10,
+        random_state=42
+    )
+)
+cluster = model.fit_predict(X)
+print(pd.Series(cluster).value_counts().sort_index())
+</code></pre></div><div class="codepanel" data-uid="mini-batch-k-means-clustering" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>ClusterR</code></li>
+</ul>
+<pre><code class="language-r">library(ClusterR)
+
+x &lt;- scale(df[, c(&quot;Age&quot;, &quot;BMI&quot;, &quot;VisitCount&quot;, &quot;MedicationCount&quot;, &quot;LabAbnormalCount&quot;)])
+fit &lt;- MiniBatchKmeans(x, clusters = 4, batch_size = 512, num_init = 10)
+
+cluster &lt;- predict_MBatchKMeans(x, fit$centroids)
+table(cluster)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：近似质心、各簇样本量、inertia、与标准 K-means 的一致性。</li>
+<li>每个主要参数如何解释：<code>batch_size</code> 越大，更新越接近标准 K-means，但速度优势降低。</li>
+<li>临床或医学意义如何表达：更适合作为大规模数据的快速分群工具，聚类解释仍需回到簇中心和临床变量差异。</li>
+<li>常见误读：速度更快不代表结果更好；它是 K-means 的近似优化策略。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>不同 batch size 下 inertia 和运行时间对比。</li>
+<li>聚类标签在 PCA/UMAP 空间中的分布。</li>
+<li>各簇中心热图。</li>
+<li>Mini-Batch 与标准 K-means 标签一致性矩阵。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>适合大规模数据。</li>
+<li>速度快、内存压力小。</li>
+<li>可作为 K-means 的快速近似替代。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>结果有随机近似误差。</li>
+<li>仍继承 K-means 对球形簇和离群点敏感的局限。</li>
+<li>小批量过小可能导致质心不稳定。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>为追求速度把 batch size 设得过小。</li>
+<li>不设置随机种子和重复初始化。</li>
+<li>用它解决明显非球形或密度不均的聚类问题。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a> 的区别：Mini-Batch K-means 用小批量近似更新，更快但略有近似误差。</li>
+<li>和 <a class="xlink" href="m-balanced-iterative-reducing-and-clustering-using-hierarchies-birch.html" data-cn="BIRCH聚类" data-en="Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH" data-def="BIRCH 是一种面向大规模数据的聚类算法。它通过簇特征树（CF tree）把大量样本压缩成可管理的微簇摘要，再对这些摘要进行聚类。">BIRCH聚类（Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH）</a> 的区别：BIRCH 先构建 CF 树压缩数据，Mini-Batch K-means 直接随机小批量更新质心。</li>
+<li>和 <a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="高斯混合模型是假设观测数据由多个高斯分布按一定权重混合而成的概率模型。它既可以做密度估计，也可以用于软聚类，即给每个样本分配“属于各个簇的概率”。">高斯混合模型（Gaussian Mixture Model, GMM）</a> 的区别：GMM 给概率归属，Mini-Batch K-means 给硬标签和质心。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>大规模 EHR 患者表型初步分群。</li>
+<li>医学影像像素或 patch 特征快速聚类。</li>
+<li>大样本多指标监测数据的原型学习。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a></li>
+<li><a class="xlink" href="m-balanced-iterative-reducing-and-clustering-using-hierarchies-birch.html" data-cn="BIRCH聚类" data-en="Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH" data-def="BIRCH 是一种面向大规模数据的聚类算法。它通过簇特征树（CF tree）把大量样本压缩成可管理的微簇摘要，再对这些摘要进行聚类。">BIRCH聚类（Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH）</a></li>
+<li><a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="高斯混合模型是假设观测数据由多个高斯分布按一定权重混合而成的概率模型。它既可以做密度估计，也可以用于软聚类，即给每个样本分配“属于各个簇的概率”。">高斯混合模型（Gaussian Mixture Model, GMM）</a></li>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Sculley D. Web-scale k-means clustering. <em>WWW</em>. 2010:1177-1178.</li>
+<li>scikit-learn Developers. <code>sklearn.cluster.MiniBatchKMeans</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MiniBatchKMeans.html">https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MiniBatchKMeans.html</a> （访问日期：2026-07-02）</li>
+<li>Lloyd S. Least squares quantization in PCM. <em>IEEE Transactions on Information Theory</em>. 1982;28(2):129-137.</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-spectral-clustering.html"><div class="pg-lab">← 前一则</div><div class="pg-t">谱聚类</div></a><a class="pg pg-next" href="m-balanced-iterative-reducing-and-clustering-using-hierarchies-birch.html"><div class="pg-lab">后一则 →</div><div class="pg-t">BIRCH聚类</div></a></div>
+    <div class="colophon">— 黑盒词典 · 09·07 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

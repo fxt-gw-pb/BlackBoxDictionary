@@ -231,9 +231,10 @@ pred <- predict(fit, newdata = df_test, type = "class")
 
 ## 11. 相关方法
 
+- [[感知机（Perceptron）]]
+- [[人工神经网络（Artificial Neural Network, ANN）]]
 - [[Logistic回归（Logistic Regression）]]
 - [[支持向量机（Support Vector Machine, SVM）]]
-- [[随机森林（Random Forest）]]
 
 ## 12. 参考资料
 

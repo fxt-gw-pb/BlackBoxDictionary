@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>分类与判别方法 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap category">
+  <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><span class="cur">分类与判别方法</span></div>
+  <div class="cat-title">
+    <div class="cat-title-l">
+      <div class="kicker dark-ink">第 16 部</div>
+      <h2 class="page-h2">分类与判别方法</h2>
+      <div class="cat-title-en">Classification &amp; Discriminant Methods</div>
+      <p class="lede">把个体分到预定义类别。</p>
+    </div>
+    <div class="cat-title-r">
+      <div class="cat-big">5</div>
+      <div class="kicker">收录条目</div>
+    </div>
+  </div>
+  <div class="entries"><a class="entry" href="m-k-nearest-neighbors-knn.html">
+      <span class="entry-no">16·01</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">K近邻算法</span>
+          <span class="entry-en">K-Nearest Neighbors, KNN</span>
+        </div>
+        <p class="entry-def">K 近邻算法是一类基于实例的非参数方法。它不显式拟合一个全局模型，而是在预测时直接寻找距离目标样本最近的 $K$ 个训练样本，并用这些近邻的标签做多数投票或平均。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-k-nearest-neighbors-regression.html">
+      <span class="entry-no">16·02</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">K近邻回归</span>
+          <span class="entry-en">K-Nearest Neighbors Regression</span>
+        </div>
+        <p class="entry-def">K近邻回归是一种非参数回归方法，它通过寻找离目标样本最近的 $K$ 个邻居，并对这些邻居的目标值做平均或加权平均来完成预测。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-naive-bayes.html">
+      <span class="entry-no">16·03</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">朴素贝叶斯</span>
+          <span class="entry-en">Naive Bayes</span>
+        </div>
+        <p class="entry-def">朴素贝叶斯是一类基于贝叶斯定理的概率分类方法。它假设在给定类别后，各特征彼此条件独立，因此可以把联合概率拆成一组一维条件概率的乘积。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-linear-discriminant-analysis-lda.html">
+      <span class="entry-no">16·04</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">线性判别分析</span>
+          <span class="entry-en">Linear Discriminant Analysis, LDA</span>
+        </div>
+        <p class="entry-def">线性判别分析是一种经典的监督式分类和降维方法。它寻找能让组间差异尽量大、组内差异尽量小的线性投影方向，并可在这些方向上进行分类。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-perceptron.html">
+      <span class="entry-no">16·05</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">感知机</span>
+          <span class="entry-en">Perceptron</span>
+        </div>
+        <p class="entry-def">感知机是最早期、最简单的神经网络分类模型之一。它通过一个线性判别函数把样本分到两个类别，本质上是“能否用一个超平面把两类样本分开”的学习问题。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a></div>
+</main>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

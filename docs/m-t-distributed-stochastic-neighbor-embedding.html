@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>t-SNE · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-10.html">降维与表征学习</a><span class="sep">/</span><span class="cur">t-SNE</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">降维与表征学习 · 10·07</div>
+      <h1 class="detail-h1">t-SNE</h1>
+      <div class="detail-en">t-Distributed Stochastic Neighbor Embedding</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>advanced</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 降维 / 可视化 / 流形学习</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>t-SNE（t-Distributed Stochastic Neighbor Embedding）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>t-SNE 是一种用于高维数据可视化的非线性降维方法。它把高维空间和低维空间中的邻近关系都表示为概率分布，并让两个分布尽可能接近。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：高维样本的局部邻域结构如何在二维或三维图中展示。</li>
+<li>适用任务：探索性可视化、样本分布观察、潜在亚群展示。</li>
+<li>常见医学场景：单细胞聚类可视化、影像组学样本分布展示、组学或表型数据的探索性分群。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>t-SNE 关心“谁是谁的邻居”。如果两个点在高维空间中很相似，算法会尽量让它们在二维图中也靠近；为了避免所有点挤在一起，低维空间使用 t 分布产生更重的尾部。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>高维空间中，点 $x_i$ 与 $x_j$ 的相似度定义为条件概率：</p>
+<p>$$
+p_{j|i}=\frac{\exp(-\|x_i-x_j\|^2/2\sigma_i^2)}
+\sum_{k\neq i}\exp(-\|x_i-x_k\|^2/2\sigma_i^2)}
+$$</p>
+<p>对称化后得到：</p>
+<p>$$
+p_{ij}=\frac{p_{j|i}+p_{i|j}}{2n}
+$$</p>
+<p>低维空间中，使用 t 分布定义相似度：</p>
+<p>$$
+q_{ij}=\frac{(1+\|y_i-y_j\|^2)^{-1}}
+\sum_{k\neq l}(1+\|y_k-y_l\|^2)^{-1}}
+$$</p>
+<p>目标是最小化 KL 散度：</p>
+<p>$$
+C=KL(P\|Q)=\sum_i\sum_j p_{ij}\log\frac{p_{ij}}{q_{ij}}
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$p_{ij}$：高维空间中的样本相似概率。</li>
+<li>$q_{ij}$：低维空间中的样本相似概率。</li>
+<li><code>perplexity</code>：近似控制每个点关注的邻居数量。</li>
+<li><code>learning_rate</code>：优化步长。</li>
+<li><code>early_exaggeration</code>：早期优化阶段放大簇间分离的参数。</li>
+<li><code>n_iter</code> 或 <code>max_iter</code>：优化迭代次数。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>局部邻域结构比全局距离更重要。</li>
+<li>高维距离度量能反映样本相似性。</li>
+<li>低维图主要用于探索和展示，而不是严格保距。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续型高维特征、嵌入向量或标准化后的矩阵。</li>
+<li>因变量类型：t-SNE 本身不需要结局变量。</li>
+<li>数据结构：样本乘以特征矩阵。</li>
+<li>是否适合高维数据：适合可视化，但常先用 PCA/SVD 降到中等维度再运行。</li>
+<li>是否适合缺失较多数据：需先处理缺失。</li>
+<li>是否适合删失数据：不直接处理删失结局。</li>
+<li>是否适合重复测量数据：需明确样本单位，普通 t-SNE 不处理相关结构。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以单细胞表达嵌入为例：</p>
+<table>
+<thead>
+<tr>
+<th>PC1</th>
+<th>PC2</th>
+<th>PC3</th>
+<th>PC4</th>
+<th>CellType</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2.1</td>
+<td>-0.4</td>
+<td>0.3</td>
+<td>1.2</td>
+<td>T cell</td>
+</tr>
+<tr>
+<td>1.9</td>
+<td>-0.2</td>
+<td>0.5</td>
+<td>1.0</td>
+<td>T cell</td>
+</tr>
+<tr>
+<td>-1.2</td>
+<td>1.5</td>
+<td>0.1</td>
+<td>-0.7</td>
+<td>B cell</td>
+</tr>
+<tr>
+<td>-1.4</td>
+<td>1.2</td>
+<td>0.0</td>
+<td>-0.8</td>
+<td>B cell</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：高维特征矩阵或预降维后的特征。</li>
+<li>关键变量：困惑度、学习率、迭代次数、初始化方式、距离度量。</li>
+<li>需要预处理的内容：缺失处理、标准化、异常值检查、必要时先用 PCA/SVD 预降维。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：二维或三维嵌入坐标。</li>
+<li>参数估计：优化得到的低维坐标。</li>
+<li>预测结果：不直接预测，主要用于可视化。</li>
+<li>不确定性指标：不同随机种子、参数和重采样下的嵌入稳定性。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：高维数据的局部结构展示、潜在亚群探索、复杂嵌入可视化。</li>
+<li>不适合：需要解释坐标轴、保持全局距离、比较簇间距离大小或做正式统计检验的场景。</li>
+<li>使用前需要特别检查的点：perplexity 是否与样本量匹配，随机种子是否影响结论，是否把图形分离过度解释为真实聚类。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="t-distributed-stochastic-neighbor-embedding" data-i="0">Python</button><button class="codetab" data-uid="t-distributed-stochastic-neighbor-embedding" data-i="1">R</button></div><div class="codepanel active" data-uid="t-distributed-stochastic-neighbor-embedding" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv(&quot;omics_features.csv&quot;)
+X = df.drop(columns=[&quot;Group&quot;])
+
+X_pca = make_pipeline(
+    StandardScaler(),
+    PCA(n_components=30, random_state=42)
+).fit_transform(X)
+
+tsne = TSNE(
+    n_components=2,
+    perplexity=30,
+    learning_rate=&quot;auto&quot;,
+    init=&quot;pca&quot;,
+    random_state=42
+)
+embedding = tsne.fit_transform(X_pca)
+
+embedding_df = pd.DataFrame(embedding, columns=[&quot;tSNE1&quot;, &quot;tSNE2&quot;])
+print(embedding_df.head())
+</code></pre></div><div class="codepanel" data-uid="t-distributed-stochastic-neighbor-embedding" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>Rtsne</code></li>
+</ul>
+<pre><code class="language-r">library(Rtsne)
+
+x &lt;- scale(df[, setdiff(names(df), &quot;Group&quot;)])
+pca &lt;- prcomp(x, center = FALSE, scale. = FALSE)
+x_pca &lt;- pca$x[, 1:30]
+
+fit &lt;- Rtsne(x_pca, dims = 2, perplexity = 30, pca = FALSE, seed = 42)
+embedding &lt;- fit$Y
+head(embedding)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：局部邻域、样本是否形成稳定的近邻群、已知分组是否在图上呈现连续或分离结构。</li>
+<li>每个主要参数如何解释：<code>perplexity=30</code> 表示每个样本的有效邻域规模大致在几十个样本量级。</li>
+<li>临床或医学意义如何表达：t-SNE 图适合提出探索性假设，不应单独作为分类、预后或机制证据。</li>
+<li>常见误读：簇与簇之间的距离、簇大小和坐标轴方向通常没有直接定量解释。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>t-SNE 二维散点图，按疾病分组、细胞类型或连续临床变量着色。</li>
+<li>不同 perplexity 的嵌入对比。</li>
+<li>不同随机种子的稳定性对比。</li>
+<li>t-SNE 图上叠加关键变量表达或风险评分。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>高维局部结构可视化效果强。</li>
+<li>常能揭示潜在亚群或局部连续谱。</li>
+<li>适合与聚类结果、细胞类型标注等结合展示。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>不保留全局距离。</li>
+<li>对参数和随机初始化敏感。</li>
+<li>主要用于可视化，不适合直接作为可解释建模结果。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>根据 t-SNE 图上两个簇的距离判断生物学距离。</li>
+<li>不做参数敏感性分析。</li>
+<li>把 t-SNE 坐标作为普通连续变量进行过度解释。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-uniform-manifold-approximation-and-projection.html" data-cn="UMAP" data-en="Uniform Manifold Approximation and Projection" data-def="UMAP 是一种非线性降维和可视化方法，基于流形假设和近邻图构建高维数据的模糊拓扑结构，再在低维空间中寻找相似的结构。">UMAP（Uniform Manifold Approximation and Projection）</a> 的区别：UMAP 通常更快、更强调拓扑结构，t-SNE 更经典地用于局部邻域可视化。</li>
+<li>和 <a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a> 的区别：PCA 是线性、可解释方差的降维；t-SNE 是非线性、概率邻域可视化。</li>
+<li>和 <a class="xlink" href="m-locally-linear-embedding-lle.html" data-cn="局部线性嵌入" data-en="Locally Linear Embedding, LLE" data-def="局部线性嵌入是一种非线性流形学习方法。它假设高维数据虽然整体弯曲，但每个样本附近的小邻域可以近似看作线性结构，并在低维空间中尽量保持这种局部重构关系。">局部线性嵌入（Locally Linear Embedding, LLE）</a> 的区别：LLE 保持局部线性重构权重，t-SNE 匹配邻域概率分布。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>单细胞转录组细胞群可视化。</li>
+<li>医学影像或组学样本的探索性分群展示。</li>
+<li>临床高维表型数据中异常样本和局部亚群观察。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-uniform-manifold-approximation-and-projection.html" data-cn="UMAP" data-en="Uniform Manifold Approximation and Projection" data-def="UMAP 是一种非线性降维和可视化方法，基于流形假设和近邻图构建高维数据的模糊拓扑结构，再在低维空间中寻找相似的结构。">UMAP（Uniform Manifold Approximation and Projection）</a></li>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
+<li><a class="xlink" href="m-locally-linear-embedding-lle.html" data-cn="局部线性嵌入" data-en="Locally Linear Embedding, LLE" data-def="局部线性嵌入是一种非线性流形学习方法。它假设高维数据虽然整体弯曲，但每个样本附近的小邻域可以近似看作线性结构，并在低维空间中尽量保持这种局部重构关系。">局部线性嵌入（Locally Linear Embedding, LLE）</a></li>
+<li><a class="xlink" href="m-multidimensional-scaling-mds.html" data-cn="多维尺度分析" data-en="Multidimensional Scaling, MDS" data-def="多维尺度分析是一类把样本间距离或不相似度表示为低维坐标的方法。它的目标是在二维或三维空间中尽量保留原始距离关系。">多维尺度分析（Multidimensional Scaling, MDS）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>van der Maaten L, Hinton G. Visualizing data using t-SNE. <em>Journal of Machine Learning Research</em>. 2008;9:2579-2605.</li>
+<li>van der Maaten L. Accelerating t-SNE using tree-based algorithms. <em>Journal of Machine Learning Research</em>. 2014;15:3221-3245.</li>
+<li>scikit-learn Developers. <code>sklearn.manifold.TSNE</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html">https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-singular-value-decomposition-svd.html"><div class="pg-lab">← 前一则</div><div class="pg-t">奇异值分解</div></a><a class="pg pg-next" href="m-uniform-manifold-approximation-and-projection.html"><div class="pg-lab">后一则 →</div><div class="pg-t">UMAP</div></a></div>
+    <div class="colophon">— 黑盒词典 · 10·07 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>时间序列与时序建模 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap category">
+  <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><span class="cur">时间序列与时序建模</span></div>
+  <div class="cat-title">
+    <div class="cat-title-l">
+      <div class="kicker dark-ink">第 12 部</div>
+      <h2 class="page-h2">时间序列与时序建模</h2>
+      <div class="cat-title-en">Time Series &amp; Temporal Modeling</div>
+      <p class="lede">处理带顺序依赖的数据。</p>
+    </div>
+    <div class="cat-title-r">
+      <div class="cat-big">10</div>
+      <div class="kicker">收录条目</div>
+    </div>
+  </div>
+  <div class="entries"><a class="entry" href="m-autoregressive-model-ar.html">
+      <span class="entry-no">12·01</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">自回归模型</span>
+          <span class="entry-en">Autoregressive Model, AR</span>
+        </div>
+        <p class="entry-def">自回归模型是一类用序列自身过去值预测当前值的时间序列模型。AR($p$) 表示当前观测由前 $p$ 个滞后值的线性组合和随机误差构成。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-moving-average-model-ma.html">
+      <span class="entry-no">12·02</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">移动平均模型</span>
+          <span class="entry-en">Moving Average Model, MA</span>
+        </div>
+        <p class="entry-def">移动平均模型在时间序列建模中通常指 MA($q$)：当前值由当前随机冲击和过去 $q$ 个随机冲击线性组合而成。实践中“移动平均”也常指简单移动平均平滑，用于去噪和观察趋势。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-autoregressive-moving-average-model-arma.html">
+      <span class="entry-no">12·03</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">自回归滑动平均模型</span>
+          <span class="entry-en">Autoregressive Moving Average Model, ARMA</span>
+        </div>
+        <p class="entry-def">ARMA 模型把自回归 AR 部分和移动平均 MA 部分组合起来，用于建模平稳单变量时间序列。ARMA($p,q$) 同时利用过去观测值和过去误差项预测当前值。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-autoregressive-integrated-moving-average-model-arima.html">
+      <span class="entry-no">12·04</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">自回归积分滑动平均模型</span>
+          <span class="entry-en">Autoregressive Integrated Moving Average Model, ARIMA</span>
+        </div>
+        <p class="entry-def">ARIMA 是用于单变量时间序列预测的经典模型。它通过差分把非平稳序列转为平稳序列，再用 ARMA 模型刻画差分后序列的自相关结构。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-vector-autoregression-var.html">
+      <span class="entry-no">12·05</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">向量自回归模型</span>
+          <span class="entry-en">Vector Autoregression, VAR</span>
+        </div>
+        <p class="entry-def">向量自回归模型是多变量时间序列模型，用每个变量自身和其他变量的历史值共同预测当前多个变量。VAR($p$) 可看作多变量版 AR 模型。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-vector-autoregressive-moving-average-model-varma.html">
+      <span class="entry-no">12·06</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">向量自回归滑动平均模型</span>
+          <span class="entry-en">Vector Autoregressive Moving Average Model, VARMA</span>
+        </div>
+        <p class="entry-def">VARMA 是多变量时间序列模型，同时包含向量自回归 VAR 部分和向量移动平均 VMA 部分。它既用多个变量的历史值，也用多个变量的过去创新项解释当前向量序列。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">advanced</span>
+      </div>
+    </a><a class="entry" href="m-prophet-forecasting-model.html">
+      <span class="entry-no">12·07</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">Prophet时间序列模型</span>
+          <span class="entry-en">Prophet Forecasting Model</span>
+        </div>
+        <p class="entry-def">Prophet 是一种面向业务时间序列预测的可加性模型。它把序列分解为趋势、季节性、节假日效应和误差项，并通过变化点捕捉趋势斜率的改变。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-holt-winters-exponential-smoothing.html">
+      <span class="entry-no">12·08</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">Holt-Winters指数平滑</span>
+          <span class="entry-en">Holt-Winters Exponential Smoothing</span>
+        </div>
+        <p class="entry-def">Holt-Winters 指数平滑是一种用于带趋势和季节性的单变量时间序列预测方法。它递推更新水平、趋势和季节性三个成分，并用它们生成未来预测。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-long-short-term-memory-for-time-series-forecasting.html">
+      <span class="entry-no">12·09</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">LSTM时间序列预测</span>
+          <span class="entry-en">Long Short-Term Memory for Time Series Forecasting</span>
+        </div>
+        <p class="entry-def">LSTM 是循环神经网络的一种改进结构，通过门控机制保存、遗忘和输出序列信息。本条目聚焦 [[长短期记忆网络（Long Short-Term Memory, LSTM）]] 在时间</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">advanced</span>
+      </div>
+    </a><a class="entry" href="m-xgboost-for-time-series-forecasting.html">
+      <span class="entry-no">12·10</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">XGBoost时间序列预测</span>
+          <span class="entry-en">XGBoost for Time Series Forecasting</span>
+        </div>
+        <p class="entry-def">XGBoost 时间序列预测是把时间序列问题转换为监督学习表格问题，再用 XGBoost 建模。核心做法是构造滞后特征、滚动统计量、日历特征和外部变量，用它们预测未来目标值。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a></div>
+</main>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

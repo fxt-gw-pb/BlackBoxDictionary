@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>决策树 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-07.html">树模型与集成学习</a><span class="sep">/</span><span class="cur">决策树</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">树模型与集成学习 · 07·01</div>
+      <h1 class="detail-h1">决策树</h1>
+      <div class="detail-en">Decision Tree</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 树模型 / 分类</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>决策树（Decision Tree）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>决策树是一类通过递归划分特征空间来完成分类或回归的树状模型。对于分类任务，它把样本一步步分到更“纯”的叶节点中，再用叶节点中的多数类别作为预测结果。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：如何根据一组特征生成清晰可解释的分类规则。</li>
+<li>适用任务：二分类、多分类、规则提取、特征交互发现。</li>
+<li>常见医学场景：根据年龄、症状、实验室指标对疾病状态、重症风险或分型标签进行初步判别。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>可以把决策树理解成一串连续的“如果……那么……”问题。每问一次，就把样本分成更相似的两组或多组，直到叶节点里的样本已经足够一致。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>分类树常用的不纯度指标包括基尼不纯度和信息熵：</p>
+<p>$$
+G(t) = 1 - \sum_{k=1}^{K} p_{k|t}^2
+$$</p>
+<p>$$
+H(t) = - \sum_{k=1}^{K} p_{k|t} \log p_{k|t}
+$$</p>
+<p>其中 $p_{k|t}$ 表示节点 $t$ 中第 $k$ 类样本的比例。一次划分的目标是最大化不纯度下降：</p>
+<p>$$
+\Delta I(s, t) = I(t) - \left( \frac{N_{left}}{N_t} I(t_{left}) + \frac{N_{right}}{N_t} I(t_{right}) \right)
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$I(t)$：节点 $t$ 的不纯度，可取基尼指数或熵。</li>
+<li>$s$：候选划分规则，通常由“特征 + 阈值”组成。</li>
+<li>$N_t$：当前节点样本数。</li>
+<li>叶节点类别概率：叶节点内各类样本比例，常用于概率输出。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>不要求线性关系或正态性假设。</li>
+<li>假设可通过递归切分把类别逐步分开。</li>
+<li>若树过深、叶节点过小，模型容易过拟合。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续、二分类、多分类变量均可。</li>
+<li>因变量类型：二分类或多分类。</li>
+<li>数据结构：宽表数据，每行一个个体。</li>
+<li>是否适合高维数据：可用，但单棵树在高维下稳定性有限。</li>
+<li>是否适合缺失较多数据：通常应先处理缺失。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：不直接适合。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以住院患者是否发生重症并发症为例：</p>
+<table>
+<thead>
+<tr>
+<th>Age</th>
+<th>Sex</th>
+<th>CRP</th>
+<th>Lactate</th>
+<th>Diabetes</th>
+<th>SevereComplication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>72</td>
+<td>1</td>
+<td>65.2</td>
+<td>2.8</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>49</td>
+<td>0</td>
+<td>12.6</td>
+<td>1.1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>63</td>
+<td>1</td>
+<td>34.0</td>
+<td>1.9</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>38</td>
+<td>0</td>
+<td>8.4</td>
+<td>0.9</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>57</td>
+<td>1</td>
+<td>28.1</td>
+<td>1.5</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：离散结局和一组候选特征。</li>
+<li>关键变量：最大深度、最小分裂样本数、最小叶节点样本数、剪枝强度。</li>
+<li>需要预处理的内容：缺失处理、类别编码、训练测试集划分。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：树结构、叶节点类别、节点概率、特征重要性。</li>
+<li>参数估计：没有线性系数，主要是分裂规则。</li>
+<li>预测结果：类别标签和类别概率。</li>
+<li>不确定性指标：交叉验证误差、测试集准确率、AUC、Brier score。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：需要直观规则、怀疑存在明显非线性与交互、想快速获得可解释基线模型。</li>
+<li>不适合：数据极小但噪声较大、需要稳定概率估计或线性参数解释的场景。</li>
+<li>使用前需要特别检查的点：是否过拟合、类别是否极不平衡、是否需要剪枝。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="decision-tree" data-i="0">Python</button><button class="codetab" data-uid="decision-tree" data-i="1">R</button></div><div class="codepanel active" data-uid="decision-tree" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+
+df = pd.read_csv(&quot;clinical_risk.csv&quot;)
+X = df&amp;quot;Age&amp;quot;, &amp;quot;CRP&amp;quot;, &amp;quot;Lactate&amp;quot;, &amp;quot;Diabetes&amp;quot;
+y = df[&quot;SevereComplication&quot;].astype(int)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+fit = DecisionTreeClassifier(
+    criterion=&quot;gini&quot;,
+    max_depth=4,
+    min_samples_leaf=20,
+    random_state=42
+)
+fit.fit(X_train, y_train)
+
+print(fit.predict_proba(X_test[:5]))
+</code></pre></div><div class="codepanel" data-uid="decision-tree" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>rpart</code></li>
+</ul>
+<pre><code class="language-r">library(rpart)
+
+fit &lt;- rpart(
+  SevereComplication ~ Age + CRP + Lactate + Diabetes,
+  data = df,
+  method = &quot;class&quot;,
+  control = rpart.control(maxdepth = 4, minbucket = 20)
+)
+
+pred_prob &lt;- predict(fit, newdata = df_test, type = &quot;prob&quot;)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：根节点和高层分裂规则、叶节点纯度、测试集表现。</li>
+<li>每个主要参数如何解释：树深度越大越灵活，但也更容易过拟合。</li>
+<li>临床或医学意义如何表达：适合表述为“当 CRP 高于某阈值且乳酸升高时，患者更可能进入高风险叶节点”。</li>
+<li>常见误读：特征出现在高层分裂不等于它具有因果作用。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>决策树结构图。</li>
+<li>混淆矩阵或 ROC 曲线。</li>
+<li>剪枝强度或树深度与验证误差关系图。</li>
+</ul>
+<h3>7.1 图像示例</h3>
+<p>下图展示分类决策树的完整树结构，可直观看到节点分裂、叶节点类别和整体规则层级。</p>
+<p><img alt="" src="img/decision_tree_classifier_structure.png" /></p></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>规则直观，可读性强。</li>
+<li>能自动捕捉非线性和交互。</li>
+<li>对特征缩放不敏感。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>单棵树稳定性较差。</li>
+<li>容易过拟合。</li>
+<li>概率输出常不如参数模型稳定。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>不做剪枝或复杂度控制。</li>
+<li>只看训练集效果。</li>
+<li>把树路径当成固定不变的医学阈值。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 Logistic 回归的区别：Logistic 回归给出平滑的 log-odds 关系，决策树给出分段规则。</li>
+<li>和随机森林的区别：随机森林是多棵树集成，通常更稳健，但解释性更弱。</li>
+<li>和 ID3 / C4.5 的区别：这两者是具体的树构建策略，而“决策树”是更宽泛的模型家族。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>患者分层与风险分组。</li>
+<li>早筛规则的初步构建。</li>
+<li>多指标组合形成简单判别路径。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-id3-decision-tree.html" data-cn="ID3决策树" data-en="ID3 Decision Tree" data-def="ID3 是 Ross Quinlan 提出的经典决策树构建算法。它用信息增益作为特征选择标准，递归地挑选最能降低类别不确定性的特征来生成分类树。">ID3决策树（ID3 Decision Tree）</a></li>
+<li><a class="xlink" href="m-c4-5-decision-tree.html" data-cn="C4.5决策树" data-en="C4.5 Decision Tree" data-def="C4.5 是 ID3 的改进版本。它用信息增益率代替单纯的信息增益，并支持连续特征、缺失值处理和后剪枝，因此比 ID3 更接近实际应用环境。">C4.5决策树（C4.5 Decision Tree）</a></li>
+<li><a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是一类基于 bagging 的树集成方法。它通过对样本做 bootstrap 抽样、对特征做随机子采样，训练许多彼此不同的决策树，再把它们的结果投票或平均起来。">随机森林（Random Forest）</a></li>
+<li><a class="xlink" href="m-decision-tree-regression.html" data-cn="决策树回归" data-en="Decision Tree Regression" data-def="决策树回归是一种通过递归划分特征空间，把连续结局映射到一系列区域均值上的非参数回归方法。">决策树回归（Decision Tree Regression）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Breiman L, Friedman JH, Olshen RA, Stone CJ. <em>Classification and Regression Trees</em>. Wadsworth; 1984.</li>
+<li>scikit-learn Developers. <code>sklearn.tree.DecisionTreeClassifier</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html">https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html</a> （访问日期：2026-07-02）</li>
+<li>Therneau T, Atkinson B, Ripley B. Package <code>rpart</code>. CRAN. <a href="https://cran.r-project.org/package=rpart">https://cran.r-project.org/package=rpart</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><span></span><a class="pg pg-next" href="m-id3-decision-tree.html"><div class="pg-lab">后一则 →</div><div class="pg-t">ID3决策树</div></a></div>
+    <div class="colophon">— 黑盒词典 · 07·01 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

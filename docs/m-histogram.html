@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>直方图 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-01.html">研究设计与数据理解</a><span class="sep">/</span><span class="cur">直方图</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">研究设计与数据理解 · 01·02</div>
+      <h1 class="detail-h1">直方图</h1>
+      <div class="detail-en">Histogram</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 描述统计 / 分布探索 / 可视化</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>直方图（Histogram）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>直方图把连续变量的取值范围切成若干等宽区间（bin），统计每个区间内的观测数（或频率），用相邻柱形展示数据的分布形状。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：一个连续变量长什么样——中心在哪、有多分散、是否偏态、有几个峰、有无异常值。</li>
+<li>适用任务：分布探索、建模前的分布假设检查、异常值与截断的初步识别。</li>
+<li>常见医学场景：年龄、血压、生物标志物浓度的分布描述与数据质控。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>直方图是把散落的数据“堆”进一排格子里，格子越高说明落在该区间的观测越多。它是认识一份数据的第一张图，几乎所有分布判断都从这里开始。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>给定 bin 宽 $h$、区间 $B_k=[x_0+kh,\,x_0+(k+1)h)$，频数与频率密度为：</p>
+<p>$$
+n_k=\sum_{i=1}^{n}\mathbf{1}\{x_i\in B_k\},\qquad
+\hat{f}(x)=\frac{n_k}{n\,h},\ x\in B_k
+$$</p>
+<p>密度化后柱面积之和为 1，可与 <a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计是一种用局部加权平均来估计连续型变量概率密度函数的非参数方法。它常用来替代粗糙的直方图，给出更平滑的分布形状。">核密度估计（Kernel Density Estimation, KDE）</a> 叠加比较。</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$h$：bin 宽（或 bin 数），决定平滑程度。</li>
+<li>$n_k$：第 $k$ 个区间的频数。</li>
+<li>$\hat{f}(x)$：频率密度估计，使不同 bin 宽下纵轴可比。</li>
+<li>常见 bin 规则：Sturges、Scott、Freedman-Diaconis。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>变量为可分箱的数值量。</li>
+<li>结果对 bin 宽和起点敏感，无“唯一正确”的直方图。</li>
+<li>样本量太小时形状不稳定。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：单个连续变量（可按分组分面）。</li>
+<li>因变量类型：不区分因变量。</li>
+<li>数据结构：一维数值数组。</li>
+<li>是否适合高维数据：仅单变量；高维需分面或改用其他图。</li>
+<li>是否适合缺失较多数据：需先剔除或说明缺失。</li>
+<li>是否适合删失数据：删失需专门处理，不宜直接画。</li>
+<li>是否适合重复测量数据：混合层级会掩盖结构，宜分层。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>bin 区间</th>
+<th>频数</th>
+<th>频率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>[110,120)</td>
+<td>24</td>
+<td>0.12</td>
+</tr>
+<tr>
+<td>[120,130)</td>
+<td>58</td>
+<td>0.29</td>
+</tr>
+<tr>
+<td>[130,140)</td>
+<td>71</td>
+<td>0.36</td>
+</tr>
+<tr>
+<td>[140,150)</td>
+<td>47</td>
+<td>0.23</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：一维数值向量。</li>
+<li>关键变量：待描述的连续变量、bin 设置。</li>
+<li>需要预处理的内容：处理缺失、决定 bin 宽/规则、是否密度化。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：各 bin 频数/频率。</li>
+<li>参数估计：无（描述性）。</li>
+<li>预测结果：无。</li>
+<li>不确定性指标：可叠加分组或密度曲线辅助判断。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：单变量分布的快速探索与质控。</li>
+<li>不适合：小样本、需要精确密度、比较多组分布（可用密度曲线或箱线图）。</li>
+<li>使用前需要特别检查的点：bin 宽是否掩盖或制造了峰、坐标是否被异常值拉伸。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="histogram" data-i="0">Python</button><button class="codetab" data-uid="histogram" data-i="1">R</button></div><div class="codepanel active" data-uid="histogram" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>matplotlib</code></li>
+<li><code>numpy</code></li>
+</ul>
+<pre><code class="language-python">import matplotlib.pyplot as plt
+import numpy as np
+
+x = np.random.normal(130, 12, size=400)
+plt.hist(x, bins=&quot;fd&quot;, density=True, color=&quot;#B0A895&quot;, edgecolor=&quot;white&quot;)
+plt.xlabel(&quot;收缩压&quot;); plt.ylabel(&quot;频率密度&quot;)
+plt.show()
+</code></pre></div><div class="codepanel" data-uid="histogram" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>graphics</code></li>
+</ul>
+<pre><code class="language-r">x &lt;- rnorm(400, 130, 12)
+hist(x, breaks = &quot;FD&quot;, freq = FALSE,
+     xlab = &quot;收缩压&quot;, main = &quot;&quot;)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：中心位置、离散程度、偏态、峰数、异常值。</li>
+<li>每个主要参数如何解释：右偏（长尾在右）常见于浓度/时间类指标；双峰提示可能存在亚群。</li>
+<li>临床或医学意义如何表达：分布形状影响后续检验/模型选择（如是否需要变换）。</li>
+<li>常见误读：把 bin 宽造成的锯齿当真实结构；用单一直方图比较多组分布。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>直方图叠加核密度曲线。</li>
+<li>分组分面直方图。</li>
+<li>与箱线图/小提琴图并列查看。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>直观、计算简单，是分布探索的第一图。</li>
+<li>可密度化以叠加理论分布或 KDE。</li>
+<li>易于分组分面。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>强烈依赖 bin 宽与起点。</li>
+<li>小样本下形状不稳。</li>
+<li>多组比较能力弱。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>默认 bin 数不当导致误判分布。</li>
+<li>未密度化就跨不同 bin 宽比较纵轴。</li>
+<li>用直方图代替正态性检验下结论。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计是一种用局部加权平均来估计连续型变量概率密度函数的非参数方法。它常用来替代粗糙的直方图，给出更平滑的分布形状。">核密度估计（Kernel Density Estimation, KDE）</a> 的区别：KDE 用平滑核给出连续密度，避免 bin 边界的锯齿。</li>
+<li>和 <a class="xlink" href="m-empirical-cumulative-distribution-function-ecdf.html" data-cn="经验分布函数" data-en="Empirical Cumulative Distribution Function, ECDF" data-def="经验分布函数是对总体分布函数 $F(x)=P(X\le x)$ 的非参数估计。它直接用样本中“不大于某个阈值的比例”来近似总体累计概率。">经验分布函数（Empirical Cumulative Distribution Function, ECDF）</a> 的区别：ECDF 无需分箱、无信息损失地展示累积分布。</li>
+<li>和箱线图的区别：箱线图概括分位数、便于多组比较，但看不出多峰。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>基线连续变量（年龄、BMI、检验值）的分布描述。</li>
+<li>数据清洗中识别异常值、截断与录入错误。</li>
+<li>判断是否需要对数变换等预处理。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计是一种用局部加权平均来估计连续型变量概率密度函数的非参数方法。它常用来替代粗糙的直方图，给出更平滑的分布形状。">核密度估计（Kernel Density Estimation, KDE）</a></li>
+<li><a class="xlink" href="m-empirical-cumulative-distribution-function-ecdf.html" data-cn="经验分布函数" data-en="Empirical Cumulative Distribution Function, ECDF" data-def="经验分布函数是对总体分布函数 $F(x)=P(X\le x)$ 的非参数估计。它直接用样本中“不大于某个阈值的比例”来近似总体累计概率。">经验分布函数（Empirical Cumulative Distribution Function, ECDF）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Freedman D, Diaconis P. On the histogram as a density estimator: L2 theory. <em>Z Wahrscheinlichkeitstheorie</em>. 1981;57(4):453-476.</li>
+<li>Scott DW. <em>Multivariate Density Estimation: Theory, Practice, and Visualization</em>. 2nd ed. Wiley; 2015.</li>
+<li>Wickham H, Grolemund G. <em>R for Data Science</em>. O'Reilly; 2017.</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-sample-size-and-power-analysis.html"><div class="pg-lab">← 前一则</div><div class="pg-t">样本量与检验效能</div></a><a class="pg pg-next" href="m-empirical-cumulative-distribution-function-ecdf.html"><div class="pg-lab">后一则 →</div><div class="pg-t">经验分布函数</div></a></div>
+    <div class="colophon">— 黑盒词典 · 01·02 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

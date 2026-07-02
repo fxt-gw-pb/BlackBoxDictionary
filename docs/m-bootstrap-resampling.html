@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bootstrap重抽样 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-02.html">描述统计与统计推断</a><span class="sep">/</span><span class="cur">Bootstrap重抽样</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">描述统计与统计推断 · 02·17</div>
+      <h1 class="detail-h1">Bootstrap重抽样</h1>
+      <div class="detail-en">Bootstrap Resampling</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 非参数统计 / 重抽样</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>Bootstrap重抽样（Bootstrap Resampling）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>Bootstrap 是一种从原始样本中“有放回重抽样”的方法，用来近似统计量的抽样分布，从而估计标准误、方差和置信区间。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：当统计量的理论分布难推导时，如何评估不确定性。</li>
+<li>适用任务：构造置信区间、估计标准误、比较复杂统计量的稳定性。</li>
+<li>常见医学场景：小样本研究、偏态数据、中位数或 AUC 等复杂指标的区间估计。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>因为我们通常只有一份数据，所以 Bootstrap 把“经验分布函数”当作总体的近似，再反复从这份经验分布里采样，模拟如果我们重复做很多次研究，统计量会怎么波动。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>$$
+\begin{aligned}
+(X_1^*, \ldots, X_n^*) &\sim \hat F_n \\
+\hat\theta_r^* &= t(X_1^*, \ldots, X_n^*), \quad r = 1, \ldots, R
+\end{aligned}
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$\hat\theta$：原始样本上的统计量。</li>
+<li>$\hat\theta_r^*$：第 $r$ 次 Bootstrap 样本上的统计量。</li>
+<li>$R$：重抽样次数。</li>
+<li>百分位区间：直接取 $\hat\theta^*$ 分布的相应分位数。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>原始样本能代表目标总体。</li>
+<li>最常见设定是假设观测独立同分布。</li>
+<li>重抽样不能弥补系统偏倚或错误设计。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：不限。</li>
+<li>因变量类型：不限，只要能定义统计量。</li>
+<li>数据结构：最基础的是独立样本；复杂结构需用 block/bootstrap 等变体。</li>
+<li>是否适合高维数据：可用，但计算量大。</li>
+<li>是否适合缺失较多数据：需先明确缺失处理，再进行 Bootstrap。</li>
+<li>是否适合删失数据：可用专门的生存 Bootstrap 变体。</li>
+<li>是否适合重复测量数据：普通 Bootstrap 不够，应尊重聚类或个体层级。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>Bootstrap 很适合先从一个简单连续变量开始，例如 <code>Framingham_data.csv</code> 基线的 BMI：</p>
+<table>
+<thead>
+<tr>
+<th>RANDID</th>
+<th>PERIOD</th>
+<th>BMI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2448</td>
+<td>1</td>
+<td>26.97</td>
+</tr>
+<tr>
+<td>6238</td>
+<td>1</td>
+<td>28.73</td>
+</tr>
+<tr>
+<td>9428</td>
+<td>1</td>
+<td>25.34</td>
+</tr>
+<tr>
+<td>10552</td>
+<td>1</td>
+<td>28.58</td>
+</tr>
+<tr>
+<td>11252</td>
+<td>1</td>
+<td>23.10</td>
+</tr>
+</tbody>
+</table>
+<p>后续可以把统计量从“均值”扩展到中位数、相关系数、AUC 或回归系数。</p>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：任意可计算目标统计量的数据集。</li>
+<li>关键变量：定义统计量所需的全部变量。</li>
+<li>需要预处理的内容：确定重抽样单位、缺失处理、随机种子。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：Bootstrap 统计量分布。</li>
+<li>参数估计：统计量点估计。</li>
+<li>预测结果：可用于模型性能的内部验证。</li>
+<li>不确定性指标：标准误、方差、百分位置信区间等。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：中位数、分位数、AUC、相关系数、复杂模型性能指标的区间估计。</li>
+<li>不适合：样本过小到无法代表总体、强依赖结构未建模、极端稀有事件。</li>
+<li>使用前需要特别检查的点：抽样单位是什么、是否存在聚类、重抽样次数是否足够。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="bootstrap-resampling" data-i="0">Python</button><button class="codetab" data-uid="bootstrap-resampling" data-i="1">R</button></div><div class="codepanel active" data-uid="bootstrap-resampling" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scipy</code></li>
+<li><code>numpy</code></li>
+</ul>
+<pre><code class="language-python">import numpy as np
+from scipy import stats
+
+x = np.array([12.3, 10.8, 11.4, 13.1, 9.9, 12.0, 11.1])
+
+res = stats.bootstrap(
+    (x,),
+    np.mean,
+    confidence_level=0.95,
+    n_resamples=5000,
+    method=&quot;percentile&quot;,
+    random_state=0
+)
+
+print(res.confidence_interval)
+print(res.standard_error)
+</code></pre></div><div class="codepanel" data-uid="bootstrap-resampling" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>boot</code></li>
+</ul>
+<pre><code class="language-r">library(boot)
+
+x &lt;- c(12.3, 10.8, 11.4, 13.1, 9.9, 12.0, 11.1)
+
+mean_boot &lt;- function(data, indices) {
+  mean(data[indices])
+}
+
+fit &lt;- boot(data = x, statistic = mean_boot, R = 5000)
+boot.ci(fit, type = &quot;perc&quot;)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：统计量在重抽样中的波动范围。</li>
+<li>每个主要参数如何解释：标准误表示不确定性大小，区间表示可能的参数范围。</li>
+<li>临床或医学意义如何表达：例如“中位数改善值的 95% Bootstrap CI 为 1.2 到 3.8”。</li>
+<li>常见误读：Bootstrap 区间不是让估计“更准”，只是更好地量化不确定性。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>Bootstrap 统计量直方图。</li>
+<li>Bootstrap 分布密度图。</li>
+<li>点估计加 Bootstrap 置信区间图。</li>
+</ul>
+<h3>7.1 图像示例</h3>
+<p>下图展示基线 BMI 均值经过 2000 次 Bootstrap 后的抽样分布近似形状。</p>
+<p><img alt="" src="img/bootstrap_bmi_mean.png" /></p></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>通用性强。</li>
+<li>不依赖复杂解析推导。</li>
+<li>对复杂统计量尤其有价值。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>计算成本较高。</li>
+<li>依赖样本代表性。</li>
+<li>对强相关数据不应直接套普通 Bootstrap。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>忽略抽样单位，错误地在观测层面重抽样。</li>
+<li>样本极小却过度信赖 Bootstrap 区间。</li>
+<li>只报告区间，不说明使用的是哪种 Bootstrap 方法。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和经典 t 区间的区别：t 区间依赖理论分布，Bootstrap 依赖重抽样近似。</li>
+<li>和置换检验的区别：Bootstrap 主要估计抽样分布，置换检验主要构造零分布。</li>
+<li>应该如何选择：若理论分布清晰、样本足够大，经典方法更简单；复杂统计量可优先考虑 Bootstrap。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>小样本下中位数或分位数的区间估计。</li>
+<li>ROC/AUC、校准指标等模型性能的内部验证。</li>
+<li>Spearman 相关、回归系数稳健性评估。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-empirical-cumulative-distribution-function-ecdf.html" data-cn="经验分布函数" data-en="Empirical Cumulative Distribution Function, ECDF" data-def="经验分布函数是对总体分布函数 $F(x)=P(X\le x)$ 的非参数估计。它直接用样本中“不大于某个阈值的比例”来近似总体累计概率。">经验分布函数（Empirical Cumulative Distribution Function, ECDF）</a></li>
+<li><a class="xlink" href="m-spearman-rank-correlation.html" data-cn="Spearman秩相关" data-en="Spearman Rank Correlation" data-def="Spearman 秩相关用两个变量各自的秩来衡量单调关联强度，适合非正态、含异常值或等级型数据。">Spearman秩相关（Spearman Rank Correlation）</a></li>
+<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归通过把连续型结局表示为若干自变量的线性组合，来估计变量与结局之间的方向、大小和不确定性，是医学统计最基础的建模方法之一。">线性回归（Linear Regression）</a></li>
+<li><a class="xlink" href="m-one-sample-t-test.html" data-cn="单样本t检验" data-en="One-Sample t-Test" data-def="单样本 t 检验用于判断一个样本均值是否与某个给定的参考值不同，是最经典的均值推断方法之一。">单样本t检验（One-Sample t-Test）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Efron B, Tibshirani RJ. <em>An Introduction to the Bootstrap</em>. Chapman and Hall/CRC; 1993.</li>
+<li>SciPy Developers. <code>scipy.stats.bootstrap</code>. SciPy API Reference. <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html</a> （访问日期：2026-07-02）</li>
+<li>Canty A, Ripley B. <code>boot</code>: Bootstrap R (S-Plus) Functions. CRAN Reference Manual. <a href="https://cran.r-project.org/package=boot">https://cran.r-project.org/package=boot</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-mantel-haenszel-test.html"><div class="pg-lab">← 前一则</div><div class="pg-t">Mantel-Haenszel检验</div></a><span></span></div>
+    <div class="colophon">— 黑盒词典 · 02·17 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

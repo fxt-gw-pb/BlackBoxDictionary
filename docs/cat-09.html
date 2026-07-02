@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>聚类与无监督学习 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap category">
+  <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><span class="cur">聚类与无监督学习</span></div>
+  <div class="cat-title">
+    <div class="cat-title-l">
+      <div class="kicker dark-ink">第 09 部</div>
+      <h2 class="page-h2">聚类与无监督学习</h2>
+      <div class="cat-title-en">Clustering &amp; Unsupervised Learning</div>
+      <p class="lede">发现潜在亚群与结构。</p>
+    </div>
+    <div class="cat-title-r">
+      <div class="cat-big">10</div>
+      <div class="kicker">收录条目</div>
+    </div>
+  </div>
+  <div class="entries"><a class="entry" href="m-gaussian-mixture-model-gmm.html">
+      <span class="entry-no">09·01</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">高斯混合模型</span>
+          <span class="entry-en">Gaussian Mixture Model, GMM</span>
+        </div>
+        <p class="entry-def">高斯混合模型是假设观测数据由多个高斯分布按一定权重混合而成的概率模型。它既可以做密度估计，也可以用于软聚类，即给每个样本分配“属于各个簇的概率”。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-k-means-clustering.html">
+      <span class="entry-no">09·02</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">K-means聚类</span>
+          <span class="entry-en">K-means Clustering</span>
+        </div>
+        <p class="entry-def">K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-hierarchical-clustering.html">
+      <span class="entry-no">09·03</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">层次聚类</span>
+          <span class="entry-en">Hierarchical Clustering</span>
+        </div>
+        <p class="entry-def">层次聚类是一类把样本组织成树状层次结构的无监督方法。最常见的是凝聚式层次聚类：先把每个样本看作一个簇，再按相似性逐步合并，最终形成一棵树状图。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-dbscan-density-based-spatial-clustering-of-applications-with-noise.html">
+      <span class="entry-no">09·04</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">DBSCAN</span>
+          <span class="entry-en">Density-Based Spatial Clustering of Applications with Noise</span>
+        </div>
+        <p class="entry-def">DBSCAN 是一种基于密度的聚类方法。它把高密度区域连接成簇，并把低密度区域中的点标记为噪声或离群点。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-mean-shift-clustering.html">
+      <span class="entry-no">09·05</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">均值漂移聚类</span>
+          <span class="entry-en">Mean Shift Clustering</span>
+        </div>
+        <p class="entry-def">均值漂移聚类是一种基于密度峰的无监督方法。它通过不断把样本点移动到邻域内样本的加权均值位置，使点沿着密度上升方向收敛到局部密度峰，最终把收敛到同一峰的点归为一簇。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-spectral-clustering.html">
+      <span class="entry-no">09·06</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">谱聚类</span>
+          <span class="entry-en">Spectral Clustering</span>
+        </div>
+        <p class="entry-def">谱聚类是一种基于图的聚类方法。它先把样本表示成相似度图，再利用图拉普拉斯矩阵的特征向量把样本嵌入到低维空间，最后在该空间中进行聚类。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">advanced</span>
+      </div>
+    </a><a class="entry" href="m-mini-batch-k-means-clustering.html">
+      <span class="entry-no">09·07</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">Mini-Batch K-means聚类</span>
+          <span class="entry-en">Mini-Batch K-means Clustering</span>
+        </div>
+        <p class="entry-def">Mini-Batch K-means 是 [[K-means聚类（K-means Clustering）]] 的大规模近似版本。它每次只用一小批样本更新质心，从而显著降低计算成本。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-balanced-iterative-reducing-and-clustering-using-hierarchies-birch.html">
+      <span class="entry-no">09·08</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">BIRCH聚类</span>
+          <span class="entry-en">Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH</span>
+        </div>
+        <p class="entry-def">BIRCH 是一种面向大规模数据的聚类算法。它通过簇特征树（CF tree）把大量样本压缩成可管理的微簇摘要，再对这些摘要进行聚类。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-fuzzy-c-means-clustering-fcm.html">
+      <span class="entry-no">09·09</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">模糊C均值聚类</span>
+          <span class="entry-en">Fuzzy C-Means Clustering, FCM</span>
+        </div>
+        <p class="entry-def">模糊 C 均值聚类是一种软聚类方法。它不是把每个样本硬分配到单一簇，而是给出样本属于每个簇的隶属度。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-expectation-maximization-algorithm-em.html">
+      <span class="entry-no">09·10</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">期望最大化算法</span>
+          <span class="entry-en">Expectation-Maximization Algorithm, EM</span>
+        </div>
+        <p class="entry-def">期望最大化算法是一种用于含隐变量或缺失数据模型的迭代最大似然估计算法。它交替执行 E 步和 M 步：先估计隐变量的条件期望，再在该期望下更新模型参数。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">advanced</span>
+      </div>
+    </a></div>
+</main>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

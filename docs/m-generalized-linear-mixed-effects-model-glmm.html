@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>广义线性混合效应模型 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-04.html">生存分析与纵向数据</a><span class="sep">/</span><span class="cur">广义线性混合效应模型</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">生存分析与纵向数据 · 04·02</div>
+      <h1 class="detail-h1">广义线性混合效应模型</h1>
+      <div class="detail-en">Generalized Linear Mixed-Effects Model, GLMM</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 纵向数据 / 混合效应模型 / 二分类</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>广义线性混合效应模型（Generalized Linear Mixed-Effects Model, GLMM）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>GLMM 是把混合效应思想与广义线性模型结合起来的方法，适用于重复测量或层级数据中的二元、计数等非高斯结局。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：当结局是二元或计数，而且同一主体有重复测量时，如何同时建模个体差异和非独立性。</li>
+<li>适用任务：纵向二元结局、重复计数结局、随机截距 / 随机斜率非高斯模型。</li>
+<li>常见医学场景：多次随访的高血压状态、是否达标、某类事件是否发生。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>GLMM 可以理解成“每个人都有自己的 Logistic 回归或 Poisson 回归曲线”，个体曲线围绕总体平均结构波动。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>$$
+\begin{aligned}
+Y_{ij} &\sim \text{Exponential Family} \\
+g(\mu_{ij}) &= \eta_{ij} = \mathbf{X}_{ij}^\top\boldsymbol{\beta} + \mathbf{Z}_{ij}^\top\mathbf{b}_i \\
+\mathbf{b}_i &\sim N(\mathbf{0}, \mathbf{D})
+\end{aligned}
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>固定效应 $\boldsymbol{\beta}$：给定个体随机效应后的 subject-specific 效应。</li>
+<li>随机效应 $\mathbf b_i$：主体特异性的偏移。</li>
+<li>边际均值 $E(Y_{ij})$ 通常没有简单闭式表达。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>同一主体内观测相关。</li>
+<li>给定随机效应后，观测条件独立。</li>
+<li>分布族和连接函数与结局类型匹配。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：时间、处理组、性别、年龄等。</li>
+<li>因变量类型：二分类或计数型。</li>
+<li>数据结构：long format 重复测量数据。</li>
+<li>是否适合高维数据：不是默认首选。</li>
+<li>是否适合缺失较多数据：比传统方法更灵活，但仍需关注缺失机制。</li>
+<li>是否适合删失数据：不适合删失结局本身。</li>
+<li>是否适合重复测量数据：非常适合。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>例如 <code>Framingham_data.csv</code> 中可以把 <code>PREVHYP</code> 作为二元重复结局：</p>
+<table>
+<thead>
+<tr>
+<th>RANDID</th>
+<th>PERIOD</th>
+<th>SEX</th>
+<th>BMI</th>
+<th>PREVHYP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6238</td>
+<td>1</td>
+<td>1</td>
+<td>28.73</td>
+<td>0</td>
+</tr>
+<tr>
+<td>6238</td>
+<td>2</td>
+<td>1</td>
+<td>29.43</td>
+<td>0</td>
+</tr>
+<tr>
+<td>6238</td>
+<td>3</td>
+<td>1</td>
+<td>28.50</td>
+<td>0</td>
+</tr>
+<tr>
+<td>11263</td>
+<td>1</td>
+<td>1</td>
+<td>30.30</td>
+<td>1</td>
+</tr>
+<tr>
+<td>11263</td>
+<td>2</td>
+<td>1</td>
+<td>31.36</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：long format 的二元或计数结局数据。</li>
+<li>关键变量：主体 ID、时间、结局、协变量、随机效应结构。</li>
+<li>需要预处理的内容：长表整理、缺失处理、结局编码。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：固定效应、随机效应方差、近似似然结果。</li>
+<li>参数估计：subject-specific 效应。</li>
+<li>预测结果：条件概率、个体特异曲线。</li>
+<li>不确定性指标：标准误、区间估计。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：重复测量二元结局或计数结局，且关心个体层面效应。</li>
+<li>不适合：只关心总体平均效应且不关心个体差异时。</li>
+<li>使用前需要特别检查的点：随机效应结构、时间形式、拟合收敛、数值积分或近似方法。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="generalized-linear-mixed-effects-model-glmm" data-i="0">Python</button><button class="codetab" data-uid="generalized-linear-mixed-effects-model-glmm" data-i="1">R</button></div><div class="codepanel active" data-uid="generalized-linear-mixed-effects-model-glmm" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>statsmodels</code></li>
+</ul>
+<pre><code class="language-python">from statsmodels.genmod.bayes_mixed_glm import BinomialBayesMixedGLM
+
+model = BinomialBayesMixedGLM.from_formula(
+    &quot;PREVHYP ~ PERIOD + SEX&quot;,
+    {&quot;RANDID&quot;: &quot;0 + C(RANDID)&quot;},
+    data=df
+)
+result = model.fit_vb()
+print(result.summary())
+</code></pre></div><div class="codepanel" data-uid="generalized-linear-mixed-effects-model-glmm" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>lme4</code></li>
+</ul>
+<pre><code class="language-r">library(lme4)
+
+fit &lt;- glmer(
+  PREVHYP ~ PERIOD + SEX + (1 | RANDID),
+  family = binomial(link = &quot;logit&quot;),
+  data = df
+)
+summary(fit)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：固定效应方向、随机效应方差、个体异质性。</li>
+<li>每个主要参数如何解释：在给定同一主体随机效应时，协变量变化如何影响 log-odds 或 log-count。</li>
+<li>临床或医学意义如何表达：GLMM 更适合回答“在同一个体层面”效应如何变化。</li>
+<li>常见误读：GLMM 的系数通常不等于边际平均意义下的 GEE 系数。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>个体二元轨迹图。</li>
+<li>个体拟合概率曲线。</li>
+<li>随机截距分布图。</li>
+</ul>
+<h3>7.1 图像示例</h3>
+<p>下图展示部分受试者的高血压状态随时间变化轨迹，突出 GLMM 所关注的个体特异性结构。</p>
+<p><img alt="" src="img/glmm_prehyp_subject_paths.png" /></p></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>同时处理相关数据和非高斯结局。</li>
+<li>可建模个体间异质性。</li>
+<li>适合 subject-specific 解释。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>拟合计算更复杂。</li>
+<li>不同近似方法可能给出略有差异的结果。</li>
+<li>结果解释较 GEE 更偏条件化。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>把 GLMM 系数直接当成总体平均效应解释。</li>
+<li>忽视收敛警告。</li>
+<li>数据太稀疏却拟合过于复杂的随机效应结构。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 Logistic / Poisson 回归的区别：GLMM 显式处理主体内相关性。</li>
+<li>和 GEE 的区别：GLMM 更偏 subject-specific，GEE 更偏 population-average。</li>
+<li>和 LMM 的区别：LMM 针对连续正态结局。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>多次随访高血压状态建模。</li>
+<li>反复记录的二元症状或计数事件分析。</li>
+<li>同一受试者多次门诊达标/未达标研究。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-linear-mixed-effects-model-lmm.html" data-cn="线性混合效应模型" data-en="Linear Mixed-Effects Model, LMM" data-def="线性混合效应模型用于分析重复测量或层级数据中的连续结局，在固定效应之外加入随机效应来刻画个体间异质性和组内相关性。">线性混合效应模型（Linear Mixed-Effects Model, LMM）</a></li>
+<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归是最经典的二分类结局回归模型，用 logit 连接函数把事件概率映射到线性预测子上，从而估计协变量与事件发生 odds 的关系。">Logistic回归（Logistic Regression）</a></li>
+<li><a class="xlink" href="m-generalized-estimating-equations-gee.html" data-cn="广义估计方程" data-en="Generalized Estimating Equations, GEE" data-def="GEE 是把 quasi-likelihood 思想扩展到相关数据的一类边际模型，重点估计总体平均效应，并通过工作相关结构和 sandwich 方差来处理重复测量相关性。">广义估计方程（Generalized Estimating Equations, GEE）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Molenberghs G, Verbeke G. <em>Models for Discrete Longitudinal Data</em>. Springer; 2005.</li>
+<li>statsmodels Developers. <code>statsmodels.genmod.bayes_mixed_glm.BinomialBayesMixedGLM</code>. statsmodels API Reference. <a href="https://www.statsmodels.org/stable/generated/statsmodels.genmod.bayes_mixed_glm.BinomialBayesMixedGLM.html">https://www.statsmodels.org/stable/generated/statsmodels.genmod.bayes_mixed_glm.BinomialBayesMixedGLM.html</a> （访问日期：2026-07-02）</li>
+<li>CRAN. Package <code>lme4</code>. <a href="https://cran.r-project.org/web/packages/lme4/index.html">https://cran.r-project.org/web/packages/lme4/index.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-linear-mixed-effects-model-lmm.html"><div class="pg-lab">← 前一则</div><div class="pg-t">线性混合效应模型</div></a><a class="pg pg-next" href="m-generalized-estimating-equations-gee.html"><div class="pg-lab">后一则 →</div><div class="pg-t">广义估计方程</div></a></div>
+    <div class="colophon">— 黑盒词典 · 04·02 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

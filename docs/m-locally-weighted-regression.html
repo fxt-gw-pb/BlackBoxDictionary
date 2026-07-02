@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>局部加权回归 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-03.html">回归与广义线性模型</a><span class="sep">/</span><span class="cur">局部加权回归</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">回归与广义线性模型 · 03·08</div>
+      <h1 class="detail-h1">局部加权回归</h1>
+      <div class="detail-en">Locally Weighted Regression</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 非参数回归 / 局部学习</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>局部加权回归（Locally Weighted Regression）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>局部加权回归是一种在每个预测点附近单独拟合局部模型的非参数回归方法，距离预测点越近的样本权重越大。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：当整体上不存在一条统一规律、而不同区域有不同局部趋势时，如何进行平滑拟合。</li>
+<li>适用任务：局部趋势建模、平滑曲线拟合、小到中等规模非线性回归。</li>
+<li>常见医学场景：年龄与生理指标的局部变化趋势、时间序列中的平滑信号、局部剂量-反应趋势。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>局部加权回归不是拟合一条固定的全局直线，而是在每个目标点附近“临时”拟合一条最合适的局部线或局部曲线。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>对某个待预测点 $x$，定义加权最小二乘目标：</p>
+<p>$$
+J(\theta)=\frac{1}{2}\sum_{i=1}^{m} w^{(i)}\left(h_\theta(x^{(i)})-y^{(i)}\right)^2
+$$</p>
+<p>常用权重函数为高斯核：</p>
+<p>$$
+w^{(i)}=\exp\left(-\frac{(x-x^{(i)})^\top(x-x^{(i)})}{2\tau^2}\right)
+$$</p>
+<p>其加权最小二乘解可写为：</p>
+<p>$$
+\theta=(X^\top W X)^{-1}X^\top W y
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$\tau$：平滑参数（带宽）。</li>
+<li>$W$：权重对角矩阵。</li>
+<li>局部性：每个预测点都有自己的一套权重和局部模型。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>目标函数在局部区域内可被低阶模型近似。</li>
+<li>带宽选择对结果影响很大。</li>
+<li>数据量不能太大，否则逐点拟合成本较高。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：一个或少数几个连续变量最典型。</li>
+<li>因变量类型：连续型。</li>
+<li>数据结构：低维宽表或一维曲线数据。</li>
+<li>是否适合高维数据：不适合高维默认使用。</li>
+<li>是否适合缺失较多数据：需先处理缺失值。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：不直接适合。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>一个典型的局部平滑回归表格如下：</p>
+<table>
+<thead>
+<tr>
+<th>X</th>
+<th>y</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.026</td>
+<td>0.045</td>
+</tr>
+<tr>
+<td>1.126</td>
+<td>0.735</td>
+</tr>
+<tr>
+<td>1.392</td>
+<td>0.979</td>
+</tr>
+<tr>
+<td>1.501</td>
+<td>1.123</td>
+</tr>
+<tr>
+<td>1.515</td>
+<td>0.756</td>
+</tr>
+<tr>
+<td>2.340</td>
+<td>0.636</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：连续结局和少量连续特征。</li>
+<li>关键变量：带宽 <code>tau / span</code>、局部多项式阶数。</li>
+<li>需要预处理的内容：必要时标准化、异常值检查。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：局部拟合曲线。</li>
+<li>参数估计：通常不强调全局参数。</li>
+<li>预测结果：连续型局部平滑预测值。</li>
+<li>不确定性指标：常通过重抽样或局部误差评估。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：局部趋势明显、曲线较平滑、低维非线性问题。</li>
+<li>不适合：高维数据、超大样本、需要简单全局模型解释时。</li>
+<li>使用前需要特别检查的点：带宽选择、边界效应、计算成本。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="locally-weighted-regression" data-i="0">Python</button><button class="codetab" data-uid="locally-weighted-regression" data-i="1">R</button></div><div class="codepanel active" data-uid="locally-weighted-regression" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>numpy</code></li>
+<li><code>statsmodels</code></li>
+</ul>
+<pre><code class="language-python">import numpy as np
+
+def local_weighted_predict(query, X, y, tau=0.5):
+    w = np.exp(-((X - query) ** 2) / (2 * tau ** 2))
+    W = np.diag(w.ravel())
+    X_design = np.c_[np.ones(len(X)), X]
+    theta = np.linalg.pinv(X_design.T @ W @ X_design) @ X_design.T @ W @ y
+    return np.array([1, query]).dot(theta)
+</code></pre></div><div class="codepanel" data-uid="locally-weighted-regression" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>stats</code></li>
+</ul>
+<pre><code class="language-r">fit &lt;- loess(y ~ x, data = df, span = 0.4, degree = 1)
+pred &lt;- predict(fit, newdata = data.frame(x = x_grid))
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：平滑曲线形状、带宽对拟合的影响。</li>
+<li>每个主要参数如何解释：相比系数，更重要的是局部趋势。</li>
+<li>临床或医学意义如何表达：适合表达“某区间内趋势如何变化”。</li>
+<li>常见误读：局部加权回归的结果高度依赖带宽，不同带宽下曲线会明显变化。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>原始散点图 + 局部平滑曲线。</li>
+<li>不同带宽下的曲线对比图。</li>
+<li>局部权重示意图。</li>
+</ul>
+<h3>7.1 图像示例</h3>
+<p>下图展示局部加权回归在非线性数据上的平滑拟合曲线，能够很好反映不同区域的局部趋势。</p>
+<p><img alt="" src="img/locally_weighted_regression_curve.png" /></p></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>对局部非线性关系很灵活。</li>
+<li>不要求单一全局模型形式。</li>
+<li>拟合结果直观。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>计算成本较高。</li>
+<li>高维效果差。</li>
+<li>带宽选择敏感。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>带宽过小导致过拟合。</li>
+<li>带宽过大又退化成过于平滑的全局趋势。</li>
+<li>在高维问题中仍试图直接使用。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 KNN 回归的区别：KNN 侧重邻域均值，局部加权回归会在邻域内拟合局部模型。</li>
+<li>和多项式回归的区别：多项式回归是一条全局曲线，局部加权回归是逐点局部拟合。</li>
+<li>和高斯过程回归的区别：高斯过程在函数空间里全局建模，局部加权回归更强调局部加权拟合。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>局部平滑剂量-反应曲线。</li>
+<li>年龄或时间与连续指标的局部趋势展示。</li>
+<li>低维信号的平滑拟合。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-k-nearest-neighbors-regression.html" data-cn="K近邻回归" data-en="K-Nearest Neighbors Regression" data-def="K近邻回归是一种非参数回归方法，它通过寻找离目标样本最近的 $K$ 个邻居，并对这些邻居的目标值做平均或加权平均来完成预测。">K近邻回归（K-Nearest Neighbors Regression）</a></li>
+<li><a class="xlink" href="m-polynomial-regression.html" data-cn="多项式回归" data-en="Polynomial Regression" data-def="多项式回归是在普通线性回归的基础上加入自变量的高次项，从而用一条更灵活的曲线来拟合非线性关系。">多项式回归（Polynomial Regression）</a></li>
+<li><a class="xlink" href="m-gaussian-process-regression.html" data-cn="高斯过程回归" data-en="Gaussian Process Regression" data-def="高斯过程回归是一种以“函数分布”为对象的贝叶斯非参数回归方法，不仅能给出预测均值，还能自然给出预测不确定性。">高斯过程回归（Gaussian Process Regression）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Cleveland WS, Devlin SJ. Locally weighted regression: an approach to regression analysis by local fitting. <em>J Am Stat Assoc</em>. 1988;83(403):596-610.</li>
+<li>R Core Team. <code>loess</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/loess.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/loess.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-bayesian-regression.html"><div class="pg-lab">← 前一则</div><div class="pg-t">贝叶斯回归</div></a><a class="pg pg-next" href="m-negative-binomial-regression.html"><div class="pg-lab">后一则 →</div><div class="pg-t">负二项回归</div></a></div>
+    <div class="colophon">— 黑盒词典 · 03·08 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

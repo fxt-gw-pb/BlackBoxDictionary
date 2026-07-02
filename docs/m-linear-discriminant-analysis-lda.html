@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>线性判别分析 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-16.html">分类与判别方法</a><span class="sep">/</span><span class="cur">线性判别分析</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">分类与判别方法 · 16·04</div>
+      <h1 class="detail-h1">线性判别分析</h1>
+      <div class="detail-en">Linear Discriminant Analysis, LDA</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 分类 / 判别分析 / 监督式降维</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>线性判别分析（Linear Discriminant Analysis, LDA）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>线性判别分析是一种经典的监督式分类和降维方法。它寻找能让组间差异尽量大、组内差异尽量小的线性投影方向，并可在这些方向上进行分类。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：多组样本能否通过连续特征的线性组合被区分。</li>
+<li>适用任务：二分类、多分类、监督式降维、判别方向可视化。</li>
+<li>常见医学场景：良恶性分类，疾病亚型判别，基于生物标志物组合的风险分组。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>LDA 希望找到一条或几条轴，使不同类别的中心在投影后尽量分开，同时同一类别内部尽量聚在一起。它既可以作为分类器，也可以把高维特征压缩成最多 $C-1$ 个判别维度。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>对于类别 $c=1,\dots,C$，设类别均值为 $\mu_c$，总体均值为 $\mu$。类内散布矩阵：</p>
+<p>$$
+S_W=\sum_{c=1}^{C}\sum_{x_i\in c}(x_i-\mu_c)(x_i-\mu_c)^\top
+$$</p>
+<p>类间散布矩阵：</p>
+<p>$$
+S_B=\sum_{c=1}^{C}n_c(\mu_c-\mu)(\mu_c-\mu)^\top
+$$</p>
+<p>LDA 的投影方向 $w$ 最大化 Fisher 判别准则：</p>
+<p>$$
+J(w)=\frac{w^\top S_B w}{w^\top S_W w}
+$$</p>
+<p>多维情况下求解广义特征值问题：</p>
+<p>$$
+S_B w = \lambda S_W w
+$$</p>
+<p>在生成式分类视角下，LDA 假设各类别服从共享协方差矩阵的多元正态分布：</p>
+<p>$$
+x\mid y=c \sim N(\mu_c,\Sigma)
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$S_W$：类内散布，衡量同类样本内部变异。</li>
+<li>$S_B$：类间散布，衡量不同类别中心的分离程度。</li>
+<li>$w$：判别方向或投影向量。</li>
+<li><code>n_components</code>：保留的判别维度，最多为类别数减 1。</li>
+<li>先验概率：各类别在总体中的预期比例。</li>
+<li>共享协方差矩阵：LDA 分类假设中各类别共同的协方差结构。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>类别条件分布近似多元正态。</li>
+<li>各类别协方差矩阵近似相同。</li>
+<li>特征与类别之间的区分结构可由线性边界表达。</li>
+<li>样本量足以估计协方差矩阵，类别不平衡需谨慎处理。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续变量或标准化后的数值特征。</li>
+<li>因变量类型：二分类或多分类标签。</li>
+<li>数据结构：监督学习特征矩阵加类别标签。</li>
+<li>是否适合高维数据：特征数接近或超过样本数时普通 LDA 不稳定，需正则化或先降维。</li>
+<li>是否适合缺失较多数据：需先处理缺失。</li>
+<li>是否适合删失数据：不直接处理删失结局。</li>
+<li>是否适合重复测量数据：普通 LDA 假设样本独立，重复测量需先汇总或使用其他模型。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以肿瘤良恶性判别为例：</p>
+<table>
+<thead>
+<tr>
+<th>Radius</th>
+<th>Texture</th>
+<th>Smoothness</th>
+<th>Compactness</th>
+<th>Diagnosis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>17.9</td>
+<td>10.4</td>
+<td>0.118</td>
+<td>0.278</td>
+<td>malignant</td>
+</tr>
+<tr>
+<td>12.3</td>
+<td>14.5</td>
+<td>0.090</td>
+<td>0.080</td>
+<td>benign</td>
+</tr>
+<tr>
+<td>20.5</td>
+<td>21.4</td>
+<td>0.109</td>
+<td>0.160</td>
+<td>malignant</td>
+</tr>
+<tr>
+<td>11.8</td>
+<td>17.1</td>
+<td>0.082</td>
+<td>0.060</td>
+<td>benign</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：特征矩阵和类别标签。</li>
+<li>关键变量：类别先验、solver、是否使用 shrinkage、保留判别维度。</li>
+<li>需要预处理的内容：缺失处理、异常值检查、标准化、训练测试划分、类别不平衡评估。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：判别方向、类别均值、共享协方差估计、类别预测概率。</li>
+<li>参数估计：判别系数、类别先验、协方差矩阵。</li>
+<li>预测结果：类别标签和类别概率。</li>
+<li>不确定性指标：交叉验证性能、混淆矩阵、置信区间或 bootstrap 稳定性。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：类别较清晰、特征连续、希望得到线性判别方向和可解释分类边界的场景。</li>
+<li>不适合：类别协方差差异很大、边界明显非线性、特征数远大于样本数且未正则化的场景。</li>
+<li>使用前需要特别检查的点：协方差齐性、类别不平衡、异常值、训练测试信息泄露。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="linear-discriminant-analysis-lda" data-i="0">Python</button><button class="codetab" data-uid="linear-discriminant-analysis-lda" data-i="1">R</button></div><div class="codepanel active" data-uid="linear-discriminant-analysis-lda" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv(&quot;tumor_features.csv&quot;)
+X = df&amp;quot;Radius&amp;quot;, &amp;quot;Texture&amp;quot;, &amp;quot;Smoothness&amp;quot;, &amp;quot;Compactness&amp;quot;
+y = df[&quot;Diagnosis&quot;]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, stratify=y, random_state=42
+)
+
+model = make_pipeline(
+    StandardScaler(),
+    LinearDiscriminantAnalysis(n_components=1)
+)
+model.fit(X_train, y_train)
+
+print(&quot;Test accuracy:&quot;, model.score(X_test, y_test))
+print(model.predict_proba(X_test).round(3)[:5])
+</code></pre></div><div class="codepanel" data-uid="linear-discriminant-analysis-lda" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>MASS</code></li>
+</ul>
+<pre><code class="language-r">library(MASS)
+
+fit &lt;- lda(
+  Diagnosis ~ Radius + Texture + Smoothness + Compactness,
+  data = train_df
+)
+
+pred &lt;- predict(fit, newdata = test_df)
+table(Predicted = pred$class, Observed = test_df$Diagnosis)
+head(pred$posterior)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：判别方向、类别均值分离、预测概率、混淆矩阵和交叉验证性能。</li>
+<li>每个主要参数如何解释：判别系数表示原始特征在线性判别方向中的贡献，但需结合标准化和变量相关性解释。</li>
+<li>临床或医学意义如何表达：LDA 给出的是特征组合的判别规则，应同时报告区分度、误分类情况和适用人群。</li>
+<li>常见误读：LDA 的投影方向能分开样本，不代表每个单变量都有独立临床效应。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>LD1 或 LD1-LD2 判别得分散点图。</li>
+<li>各类别判别得分密度图。</li>
+<li>混淆矩阵热图。</li>
+<li>ROC 曲线和校准图，尤其用于二分类医学预测。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>模型简洁，计算快速。</li>
+<li>判别方向可用于监督式降维和可视化。</li>
+<li>在正态且协方差相近时表现稳定。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>线性边界表达能力有限。</li>
+<li>对协方差齐性和异常值敏感。</li>
+<li>高维小样本时协方差矩阵估计不稳定。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>把 LDA 与主题模型 Latent Dirichlet Allocation 混淆。</li>
+<li>在标准化、特征选择或降维中使用全数据导致信息泄露。</li>
+<li>忽略类别不平衡，只报告 accuracy。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a> 的区别：PCA 不使用类别标签，保留最大方差方向；LDA 使用类别标签，寻找最大判别方向。</li>
+<li>和 <a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归是最经典的二分类结局回归模型，用 logit 连接函数把事件概率映射到线性预测子上，从而估计协变量与事件发生 odds 的关系。">Logistic回归（Logistic Regression）</a> 的区别：Logistic 回归直接建模类别概率，LDA 是带正态和共享协方差假设的生成式判别模型。</li>
+<li>和 <a class="xlink" href="m-naive-bayes.html" data-cn="朴素贝叶斯" data-en="Naive Bayes" data-def="朴素贝叶斯是一类基于贝叶斯定理的概率分类方法。它假设在给定类别后，各特征彼此条件独立，因此可以把联合概率拆成一组一维条件概率的乘积。">朴素贝叶斯（Naive Bayes）</a> 的区别：朴素贝叶斯常假设特征条件独立，LDA 允许特征相关但要求类别共享协方差。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>基于连续生物标志物组合的疾病分类。</li>
+<li>肿瘤良恶性或分子亚型判别。</li>
+<li>在少数判别维度上可视化多类别临床表型。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
+<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归是最经典的二分类结局回归模型，用 logit 连接函数把事件概率映射到线性预测子上，从而估计协变量与事件发生 odds 的关系。">Logistic回归（Logistic Regression）</a></li>
+<li><a class="xlink" href="m-naive-bayes.html" data-cn="朴素贝叶斯" data-en="Naive Bayes" data-def="朴素贝叶斯是一类基于贝叶斯定理的概率分类方法。它假设在给定类别后，各特征彼此条件独立，因此可以把联合概率拆成一组一维条件概率的乘积。">朴素贝叶斯（Naive Bayes）</a></li>
+<li><a class="xlink" href="m-support-vector-machine-svm.html" data-cn="支持向量机" data-en="Support Vector Machine, SVM" data-def="支持向量机是一类通过最大化分类间隔来学习判别边界的监督学习方法。它最经典的用途是二分类，也可以扩展到多分类和非线性分类。">支持向量机（Support Vector Machine, SVM）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Fisher RA. The use of multiple measurements in taxonomic problems. <em>Annals of Eugenics</em>. 1936;7(2):179-188.</li>
+<li>Hastie T, Tibshirani R, Friedman J. <em>The Elements of Statistical Learning</em>. 2nd ed. Springer; 2009.</li>
+<li>scikit-learn Developers. <code>sklearn.discriminant_analysis.LinearDiscriminantAnalysis</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.discriminant_analysis.LinearDiscriminantAnalysis.html">https://scikit-learn.org/stable/modules/generated/sklearn.discriminant_analysis.LinearDiscriminantAnalysis.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-naive-bayes.html"><div class="pg-lab">← 前一则</div><div class="pg-t">朴素贝叶斯</div></a><a class="pg pg-next" href="m-perceptron.html"><div class="pg-lab">后一则 →</div><div class="pg-t">感知机</div></a></div>
+    <div class="colophon">— 黑盒词典 · 16·04 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

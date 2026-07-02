@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transformer · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-11.html">神经网络与深度学习</a><span class="sep">/</span><span class="cur">Transformer</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">神经网络与深度学习 · 11·10</div>
+      <h1 class="detail-h1">Transformer</h1>
+      <div class="detail-en">Transformer</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>advanced</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 深度学习 / 序列建模</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>Transformer（Transformer）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>Transformer 是以多头注意力为核心的序列建模架构。它不依赖传统递归结构，而是通过自注意力和位置编码并行建模序列中的全局依赖。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：当序列很长、远距离依赖重要且并行训练效率关键时，如何更高效地学习上下文关系。</li>
+<li>适用任务：文本理解与生成、时间序列建模、图像 patch 建模、多模态学习。</li>
+<li>常见医学场景：临床文本分类、长病历摘要、时序监测数据预测、多模态诊疗辅助建模。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>Transformer 不再一步一步“读”序列，而是让每个位置同时查看所有其他位置，决定哪些信息最相关，再把这些相关信息聚合到当前位置表示里。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>Transformer 的核心组件是多头注意力：</p>
+<p>$$
+\operatorname{head}_i = \operatorname{Attention}(QW_i^Q, KW_i^K, VW_i^V)
+$$</p>
+<p>$$
+\operatorname{MHA}(Q,K,V) = \operatorname{Concat}(\operatorname{head}_1,\dots,\operatorname{head}_h)W^O
+$$</p>
+<p>编码器层常写为：</p>
+<p>$$
+H' = \operatorname{LayerNorm}(H + \operatorname{MHA}(H,H,H))
+$$</p>
+<p>$$
+H^{+} = \operatorname{LayerNorm}(H' + \operatorname{FFN}(H'))
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>头数 $h$：表示并行关注的子空间数。</li>
+<li>$d_{\text{model}}$：隐藏表示维度。</li>
+<li>位置编码：注入顺序信息。</li>
+<li>FFN：对每个位置独立进行非线性变换。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>全局依赖对任务很重要。</li>
+<li>数据量和算力足以支撑较大模型训练。</li>
+<li>顺序信息可以通过位置编码补充。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：文本 token 序列、时间序列窗口、图像 patch、跨模态嵌入。</li>
+<li>因变量类型：分类、回归、序列生成、掩码预测。</li>
+<li>数据结构：嵌入序列张量。</li>
+<li>是否适合高维数据：适合，但长序列时显存开销较大。</li>
+<li>是否适合缺失较多数据：需通过 mask 或缺失标记处理。</li>
+<li>是否适合删失数据：不直接处理删失。</li>
+<li>是否适合重复测量数据：适合，尤其是长程依赖明显的重复测量。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以出院小结文本分类为例：</p>
+<table>
+<thead>
+<tr>
+<th>NoteID</th>
+<th>TokenSequence</th>
+<th>Department</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>N001</td>
+<td>t1, t2, ...</td>
+<td>cardiology</td>
+<td>readmit</td>
+</tr>
+<tr>
+<td>N002</td>
+<td>t1, t2, ...</td>
+<td>oncology</td>
+<td>no_readmit</td>
+</tr>
+<tr>
+<td>N003</td>
+<td>t1, t2, ...</td>
+<td>nephrology</td>
+<td>readmit</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：token 或时间步嵌入序列。</li>
+<li>关键变量：层数、头数、隐藏维度、前馈维度、最大序列长度。</li>
+<li>需要预处理的内容：token 化、padding、mask、位置编码、数据切分。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：编码器/解码器参数和验证指标。</li>
+<li>参数估计：注意力投影矩阵、前馈网络参数。</li>
+<li>预测结果：类别概率、连续值、生成序列或上下文表征。</li>
+<li>不确定性指标：外部验证性能、校准、时间外或中心外泛化。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：长序列、多模态、需要全局上下文建模和并行计算的任务。</li>
+<li>不适合：数据量很小、算力受限、或简单时序结构即可解释的问题。</li>
+<li>使用前需要特别检查的点：序列长度、显存开销、mask 正确性、预训练与微调策略。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="transformer" data-i="0">Python</button><button class="codetab" data-uid="transformer" data-i="1">R</button></div><div class="codepanel active" data-uid="transformer" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>torch</code></li>
+</ul>
+<pre><code class="language-python">import torch.nn as nn
+
+encoder_layer = nn.TransformerEncoderLayer(
+    d_model=128,
+    nhead=4,
+    dim_feedforward=256,
+    batch_first=True
+)
+model = nn.TransformerEncoder(encoder_layer, num_layers=2)
+</code></pre></div><div class="codepanel" data-uid="transformer" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>keras</code></li>
+</ul>
+<pre><code class="language-r"># R 中通常通过 keras / torch 调用多头注意力与前馈层组合，
+# 构建简化版 Transformer 编码器。
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：验证性能、长序列上的稳健性、是否优于 RNN/LSTM 基线。</li>
+<li>每个主要参数如何解释：层数和维度决定容量，头数影响多视角关联学习。</li>
+<li>临床或医学意义如何表达：适合强调复杂上下文建模能力，但仍需外部验证和错误案例审查。</li>
+<li>常见误读：注意力权重图不等于完整解释，也不能替代临床机制分析。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>训练/验证损失曲线。</li>
+<li>注意力热图。</li>
+<li>不同序列长度或不同模型架构的性能对比图。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>并行训练效率高。</li>
+<li>擅长长程依赖建模。</li>
+<li>易于扩展到预训练和多模态框架。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>对数据量和算力要求较高。</li>
+<li>长序列自注意力复杂度较高。</li>
+<li>结构复杂，可解释性有限。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>训练样本不足却使用过大模型。</li>
+<li>只看内部验证，不做时间外或中心外评估。</li>
+<li>忽略 token 化和位置编码细节对结果的影响。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-attention-mechanism.html" data-cn="注意力机制" data-en="Attention Mechanism" data-def="注意力机制是一类根据“相关性权重”聚合信息的计算方式。它允许模型在处理当前目标时，对输入中的不同位置分配不同关注程度。">注意力机制（Attention Mechanism）</a> 的区别：注意力是组件，Transformer 是完整架构。</li>
+<li>和 <a class="xlink" href="m-recurrent-neural-network-rnn.html" data-cn="循环神经网络" data-en="Recurrent Neural Network, RNN" data-def="循环神经网络是一类面向序列数据的神经网络。它在每个时间步共享同一组参数，并把前一时刻的隐藏状态传递到当前时刻，从而建模顺序依赖关系。">循环神经网络（Recurrent Neural Network, RNN）</a> 的区别：Transformer 并行建模全局依赖，RNN 递归顺序处理。</li>
+<li>和 <a class="xlink" href="m-long-short-term-memory-lstm.html" data-cn="长短期记忆网络" data-en="Long Short-Term Memory, LSTM" data-def="LSTM 是循环神经网络的重要变体，通过遗忘门、输入门和输出门控制信息流动，专门用于缓解普通 RNN 难以学习长程依赖的问题。">长短期记忆网络（Long Short-Term Memory, LSTM）</a> 的区别：LSTM 更适合中短序列和较小模型，Transformer 在大规模长序列上通常更强。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>临床文本理解、编码和摘要。</li>
+<li>多变量监测序列预测。</li>
+<li>医学图像 patch 建模和多模态诊疗模型。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-attention-mechanism.html" data-cn="注意力机制" data-en="Attention Mechanism" data-def="注意力机制是一类根据“相关性权重”聚合信息的计算方式。它允许模型在处理当前目标时，对输入中的不同位置分配不同关注程度。">注意力机制（Attention Mechanism）</a></li>
+<li><a class="xlink" href="m-recurrent-neural-network-rnn.html" data-cn="循环神经网络" data-en="Recurrent Neural Network, RNN" data-def="循环神经网络是一类面向序列数据的神经网络。它在每个时间步共享同一组参数，并把前一时刻的隐藏状态传递到当前时刻，从而建模顺序依赖关系。">循环神经网络（Recurrent Neural Network, RNN）</a></li>
+<li><a class="xlink" href="m-long-short-term-memory-lstm.html" data-cn="长短期记忆网络" data-en="Long Short-Term Memory, LSTM" data-def="LSTM 是循环神经网络的重要变体，通过遗忘门、输入门和输出门控制信息流动，专门用于缓解普通 RNN 难以学习长程依赖的问题。">长短期记忆网络（Long Short-Term Memory, LSTM）</a></li>
+<li><a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="卷积神经网络是一类专门处理图像或局部空间结构数据的神经网络。它通过卷积核、激活函数和池化层，从原始像素中自动提取边缘、纹理和高级语义特征。">卷积神经网络（Convolutional Neural Network, CNN）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Vaswani A, Shazeer N, Parmar N, et al. Attention is all you need. <em>Advances in Neural Information Processing Systems</em>. 2017;30.</li>
+<li>Dosovitskiy A, Beyer L, Kolesnikov A, et al. An image is worth 16x16 words: transformers for image recognition at scale. <em>arXiv</em>. 2020. <a href="https://arxiv.org/abs/2010.11929">https://arxiv.org/abs/2010.11929</a></li>
+<li>Goodfellow I, Bengio Y, Courville A. <em>Deep Learning</em>. MIT Press; 2016.</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-attention-mechanism.html"><div class="pg-lab">← 前一则</div><div class="pg-t">注意力机制</div></a><a class="pg pg-next" href="m-residual-network-resnet.html"><div class="pg-lab">后一则 →</div><div class="pg-t">残差网络</div></a></div>
+    <div class="colophon">— 黑盒词典 · 11·10 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

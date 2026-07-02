@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>核密度估计 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-01.html">研究设计与数据理解</a><span class="sep">/</span><span class="cur">核密度估计</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">研究设计与数据理解 · 01·04</div>
+      <h1 class="detail-h1">核密度估计</h1>
+      <div class="detail-en">Kernel Density Estimation, KDE</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 非参数统计 / 分布探索</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>核密度估计（Kernel Density Estimation, KDE）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>核密度估计是一种用局部加权平均来估计连续型变量概率密度函数的非参数方法。它常用来替代粗糙的直方图，给出更平滑的分布形状。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：总体分布大致长什么样，是否单峰、偏态、厚尾或多峰。</li>
+<li>适用任务：分布探索、组间分布比较、异常值与尾部观察。</li>
+<li>常见医学场景：观察炎症指标、年龄、住院天数、风险评分等连续变量的分布形态。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>可以把每个观测值想成在自己位置上“放一小团平滑墨水”，最后把所有小团叠加起来，得到整体平滑曲线。带宽越大，墨水铺得越宽，曲线越平滑。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>$$
+\hat f(x) = \frac{1}{nh}\sum_{i=1}^n K\left(\frac{X_i - x}{h}\right)
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$K(\cdot)$：核函数，决定邻近点如何加权。</li>
+<li>$h$：带宽，决定平滑程度。</li>
+<li>$n$：样本量。</li>
+<li>$\hat f(x)$：在点 $x$ 处的密度估计。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>目标变量通常是连续型。</li>
+<li>样本来自同一总体且常假设独立。</li>
+<li>关键不在核函数本身，而在带宽选择。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：一维连续变量最典型。</li>
+<li>因变量类型：不涉及监督学习因变量。</li>
+<li>数据结构：独立样本的一维观测。</li>
+<li>是否适合高维数据：高维 KDE 会遇到维数灾难，不适合当作默认工具。</li>
+<li>是否适合缺失较多数据：先处理缺失后可用。</li>
+<li>是否适合删失数据：不适合直接处理删失。</li>
+<li>是否适合重复测量数据：可探索，但推断需谨慎。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>KDE 最适合这种“单列连续变量 + 可选分组变量”的表格结构：</p>
+<table>
+<thead>
+<tr>
+<th>RANDID</th>
+<th>PERIOD</th>
+<th>SEX</th>
+<th>BMI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2448</td>
+<td>1</td>
+<td>0</td>
+<td>26.97</td>
+</tr>
+<tr>
+<td>6238</td>
+<td>1</td>
+<td>1</td>
+<td>28.73</td>
+</tr>
+<tr>
+<td>9428</td>
+<td>1</td>
+<td>0</td>
+<td>25.34</td>
+</tr>
+<tr>
+<td>10552</td>
+<td>1</td>
+<td>1</td>
+<td>28.58</td>
+</tr>
+<tr>
+<td>11252</td>
+<td>1</td>
+<td>1</td>
+<td>23.10</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：一组连续型观测值。</li>
+<li>关键变量：数值型变量，可加分组标签。</li>
+<li>需要预处理的内容：缺失值处理、必要时对偏态数据考虑对数变换。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：一条平滑密度曲线。</li>
+<li>参数估计：没有回归系数，主要是密度函数估计。</li>
+<li>预测结果：无监督描述，不用于预测。</li>
+<li>不确定性指标：通常不直接报告，若需要可用 Bootstrap 构建带状区间。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：查看连续变量分布形状、比较多组分布、辅助判断正态性或多峰性。</li>
+<li>不适合：离散数据、样本极小且需要正式推断、边界效应强的数据。</li>
+<li>使用前需要特别检查的点：带宽设置、是否存在边界限制、是否因过度平滑掩盖多峰结构。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="kernel-density-estimation-kde" data-i="0">Python</button><button class="codetab" data-uid="kernel-density-estimation-kde" data-i="1">R</button></div><div class="codepanel active" data-uid="kernel-density-estimation-kde" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>statsmodels</code></li>
+<li><code>seaborn</code></li>
+</ul>
+<pre><code class="language-python">import numpy as np
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+
+x = np.random.normal(loc=0, scale=1, size=200)
+kde = sm.nonparametric.KDEUnivariate(x)
+kde.fit(bw=&quot;scott&quot;)
+
+plt.plot(kde.support, kde.density)
+plt.xlabel(&quot;X&quot;)
+plt.ylabel(&quot;Density&quot;)
+plt.show()
+</code></pre></div><div class="codepanel" data-uid="kernel-density-estimation-kde" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>stats</code></li>
+</ul>
+<pre><code class="language-r">x &lt;- rnorm(200)
+d &lt;- density(x)
+plot(d, main = &quot;Kernel Density Estimate&quot;)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：峰的位置、峰数、尾部厚度、偏态和组间曲线差异。</li>
+<li>每个主要参数如何解释：主要超参数是带宽，不是回归系数。</li>
+<li>临床或医学意义如何表达：例如“病例组分布整体右移，且高值尾部更厚”。</li>
+<li>常见误读：密度高不代表概率大，面积才对应概率；峰数也可能受带宽影响。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>单组 KDE 曲线。</li>
+<li>分组叠加 KDE 曲线。</li>
+<li>直方图加 KDE 曲线。</li>
+</ul>
+<h3>7.1 图像示例</h3>
+<p>下图展示基线 BMI 按性别分层后的密度曲线，能够直观体现连续变量的分布形状和组间差异。</p>
+<p><img alt="" src="img/kde_bmi_by_sex.png" /></p></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>比直方图更平滑。</li>
+<li>不需要指定参数分布。</li>
+<li>对探索多峰、偏态分布很有帮助。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>对带宽敏感。</li>
+<li>高维场景效果差。</li>
+<li>边界处可能偏倚明显。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>带宽过大导致真实结构被抹平。</li>
+<li>带宽过小导致噪声被误判成多峰。</li>
+<li>用 KDE 展示离散计数数据，造成误导。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和直方图的区别：KDE 更平滑，直方图更受分箱影响。</li>
+<li>和 ECDF 的区别：KDE 估计密度，ECDF 估计累计概率。</li>
+<li>应该如何选择：想看局部分布形状用 KDE，想看累计比例用 ECDF。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>查看风险评分是否偏态。</li>
+<li>观察两组生物标志物是否出现整体右移。</li>
+<li>作为建模前的探索性分布检查。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-empirical-cumulative-distribution-function-ecdf.html" data-cn="经验分布函数" data-en="Empirical Cumulative Distribution Function, ECDF" data-def="经验分布函数是对总体分布函数 $F(x)=P(X\le x)$ 的非参数估计。它直接用样本中“不大于某个阈值的比例”来近似总体累计概率。">经验分布函数（Empirical Cumulative Distribution Function, ECDF）</a></li>
+<li><a class="xlink" href="m-one-sample-t-test.html" data-cn="单样本t检验" data-en="One-Sample t-Test" data-def="单样本 t 检验用于判断一个样本均值是否与某个给定的参考值不同，是最经典的均值推断方法之一。">单样本t检验（One-Sample t-Test）</a></li>
+<li><a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 是一种从原始样本中“有放回重抽样”的方法，用来近似统计量的抽样分布，从而估计标准误、方差和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a></li>
+<li><a class="xlink" href="m-histogram.html" data-cn="直方图" data-en="Histogram" data-def="直方图把连续变量的取值范围切成若干等宽区间（bin），统计每个区间内的观测数（或频率），用相邻柱形展示数据的分布形状。">直方图（Histogram）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Silverman BW. <em>Density Estimation for Statistics and Data Analysis</em>. Chapman and Hall/CRC; 1986.</li>
+<li>statsmodels Developers. <code>statsmodels.nonparametric.kde.KDEUnivariate</code>. statsmodels API Reference. <a href="https://www.statsmodels.org/stable/generated/statsmodels.nonparametric.kde.KDEUnivariate.html">https://www.statsmodels.org/stable/generated/statsmodels.nonparametric.kde.KDEUnivariate.html</a> （访问日期：2026-07-02）</li>
+<li>seaborn Developers. <code>seaborn.kdeplot</code>. seaborn documentation. <a href="https://seaborn.pydata.org/generated/seaborn.kdeplot.html">https://seaborn.pydata.org/generated/seaborn.kdeplot.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-empirical-cumulative-distribution-function-ecdf.html"><div class="pg-lab">← 前一则</div><div class="pg-t">经验分布函数</div></a><a class="pg pg-next" href="m-kolmogorov-smirnov-test.html"><div class="pg-lab">后一则 →</div><div class="pg-t">Kolmogorov-Smirnov检验</div></a></div>
+    <div class="colophon">— 黑盒词典 · 01·04 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

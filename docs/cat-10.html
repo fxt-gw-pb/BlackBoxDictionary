@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>降维与表征学习 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap category">
+  <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><span class="cur">降维与表征学习</span></div>
+  <div class="cat-title">
+    <div class="cat-title-l">
+      <div class="kicker dark-ink">第 10 部</div>
+      <h2 class="page-h2">降维与表征学习</h2>
+      <div class="cat-title-en">Dimensionality Reduction &amp; Representation</div>
+      <p class="lede">压缩维度并保留主要结构。</p>
+    </div>
+    <div class="cat-title-r">
+      <div class="cat-big">10</div>
+      <div class="kicker">收录条目</div>
+    </div>
+  </div>
+  <div class="entries"><a class="entry" href="m-principal-component-analysis-pca.html">
+      <span class="entry-no">10·01</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">主成分分析</span>
+          <span class="entry-en">Principal Component Analysis, PCA</span>
+        </div>
+        <p class="entry-def">主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-independent-component-analysis-ica.html">
+      <span class="entry-no">10·02</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">独立成分分析</span>
+          <span class="entry-en">Independent Component Analysis, ICA</span>
+        </div>
+        <p class="entry-def">独立成分分析是一种无监督表征学习方法，用来把观测到的混合信号分解成若干统计上尽量相互独立的潜在成分。它常用于盲源分离，也可作为高维数据的独立模式提取方法。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-factor-analysis.html">
+      <span class="entry-no">10·03</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">因子分析</span>
+          <span class="entry-en">Factor Analysis</span>
+        </div>
+        <p class="entry-def">因子分析是一类潜变量模型，用少数不可直接观测的公共因子解释多个观测变量之间的相关结构。它常用于问卷量表、心理测量、症状维度和综合指标构建。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-locally-linear-embedding-lle.html">
+      <span class="entry-no">10·04</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">局部线性嵌入</span>
+          <span class="entry-en">Locally Linear Embedding, LLE</span>
+        </div>
+        <p class="entry-def">局部线性嵌入是一种非线性流形学习方法。它假设高维数据虽然整体弯曲，但每个样本附近的小邻域可以近似看作线性结构，并在低维空间中尽量保持这种局部重构关系。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">advanced</span>
+      </div>
+    </a><a class="entry" href="m-isometric-mapping.html">
+      <span class="entry-no">10·05</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">Isomap</span>
+          <span class="entry-en">Isometric Mapping</span>
+        </div>
+        <p class="entry-def">Isomap 是一种非线性流形学习方法。它通过近邻图上的最短路径近似流形测地距离，再用经典多维尺度分析把样本嵌入低维空间。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">advanced</span>
+      </div>
+    </a><a class="entry" href="m-singular-value-decomposition-svd.html">
+      <span class="entry-no">10·06</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">奇异值分解</span>
+          <span class="entry-en">Singular Value Decomposition, SVD</span>
+        </div>
+        <p class="entry-def">奇异值分解是一种基础矩阵分解方法，可以把任意矩阵分解为左奇异向量、奇异值和右奇异向量三部分。截断 SVD 使用最大的若干奇异值构造低秩近似，从而实现降维、压缩和去噪。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-t-distributed-stochastic-neighbor-embedding.html">
+      <span class="entry-no">10·07</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">t-SNE</span>
+          <span class="entry-en">t-Distributed Stochastic Neighbor Embedding</span>
+        </div>
+        <p class="entry-def">t-SNE 是一种用于高维数据可视化的非线性降维方法。它把高维空间和低维空间中的邻近关系都表示为概率分布，并让两个分布尽可能接近。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">advanced</span>
+      </div>
+    </a><a class="entry" href="m-uniform-manifold-approximation-and-projection.html">
+      <span class="entry-no">10·08</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">UMAP</span>
+          <span class="entry-en">Uniform Manifold Approximation and Projection</span>
+        </div>
+        <p class="entry-def">UMAP 是一种非线性降维和可视化方法，基于流形假设和近邻图构建高维数据的模糊拓扑结构，再在低维空间中寻找相似的结构。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">advanced</span>
+      </div>
+    </a><a class="entry" href="m-kernel-principal-component-analysis-kpca.html">
+      <span class="entry-no">10·09</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">核主成分分析</span>
+          <span class="entry-en">Kernel Principal Component Analysis, KPCA</span>
+        </div>
+        <p class="entry-def">核主成分分析是 [[主成分分析（Principal Component Analysis, PCA）]] 的非线性扩展。它通过核函数隐式地把样本映射到高维特征空间，再在该空间中执行</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">advanced</span>
+      </div>
+    </a><a class="entry" href="m-multidimensional-scaling-mds.html">
+      <span class="entry-no">10·10</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">多维尺度分析</span>
+          <span class="entry-en">Multidimensional Scaling, MDS</span>
+        </div>
+        <p class="entry-def">多维尺度分析是一类把样本间距离或不相似度表示为低维坐标的方法。它的目标是在二维或三维空间中尽量保留原始距离关系。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a></div>
+</main>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

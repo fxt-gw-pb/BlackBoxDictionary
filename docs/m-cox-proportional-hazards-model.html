@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cox比例风险模型 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-04.html">生存分析与纵向数据</a><span class="sep">/</span><span class="cur">Cox比例风险模型</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">生存分析与纵向数据 · 04·08</div>
+      <h1 class="detail-h1">Cox比例风险模型</h1>
+      <div class="detail-en">Cox Proportional Hazards Model</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 生存分析 / Cox模型</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>Cox比例风险模型（Cox Proportional Hazards Model）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>Cox 比例风险模型是最常用的生存回归模型，在不指定基线风险函数具体形式的情况下，估计协变量对危险率的相对影响。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：在调整多个协变量后，哪些因素会提高或降低事件发生风险。</li>
+<li>适用任务：时间到事件回归、危险比估计、协变量调整。</li>
+<li>常见医学场景：死亡风险、复发风险、装置失效风险建模。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>Cox 模型把总风险拆成两部分：一部分是所有人共享的“基线风险”，另一部分是由协变量带来的“相对风险倍数”。它最吸引人的地方是，不需要事先假设基线风险的具体形状。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>$$
+h(t\mid X_i)=h_0(t)\exp(X_i^\top\boldsymbol{\beta})
+$$</p>
+<p>对应的 hazard ratio 为：</p>
+<p>$$
+HR(X_1,X_2)=\exp[(X_1-X_2)^\top\boldsymbol{\beta}]
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$h_0(t)$：基线危险率函数。</li>
+<li>$\boldsymbol{\beta}$：协变量对 log hazard 的效应。</li>
+<li>$\exp(\beta_j)$：协变量每增加 1 单位对应的 hazard ratio。</li>
+<li>partial likelihood：Cox 模型估计 $\boldsymbol{\beta}$ 的核心工具。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>比例风险（PH）假设成立。</li>
+<li>删失独立 / 非信息性。</li>
+<li>协变量测量合理、时间起点清晰。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续、二分类、多分类都可。</li>
+<li>因变量类型：时间到事件结局。</li>
+<li>数据结构：每行一个个体的生存数据，至少有 <code>time</code> 和 <code>event</code>。</li>
+<li>是否适合高维数据：可扩展，但高维时需更谨慎。</li>
+<li>是否适合缺失较多数据：需先明确缺失机制和处理策略。</li>
+<li>是否适合删失数据：非常适合。</li>
+<li>是否适合重复测量数据：time-varying covariate 需要扩展形式。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>下面是适合 Cox 模型的基本数据形态：</p>
+<table>
+<thead>
+<tr>
+<th>RANDID</th>
+<th>TIMEDTH</th>
+<th>DEATH</th>
+<th>SEX</th>
+<th>BMI</th>
+<th>AGE_group</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2448</td>
+<td>8766</td>
+<td>0</td>
+<td>0</td>
+<td>26.97</td>
+<td>1</td>
+</tr>
+<tr>
+<td>6238</td>
+<td>8766</td>
+<td>0</td>
+<td>1</td>
+<td>28.73</td>
+<td>1</td>
+</tr>
+<tr>
+<td>9428</td>
+<td>8766</td>
+<td>0</td>
+<td>0</td>
+<td>25.34</td>
+<td>1</td>
+</tr>
+<tr>
+<td>10552</td>
+<td>2956</td>
+<td>1</td>
+<td>1</td>
+<td>28.58</td>
+<td>2</td>
+</tr>
+<tr>
+<td>11252</td>
+<td>8766</td>
+<td>0</td>
+<td>1</td>
+<td>23.10</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>一个简单示例模型的 HR 结果可整理为：</p>
+<table>
+<thead>
+<tr>
+<th>变量</th>
+<th>HR</th>
+<th>95% CI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BMI</td>
+<td>1.022</td>
+<td>1.009 - 1.036</td>
+</tr>
+<tr>
+<td>Female vs Male</td>
+<td>0.586</td>
+<td>0.527 - 0.651</td>
+</tr>
+<tr>
+<td>AGE_group 2 vs 1</td>
+<td>3.282</td>
+<td>2.938 - 3.666</td>
+</tr>
+<tr>
+<td>AGE_group 3 vs 1</td>
+<td>8.261</td>
+<td>6.653 - 10.258</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：时间、事件指示变量、协变量。</li>
+<li>关键变量：<code>time</code>、<code>event</code>、协变量矩阵、ties 处理方法。</li>
+<li>需要预处理的内容：删失编码、分类变量编码、必要时构造 time-varying 格式。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：系数、HR、Wald / LR / Score 检验。</li>
+<li>参数估计：$\boldsymbol{\beta}$ 和 HR。</li>
+<li>预测结果：相对风险、分层预测生存曲线、基线累积风险。</li>
+<li>不确定性指标：标准误、HR 区间、PH 诊断。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：需要调整多个协变量的生存分析。</li>
+<li>不适合：比例风险假设明显不成立又不做扩展时。</li>
+<li>使用前需要特别检查的点：PH 假设、ties、删失模式、异常影响点。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="cox-proportional-hazards-model" data-i="0">Python</button><button class="codetab" data-uid="cox-proportional-hazards-model" data-i="1">R</button></div><div class="codepanel active" data-uid="cox-proportional-hazards-model" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>lifelines</code></li>
+</ul>
+<pre><code class="language-python">from lifelines import CoxPHFitter
+
+cph = CoxPHFitter()
+cph.fit(df, duration_col=&quot;TIMEDTH&quot;, event_col=&quot;DEATH&quot;)
+cph.print_summary()
+</code></pre></div><div class="codepanel" data-uid="cox-proportional-hazards-model" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>survival</code></li>
+</ul>
+<pre><code class="language-r">library(survival)
+
+fit &lt;- coxph(Surv(TIMEDTH, DEATH) ~ BMI + sex_label + factor(AGE_group), data = df)
+summary(fit)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：HR 的方向、大小、区间和 PH 诊断。</li>
+<li>每个主要参数如何解释：例如 HR=1.022 表示 BMI 每增加 1 单位，死亡风险约增加 2.2%。</li>
+<li>临床或医学意义如何表达：HR 是相对风险尺度，不直接等于生存概率差。</li>
+<li>常见误读：HR 不是固定时间点的风险差，也不是 odds ratio。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>HR 森林图。</li>
+<li>分组预测生存曲线。</li>
+<li>累积风险曲线和残差诊断图。</li>
+</ul>
+<h3>7.1 图像示例</h3>
+<p>下图用区间图展示 Cox 模型的 hazard ratio 及其 95% 置信区间。</p>
+<p><img alt="" src="img/cox_hr_forest.png" /></p></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>不需指定基线风险形式。</li>
+<li>能自然处理删失。</li>
+<li>是医学时间到事件建模的标准工具。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>依赖比例风险假设。</li>
+<li>解释主要在相对风险尺度。</li>
+<li>ties 和时间变协变量会增加复杂度。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>不检查 PH 假设。</li>
+<li>把 HR 解释成绝对风险差。</li>
+<li>只报 p 值，不报 HR 区间和诊断。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 Kaplan-Meier / Log-rank 的区别：Cox 可以调整协变量。</li>
+<li>和 AFT 的区别：Cox 在 hazard 尺度建模，AFT 在生存时间尺度建模。</li>
+<li>和条件 Logistic 回归的关系：精确 ties 的 Cox 偏似然与某些条件 Logistic 结构有关。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>基线风险因素与长期死亡风险建模。</li>
+<li>调整混杂后的治疗生存效应评估。</li>
+<li>构建临床风险评分模型。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 生存曲线是生存分析中最经典的非参数估计方法，用于在存在删失时估计生存函数 $S(t)=P(T&gt;t)$。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a></li>
+<li><a class="xlink" href="m-log-rank-test.html" data-cn="Log-rank检验" data-en="Log-rank Test" data-def="Log-rank 检验是比较两组或多组生存曲线是否存在统计学差异的最常用非参数检验。">Log-rank检验（Log-rank Test）</a></li>
+<li><a class="xlink" href="m-accelerated-failure-time-aft-model.html" data-cn="加速失效时间模型" data-en="Accelerated Failure Time, AFT, Model" data-def="AFT 模型直接在生存时间尺度上建模，强调协变量如何“拉长”或“缩短”事件发生时间。">加速失效时间模型（Accelerated Failure Time, AFT, Model）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Therneau TM, Grambsch PM. <em>Modeling Survival Data: Extending the Cox Model</em>. Springer; 2000.</li>
+<li>R Core Team / survival package. <code>coxph</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/survival/html/coxph.html">https://stat.ethz.ch/R-manual/R-devel/library/survival/html/coxph.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-log-rank-test.html"><div class="pg-lab">← 前一则</div><div class="pg-t">Log-rank检验</div></a><a class="pg pg-next" href="m-accelerated-failure-time-aft-model.html"><div class="pg-lab">后一则 →</div><div class="pg-t">加速失效时间模型</div></a></div>
+    <div class="colophon">— 黑盒词典 · 04·08 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

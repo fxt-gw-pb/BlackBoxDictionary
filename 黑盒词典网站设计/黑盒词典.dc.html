@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<style>
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Spectral','Noto Serif SC',serif;background:#F5F1E8;}
+  ::selection{background:#B23A2B;color:#F5F1E8;}
+  ::-webkit-scrollbar{width:10px;height:10px;}
+  ::-webkit-scrollbar-thumb{background:rgba(33,28,23,0.22);border:3px solid transparent;background-clip:padding-box;border-radius:10px;}
+  @keyframes bbFade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  @keyframes bbGlow{0%,100%{opacity:.62;}50%{opacity:1;}}
+  .katex{font-size:1.06em;}
+  .katex-display{margin:0;}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#F5F1E8;color:#211C17;font-family:'Spectral','Noto Serif SC',serif;">
+
+  <!-- ============ MASTHEAD (all pages except hero) ============ -->
+  <sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}">
+  <div style="position:sticky;top:0;z-index:40;background:{{ chromeBg }};backdrop-filter:saturate(1.1) blur(6px);border-bottom:1px solid {{ chromeRule }};">
+    <div style="max-width:1180px;margin:0 auto;padding:0 40px;height:66px;display:flex;align-items:center;justify-content:space-between;">
+      <div onClick="{{ goHero }}" style="display:flex;align-items:baseline;gap:12px;cursor:pointer;">
+        <span style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:19px;letter-spacing:0.04em;color:{{ chromeFg }};">黑盒词典</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:{{ chromeFaint }};">Blackbox&nbsp;Dictionary</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:30px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;">
+        <span onClick="{{ goIndex }}" style="cursor:pointer;color:{{ navIndexColor }};padding-bottom:2px;border-bottom:1px solid {{ navIndexBorder }};">检字表</span>
+        <span onClick="{{ goSpecs }}" style="cursor:pointer;color:{{ navSpecsColor }};padding-bottom:2px;border-bottom:1px solid {{ navSpecsBorder }};">设计规范</span>
+        <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+          <span onClick="{{ toggleDark }}" style="cursor:pointer;color:{{ chromeFg }};display:inline-flex;align-items:center;gap:7px;">
+            <span style="width:9px;height:9px;border-radius:50%;background:{{ darkDotBg }};border:1px solid {{ chromeFg }};display:inline-block;"></span>{{ darkLabel }}
+          </span>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= HERO ================= -->
+  <sc-if value="{{ isHero }}" hint-placeholder-val="{{ true }}">
+  <div style="position:relative;min-height:100vh;background:#141210;color:#EDE6D6;overflow:hidden;">
+    <!-- luminous seam (opening box) -->
+    <div style="position:absolute;top:0;bottom:0;left:61%;width:340px;transform:translateX(-50%);background:radial-gradient(ellipse 60% 55% at 50% 42%, rgba(255,238,206,0.18), rgba(255,238,206,0.05) 45%, transparent 70%);filter:blur(6px);animation:bbGlow 7s ease-in-out infinite;"></div>
+    <div style="position:absolute;top:0;bottom:0;left:61%;width:2px;background:linear-gradient(to bottom, transparent, rgba(255,243,214,0.85) 34%, rgba(255,243,214,0.95) 46%, rgba(255,243,214,0.4) 62%, transparent);box-shadow:0 0 26px 3px rgba(255,240,206,0.35);"></div>
+    <!-- faint density curve at base -->
+    <svg viewBox="0 0 1200 160" preserveAspectRatio="none" style="position:absolute;left:0;right:0;bottom:0;width:100%;height:150px;opacity:0.20;">
+      <path d="M0,150 C220,150 300,30 460,26 C560,24 640,120 760,138 C880,150 980,64 1200,58" fill="none" stroke="#EDE6D6" stroke-width="1"></path>
+      <path d="M0,150 C260,150 340,74 520,70 C660,66 720,130 880,142 C1000,150 1080,100 1200,96" fill="none" stroke="#B23A2B" stroke-width="1"></path>
+    </svg>
+
+    <div style="position:relative;max-width:1180px;margin:0 auto;padding:44px 40px 0;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;">
+        <div style="display:flex;align-items:baseline;gap:14px;">
+          <span style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:20px;letter-spacing:0.05em;">黑盒词典</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#8C8375;">Blackbox Dictionary</span>
+        </div>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:0.22em;text-transform:uppercase;color:#8C8375;">Ed. 2026 · 57 方法卡 · 16 部</span>
+      </div>
+    </div>
+
+    <div style="position:relative;max-width:1180px;margin:0 auto;padding:0 40px;min-height:calc(100vh - 108px);display:grid;grid-template-columns:1fr;align-content:center;gap:0;">
+      <div style="max-width:640px;padding:72px 0;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.34em;text-transform:uppercase;color:#B23A2B;margin-bottom:26px;">打开统计方法的黑箱</div>
+        <h1 style="font-family:'Noto Serif SC',serif;font-weight:500;font-size:74px;line-height:1.14;letter-spacing:0.01em;margin:0 0 22px;">黑盒词典</h1>
+        <p style="font-family:'Spectral',serif;font-weight:300;font-size:20px;line-height:1.5;letter-spacing:0.02em;color:#C9C1B0;max-width:480px;margin:0 0 52px;">A working dictionary of statistical methods for medical research &amp; data science —<span style="font-family:'Noto Serif SC',serif;font-weight:300;color:#B7AE9C;">&nbsp;为医学研究与数据科学编纂的方法词典。</span></p>
+
+        <!-- 序 · preface placeholder (题记) -->
+        <div style="position:relative;padding-left:26px;border-left:1px solid rgba(237,230,214,0.22);max-width:520px;">
+          <div style="position:absolute;left:-1px;top:2px;width:1px;height:34px;background:#B23A2B;"></div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#8C8375;margin-bottom:14px;">序 · Preface</div>
+          <p style="font-family:'Spectral','Noto Serif SC',serif;font-style:italic;font-weight:300;font-size:19px;line-height:1.85;letter-spacing:0.01em;color:#D8D0BF;margin:0;">〔 此处留作序言 · 二至四句 〕 每一种统计方法都是一只黑箱：数据从一端进入，结论从另一端走出，中间的机理常被交给软件与惯例。这部词典想做的，是把箱子打开——写清每种方法的数学、假设、代价与边界。</p>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:0.14em;color:#8C8375;margin-top:16px;">— 待署名</div>
+        </div>
+
+        <div style="margin-top:56px;display:flex;align-items:center;gap:28px;">
+          <span onClick="{{ goIndex }}" style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#EDE6D6;border-bottom:1px solid #B23A2B;padding-bottom:6px;">进入词典 →</span>
+          <span onClick="{{ goIndex }}" style="cursor:pointer;font-family:'Noto Serif SC',serif;font-size:14px;letter-spacing:0.1em;color:#8C8375;">向下检字</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= INDEX / 检字表 ================= -->
+  <sc-if value="{{ isIndex }}" hint-placeholder-val="{{ false }}">
+  <div style="max-width:1180px;margin:0 auto;padding:72px 40px 120px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:end;padding-bottom:40px;border-bottom:1px solid rgba(33,28,23,0.16);">
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:#8A8276;margin-bottom:18px;">部首检字表 · Radical Index</div>
+        <h2 style="font-family:'Noto Serif SC',serif;font-weight:500;font-size:46px;line-height:1.1;margin:0 0 14px;">检字表</h2>
+        <p style="font-family:'Spectral','Noto Serif SC',serif;font-weight:300;font-size:17px;line-height:1.6;color:#5C554B;max-width:460px;margin:0;">全书 16 部，收方法 57 则。按部检字，或以中文名 / 英文名 / 标签直检。</p>
+      </div>
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8276;margin-bottom:10px;">检索 · Search</div>
+        <div style="display:flex;align-items:center;gap:12px;border-bottom:1.5px solid #211C17;padding-bottom:10px;">
+          <span style="font-family:'IBM Plex Mono',monospace;color:{{ accent }};font-size:15px;">⌕</span>
+          <input onInput="{{ onSearch }}" placeholder="Cox / 生存 / hazard / 标签…" style="flex:1;border:none;outline:none;background:transparent;font-family:'Spectral','Noto Serif SC',serif;font-size:18px;color:#211C17;letter-spacing:0.01em;"></input>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:0.06em;color:#8A8276;margin-top:9px;">{{ searchHint }}</div>
+      </div>
+    </div>
+
+    <!-- search results -->
+    <sc-if value="{{ hasQuery }}" hint-placeholder-val="{{ false }}">
+    <div style="margin-top:36px;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:0.24em;text-transform:uppercase;color:#8A8276;margin-bottom:16px;">检索结果 · {{ matchCount }}</div>
+      <sc-for list="{{ matchedMethods }}" as="m" hint-placeholder-count="3">
+        <div onClick="{{ m.open }}" style="display:grid;grid-template-columns:56px 1fr auto;gap:20px;align-items:baseline;padding:14px 12px;border-bottom:1px solid rgba(33,28,23,0.1);cursor:pointer;" style-hover="background:rgba(178,58,43,0.05);">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#B0A895;letter-spacing:0.08em;">{{ m.catNo }}</span>
+          <span><span style="font-family:'Noto Serif SC',serif;font-size:18px;color:#211C17;">{{ m.cn }}</span>&nbsp;&nbsp;<span style="font-family:'Spectral',serif;font-style:italic;font-size:14px;color:#8A8276;">{{ m.en }}</span></span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:0.1em;color:#8A8276;">{{ m.cat }}</span>
+        </div>
+      </sc-for>
+      <sc-if value="{{ noMatch }}" hint-placeholder-val="{{ false }}">
+        <div style="font-family:'Noto Serif SC',serif;font-size:15px;color:#8A8276;padding:12px;">未检得相符条目。</div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- radical table -->
+    <sc-if value="{{ showCatTable }}" hint-placeholder-val="{{ true }}">
+    <div style="margin-top:44px;">
+      <div style="display:grid;grid-template-columns:64px 1fr 92px;gap:24px;padding:0 12px 10px;border-bottom:1px solid rgba(33,28,23,0.16);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#A79F8E;">
+        <span>部序</span><span>部类 · Category</span><span style="text-align:right;">收录</span>
+      </div>
+      <sc-for list="{{ categories }}" as="c" hint-placeholder-count="16">
+        <div onClick="{{ c.open }}" style="display:grid;grid-template-columns:64px 1fr 92px;gap:24px;align-items:center;padding:20px 12px;border-bottom:1px solid rgba(33,28,23,0.1);cursor:pointer;transition:background .18s;" style-hover="background:rgba(178,58,43,0.045);">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#B0A895;letter-spacing:0.05em;">{{ c.no }}</span>
+          <div style="display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;">
+            <span style="font-family:'Noto Serif SC',serif;font-weight:500;font-size:22px;color:#211C17;letter-spacing:0.01em;">{{ c.cn }}</span>
+            <span style="font-family:'Spectral',serif;font-style:italic;font-size:14px;color:#8A8276;letter-spacing:0.01em;">{{ c.en }}</span>
+            <span style="font-family:'Noto Serif SC',serif;font-weight:300;font-size:14px;color:#6B6459;flex-basis:100%;">{{ c.desc }}</span>
+          </div>
+          <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:15px;color:#211C17;">{{ c.count }}<span style="font-size:11px;color:#A79F8E;">&nbsp;则</span></span>
+        </div>
+      </sc-for>
+    </div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <!-- ================= CATEGORY LIST ================= -->
+  <sc-if value="{{ isCategory }}" hint-placeholder-val="{{ false }}">
+  <div style="max-width:1180px;margin:0 auto;padding:56px 40px 120px;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.12em;color:#8A8276;margin-bottom:40px;">
+      <span onClick="{{ goIndex }}" style="cursor:pointer;border-bottom:1px solid transparent;" style-hover="border-bottom:1px solid #8A8276;">检字表</span>
+      <span style="color:#C3BBA9;">&nbsp;&nbsp;/&nbsp;&nbsp;</span><span style="color:#211C17;">{{ cat.cn }}</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 300px;gap:60px;align-items:end;padding-bottom:34px;border-bottom:1.5px solid #211C17;">
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:{{ accent }};margin-bottom:16px;">第 {{ cat.no }} 部</div>
+        <h2 style="font-family:'Noto Serif SC',serif;font-weight:500;font-size:44px;line-height:1.12;margin:0 0 8px;">{{ cat.cn }}</h2>
+        <div style="font-family:'Spectral',serif;font-style:italic;font-size:18px;color:#8A8276;margin-bottom:18px;">{{ cat.en }}</div>
+        <p style="font-family:'Noto Serif SC',serif;font-weight:300;font-size:16px;line-height:1.7;color:#5C554B;max-width:520px;margin:0;">{{ cat.desc }}</p>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:52px;color:#211C17;line-height:1;">{{ cat.count }}</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:#8A8276;margin-top:8px;">收录条目</div>
+      </div>
+    </div>
+
+    <div style="margin-top:8px;">
+      <sc-for list="{{ entries }}" as="e" hint-placeholder-count="9">
+        <div onClick="{{ e.open }}" style="display:grid;grid-template-columns:74px 1fr 190px;gap:24px;align-items:baseline;padding:26px 12px;border-bottom:1px solid rgba(33,28,23,0.1);cursor:{{ e.cursor }};transition:background .18s;" style-hover="background:rgba(178,58,43,0.045);">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#B0A895;letter-spacing:0.05em;padding-top:6px;">{{ e.no }}</span>
+          <div>
+            <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:9px;">
+              <span style="font-family:'Noto Serif SC',serif;font-weight:500;font-size:25px;color:#211C17;letter-spacing:0.01em;">{{ e.cn }}</span>
+              <span style="font-family:'Spectral',serif;font-style:italic;font-size:15px;color:#8A8276;">{{ e.en }}</span>
+              <sc-if value="{{ e.isCox }}" hint-placeholder-val="{{ false }}">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:{{ accent }};border:1px solid {{ accent }};padding:2px 7px;border-radius:2px;">正文已接入</span>
+              </sc-if>
+            </div>
+            <p style="font-family:'Noto Serif SC',serif;font-weight:300;font-size:15px;line-height:1.6;color:#6B6459;margin:0;max-width:560px;">{{ e.def }}</p>
+          </div>
+          <div style="text-align:right;display:flex;flex-direction:column;gap:8px;align-items:flex-end;padding-top:4px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.1em;color:#6B6459;">{{ e.statusGlyph }}&nbsp;{{ e.status }}</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A79F8E;border:1px solid rgba(33,28,23,0.16);padding:2px 8px;border-radius:2px;">{{ e.difficulty }}</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= DETAIL (Cox) ================= -->
+  <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+  <div style="background:{{ dt.bg }};color:{{ dt.fg }};">
+    <div style="max-width:1180px;margin:0 auto;padding:0 40px;display:grid;grid-template-columns:214px 1fr;gap:64px;">
+
+      <!-- sticky TOC -->
+      <aside style="padding-top:56px;">
+        <div style="position:sticky;top:98px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:{{ dt.faint }};margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid {{ dt.rule }};">目次 · Contents</div>
+          <sc-for list="{{ toc }}" as="s" hint-placeholder-count="12">
+            <div onClick="{{ s.go }}" style="display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:baseline;padding:7px 0;cursor:pointer;color:{{ s.color }};transition:color .16s;">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:{{ s.numColor }};">{{ s.num }}</span>
+              <span style="font-family:'Noto Serif SC',serif;font-size:13.5px;line-height:1.45;letter-spacing:0.01em;border-left:2px solid {{ s.bar }};padding-left:10px;margin-left:-12px;">{{ s.title }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </aside>
+
+      <!-- article -->
+      <article id="cox-body" style="padding:56px 0 130px;max-width:760px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.12em;color:{{ dt.faint }};margin-bottom:34px;">
+          <span onClick="{{ goIndex }}" style="cursor:pointer;">检字表</span><span style="color:{{ dt.faint }};">&nbsp;/&nbsp;</span><span onClick="{{ goSurvival }}" style="cursor:pointer;">生存分析与纵向数据</span><span style="color:{{ dt.faint }};">&nbsp;/&nbsp;</span><span style="color:{{ dt.fg }};">Cox 比例风险模型</span>
+        </div>
+
+        <!-- title block -->
+        <div style="border-bottom:1px solid {{ dt.rule }};padding-bottom:34px;margin-bottom:14px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.26em;text-transform:uppercase;color:{{ dt.accent }};margin-bottom:22px;">生存分析与纵向数据 · 03·03</div>
+          <h1 style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:52px;line-height:1.16;letter-spacing:0.01em;margin:0 0 12px;color:{{ dt.fg }};">Cox 比例风险模型</h1>
+          <div style="font-family:'Spectral',serif;font-style:italic;font-weight:400;font-size:22px;color:{{ dt.faint }};margin-bottom:28px;">Cox Proportional Hazards Model</div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px 26px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.08em;color:{{ dt.faint }};">
+            <span>状态&nbsp;·&nbsp;<span style="color:{{ dt.fg }};">● 已校</span></span>
+            <span>难度&nbsp;·&nbsp;<span style="color:{{ dt.fg }};">intermediate</span></span>
+            <span>标签&nbsp;·&nbsp;<span style="color:{{ dt.fg }};">生存分析 / 半参数 / 风险比 / 删失</span></span>
+          </div>
+        </div>
+
+        <!-- §1 -->
+        <section id="sec-1" data-sec="1" style="padding-top:44px;">
+          <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ dt.accent }};letter-spacing:0.1em;">§1</span>
+            <h2 style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:26px;margin:0;color:{{ dt.fg }};">方法概览</h2>
+          </div>
+          <p style="font-family:'Spectral','Noto Serif SC',serif;font-weight:400;font-size:17px;line-height:1.95;letter-spacing:0.01em;color:{{ dt.body }};margin:0 0 18px;">Cox 比例风险模型是生存分析中最常用的回归工具，用于量化一组协变量对<em style="font-style:normal;border-bottom:1px solid {{ dt.rule }};">事件发生风险</em>（hazard）的影响。它之所以被称为「半参数」，是因为它不对基线风险 <span style="font-family:'IBM Plex Mono',monospace;font-size:0.92em;">h₀(t)</span> 的形状作任何假设，只对协变量的作用形式作出设定。</p>
+          <p style="font-family:'Spectral','Noto Serif SC',serif;font-weight:400;font-size:17px;line-height:1.95;letter-spacing:0.01em;color:{{ dt.body }};margin:0;">这一特性使它在处理<em style="font-style:normal;border-bottom:1px solid {{ dt.rule }};">删失数据</em>（censoring）时既灵活又稳健，成为临床随访研究里估计治疗与预后因素效应的标准方法。</p>
+        </section>
+
+        <!-- §2 -->
+        <section id="sec-2" data-sec="2" style="padding-top:56px;">
+          <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ dt.accent }};letter-spacing:0.1em;">§2</span>
+            <h2 style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:26px;margin:0;color:{{ dt.fg }};">数学形式</h2>
+          </div>
+          <p style="font-family:'Spectral','Noto Serif SC',serif;font-size:17px;line-height:1.95;color:{{ dt.body }};margin:0 0 20px;">模型将个体在时刻 t、给定协变量 x 的风险函数写作基线风险与指数项之积：</p>
+          <div style="background:{{ dt.formulaBg }};border-left:2px solid {{ dt.accent }};padding:26px 30px;margin:0 0 14px;overflow-x:auto;">
+            $$h(t \mid \mathbf{x}) = h_0(t)\,\exp\!\left(\beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_p x_p\right)$$
+          </div>
+          <p style="font-family:'Spectral','Noto Serif SC',serif;font-size:16px;line-height:1.9;color:{{ dt.body }};margin:0 0 20px;">参数 β 通过最大化 Cox 的<em style="font-style:normal;">偏似然</em>（partial likelihood）估计，它只依赖事件发生的次序而非具体时点：</p>
+          <div style="background:{{ dt.formulaBg }};border-left:2px solid {{ dt.accent }};padding:26px 30px;margin:0 0 20px;overflow-x:auto;">
+            $$L(\boldsymbol{\beta}) = \prod_{i:\,\delta_i = 1} \frac{\exp(\boldsymbol{\beta}^{\top}\mathbf{x}_i)}{\displaystyle\sum_{j \in R(t_i)} \exp(\boldsymbol{\beta}^{\top}\mathbf{x}_j)}$$
+          </div>
+          <p style="font-family:'Spectral','Noto Serif SC',serif;font-size:16px;line-height:1.9;color:{{ dt.body }};margin:0;">其中 <span style="font-family:'IBM Plex Mono',monospace;font-size:0.9em;">R(tᵢ)</span> 为 tᵢ 时刻的风险集，δᵢ 为事件指示。系数的指数即<em style="font-style:normal;">风险比</em> $\mathrm{HR} = \exp(\beta_k)$，是模型解释的核心量。</p>
+        </section>
+
+        <!-- §3 -->
+        <section id="sec-3" data-sec="3" style="padding-top:56px;">
+          <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ dt.accent }};letter-spacing:0.1em;">§3</span>
+            <h2 style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:26px;margin:0;color:{{ dt.fg }};">数据形式与输入输出</h2>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-family:'Spectral','Noto Serif SC',serif;font-size:15px;color:{{ dt.body }};">
+            <thead>
+              <tr style="border-bottom:1.5px solid {{ dt.fg }};">
+                <th style="text-align:left;padding:12px 8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:{{ dt.faint }};font-weight:400;">变量</th>
+                <th style="text-align:left;padding:12px 8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:{{ dt.faint }};font-weight:400;">角色</th>
+                <th style="text-align:left;padding:12px 8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:{{ dt.faint }};font-weight:400;">说明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid {{ dt.rule }};"><td style="padding:13px 8px;font-family:'IBM Plex Mono',monospace;font-size:13px;">time</td><td style="padding:13px 8px;">生存时间</td><td style="padding:13px 8px;color:{{ dt.faint }};">观测到事件或删失的时长</td></tr>
+              <tr style="border-bottom:1px solid {{ dt.rule }};"><td style="padding:13px 8px;font-family:'IBM Plex Mono',monospace;font-size:13px;">event</td><td style="padding:13px 8px;">事件指示</td><td style="padding:13px 8px;color:{{ dt.faint }};">1 = 发生，0 = 右删失</td></tr>
+              <tr style="border-bottom:1px solid {{ dt.rule }};"><td style="padding:13px 8px;font-family:'IBM Plex Mono',monospace;font-size:13px;">x₁…xₚ</td><td style="padding:13px 8px;">协变量</td><td style="padding:13px 8px;color:{{ dt.faint }};">连续或分类的预后 / 治疗因素</td></tr>
+            </tbody>
+          </table>
+          <p style="font-family:'Spectral','Noto Serif SC',serif;font-size:15px;line-height:1.8;color:{{ dt.faint }};margin:18px 0 0;"><span style="font-family:'IBM Plex Mono',monospace;font-size:0.85em;letter-spacing:0.1em;">输出&nbsp;→</span>&nbsp;各协变量系数 β、风险比 HR、95% 置信区间、Wald / 似然比 p 值、C-index 与基线累积风险。</p>
+        </section>
+
+        <!-- §4 -->
+        <section id="sec-4" data-sec="4" style="padding-top:56px;">
+          <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ dt.accent }};letter-spacing:0.1em;">§4</span>
+            <h2 style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:26px;margin:0;color:{{ dt.fg }};">适用场景</h2>
+          </div>
+          <ul style="list-style:none;padding:0;margin:0;font-family:'Spectral','Noto Serif SC',serif;font-size:16.5px;line-height:1.6;color:{{ dt.body }};">
+            <li style="padding:12px 0 12px 26px;position:relative;border-bottom:1px solid {{ dt.rule }};"><span style="position:absolute;left:0;color:{{ dt.accent }};font-family:'IBM Plex Mono',monospace;">—</span>随访研究中评估治疗或暴露对生存 / 复发风险的影响；</li>
+            <li style="padding:12px 0 12px 26px;position:relative;border-bottom:1px solid {{ dt.rule }};"><span style="position:absolute;left:0;color:{{ dt.accent }};font-family:'IBM Plex Mono',monospace;">—</span>存在<em style="font-style:normal;">右删失</em>、且事件时点分布未知或不便参数化时；</li>
+            <li style="padding:12px 0 12px 26px;position:relative;"><span style="position:absolute;left:0;color:{{ dt.accent }};font-family:'IBM Plex Mono',monospace;">—</span>需要在多个预后因素间调整、构建风险评分或列线图。</li>
+          </ul>
+        </section>
+
+        <!-- §5 code -->
+        <section id="sec-5" data-sec="5" style="padding-top:56px;">
+          <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ dt.accent }};letter-spacing:0.1em;">§5</span>
+            <h2 style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:26px;margin:0;color:{{ dt.fg }};">实现</h2>
+          </div>
+          <div style="border:1px solid {{ dt.rule }};">
+            <div style="display:flex;border-bottom:1px solid {{ dt.rule }};">
+              <span onClick="{{ setPy }}" style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.12em;padding:13px 20px;color:{{ pyTabColor }};border-bottom:2px solid {{ pyTabBar }};">Python · lifelines</span>
+              <span onClick="{{ setR }}" style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.12em;padding:13px 20px;color:{{ rTabColor }};border-bottom:2px solid {{ rTabBar }};">R · survival</span>
+            </div>
+            <sc-if value="{{ codeIsPy }}" hint-placeholder-val="{{ true }}">
+            <pre style="margin:0;padding:24px 26px;background:{{ dt.codeBg }};overflow-x:auto;font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.85;color:{{ dt.code }};letter-spacing:0.01em;">from lifelines import CoxPHFitter
+import pandas as pd
+
+df = pd.read_csv("rossi.csv")
+
+cph = CoxPHFitter()
+cph.fit(df, duration_col="week", event_col="arrest")
+
+cph.print_summary()          # HR、95% CI、p 值
+cph.plot()                   # 森林图
+cph.check_assumptions(df)    # 比例风险假设检验</pre>
+            </sc-if>
+            <sc-if value="{{ codeIsR }}" hint-placeholder-val="{{ false }}">
+            <pre style="margin:0;padding:24px 26px;background:{{ dt.codeBg }};overflow-x:auto;font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.85;color:{{ dt.code }};letter-spacing:0.01em;">library(survival)
+library(survminer)
+
+fit <- coxph(Surv(week, arrest) ~ fin + age + prio,
+             data = rossi)
+
+summary(fit)                 # HR = exp(coef)、95% CI、p
+cox.zph(fit)                 # 比例风险假设 (Schoenfeld)
+ggforest(fit, data = rossi)  # 森林图</pre>
+            </sc-if>
+          </div>
+        </section>
+
+        <!-- §6 -->
+        <section id="sec-6" data-sec="6" style="padding-top:56px;">
+          <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ dt.accent }};letter-spacing:0.1em;">§6</span>
+            <h2 style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:26px;margin:0;color:{{ dt.fg }};">结果解释</h2>
+          </div>
+          <p style="font-family:'Spectral','Noto Serif SC',serif;font-size:17px;line-height:1.95;color:{{ dt.body }};margin:0 0 16px;">系数 β 本身无直觉意义，需取指数还原为风险比。以 HR 读数：<span style="font-family:'IBM Plex Mono',monospace;font-size:0.9em;">HR &gt; 1</span> 表示协变量升高使风险增大，<span style="font-family:'IBM Plex Mono',monospace;font-size:0.9em;">HR &lt; 1</span> 为保护性，<span style="font-family:'IBM Plex Mono',monospace;font-size:0.9em;">HR = 1</span> 无影响。</p>
+          <p style="font-family:'Spectral','Noto Serif SC',serif;font-size:17px;line-height:1.95;color:{{ dt.body }};margin:0;">「比例」二字是全部解释的前提：模型假设任意两组的风险比<em style="font-style:normal;border-bottom:1px solid {{ dt.rule }};">不随时间改变</em>。报告结果前应以 Schoenfeld 残差检验（cox.zph）核验此假设，否则 HR 会失去恒定的意义。</p>
+        </section>
+
+        <!-- §7 figure -->
+        <section id="sec-7" data-sec="7" style="padding-top:56px;">
+          <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ dt.accent }};letter-spacing:0.1em;">§7</span>
+            <h2 style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:26px;margin:0;color:{{ dt.fg }};">推荐可视化</h2>
+          </div>
+          <figure style="margin:0;border:1px solid {{ dt.rule }};padding:30px 30px 20px;background:{{ dt.formulaBg }};">
+            <svg viewBox="0 0 600 320" style="width:100%;height:auto;display:block;">
+              <line x1="70" y1="40" x2="70" y2="270" stroke="{{ dt.axis }}" stroke-width="1"></line>
+              <line x1="70" y1="270" x2="560" y2="270" stroke="{{ dt.axis }}" stroke-width="1"></line>
+              <line x1="70" y1="155" x2="560" y2="155" stroke="{{ dt.rule }}" stroke-width="1" stroke-dasharray="3 4"></line>
+              <text x="60" y="45" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="{{ dt.faint }}">1.0</text>
+              <text x="60" y="159" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="{{ dt.faint }}">0.5</text>
+              <text x="60" y="274" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="{{ dt.faint }}">0.0</text>
+              <text x="70" y="292" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="{{ dt.faint }}">0</text>
+              <text x="315" y="292" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="{{ dt.faint }}">26</text>
+              <text x="560" y="292" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="{{ dt.faint }}">52 wk</text>
+              <path d="M70,40 L150,40 L150,72 L230,72 L230,110 L320,110 L320,150 L410,150 L410,192 L500,192 L500,222 L560,222" fill="none" stroke="{{ dt.axis }}" stroke-width="1.6"></path>
+              <path d="M70,40 L170,40 L170,60 L270,60 L270,86 L370,86 L370,112 L460,112 L460,138 L560,138" fill="none" stroke="{{ dt.accent }}" stroke-width="1.6"></path>
+              <line x1="400" y1="230" x2="424" y2="230" stroke="{{ dt.axis }}" stroke-width="1.6"></line>
+              <text x="432" y="234" font-family="IBM Plex Mono" font-size="11" fill="{{ dt.faint }}">对照组</text>
+              <line x1="400" y1="250" x2="424" y2="250" stroke="{{ dt.accent }}" stroke-width="1.6"></line>
+              <text x="432" y="254" font-family="IBM Plex Mono" font-size="11" fill="{{ dt.faint }}">治疗组</text>
+            </svg>
+            <figcaption style="font-family:'Spectral','Noto Serif SC',serif;font-size:13px;line-height:1.6;color:{{ dt.faint }};margin-top:14px;padding-top:14px;border-top:1px solid {{ dt.rule }};"><span style="font-family:'IBM Plex Mono',monospace;font-size:0.85em;color:{{ dt.accent }};">图 1 &nbsp;</span>按组分层的 Kaplan–Meier 生存曲线，用于直观核验比例风险假设。搭配 Schoenfeld 残差图与系数森林图共同呈报。</figcaption>
+          </figure>
+        </section>
+
+        <!-- §8 -->
+        <section id="sec-8" data-sec="8" style="padding-top:56px;">
+          <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ dt.accent }};letter-spacing:0.1em;">§8</span>
+            <h2 style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:26px;margin:0;color:{{ dt.fg }};">优势 · 局限与常见坑</h2>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid {{ dt.rule }};">
+            <div style="padding:22px 26px 22px 0;border-right:1px solid {{ dt.rule }};">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:{{ dt.accent }};margin-bottom:14px;">优势</div>
+              <p style="font-family:'Spectral','Noto Serif SC',serif;font-size:15px;line-height:1.8;color:{{ dt.body }};margin:0;">无需设定基线风险形状；自然处理删失；系数解释为风险比，临床沟通友好；成熟软件与诊断工具完备。</p>
+            </div>
+            <div style="padding:22px 0 22px 26px;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:{{ dt.faint }};margin-bottom:14px;">局限 / 坑</div>
+              <p style="font-family:'Spectral','Noto Serif SC',serif;font-size:15px;line-height:1.8;color:{{ dt.body }};margin:0;">比例风险假设常被忽视；对时依效应无能为力（需时依协变量）；处理大量结点（ties）需近似；不直接给出绝对风险。</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- §9 -->
+        <section id="sec-9" data-sec="9" style="padding-top:56px;">
+          <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ dt.accent }};letter-spacing:0.1em;">§9</span>
+            <h2 style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:26px;margin:0;color:{{ dt.fg }};">与相近方法的区别</h2>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-family:'Spectral','Noto Serif SC',serif;font-size:14.5px;color:{{ dt.body }};">
+            <thead><tr style="border-bottom:1.5px solid {{ dt.fg }};">
+              <th style="text-align:left;padding:11px 8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:{{ dt.faint }};font-weight:400;">方法</th>
+              <th style="text-align:left;padding:11px 8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:{{ dt.faint }};font-weight:400;">基线</th>
+              <th style="text-align:left;padding:11px 8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:{{ dt.faint }};font-weight:400;">解释量</th>
+            </tr></thead>
+            <tbody>
+              <tr style="border-bottom:1px solid {{ dt.rule }};"><td style="padding:12px 8px;">Cox PH</td><td style="padding:12px 8px;color:{{ dt.faint }};">不设定（半参数）</td><td style="padding:12px 8px;">风险比 HR</td></tr>
+              <tr style="border-bottom:1px solid {{ dt.rule }};"><td style="padding:12px 8px;">加速失效时间</td><td style="padding:12px 8px;color:{{ dt.faint }};">参数化分布</td><td style="padding:12px 8px;">时间比 TR</td></tr>
+              <tr style="border-bottom:1px solid {{ dt.rule }};"><td style="padding:12px 8px;">Log-rank 检验</td><td style="padding:12px 8px;color:{{ dt.faint }};">—</td><td style="padding:12px 8px;">组间差异 p</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- §10 -->
+        <section id="sec-10" data-sec="10" style="padding-top:56px;">
+          <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ dt.accent }};letter-spacing:0.1em;">§10</span>
+            <h2 style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:26px;margin:0;color:{{ dt.fg }};">医学应用</h2>
+          </div>
+          <p style="font-family:'Spectral','Noto Serif SC',serif;font-size:17px;line-height:1.95;color:{{ dt.body }};margin:0;">在肿瘤学随访中，Cox 模型被用于同时评估分期、分子标志物与治疗方案对总生存与无进展生存的独立影响。例如某三期临床试验以治疗组为主协变量，调整年龄、ECOG 评分后得 <span style="font-family:'IBM Plex Mono',monospace;font-size:0.9em;">HR = 0.72（95% CI 0.58–0.90）</span>，提示试验方案将死亡风险降低约 28%。</p>
+        </section>
+
+        <!-- §11 related with hover preview -->
+        <section id="sec-11" data-sec="11" style="padding-top:56px;">
+          <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ dt.accent }};letter-spacing:0.1em;">§11</span>
+            <h2 style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:26px;margin:0;color:{{ dt.fg }};">相关方法</h2>
+          </div>
+          <p style="font-family:'Spectral','Noto Serif SC',serif;font-size:17px;line-height:2.05;color:{{ dt.body }};margin:0;">建模前常以 <sc-for list="{{ related }}" as="r" hint-placeholder-count="4"><span onMouseEnter="{{ r.hoverIn }}" onMouseLeave="{{ clearHover }}" onClick="{{ r.open }}" style="cursor:pointer;color:{{ dt.accent }};border-bottom:1px solid {{ dt.accentFaint }};padding:0 1px;white-space:nowrap;">{{ r.cn }}</span><span style="color:{{ dt.faint }};">{{ r.sep }}</span></sc-for>&nbsp;等方法共同构成生存分析的工具链——先以非参数方法描述曲线、以检验比较组别，再以 Cox 做多因素调整，必要时转向参数化或竞争风险框架。悬停任一词条可见其提要。</p>
+        </section>
+
+        <!-- §12 refs -->
+        <section id="sec-12" data-sec="12" style="padding-top:56px;">
+          <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:22px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ dt.accent }};letter-spacing:0.1em;">§12</span>
+            <h2 style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:26px;margin:0;color:{{ dt.fg }};">参考资料</h2>
+          </div>
+          <ol style="list-style:none;counter-reset:ref;padding:0;margin:0;">
+            <li style="counter-increment:ref;position:relative;padding:11px 0 11px 34px;border-bottom:1px solid {{ dt.rule }};font-family:'Spectral',serif;font-size:14px;line-height:1.7;color:{{ dt.faint }};"><span style="position:absolute;left:0;font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ dt.accent }};">[1]</span>Cox, D. R. (1972). <em>Regression Models and Life-Tables.</em> JRSS-B, 34(2), 187–220.</li>
+            <li style="position:relative;padding:11px 0 11px 34px;border-bottom:1px solid {{ dt.rule }};font-family:'Spectral',serif;font-size:14px;line-height:1.7;color:{{ dt.faint }};"><span style="position:absolute;left:0;font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ dt.accent }};">[2]</span>Therneau, T. M., &amp; Grambsch, P. M. (2000). <em>Modeling Survival Data.</em> Springer.</li>
+            <li style="position:relative;padding:11px 0 11px 34px;border-bottom:1px solid {{ dt.rule }};font-family:'Spectral',serif;font-size:14px;line-height:1.7;color:{{ dt.faint }};"><span style="position:absolute;left:0;font-family:'IBM Plex Mono',monospace;font-size:11px;color:{{ dt.accent }};">[3]</span>Harrell, F. E. (2015). <em>Regression Modeling Strategies</em> (2nd ed.). Springer.</li>
+          </ol>
+          <!-- pager -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:64px;padding-top:28px;border-top:1px solid {{ dt.rule }};">
+            <div onClick="{{ goSurvival }}" style="cursor:pointer;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:{{ dt.faint }};margin-bottom:8px;">← 前一则</div>
+              <div style="font-family:'Noto Serif SC',serif;font-size:17px;color:{{ dt.fg }};">对数秩检验</div>
+            </div>
+            <div onClick="{{ goSurvival }}" style="cursor:pointer;text-align:right;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:{{ dt.faint }};margin-bottom:8px;">后一则 →</div>
+              <div style="font-family:'Noto Serif SC',serif;font-size:17px;color:{{ dt.fg }};">加速失效时间模型</div>
+            </div>
+          </div>
+          <div style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.2em;color:{{ dt.faint }};margin-top:50px;">— 黑盒词典 · 03·03 —</div>
+        </section>
+      </article>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= SPECS ================= -->
+  <sc-if value="{{ isSpecs }}" hint-placeholder-val="{{ false }}">
+  <div style="max-width:1180px;margin:0 auto;padding:72px 40px 120px;">
+    <div style="border-bottom:1.5px solid #211C17;padding-bottom:30px;margin-bottom:48px;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:#8A8276;margin-bottom:16px;">设计规范摘要 · Design Spec</div>
+      <h2 style="font-family:'Noto Serif SC',serif;font-weight:500;font-size:44px;margin:0;">规范摘要</h2>
+    </div>
+
+    <!-- palette -->
+    <div style="margin-bottom:60px;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:{{ accent }};margin-bottom:22px;">01 · 配色</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:2px;">
+        <div style="background:#F5F1E8;border:1px solid rgba(33,28,23,0.14);padding:20px 16px;height:150px;display:flex;flex-direction:column;justify-content:flex-end;"><span style="font-family:'Noto Serif SC',serif;font-size:14px;color:#211C17;">纸白</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A8276;">#F5F1E8</span></div>
+        <div style="background:#EEE8DA;padding:20px 16px;height:150px;display:flex;flex-direction:column;justify-content:flex-end;"><span style="font-family:'Noto Serif SC',serif;font-size:14px;color:#211C17;">暖灰</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A8276;">#EEE8DA</span></div>
+        <div style="background:#211C17;padding:20px 16px;height:150px;display:flex;flex-direction:column;justify-content:flex-end;"><span style="font-family:'Noto Serif SC',serif;font-size:14px;color:#F5F1E8;">墨黑</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A8276;">#211C17</span></div>
+        <div style="background:#8A8276;padding:20px 16px;height:150px;display:flex;flex-direction:column;justify-content:flex-end;"><span style="font-family:'Noto Serif SC',serif;font-size:14px;color:#F5F1E8;">辅助灰</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#EEE8DA;">#8A8276</span></div>
+        <div style="background:{{ accent }};padding:20px 16px;height:150px;display:flex;flex-direction:column;justify-content:flex-end;"><span style="font-family:'Noto Serif SC',serif;font-size:14px;color:#F5F1E8;">朱砂（强调）</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(245,241,232,0.8);">{{ accent }}</span></div>
+      </div>
+    </div>
+
+    <!-- type scale -->
+    <div style="margin-bottom:60px;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:{{ accent }};margin-bottom:22px;">02 · 字体层级</div>
+      <div style="border-top:1px solid rgba(33,28,23,0.14);">
+        <div style="display:grid;grid-template-columns:180px 1fr;gap:24px;align-items:baseline;padding:18px 0;border-bottom:1px solid rgba(33,28,23,0.1);"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A8276;">Display / 52–74</span><span style="font-family:'Noto Serif SC',serif;font-weight:500;font-size:40px;">黑盒词典 · 方法卡标题</span></div>
+        <div style="display:grid;grid-template-columns:180px 1fr;gap:24px;align-items:baseline;padding:18px 0;border-bottom:1px solid rgba(33,28,23,0.1);"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A8276;">H2 / 26</span><span style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:26px;">节标题 · 方法概览</span></div>
+        <div style="display:grid;grid-template-columns:180px 1fr;gap:24px;align-items:baseline;padding:18px 0;border-bottom:1px solid rgba(33,28,23,0.1);"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A8276;">Body / 17 · lh 1.95</span><span style="font-family:'Spectral','Noto Serif SC',serif;font-size:17px;line-height:1.6;">正文 Spectral + 思源宋体混排，行高为中文阅读调校。</span></div>
+        <div style="display:grid;grid-template-columns:180px 1fr;gap:24px;align-items:baseline;padding:18px 0;border-bottom:1px solid rgba(33,28,23,0.1);"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A8276;">Mono / 10–13</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:0.06em;">IBM Plex Mono · 元数据 / 编号 / 代码</span></div>
+      </div>
+    </div>
+
+    <!-- components -->
+    <div style="margin-bottom:20px;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:{{ accent }};margin-bottom:22px;">03 · 组件</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:36px;">
+        <div style="border:1px solid rgba(33,28,23,0.14);padding:24px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#8A8276;margin-bottom:16px;">链接 / 状态徽章</div>
+          <p style="font-family:'Spectral','Noto Serif SC',serif;font-size:16px;line-height:1.9;margin:0 0 16px;">正文内链作 <span style="color:{{ accent }};border-bottom:1px solid rgba(178,58,43,0.4);">朱砂细下划线</span>，hover 显提要卡。</p>
+          <div style="display:flex;gap:18px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6B6459;"><span>○ 草稿</span><span>◑ 已建</span><span>● 已校</span></div>
+        </div>
+        <div style="border:1px solid rgba(33,28,23,0.14);padding:24px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#8A8276;margin-bottom:16px;">公式块 / 代码块</div>
+          <div style="background:#EEE8DA;border-left:2px solid {{ accent }};padding:12px 16px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#211C17;margin-bottom:12px;">h(t|x) = h₀(t)·exp(βᵀx)</div>
+          <div style="background:#EEE8DA;padding:10px 16px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5C554B;">Python / R · 标签切换 · 浅底等宽</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ HOVER PREVIEW CARD ============ -->
+  <sc-if value="{{ hasHover }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;left:{{ hover.x }}px;top:{{ hover.y }}px;z-index:80;width:288px;background:{{ dt.bg }};border:1px solid {{ dt.accent }};box-shadow:0 18px 46px rgba(20,18,16,0.28);padding:18px 20px;animation:bbFade .16s ease both;pointer-events:none;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.2em;text-transform:uppercase;color:{{ dt.accent }};margin-bottom:10px;">{{ hover.status }} · 生存分析</div>
+    <div style="font-family:'Noto Serif SC',serif;font-weight:600;font-size:19px;color:{{ dt.fg }};margin-bottom:3px;">{{ hover.cn }}</div>
+    <div style="font-family:'Spectral',serif;font-style:italic;font-size:13px;color:{{ dt.faint }};margin-bottom:12px;">{{ hover.en }}</div>
+    <p style="font-family:'Spectral','Noto Serif SC',serif;font-size:13.5px;line-height:1.65;color:{{ dt.body }};margin:0;">{{ hover.def }}</p>
+  </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:720},&quot;startRoute&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;hero&quot;,&quot;index&quot;,&quot;category&quot;,&quot;detail&quot;,&quot;specs&quot;],&quot;default&quot;:&quot;hero&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;预览&quot;,&quot;default_label&quot;:&quot;起始页面&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;朱砂&quot;,&quot;深靛蓝&quot;,&quot;黛绿&quot;],&quot;default&quot;:&quot;朱砂&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;主题&quot;,&quot;default_label&quot;:&quot;强调色&quot;}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    const r = (props && props.startRoute) || 'hero';
+    this.state = { route:r, cat:'survival', dark:false, codeLang:'py', query:'', activeSec:1, hover:null };
+  }
+
+  go(route, cat){ this.setState({ route, cat: cat || this.state.cat, query:'', hover:null }); try{ window.scrollTo(0,0); }catch(e){} }
+
+  componentDidMount(){ if(this.state.route==='detail'){ this.tryMath(); this.setupSpy(); } }
+  componentDidUpdate(prev){
+    if(prev.startRoute !== this.props.startRoute && this.props.startRoute){ this.setState({route:this.props.startRoute}); }
+    if(this.state.route==='detail'){ this.tryMath(); }
+    if(this.state.route==='detail' && prev.route!=='detail'){ this.setupSpy(); }
+    if(this.state.route!=='detail' && prev.route==='detail'){ this.teardownSpy(); }
+  }
+
+  tryMath(){
+    const el = document.getElementById('cox-body');
+    if(!el) return;
+    if(window.renderMathInElement){
+      if(el.getAttribute('data-math') !== 'done'){
+        try{ window.renderMathInElement(el, { delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}], throwOnError:false }); }catch(e){}
+        el.setAttribute('data-math','done');
+      }
+    } else { clearTimeout(this._mt); this._mt = setTimeout(()=>this.tryMath(), 160); }
+  }
+
+  setupSpy(){
+    this.teardownSpy();
+    setTimeout(()=>{
+      const secs = [].slice.call(document.querySelectorAll('[data-sec]'));
+      if(!secs.length) return;
+      this._io = new IntersectionObserver((ents)=>{
+        ents.forEach((en)=>{ if(en.isIntersecting){ const n = parseInt(en.target.getAttribute('data-sec'),10); this.setState({ activeSec:n }); } });
+      }, { rootMargin:'-76px 0px -68% 0px', threshold:0 });
+      secs.forEach((s)=>this._io.observe(s));
+    }, 80);
+  }
+  teardownSpy(){ if(this._io){ this._io.disconnect(); this._io = null; } }
+
+  gotoSec(n){
+    const el = document.getElementById('sec-'+n);
+    if(el){ try{ window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 78, behavior:'smooth' }); }catch(e){} }
+    this.setState({ activeSec:n });
+  }
+
+  setHover(data, e){
+    try{
+      const r = e.currentTarget.getBoundingClientRect();
+      let x = r.left; const vw = window.innerWidth;
+      if(x + 300 > vw) x = vw - 300;
+      this.setState({ hover: Object.assign({}, data, { x: Math.max(12,x), y: r.bottom + 8 }) });
+    }catch(err){}
+  }
+  clearHover(){ this.setState({ hover:null }); }
+
+  accentFor(){
+    const map = { '朱砂':'#B23A2B', '深靛蓝':'#2C4A6E', '黛绿':'#3C5A4E' };
+    return map[this.props.accent] || '#B23A2B';
+  }
+  accentDark(){
+    const map = { '朱砂':'#D5715F', '深靛蓝':'#7699C6', '黛绿':'#6FA490' };
+    return map[this.props.accent] || '#D5715F';
+  }
+
+  renderVals(){
+    const st = this.state;
+    const accent = this.accentFor();
+    const dark = st.dark;
+    const dt = dark ? {
+      bg:'#17130E', fg:'#ECE6D8', body:'#D6CFBF', faint:'#948C7B', rule:'rgba(236,230,216,0.15)',
+      codeBg:'#221D15', code:'#D6CFBF', formulaBg:'#1E1A13', axis:'#B4AC99',
+      accent:this.accentDark(), accentFaint:'rgba(213,113,95,0.4)'
+    } : {
+      bg:'#F5F1E8', fg:'#211C17', body:'#332C24', faint:'#8A8276', rule:'rgba(33,28,23,0.13)',
+      codeBg:'#EEE8DA', code:'#332C24', formulaBg:'#EEE8DA', axis:'#4A443A',
+      accent:accent, accentFaint:'rgba(178,58,43,0.38)'
+    };
+
+    // categories
+    const catData = [
+      ['01','描述统计与统计推断','Descriptive & Inferential Statistics','均值、分布、区间估计与假设检验的地基。',6],
+      ['02','回归与广义线性模型','Regression & Generalized Linear Models','以线性预测子连接期望与协变量的通用框架。',7],
+      ['03','生存分析与纵向数据','Survival Analysis & Longitudinal Data','处理事件时间、删失与重复测量的方法族。',9],
+      ['04','因果推断','Causal Inference','从观测数据识别与估计干预效应。',4],
+      ['05','树模型与集成学习','Trees & Ensemble Learning','以递归划分与聚合弱学习器构建预测。',5],
+      ['06','支持向量机与核方法','SVM & Kernel Methods','以间隔最大化与核技巧处理非线性边界。',2],
+      ['07','聚类与无监督学习','Clustering & Unsupervised Learning','无标签下发现结构与分群。',4],
+      ['08','分类与判别方法','Classification & Discriminant Analysis','为观测指派类别的判别规则。',4],
+      ['09','贝叶斯方法','Bayesian Methods','以先验与后验刻画参数的不确定性。',3],
+      ['10','降维与特征选择','Dimensionality Reduction & Feature Selection','在保留信息的前提下压缩变量空间。',3],
+      ['11','时间序列分析','Time Series Analysis','建模自相关与时间依赖的动态过程。',3],
+      ['12','多元统计分析','Multivariate Analysis','同时处理多个响应变量的联合结构。',2],
+      ['13','缺失数据与插补','Missing Data & Imputation','在缺失机制下恢复可用样本。',2],
+      ['14','抽样与实验设计','Sampling & Experimental Design','以设计控制偏倚、提升效率。',2],
+      ['15','诊断检验与效能评价','Diagnostic Tests & Performance Evaluation','ROC、灵敏度特异度与模型评估。',3],
+      ['16','元分析与系统综述','Meta-analysis & Systematic Review','汇总多项研究的证据合成。',2],
+    ];
+    const categories = catData.map((c)=>({ no:c[0], cn:c[1], en:c[2], desc:c[3], count:c[4], open:()=>this.go('category','survival') }));
+
+    // survival entries
+    const entryData = [
+      ['03·01','Kaplan–Meier 估计','Kaplan–Meier Estimator','以非参数方式估计生存函数，是描述生存经验的起点。','●','已校','basic',false],
+      ['03·02','对数秩检验','Log-rank Test','比较两组或多组生存曲线是否存在显著差异。','●','已校','basic',false],
+      ['03·03','Cox 比例风险模型','Cox Proportional Hazards Model','半参数回归，量化多个协变量对事件风险的独立影响。','●','已校','intermediate',true],
+      ['03·04','加速失效时间模型','Accelerated Failure Time Model','参数化建模生存时间，系数解释为时间的伸缩。','◑','已建','intermediate',false],
+      ['03·05','竞争风险模型','Competing Risks Model','存在多种互斥终点事件时估计累积发生率。','◑','已建','intermediate',false],
+      ['03·06','时依协变量 Cox 模型','Time-varying Covariate Cox','允许协变量或其效应随时间变化。','○','草稿','intermediate',false],
+      ['03·07','脆弱模型','Frailty Model','引入随机效应刻画个体或聚集间的异质性。','○','草稿','intermediate',false],
+      ['03·08','纵向数据混合效应模型','Linear Mixed-effects Model','以固定与随机效应分析重复测量数据。','●','已校','intermediate',false],
+      ['03·09','广义估计方程','Generalized Estimating Equations','边际模型处理相关结局的总体平均效应。','◑','已建','intermediate',false],
+    ];
+    const entries = entryData.map((e)=>({
+      no:e[0], cn:e[1], en:e[2], def:e[3], statusGlyph:e[4], status:e[5], difficulty:e[6], isCox:e[7],
+      cursor: e[7] ? 'pointer' : 'default',
+      open: e[7] ? (()=>this.go('detail')) : (()=>{})
+    }));
+
+    const cat = { no:'03', cn:'生存分析与纵向数据', en:'Survival Analysis & Longitudinal Data', desc:'当结局是「事件何时发生」而非「是否发生」，且观测常被删失时，需要专门的方法族。本部收录从非参数曲线、组间检验到半参数与参数回归，以及纵向重复测量的建模工具。', count:9 };
+
+    // search
+    const q = (st.query || '').trim().toLowerCase();
+    const hasQuery = q.length > 0;
+    const pool = [
+      { cn:'Cox 比例风险模型', en:'Cox Proportional Hazards Model', tag:'生存 hazard 风险比 删失', cat:'生存分析与纵向数据', catNo:'03·03', open:()=>this.go('detail') },
+      { cn:'Kaplan–Meier 估计', en:'Kaplan-Meier Estimator', tag:'生存 曲线 非参数', cat:'生存分析与纵向数据', catNo:'03·01', open:()=>this.go('category','survival') },
+      { cn:'对数秩检验', en:'Log-rank Test', tag:'生存 检验 组间', cat:'生存分析与纵向数据', catNo:'03·02', open:()=>this.go('category','survival') },
+      { cn:'加速失效时间模型', en:'Accelerated Failure Time', tag:'生存 参数 aft', cat:'生存分析与纵向数据', catNo:'03·04', open:()=>this.go('category','survival') },
+      { cn:'逻辑回归', en:'Logistic Regression', tag:'分类 glm odds', cat:'回归与广义线性模型', catNo:'02·03', open:()=>this.go('category','survival') },
+      { cn:'随机森林', en:'Random Forest', tag:'树 集成 bagging', cat:'树模型与集成学习', catNo:'05·02', open:()=>this.go('category','survival') },
+      { cn:'倾向评分匹配', en:'Propensity Score Matching', tag:'因果 匹配', cat:'因果推断', catNo:'04·02', open:()=>this.go('category','survival') },
+      { cn:'主成分分析', en:'Principal Component Analysis', tag:'降维 pca', cat:'降维与特征选择', catNo:'10·01', open:()=>this.go('category','survival') },
+    ];
+    const matchedMethods = hasQuery ? pool.filter((m)=> (m.cn+' '+m.en+' '+m.tag).toLowerCase().indexOf(q) >= 0 ) : [];
+    const filteredCategories = categories;
+
+    // toc
+    const tocTitles = ['方法概览','数学形式','数据形式与输入输出','适用场景','实现','结果解释','推荐可视化','优势 · 局限与常见坑','与相近方法的区别','医学应用','相关方法','参考资料'];
+    const toc = tocTitles.map((t,i)=>{
+      const n = i+1; const on = st.activeSec === n;
+      return {
+        num: String(n).padStart(2,'0'), title:t,
+        color: on ? dt.fg : dt.faint,
+        numColor: on ? dt.accent : dt.faint,
+        bar: on ? dt.accent : 'transparent',
+        go: ()=>this.gotoSec(n)
+      };
+    });
+
+    // related (hover preview)
+    const relData = [
+      { cn:'Kaplan–Meier 估计', en:'Kaplan–Meier Estimator', status:'已校', def:'以乘积极限法非参数估计生存函数，是描述与直观检验的起点。' },
+      { cn:'对数秩检验', en:'Log-rank Test', status:'已校', def:'比较组间生存曲线的经典非参数检验，对比例风险最敏感。' },
+      { cn:'加速失效时间模型', en:'Accelerated Failure Time', status:'已建', def:'参数化生存时间的替代框架，系数解释为时间轴的伸缩。' },
+      { cn:'竞争风险模型', en:'Competing Risks Model', status:'已建', def:'当存在互斥终点事件时，估计各类事件的累积发生率。' },
+    ];
+    const related = relData.map((r,i)=>({
+      cn:r.cn, sep: i < relData.length-1 ? '、' : '',
+      hoverIn:(e)=>this.setHover(r,e), open:()=>this.go('detail')
+    }));
+
+    const codeIsPy = st.codeLang === 'py';
+
+    return {
+      // routing
+      isHero: st.route==='hero', isIndex: st.route==='index', isCategory: st.route==='category',
+      isDetail: st.route==='detail', isSpecs: st.route==='specs', showChrome: st.route!=='hero',
+      // chrome theme (masthead follows dark only on detail)
+      chromeBg: (st.route==='detail' && dark) ? 'rgba(23,19,14,0.9)' : 'rgba(245,241,232,0.9)',
+      chromeFg: (st.route==='detail' && dark) ? '#ECE6D8' : '#211C17',
+      chromeFaint: (st.route==='detail' && dark) ? '#948C7B' : '#8A8276',
+      chromeRule: (st.route==='detail' && dark) ? 'rgba(236,230,216,0.14)' : 'rgba(33,28,23,0.13)',
+      navIndexColor: (st.route==='index') ? accent : ((st.route==='detail'&&dark)?'#ECE6D8':'#211C17'),
+      navIndexBorder: (st.route==='index') ? accent : 'transparent',
+      navSpecsColor: (st.route==='specs') ? accent : ((st.route==='detail'&&dark)?'#ECE6D8':'#211C17'),
+      navSpecsBorder: (st.route==='specs') ? accent : 'transparent',
+      darkLabel: dark ? '日读' : '夜读',
+      darkDotBg: dark ? '#ECE6D8' : 'transparent',
+      // nav handlers
+      goHero:()=>this.go('hero'), goIndex:()=>this.go('index'), goSpecs:()=>this.go('specs'),
+      goSurvival:()=>this.go('category','survival'), toggleDark:()=>this.setState({dark:!st.dark}),
+      // data
+      accent, dt,
+      categories: filteredCategories, cat, entries,
+      // search
+      onSearch:(e)=>this.setState({query:e.target.value}),
+      hasQuery, matchedMethods, matchCount: matchedMethods.length + ' 则',
+      noMatch: hasQuery && matchedMethods.length===0,
+      showCatTable: !hasQuery,
+      searchHint: hasQuery ? '' : '支持中文名 · 英文名 · 标签',
+      // toc + code + related
+      toc, related,
+      codeIsPy, codeIsR: !codeIsPy,
+      setPy:()=>this.setState({codeLang:'py'}), setR:()=>this.setState({codeLang:'r'}),
+      pyTabColor: codeIsPy ? dt.accent : dt.faint, pyTabBar: codeIsPy ? dt.accent : 'transparent',
+      rTabColor: !codeIsPy ? dt.accent : dt.faint, rTabBar: !codeIsPy ? dt.accent : 'transparent',
+      // hover
+      hasHover: !!st.hover, hover: st.hover || { x:0,y:0,cn:'',en:'',def:'',status:'' },
+      clearHover:()=>this.clearHover(),
+    };
+  }
+}
+</script>
+</body>
+</html>

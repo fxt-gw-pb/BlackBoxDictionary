@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DenseNet · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-11.html">神经网络与深度学习</a><span class="sep">/</span><span class="cur">DenseNet</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">神经网络与深度学习 · 11·12</div>
+      <h1 class="detail-h1">DenseNet</h1>
+      <div class="detail-en">Densely Connected Convolutional Network, DenseNet</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>advanced</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 深度学习 / 图像分析</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>DenseNet（Densely Connected Convolutional Network, DenseNet）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>DenseNet 是一种密集连接卷积网络。它让每一层都接收所有前面层的特征图作为输入，从而强化特征复用并改善梯度传播。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：如何在保持深层表达能力的同时，更充分地复用浅层和中层特征。</li>
+<li>适用任务：图像分类、迁移学习、医学影像表征提取。</li>
+<li>常见医学场景：胸片识别、病理切片分类、皮肤和眼底图像分级。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>DenseNet 像一套层层共享笔记的网络。后面每一层不仅看上一层结果，还能直接查看更早层的特征，因此对细粒度纹理和高层语义都能同时利用。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>DenseNet 的第 $l$ 层通常写为：</p>
+<p>$$
+x_l = H_l([x_0, x_1, \dots, x_{l-1}])
+$$</p>
+<p>其中 $[\cdot]$ 表示特征拼接，$H_l$ 是卷积、归一化和激活组成的变换。增长率 $k$ 表示每层新增的特征图数量。</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>密集连接：当前层可直接访问所有前层特征。</li>
+<li>growth rate：每层新增通道数。</li>
+<li>transition layer：用于压缩通道和下采样。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>任务受益于多层级特征共享。</li>
+<li>训练数据和计算资源足以支持密集连接带来的内存开销。</li>
+<li>特征复用优于简单加深网络。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：二维或三维图像张量。</li>
+<li>因变量类型：分类、回归、视觉识别任务标签。</li>
+<li>数据结构：图像张量。</li>
+<li>是否适合高维数据：适合图像高维输入，但内存开销需关注。</li>
+<li>是否适合缺失较多数据：需先处理图像质量问题。</li>
+<li>是否适合删失数据：不直接处理删失。</li>
+<li>是否适合重复测量数据：若是图像序列，需额外时序建模。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以肺结节影像分类为例：</p>
+<table>
+<thead>
+<tr>
+<th>ImageID</th>
+<th>ImagePath</th>
+<th>SliceType</th>
+<th>NoduleLabel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C001</td>
+<td>ct_001.png</td>
+<td>axial</td>
+<td>malignant</td>
+</tr>
+<tr>
+<td>C002</td>
+<td>ct_002.png</td>
+<td>axial</td>
+<td>benign</td>
+</tr>
+<tr>
+<td>C003</td>
+<td>ct_003.png</td>
+<td>coronal</td>
+<td>malignant</td>
+</tr>
+<tr>
+<td>C004</td>
+<td>ct_004.png</td>
+<td>axial</td>
+<td>benign</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：图像张量和分类标签。</li>
+<li>关键变量：网络版本、growth rate、压缩率、学习率。</li>
+<li>需要预处理的内容：标准化、增强、中心和病人级划分。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：DenseNet 权重和验证指标。</li>
+<li>参数估计：各 dense block 与分类头参数。</li>
+<li>预测结果：类别概率、回归值或图像嵌入。</li>
+<li>不确定性指标：外部验证性能、校准与错误模式分析。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：希望充分复用多尺度特征的影像任务，尤其是迁移学习场景。</li>
+<li>不适合：显存十分有限、样本特别少且无法迁移学习的任务。</li>
+<li>使用前需要特别检查的点：内存占用、特征冗余、域偏移。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="densely-connected-convolutional-network-densenet" data-i="0">Python</button><button class="codetab" data-uid="densely-connected-convolutional-network-densenet" data-i="1">R</button></div><div class="codepanel active" data-uid="densely-connected-convolutional-network-densenet" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>torch</code></li>
+<li><code>torchvision</code></li>
+</ul>
+<pre><code class="language-python">from torchvision.models import densenet121
+
+model = densenet121(weights=None, num_classes=2)
+</code></pre></div><div class="codepanel" data-uid="densely-connected-convolutional-network-densenet" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>keras</code></li>
+</ul>
+<pre><code class="language-r"># R 中通常通过 keras 的 DenseNet 预训练应用模型做迁移学习，
+# 或直接在 Python 生态中训练后导出结果。
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：分类性能、外部泛化、不同病灶类型下表现。</li>
+<li>每个主要参数如何解释：growth rate 越大，新增特征越多，容量和资源需求也越高。</li>
+<li>临床或医学意义如何表达：DenseNet 常用于提高视觉任务性能，但仍需临床验证和解释工具辅助。</li>
+<li>常见误读：特征共享多不代表一定优于 ResNet，具体效果依赖任务和数据域。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>训练/验证曲线。</li>
+<li>混淆矩阵。</li>
+<li>特征嵌入投影或热图解释。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>特征复用充分。</li>
+<li>梯度传播顺畅。</li>
+<li>在部分医疗影像任务中迁移效果优秀。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>内存占用较高。</li>
+<li>结构较复杂。</li>
+<li>解释性依然有限。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>忽略 dense block 带来的显存压力。</li>
+<li>只比平均性能，不看罕见病灶类别。</li>
+<li>不检查数据集来源偏差。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="卷积神经网络是一类专门处理图像或局部空间结构数据的神经网络。它通过卷积核、激活函数和池化层，从原始像素中自动提取边缘、纹理和高级语义特征。">卷积神经网络（Convolutional Neural Network, CNN）</a> 的区别：DenseNet 是 CNN 的具体密集连接变体。</li>
+<li>和 <a class="xlink" href="m-residual-network-resnet.html" data-cn="残差网络" data-en="Residual Network, ResNet" data-def="ResNet 是在深层 CNN 中引入残差连接的网络架构。它通过快捷连接把输入直接加到后续层输出上，从而缓解深层网络训练中的退化与梯度传播困难。">残差网络（Residual Network, ResNet）</a> 的区别：ResNet 用逐块相加的残差连接，DenseNet 用跨层拼接复用特征。</li>
+<li>和 <a class="xlink" href="m-alexnet.html" data-cn="AlexNet" data-en="AlexNet" data-def="AlexNet 是深度学习图像识别史上的经典卷积神经网络架构。它通过较深的卷积层堆叠、ReLU、dropout 和大规模 GPU 训练，推动了现代深度视觉模型的发展。">AlexNet（AlexNet）</a> 的区别：AlexNet 更早、更浅，DenseNet 更强调深层特征复用。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>胸片和 CT 分类任务。</li>
+<li>迁移学习驱动的病理图像识别。</li>
+<li>作为医学影像表征骨干网络。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="卷积神经网络是一类专门处理图像或局部空间结构数据的神经网络。它通过卷积核、激活函数和池化层，从原始像素中自动提取边缘、纹理和高级语义特征。">卷积神经网络（Convolutional Neural Network, CNN）</a></li>
+<li><a class="xlink" href="m-residual-network-resnet.html" data-cn="残差网络" data-en="Residual Network, ResNet" data-def="ResNet 是在深层 CNN 中引入残差连接的网络架构。它通过快捷连接把输入直接加到后续层输出上，从而缓解深层网络训练中的退化与梯度传播困难。">残差网络（Residual Network, ResNet）</a></li>
+<li><a class="xlink" href="m-alexnet.html" data-cn="AlexNet" data-en="AlexNet" data-def="AlexNet 是深度学习图像识别史上的经典卷积神经网络架构。它通过较深的卷积层堆叠、ReLU、dropout 和大规模 GPU 训练，推动了现代深度视觉模型的发展。">AlexNet（AlexNet）</a></li>
+<li><a class="xlink" href="m-transformer.html" data-cn="Transformer" data-en="Transformer" data-def="Transformer 是以多头注意力为核心的序列建模架构。它不依赖传统递归结构，而是通过自注意力和位置编码并行建模序列中的全局依赖。">Transformer（Transformer）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Huang G, Liu Z, van der Maaten L, Weinberger KQ. Densely connected convolutional networks. <em>Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition</em>. 2017:4700-4708.</li>
+<li>Goodfellow I, Bengio Y, Courville A. <em>Deep Learning</em>. MIT Press; 2016.</li>
+<li>torchvision Developers. DenseNet models. <a href="https://pytorch.org/vision/stable/models/densenet.html">https://pytorch.org/vision/stable/models/densenet.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-residual-network-resnet.html"><div class="pg-lab">← 前一则</div><div class="pg-t">残差网络</div></a><a class="pg pg-next" href="m-alexnet.html"><div class="pg-lab">后一则 →</div><div class="pg-t">AlexNet</div></a></div>
+    <div class="colophon">— 黑盒词典 · 11·12 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AlexNet · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-11.html">神经网络与深度学习</a><span class="sep">/</span><span class="cur">AlexNet</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">神经网络与深度学习 · 11·13</div>
+      <h1 class="detail-h1">AlexNet</h1>
+      <div class="detail-en">AlexNet</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 深度学习 / 图像分析</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>AlexNet（AlexNet）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>AlexNet 是深度学习图像识别史上的经典卷积神经网络架构。它通过较深的卷积层堆叠、ReLU、dropout 和大规模 GPU 训练，推动了现代深度视觉模型的发展。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：如何在传统浅层视觉模型之外，利用深层 CNN 从原始图像中学习更强的判别特征。</li>
+<li>适用任务：图像分类、迁移学习、卷积网络教学与基线建模。</li>
+<li>常见医学场景：小型医学图像分类基线、教学演示、预训练视觉骨干对比。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>AlexNet 像现代 CNN 的早期原型机。它用多层卷积逐步把像素加工成越来越抽象的图像特征，再通过全连接层输出分类结果。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>AlexNet 的基本运算仍是卷积、激活和池化：</p>
+<p>$$
+Y_{i,j,c} = \sum_{m,n,k} X_{i+m, j+n, k} K_{m,n,k,c} + b_c
+$$</p>
+<p>随后经过：</p>
+<p>$$
+A = \operatorname{ReLU}(Y)
+$$</p>
+<p>再通过池化、展平和全连接层输出类别概率。</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>大卷积核和步幅：早期层快速扩大感受野。</li>
+<li>ReLU：加速训练并缓解梯度消失。</li>
+<li>dropout：减少全连接层过拟合。</li>
+<li>全连接层：综合高级视觉特征完成分类。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>图像中存在可由深层卷积逐层提取的判别模式。</li>
+<li>有足够训练样本或可借助预训练。</li>
+<li>任务受益于经典 CNN 视觉归纳偏置。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：二维彩色或灰度图像。</li>
+<li>因变量类型：图像类别标签。</li>
+<li>数据结构：图像张量。</li>
+<li>是否适合高维数据：适合图像高维输入。</li>
+<li>是否适合缺失较多数据：需先处理图像缺损和低质量样本。</li>
+<li>是否适合删失数据：不直接处理删失。</li>
+<li>是否适合重复测量数据：不直接建模时间相关性。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以皮肤病变分类为例：</p>
+<table>
+<thead>
+<tr>
+<th>ImageID</th>
+<th>ImagePath</th>
+<th>BodySite</th>
+<th>LesionType</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D001</td>
+<td>derm_001.png</td>
+<td>arm</td>
+<td>benign</td>
+</tr>
+<tr>
+<td>D002</td>
+<td>derm_002.png</td>
+<td>face</td>
+<td>malignant</td>
+</tr>
+<tr>
+<td>D003</td>
+<td>derm_003.png</td>
+<td>back</td>
+<td>benign</td>
+</tr>
+<tr>
+<td>D004</td>
+<td>derm_004.png</td>
+<td>leg</td>
+<td>malignant</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：图像张量及标签。</li>
+<li>关键变量：输入尺寸、学习率、dropout、是否迁移学习。</li>
+<li>需要预处理的内容：缩放、标准化、增强、病人级划分。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：训练好的 AlexNet 参数和验证性能。</li>
+<li>参数估计：卷积层与全连接层权重。</li>
+<li>预测结果：类别概率和最终分类标签。</li>
+<li>不确定性指标：验证集 AUC、召回率、错误样本复核结果。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：作为经典 CNN 基线、教学示例、轻量迁移学习起点。</li>
+<li>不适合：需要最先进性能或极深特征建模的复杂任务。</li>
+<li>使用前需要特别检查的点：输入分辨率、过拟合、是否有更合适的现代骨干网络。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="alexnet" data-i="0">Python</button><button class="codetab" data-uid="alexnet" data-i="1">R</button></div><div class="codepanel active" data-uid="alexnet" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>torch</code></li>
+<li><code>torchvision</code></li>
+</ul>
+<pre><code class="language-python">from torchvision.models import alexnet
+
+model = alexnet(weights=None, num_classes=2)
+</code></pre></div><div class="codepanel" data-uid="alexnet" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>keras</code></li>
+</ul>
+<pre><code class="language-r"># R 中更常通过 keras 调用预训练视觉模型，AlexNet 本身通常在 Python 生态中实现。
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：分类性能、训练收敛情况、是否比更简单 CNN 基线明显更优。</li>
+<li>每个主要参数如何解释：卷积层负责局部特征提取，全连接层负责最终判别整合。</li>
+<li>临床或医学意义如何表达：AlexNet 更常用作技术基线，而不是最终临床部署模型。</li>
+<li>常见误读：AlexNet 在深度学习历史上重要，但在很多现代任务中并非最优选择。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>训练/验证曲线。</li>
+<li>混淆矩阵。</li>
+<li>典型正确与错误分类样本图。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>结构经典，易于学习和复现。</li>
+<li>作为 CNN 基线有历史代表性。</li>
+<li>可快速用于小型迁移学习实验。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>相比 ResNet、DenseNet 等现代网络较浅且效率较低。</li>
+<li>全连接层参数较多，易过拟合。</li>
+<li>对复杂影像任务性能常不够强。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>把 AlexNet 当成现代最佳视觉架构。</li>
+<li>不做病人级切分和外部验证。</li>
+<li>输入尺寸和预处理与预训练权重不匹配。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="卷积神经网络是一类专门处理图像或局部空间结构数据的神经网络。它通过卷积核、激活函数和池化层，从原始像素中自动提取边缘、纹理和高级语义特征。">卷积神经网络（Convolutional Neural Network, CNN）</a> 的区别：AlexNet 是经典 CNN 具体架构。</li>
+<li>和 <a class="xlink" href="m-residual-network-resnet.html" data-cn="残差网络" data-en="Residual Network, ResNet" data-def="ResNet 是在深层 CNN 中引入残差连接的网络架构。它通过快捷连接把输入直接加到后续层输出上，从而缓解深层网络训练中的退化与梯度传播困难。">残差网络（Residual Network, ResNet）</a> 的区别：ResNet 更深且通过残差连接改善训练。</li>
+<li>和 <a class="xlink" href="m-densely-connected-convolutional-network-densenet.html" data-cn="DenseNet" data-en="Densely Connected Convolutional Network, DenseNet" data-def="DenseNet 是一种密集连接卷积网络。它让每一层都接收所有前面层的特征图作为输入，从而强化特征复用并改善梯度传播。">DenseNet（Densely Connected Convolutional Network, DenseNet）</a> 的区别：DenseNet 更强调跨层特征复用。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>医学图像分类教学基线。</li>
+<li>预训练模型对照实验。</li>
+<li>小规模视觉任务的快速原型开发。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="卷积神经网络是一类专门处理图像或局部空间结构数据的神经网络。它通过卷积核、激活函数和池化层，从原始像素中自动提取边缘、纹理和高级语义特征。">卷积神经网络（Convolutional Neural Network, CNN）</a></li>
+<li><a class="xlink" href="m-residual-network-resnet.html" data-cn="残差网络" data-en="Residual Network, ResNet" data-def="ResNet 是在深层 CNN 中引入残差连接的网络架构。它通过快捷连接把输入直接加到后续层输出上，从而缓解深层网络训练中的退化与梯度传播困难。">残差网络（Residual Network, ResNet）</a></li>
+<li><a class="xlink" href="m-densely-connected-convolutional-network-densenet.html" data-cn="DenseNet" data-en="Densely Connected Convolutional Network, DenseNet" data-def="DenseNet 是一种密集连接卷积网络。它让每一层都接收所有前面层的特征图作为输入，从而强化特征复用并改善梯度传播。">DenseNet（Densely Connected Convolutional Network, DenseNet）</a></li>
+<li><a class="xlink" href="m-artificial-neural-network-ann.html" data-cn="人工神经网络" data-en="Artificial Neural Network, ANN" data-def="人工神经网络是由多层神经元节点组成的一类函数逼近模型。它通过权重、偏置和非线性激活函数，把输入数据映射到分类、回归或表征学习目标上。">人工神经网络（Artificial Neural Network, ANN）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Krizhevsky A, Sutskever I, Hinton GE. ImageNet classification with deep convolutional neural networks. <em>Advances in Neural Information Processing Systems</em>. 2012;25.</li>
+<li>Goodfellow I, Bengio Y, Courville A. <em>Deep Learning</em>. MIT Press; 2016.</li>
+<li>torchvision Developers. AlexNet model. <a href="https://pytorch.org/vision/stable/models/alexnet.html">https://pytorch.org/vision/stable/models/alexnet.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-densely-connected-convolutional-network-densenet.html"><div class="pg-lab">← 前一则</div><div class="pg-t">DenseNet</div></a><span></span></div>
+    <div class="colophon">— 黑盒词典 · 11·13 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

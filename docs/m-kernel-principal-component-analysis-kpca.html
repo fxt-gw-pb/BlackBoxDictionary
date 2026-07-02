@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>核主成分分析 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-10.html">降维与表征学习</a><span class="sep">/</span><span class="cur">核主成分分析</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">降维与表征学习 · 10·09</div>
+      <h1 class="detail-h1">核主成分分析</h1>
+      <div class="detail-en">Kernel Principal Component Analysis, KPCA</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>advanced</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 降维 / 核方法 / 非线性</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>核主成分分析（Kernel Principal Component Analysis, KPCA）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>核主成分分析是 <a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a> 的非线性扩展。它通过核函数隐式地把样本映射到高维特征空间，再在该空间中执行 PCA，从而捕捉原始空间中的非线性结构。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：数据主要结构不是线性方向时，如何提取非线性主成分。</li>
+<li>适用任务：非线性降维、非线性特征提取、可视化、后续分类或回归的特征构造。</li>
+<li>常见医学场景：复杂生物标志物模式提取，影像组学非线性特征压缩，非线性疾病表型结构展示。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>普通 PCA 只能寻找原始空间中的直线方向。核 PCA 借助核函数在“看不见的高维空间”里做 PCA，使原始空间中弯曲的结构也可能被展开成更容易表示的方向。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>设非线性映射为 $\phi(x)$，核函数为：</p>
+<p>$$
+K(x_i,x_j)=\langle \phi(x_i),\phi(x_j)\rangle
+$$</p>
+<p>核矩阵 $K$ 需要中心化：</p>
+<p>$$
+K_c = K - \mathbf{1}_n K - K\mathbf{1}_n + \mathbf{1}_n K \mathbf{1}_n
+$$</p>
+<p>其中 $\mathbf{1}_n$ 为元素均为 $1/n$ 的矩阵。核 PCA 通过求解：</p>
+<p>$$
+K_c \alpha = n\lambda \alpha
+$$</p>
+<p>得到特征空间中的主成分方向。新样本 $x$ 在第 $m$ 个核主成分上的坐标为：</p>
+<p>$$
+z_m(x)=\sum_{i=1}^{n}\alpha_{mi}K(x_i,x)
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$K$：核矩阵，表示样本在隐式特征空间中的内积。</li>
+<li>$\phi(x)$：隐式非线性映射。</li>
+<li>$\alpha$：核矩阵特征向量。</li>
+<li><code>kernel</code>：核函数类型，如 RBF、多项式、sigmoid。</li>
+<li><code>gamma</code>：RBF 核的尺度参数。</li>
+<li><code>n_components</code>：保留的核主成分数量。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>所选核函数能表达数据中的非线性结构。</li>
+<li>样本相似性可由核矩阵合理描述。</li>
+<li>参数如 <code>gamma</code> 不会造成过度局部化或过度平滑。</li>
+<li>主要目标是表征或预测辅助，而不是直接解释原始变量载荷。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续型特征或可定义核函数的对象。</li>
+<li>因变量类型：KPCA 本身不需要结局变量。</li>
+<li>数据结构：样本乘以特征矩阵，或预计算核矩阵。</li>
+<li>是否适合高维数据：可用于高维数据，但核矩阵规模为 $n\times n$，大样本成本较高。</li>
+<li>是否适合缺失较多数据：需先处理缺失。</li>
+<li>是否适合删失数据：不直接处理删失结局。</li>
+<li>是否适合重复测量数据：需先定义样本单位或使用合适核函数。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以非线性生物标志物模式为例：</p>
+<table>
+<thead>
+<tr>
+<th>Marker_1</th>
+<th>Marker_2</th>
+<th>Marker_3</th>
+<th>Marker_4</th>
+<th>Disease</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.8</td>
+<td>1.4</td>
+<td>-0.2</td>
+<td>0.3</td>
+<td>1</td>
+</tr>
+<tr>
+<td>0.6</td>
+<td>1.1</td>
+<td>-0.1</td>
+<td>0.1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>-0.4</td>
+<td>0.2</td>
+<td>0.7</td>
+<td>-0.5</td>
+<td>0</td>
+</tr>
+<tr>
+<td>-0.6</td>
+<td>0.1</td>
+<td>0.5</td>
+<td>-0.4</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：数值特征矩阵或核矩阵。</li>
+<li>关键变量：核函数、核参数、保留维度、是否拟合逆变换。</li>
+<li>需要预处理的内容：缺失处理、标准化、核参数调优、训练测试划分内 fit。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：核主成分得分、核矩阵特征值、低维表示。</li>
+<li>参数估计：核矩阵特征向量和特征值。</li>
+<li>预测结果：KPCA 本身不预测，可作为后续模型输入。</li>
+<li>不确定性指标：参数敏感性、交叉验证性能、重采样稳定性。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：线性 PCA 难以展开结构、非线性关系明显、样本量中等且核矩阵可计算的场景。</li>
+<li>不适合：需要清晰变量载荷解释、大样本核矩阵计算不可承受、核参数难以稳定选择的场景。</li>
+<li>使用前需要特别检查的点：核函数是否合适，<code>gamma</code> 是否过大或过小，降维结果是否改善下游任务或可视化。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="kernel-principal-component-analysis-kpca" data-i="0">Python</button><button class="codetab" data-uid="kernel-principal-component-analysis-kpca" data-i="1">R</button></div><div class="codepanel active" data-uid="kernel-principal-component-analysis-kpca" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+from sklearn.decomposition import KernelPCA
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv(&quot;biomarker_features.csv&quot;)
+X = df&amp;quot;Marker_1&amp;quot;, &amp;quot;Marker_2&amp;quot;, &amp;quot;Marker_3&amp;quot;, &amp;quot;Marker_4&amp;quot;
+
+kpca_pipe = make_pipeline(
+    StandardScaler(),
+    KernelPCA(
+        n_components=2,
+        kernel=&quot;rbf&quot;,
+        gamma=0.5,
+        random_state=42
+    )
+)
+
+Z = kpca_pipe.fit_transform(X)
+embedding = pd.DataFrame(Z, columns=[&quot;KPCA1&quot;, &quot;KPCA2&quot;])
+print(embedding.head())
+</code></pre></div><div class="codepanel" data-uid="kernel-principal-component-analysis-kpca" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>kernlab</code></li>
+</ul>
+<pre><code class="language-r">library(kernlab)
+
+x &lt;- scale(df[, c(&quot;Marker_1&quot;, &quot;Marker_2&quot;, &quot;Marker_3&quot;, &quot;Marker_4&quot;)])
+fit &lt;- kpca(x, kernel = &quot;rbfdot&quot;, kpar = list(sigma = 0.5), features = 2)
+
+embedding &lt;- rotated(fit)
+head(embedding)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：核主成分空间中的样本分布、特征值衰减、不同核参数下结构是否稳定。</li>
+<li>每个主要参数如何解释：RBF 核中的 <code>gamma</code> 越大，相似性越局部，嵌入可能更复杂也更容易过拟合。</li>
+<li>临床或医学意义如何表达：核主成分是隐式特征空间中的方向，解释应围绕样本相似性和下游任务表现，而不是原始变量载荷。</li>
+<li>常见误读：KPCA 的二维图比 PCA 好看，不代表它一定更适合预测或机制解释。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>KPCA1-KPCA2 散点图。</li>
+<li>核参数敏感性对比图。</li>
+<li>下游模型交叉验证性能随核参数变化曲线。</li>
+<li>与 PCA、UMAP 或 t-SNE 的嵌入对比图。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>能捕捉非线性结构。</li>
+<li>可复用核方法的灵活相似性定义。</li>
+<li>可作为后续模型的非线性特征工程步骤。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>核矩阵计算和存储成本随样本量平方增长。</li>
+<li>结果解释不如 PCA 载荷直观。</li>
+<li>核函数和参数选择影响很大。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>在全数据上 fit KPCA 后再交叉验证监督模型。</li>
+<li>不调核参数就比较算法优劣。</li>
+<li>把隐式核主成分强行解释为原始变量线性组合。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a> 的区别：PCA 是线性降维，KPCA 通过核技巧做非线性降维。</li>
+<li>和 <a class="xlink" href="m-polynomial-kernel-regression.html" data-cn="多项式核回归" data-en="Polynomial Kernel Regression" data-def="多项式核回归是一类利用多项式核函数实现非线性拟合的回归方法，实践中常见形式是“带多项式核的支持向量回归”。">多项式核回归（Polynomial Kernel Regression）</a> 的区别：多项式核回归是监督回归，KPCA 是无监督表征学习。</li>
+<li>和 <a class="xlink" href="m-uniform-manifold-approximation-and-projection.html" data-cn="UMAP" data-en="Uniform Manifold Approximation and Projection" data-def="UMAP 是一种非线性降维和可视化方法，基于流形假设和近邻图构建高维数据的模糊拓扑结构，再在低维空间中寻找相似的结构。">UMAP（Uniform Manifold Approximation and Projection）</a> 的区别：UMAP 面向邻域图嵌入和可视化，KPCA 基于核矩阵特征分解。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>多生物标志物非线性综合表征。</li>
+<li>影像组学非线性结构压缩后进入分类模型。</li>
+<li>复杂临床表型数据的非线性探索性可视化。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
+<li><a class="xlink" href="m-polynomial-kernel-regression.html" data-cn="多项式核回归" data-en="Polynomial Kernel Regression" data-def="多项式核回归是一类利用多项式核函数实现非线性拟合的回归方法，实践中常见形式是“带多项式核的支持向量回归”。">多项式核回归（Polynomial Kernel Regression）</a></li>
+<li><a class="xlink" href="m-uniform-manifold-approximation-and-projection.html" data-cn="UMAP" data-en="Uniform Manifold Approximation and Projection" data-def="UMAP 是一种非线性降维和可视化方法，基于流形假设和近邻图构建高维数据的模糊拓扑结构，再在低维空间中寻找相似的结构。">UMAP（Uniform Manifold Approximation and Projection）</a></li>
+<li><a class="xlink" href="m-support-vector-machine-svm.html" data-cn="支持向量机" data-en="Support Vector Machine, SVM" data-def="支持向量机是一类通过最大化分类间隔来学习判别边界的监督学习方法。它最经典的用途是二分类，也可以扩展到多分类和非线性分类。">支持向量机（Support Vector Machine, SVM）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Scholkopf B, Smola A, Muller KR. Nonlinear component analysis as a kernel eigenvalue problem. <em>Neural Computation</em>. 1998;10(5):1299-1319.</li>
+<li>Scholkopf B, Smola AJ. <em>Learning with Kernels</em>. MIT Press; 2002.</li>
+<li>scikit-learn Developers. <code>sklearn.decomposition.KernelPCA</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.KernelPCA.html">https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.KernelPCA.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-uniform-manifold-approximation-and-projection.html"><div class="pg-lab">← 前一则</div><div class="pg-t">UMAP</div></a><a class="pg pg-next" href="m-multidimensional-scaling-mds.html"><div class="pg-lab">后一则 →</div><div class="pg-t">多维尺度分析</div></a></div>
+    <div class="colophon">— 黑盒词典 · 10·09 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

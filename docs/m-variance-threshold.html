@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>方差阈值法 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-13.html">数据预处理与特征工程</a><span class="sep">/</span><span class="cur">方差阈值法</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">数据预处理与特征工程 · 13·01</div>
+      <h1 class="detail-h1">方差阈值法</h1>
+      <div class="detail-en">Variance Threshold</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 特征选择 / 数据预处理</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>方差阈值法（Variance Threshold）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>方差阈值法是一种过滤式特征选择方法。它计算每个特征在样本中的方差，并删除方差低于预设阈值的特征，用来去掉几乎不变化、信息量很低的变量。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：如何在建模前快速删除近似常量特征。</li>
+<li>适用任务：无监督特征过滤、建模前降噪、高维矩阵预处理。</li>
+<li>常见医学场景：组学特征初筛、影像组学稳定特征过滤、电子病历中几乎恒定字段清理。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>如果一个变量在所有患者中几乎一样，它很难帮助模型区分不同个体。方差阈值法就是先把这类“没有变化”的列清掉，让后续模型少背一些没有信息的包袱。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>对第 $j$ 个特征 $X_j$，其样本方差为：</p>
+<p>$$
+s_j^2=\frac{1}{n}\sum_{i=1}^{n}(x_{ij}-\bar x_j)^2
+$$</p>
+<p>设阈值为 $\theta$，选择规则为：</p>
+<p>$$
+\text{keep}(X_j)=I(s_j^2\geq \theta)
+$$</p>
+<p>对于二分类哑变量，若取值为 1 的比例为 $p$，方差为：</p>
+<p>$$
+\mathrm{Var}(X_j)=p(1-p)
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$s_j^2$：第 $j$ 个特征的样本方差。</li>
+<li>$\theta$：方差阈值。</li>
+<li>近零方差：特征几乎恒定，或某个取值占绝大多数。</li>
+<li><code>threshold</code>：实现中的阈值参数。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>特征变化越小，通常提供的信息越少。</li>
+<li>这是无监督过滤方法，不使用结局变量。</li>
+<li>只有在特征尺度可比时，方差大小才有直接比较意义。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续变量、二值变量、编码后的分类变量。</li>
+<li>因变量类型：不需要结局变量。</li>
+<li>数据结构：样本乘以特征的矩阵。</li>
+<li>是否适合高维数据：适合，尤其适合作为第一步粗筛。</li>
+<li>是否适合缺失较多数据：需先处理缺失或按规则计算方差。</li>
+<li>是否适合删失数据：作为特征预处理可用，但不处理删失结局。</li>
+<li>是否适合重复测量数据：需先明确分析单位，避免把同一患者重复记录当作独立样本。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以 ICU 表格特征预处理为例：</p>
+<table>
+<thead>
+<tr>
+<th>Age</th>
+<th>SexMale</th>
+<th>HospitalID_01</th>
+<th>RareCode_X</th>
+<th>Lactate</th>
+<th>Death30d</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>73</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>3.1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>46</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1.1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>65</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>2.4</td>
+<td>1</td>
+</tr>
+<tr>
+<td>39</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0.8</td>
+<td>0</td>
+</tr>
+<tr>
+<td>58</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1.6</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：特征矩阵。</li>
+<li>关键变量：每个特征的方差、阈值。</li>
+<li>需要预处理的内容：缺失处理、类别编码、是否标准化的决策。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：保留特征掩码、各特征方差。</li>
+<li>参数估计：无。</li>
+<li>预测结果：无，输出降维后的特征矩阵。</li>
+<li>不确定性指标：通常不提供。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：删除常量列、近似常量列、极低频哑变量。</li>
+<li>不适合：单独作为最终特征选择依据，尤其不适合判断特征与结局是否相关。</li>
+<li>使用前需要特别检查的点：特征尺度是否可比；二值特征的低方差是否仍有医学意义，例如罕见但重要的突变。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="variance-threshold" data-i="0">Python</button><button class="codetab" data-uid="variance-threshold" data-i="1">R</button></div><div class="codepanel active" data-uid="variance-threshold" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+from sklearn.feature_selection import VarianceThreshold
+from sklearn.model_selection import train_test_split
+
+df = pd.read_csv(&quot;icu_features.csv&quot;)
+X = df.drop(columns=[&quot;Death30d&quot;])
+y = df[&quot;Death30d&quot;]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+selector = VarianceThreshold(threshold=0.01)
+X_train_sel = selector.fit_transform(X_train)
+X_test_sel = selector.transform(X_test)
+
+selected_features = X.columns[selector.get_support()]
+print(selected_features.tolist())
+</code></pre></div><div class="codepanel" data-uid="variance-threshold" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>caret</code></li>
+</ul>
+<pre><code class="language-r">library(caret)
+
+x_train &lt;- df_train[, setdiff(names(df_train), &quot;Death30d&quot;)]
+nzv &lt;- nearZeroVar(x_train)
+
+x_train_sel &lt;- x_train[, -nzv]
+x_test_sel &lt;- df_test[, names(x_train_sel)]
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：哪些特征被删除、删除原因是否只是低变化。</li>
+<li>每个主要参数如何解释：阈值越高，删除越激进。</li>
+<li>临床或医学意义如何表达：该方法只说明某特征在当前样本中变化很少，不说明其没有生物学或临床意义。</li>
+<li>常见误读：低方差不等于无效，高方差也不等于有预测价值。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>特征方差排序条形图。</li>
+<li>低方差特征取值频数图。</li>
+<li>阈值与保留特征数量关系图。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>简单、快速、无需结局变量。</li>
+<li>适合高维数据的第一步粗筛。</li>
+<li>能清理常量列和无效哑变量。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>不评估特征与结局关系。</li>
+<li>对特征尺度敏感。</li>
+<li>可能删除低频但临床重要的特征。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>标准化后所有连续特征方差都接近 1，再做方差阈值就失去意义。</li>
+<li>在全数据上先筛选，再做训练测试划分，造成数据处理流程不规范。</li>
+<li>对罕见事件变量机械删除。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-univariate-feature-selection.html" data-cn="单变量特征选择" data-en="Univariate Feature Selection" data-def="单变量特征选择是一类过滤式方法。它逐个评估每个特征与目标变量之间的关系，根据统计量、P 值或信息量得分选择排名靠前或达到阈值的特征。">单变量特征选择（Univariate Feature Selection）</a> 的区别：方差阈值不看结局；单变量方法会评估每个特征与结局的关系。</li>
+<li>和 <a class="xlink" href="m-correlation-based-feature-selection.html" data-cn="相关系数特征选择" data-en="Correlation-based Feature Selection" data-def="相关系数特征选择是一种基于变量间相关性的过滤方法。它通过计算特征之间，或特征与结局之间的相关系数，删除冗余特征或保留与结局关系更强的特征。">相关系数特征选择（Correlation-based Feature Selection）</a> 的区别：方差阈值删除低变化特征；相关系数法删除高冗余特征。</li>
+<li>和 <a class="xlink" href="m-embedded-feature-selection.html" data-cn="嵌入式特征选择" data-en="Embedded Feature Selection" data-def="嵌入式特征选择是在模型训练过程中同步完成特征评价或筛选的方法。常见形式包括 L1 正则化模型、树模型特征重要性和基于模型系数的 SelectFromModel。">嵌入式特征选择（Embedded Feature Selection）</a> 的区别：方差阈值不依赖模型训练。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>删除所有患者取值完全相同的 EHR 字段。</li>
+<li>影像组学中去除几乎不变化的纹理特征。</li>
+<li>组学分析中先删除低变异探针或低表达特征。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-univariate-feature-selection.html" data-cn="单变量特征选择" data-en="Univariate Feature Selection" data-def="单变量特征选择是一类过滤式方法。它逐个评估每个特征与目标变量之间的关系，根据统计量、P 值或信息量得分选择排名靠前或达到阈值的特征。">单变量特征选择（Univariate Feature Selection）</a></li>
+<li><a class="xlink" href="m-correlation-based-feature-selection.html" data-cn="相关系数特征选择" data-en="Correlation-based Feature Selection" data-def="相关系数特征选择是一种基于变量间相关性的过滤方法。它通过计算特征之间，或特征与结局之间的相关系数，删除冗余特征或保留与结局关系更强的特征。">相关系数特征选择（Correlation-based Feature Selection）</a></li>
+<li><a class="xlink" href="m-embedded-feature-selection.html" data-cn="嵌入式特征选择" data-en="Embedded Feature Selection" data-def="嵌入式特征选择是在模型训练过程中同步完成特征评价或筛选的方法。常见形式包括 L1 正则化模型、树模型特征重要性和基于模型系数的 SelectFromModel。">嵌入式特征选择（Embedded Feature Selection）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Kuhn M, Johnson K. <em>Feature Engineering and Selection: A Practical Approach for Predictive Models</em>. Chapman and Hall/CRC; 2019.</li>
+<li>scikit-learn Developers. <code>sklearn.feature_selection.VarianceThreshold</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.VarianceThreshold.html">https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.VarianceThreshold.html</a> （访问日期：2026-07-02）</li>
+<li>Kuhn M. Building predictive models in R using the caret package. <em>J Stat Softw</em>. 2008;28(5):1-26.</li>
+</ul></div>
+    </section>
+    <div class="pager"><span></span><a class="pg pg-next" href="m-univariate-feature-selection.html"><div class="pg-lab">后一则 →</div><div class="pg-t">单变量特征选择</div></a></div>
+    <div class="colophon">— 黑盒词典 · 13·01 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XGBoost时间序列预测 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-12.html">时间序列与时序建模</a><span class="sep">/</span><span class="cur">XGBoost时间序列预测</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">时间序列与时序建模 · 12·10</div>
+      <h1 class="detail-h1">XGBoost时间序列预测</h1>
+      <div class="detail-en">XGBoost for Time Series Forecasting</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 时间序列 / 预测 / XGBoost / 特征工程</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>XGBoost时间序列预测（XGBoost for Time Series Forecasting）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>XGBoost 时间序列预测是把时间序列问题转换为监督学习表格问题，再用 XGBoost 建模。核心做法是构造滞后特征、滚动统计量、日历特征和外部变量，用它们预测未来目标值。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：时间序列中存在非线性、交互和外部变量影响时，如何做高性能预测。</li>
+<li>适用任务：单步或多步预测、带外部变量的运营预测、非线性时序回归或分类。</li>
+<li>常见医学场景：每日就诊量预测、药品需求预测、患者风险随时间更新、可穿戴设备特征预测。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>XGBoost 本身不懂时间顺序，所以我们要把“过去”显式做成特征：昨天的值、过去 7 天均值、星期几、节假日、天气等。模型再从这些特征里学习非线性预测规则。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>先把序列转换为监督学习样本：</p>
+<p>$$
+X_t=[y_{t-1},y_{t-2},\dots,y_{t-p}, r_t, z_t]
+$$</p>
+<p>其中 $r_t$ 是滚动统计量，$z_t$ 是日历或外部变量。预测目标为：</p>
+<p>$$
+\hat y_t=F(X_t)=\sum_{k=1}^{K}f_k(X_t)
+$$</p>
+<p>XGBoost 的正则化目标为：</p>
+<p>$$
+\mathcal{L}=\sum_{i}l(y_i,\hat y_i)+\sum_{k}\Omega(f_k)
+$$</p>
+<p>其中：</p>
+<p>$$
+\Omega(f)=\gamma T+\frac{1}{2}\lambda\sum_{j=1}^{T}w_j^2
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>滞后特征：过去若干期的目标值。</li>
+<li>滚动统计量：过去窗口内均值、最大值、标准差等。</li>
+<li><code>n_estimators</code>：树的数量。</li>
+<li><code>max_depth</code>：单棵树最大深度。</li>
+<li><code>learning_rate</code>：每棵树的贡献缩放。</li>
+<li><code>subsample</code> 和 <code>colsample_bytree</code>：样本和特征采样比例。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>未来可由历史滞后、日历和外部变量特征预测。</li>
+<li>训练和预测期间的特征生成逻辑一致。</li>
+<li>时间切分严格避免未来信息泄露。</li>
+<li>若做多步预测，需要明确递归预测或直接多步建模策略。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：滞后特征、滚动特征、日历特征、外部变量。</li>
+<li>因变量类型：连续型未来值，也可为未来事件分类标签。</li>
+<li>数据结构：由时间序列展开成监督学习宽表。</li>
+<li>是否适合高维数据：适合中高维表格特征，但需防止过拟合。</li>
+<li>是否适合缺失较多数据：XGBoost 可处理部分缺失，但时间特征缺失仍需谨慎。</li>
+<li>是否适合删失数据：不直接处理删失结局。</li>
+<li>是否适合重复测量数据：可用于多实体面板序列，但需按实体构造滞后并设计分组验证。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以每日急诊量预测为例：</p>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>y</th>
+<th>lag_1</th>
+<th>lag_7</th>
+<th>roll_mean_7</th>
+<th>weekday</th>
+<th>temperature</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-01-08</td>
+<td>230</td>
+<td>225</td>
+<td>212</td>
+<td>221.4</td>
+<td>3</td>
+<td>4.2</td>
+</tr>
+<tr>
+<td>2026-01-09</td>
+<td>241</td>
+<td>230</td>
+<td>225</td>
+<td>224.0</td>
+<td>4</td>
+<td>3.8</td>
+</tr>
+<tr>
+<td>2026-01-10</td>
+<td>220</td>
+<td>241</td>
+<td>231</td>
+<td>226.9</td>
+<td>5</td>
+<td>5.1</td>
+</tr>
+<tr>
+<td>2026-01-11</td>
+<td>208</td>
+<td>220</td>
+<td>220</td>
+<td>226.0</td>
+<td>6</td>
+<td>6.3</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：带时间索引的序列，以及构造好的监督学习特征表。</li>
+<li>关键变量：滞后窗口、滚动窗口、预测步长、树模型超参数。</li>
+<li>需要预处理的内容：按时间切分、滞后特征生成、外部变量对齐、缺失处理、时间序列交叉验证。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：训练好的 XGBoost 模型、特征重要性、预测值。</li>
+<li>参数估计：树结构和叶节点权重。</li>
+<li>预测结果：未来值点预测；可用分位数模型或 bootstrap 近似区间。</li>
+<li>不确定性指标：时间序列交叉验证误差、残差分布、分位数预测区间。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：非线性强、有多种外部变量、特征工程充分、预测表现优先的场景。</li>
+<li>不适合：样本很少、需要参数解释、长期外推趋势、未来外部变量无法获得的场景。</li>
+<li>使用前需要特别检查的点：滞后特征是否泄露未来、验证切分是否按时间、未来外部变量是否可用。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="xgboost-for-time-series-forecasting" data-i="0">Python</button><button class="codetab" data-uid="xgboost-for-time-series-forecasting" data-i="1">R</button></div><div class="codepanel active" data-uid="xgboost-for-time-series-forecasting" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>xgboost</code></li>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+from xgboost import XGBRegressor
+from sklearn.metrics import mean_absolute_error
+
+df = pd.read_csv(&quot;daily_ed_visits_with_weather.csv&quot;, parse_dates=[&quot;Date&quot;])
+df = df.sort_values(&quot;Date&quot;)
+df[&quot;lag_1&quot;] = df[&quot;EDVisits&quot;].shift(1)
+df[&quot;lag_7&quot;] = df[&quot;EDVisits&quot;].shift(7)
+df[&quot;roll_mean_7&quot;] = df[&quot;EDVisits&quot;].shift(1).rolling(7).mean()
+df[&quot;weekday&quot;] = df[&quot;Date&quot;].dt.weekday
+df = df.dropna()
+
+features = [&quot;lag_1&quot;, &quot;lag_7&quot;, &quot;roll_mean_7&quot;, &quot;weekday&quot;, &quot;Temperature&quot;]
+train = df[df[&quot;Date&quot;] &lt; &quot;2026-06-01&quot;]
+test = df[df[&quot;Date&quot;] &gt;= &quot;2026-06-01&quot;]
+
+model = XGBRegressor(
+    n_estimators=300,
+    max_depth=3,
+    learning_rate=0.05,
+    subsample=0.8,
+    random_state=42
+)
+model.fit(train[features], train[&quot;EDVisits&quot;])
+pred = model.predict(test[features])
+print(&quot;MAE:&quot;, mean_absolute_error(test[&quot;EDVisits&quot;], pred))
+</code></pre></div><div class="codepanel" data-uid="xgboost-for-time-series-forecasting" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>xgboost</code></li>
+</ul>
+<pre><code class="language-r">library(xgboost)
+
+df &lt;- df[order(df$Date), ]
+df$lag_1 <- dplyr::lag(df$EDVisits, 1)
+df$lag_7 <- dplyr::lag(df$EDVisits, 7)
+df$roll_mean_7 <- zoo::rollmean(dplyr::lag(df$EDVisits, 1), 7, fill = NA, align = &quot;right&quot;)
+df$weekday <- as.POSIXlt(df$Date)$wday
+df &lt;- na.omit(df)
+
+features &lt;- c(&quot;lag_1&quot;, &quot;lag_7&quot;, &quot;roll_mean_7&quot;, &quot;weekday&quot;, &quot;Temperature&quot;)
+train &lt;- df[df$Date &lt; as.Date(&quot;2026-06-01&quot;), ]
+test &lt;- df[df$Date &gt;= as.Date(&quot;2026-06-01&quot;), ]
+
+dtrain &lt;- xgb.DMatrix(as.matrix(train[, features]), label = train$EDVisits)
+fit &lt;- xgboost(data = dtrain, nrounds = 300, max_depth = 3, eta = 0.05, objective = &quot;reg:squarederror&quot;)
+pred &lt;- predict(fit, as.matrix(test[, features]))
+mean(abs(test$EDVisits - pred))
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：时间外测试误差、特征重要性、残差随时间变化、不同预测步长表现。</li>
+<li>每个主要参数如何解释：<code>max_depth</code> 控制交互复杂度，过深更容易过拟合时间噪声。</li>
+<li>临床或医学意义如何表达：可用于高性能运营预测，但解释应以特征贡献和误差分析为主。</li>
+<li>常见误读：特征重要性高不代表因果影响，尤其滞后值和外部变量可能共同反映趋势。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>实际值与预测值时间曲线。</li>
+<li>残差随时间变化图。</li>
+<li>特征重要性或 SHAP 图。</li>
+<li>不同预测 horizon 的误差曲线。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>能捕捉非线性和特征交互。</li>
+<li>可融合日历、天气、节假日和运营变量。</li>
+<li>对表格型时间序列预测常有强表现。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>不内置时间结构，依赖特征工程。</li>
+<li>长期外推能力弱。</li>
+<li>预测区间和不确定性需要额外方法。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>滚动均值没有先 shift，导致使用当天目标值预测当天。</li>
+<li>随机划分训练测试集。</li>
+<li>未来不可获得的外部变量被用于预测。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-extreme-gradient-boosting-xgboost.html" data-cn="XGBoost" data-en="Extreme Gradient Boosting, XGBoost" data-def="XGBoost 是一种基于梯度提升树的高性能集成学习方法。它在经典 GBDT 基础上加入了二阶优化、显式正则化、列采样、缺失值处理和工程级并行优化，因此在表格数据预测中非常常用。">XGBoost（Extreme Gradient Boosting, XGBoost）</a> 的区别：通用 XGBoost 条目讲梯度提升树本身，本条目关注如何把时间序列构造成监督学习问题。</li>
+<li>和 <a class="xlink" href="m-autoregressive-integrated-moving-average-model-arima.html" data-cn="自回归积分滑动平均模型" data-en="Autoregressive Integrated Moving Average Model, ARIMA" data-def="ARIMA 是用于单变量时间序列预测的经典模型。它通过差分把非平稳序列转为平稳序列，再用 ARMA 模型刻画差分后序列的自相关结构。">自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）</a> 的区别：ARIMA 是参数化时间序列模型，XGBoost 通过特征工程学习非线性映射。</li>
+<li>和 <a class="xlink" href="m-long-short-term-memory-for-time-series-forecasting.html" data-cn="LSTM时间序列预测" data-en="Long Short-Term Memory for Time Series Forecasting" data-def="LSTM 是循环神经网络的一种改进结构，通过门控机制保存、遗忘和输出序列信息。本条目聚焦 [[长短期记忆网络（Long Short-Term Memory, LSTM）]] 在时间序列预测中的应用型变体，强调窗口构造、时间切分和预测评估。">LSTM时间序列预测（Long Short-Term Memory for Time Series Forecasting）</a> 的区别：LSTM 直接读取序列窗口，XGBoost 读取手工构造的表格特征。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>门急诊量、床位需求和检查量预测。</li>
+<li>药品、耗材和血液制品需求预测。</li>
+<li>多源特征驱动的患者短期风险动态预测。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-extreme-gradient-boosting-xgboost.html" data-cn="XGBoost" data-en="Extreme Gradient Boosting, XGBoost" data-def="XGBoost 是一种基于梯度提升树的高性能集成学习方法。它在经典 GBDT 基础上加入了二阶优化、显式正则化、列采样、缺失值处理和工程级并行优化，因此在表格数据预测中非常常用。">XGBoost（Extreme Gradient Boosting, XGBoost）</a></li>
+<li><a class="xlink" href="m-autoregressive-integrated-moving-average-model-arima.html" data-cn="自回归积分滑动平均模型" data-en="Autoregressive Integrated Moving Average Model, ARIMA" data-def="ARIMA 是用于单变量时间序列预测的经典模型。它通过差分把非平稳序列转为平稳序列，再用 ARMA 模型刻画差分后序列的自相关结构。">自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）</a></li>
+<li><a class="xlink" href="m-long-short-term-memory-for-time-series-forecasting.html" data-cn="LSTM时间序列预测" data-en="Long Short-Term Memory for Time Series Forecasting" data-def="LSTM 是循环神经网络的一种改进结构，通过门控机制保存、遗忘和输出序列信息。本条目聚焦 [[长短期记忆网络（Long Short-Term Memory, LSTM）]] 在时间序列预测中的应用型变体，强调窗口构造、时间切分和预测评估。">LSTM时间序列预测（Long Short-Term Memory for Time Series Forecasting）</a></li>
+<li><a class="xlink" href="m-prophet-forecasting-model.html" data-cn="Prophet时间序列模型" data-en="Prophet Forecasting Model" data-def="Prophet 是一种面向业务时间序列预测的可加性模型。它把序列分解为趋势、季节性、节假日效应和误差项，并通过变化点捕捉趋势斜率的改变。">Prophet时间序列模型（Prophet Forecasting Model）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Chen T, Guestrin C. XGBoost: A scalable tree boosting system. <em>KDD</em>. 2016:785-794.</li>
+<li>Hyndman RJ, Athanasopoulos G. <em>Forecasting: Principles and Practice</em>. 3rd ed. OTexts; 2021. <a href="https://otexts.com/fpp3/">https://otexts.com/fpp3/</a> （访问日期：2026-07-02）</li>
+<li>XGBoost Developers. XGBoost Documentation. <a href="https://xgboost.readthedocs.io/">https://xgboost.readthedocs.io/</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-long-short-term-memory-for-time-series-forecasting.html"><div class="pg-lab">← 前一则</div><div class="pg-t">LSTM时间序列预测</div></a><span></span></div>
+    <div class="colophon">— 黑盒词典 · 12·10 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>弹性网络回归 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-06.html">正则化与变量选择</a><span class="sep">/</span><span class="cur">弹性网络回归</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">正则化与变量选择 · 06·03</div>
+      <h1 class="detail-h1">弹性网络回归</h1>
+      <div class="detail-en">Elastic Net Regression</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 正则化 / 变量选择</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>弹性网络回归（Elastic Net Regression）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>弹性网络回归结合了 Lasso 的 L1 正则化和 Ridge 的 L2 正则化，既能做变量选择，也能在高度相关特征中保持更稳定的系数结构。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：当变量很多且彼此相关时，如何同时获得稀疏性和稳定性。</li>
+<li>适用任务：高维预测、相关特征组建模、变量筛选。</li>
+<li>常见医学场景：多组学、影像组学、多个相关临床指标联合建模。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>Elastic Net 像是在 Lasso 和 Ridge 之间做折中：既希望删掉不重要的变量，又不希望在高度相关的一组变量里只留下一个“幸存者”。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>$$
+\hat{\boldsymbol{\beta}}
+=
+\arg\min_{\boldsymbol{\beta}}
+\left[
+\frac{1}{n}\|y-\mathbf{X}\boldsymbol{\beta}\|_2^2
++
+\alpha\left(
+\rho\|\boldsymbol{\beta}\|_1
++
+\frac{1-\rho}{2}\|\boldsymbol{\beta}\|_2^2
+\right)
+\right]
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$\alpha$：正则化整体强度。</li>
+<li>$\rho$（或 <code>l1_ratio</code>）：控制 L1 与 L2 的权重平衡。</li>
+<li>当 $\rho=1$ 时退化为 Lasso；当 $\rho=0$ 时退化为 Ridge。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>结局为连续型。</li>
+<li>线性可加结构基本合理。</li>
+<li>特征通常需要标准化。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续变量为主，也可包含编码后的分类变量。</li>
+<li>因变量类型：连续型。</li>
+<li>数据结构：宽表数据。</li>
+<li>是否适合高维数据：非常适合。</li>
+<li>是否适合缺失较多数据：需先完成缺失值处理。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：不直接适合。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>Elastic Net 常用于这类“多个相关特征共同预测连续结局”的宽表：</p>
+<table>
+<thead>
+<tr>
+<th>OverallQual</th>
+<th>GrLivArea</th>
+<th>GarageCars</th>
+<th>TotalBsmtSF</th>
+<th>YearBuilt</th>
+<th>SalePrice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>7</td>
+<td>1710</td>
+<td>2</td>
+<td>856</td>
+<td>2003</td>
+<td>208500</td>
+</tr>
+<tr>
+<td>6</td>
+<td>1262</td>
+<td>2</td>
+<td>1262</td>
+<td>1976</td>
+<td>181500</td>
+</tr>
+<tr>
+<td>7</td>
+<td>1786</td>
+<td>2</td>
+<td>920</td>
+<td>2001</td>
+<td>223500</td>
+</tr>
+<tr>
+<td>7</td>
+<td>1717</td>
+<td>3</td>
+<td>756</td>
+<td>1915</td>
+<td>140000</td>
+</tr>
+<tr>
+<td>8</td>
+<td>2198</td>
+<td>3</td>
+<td>1145</td>
+<td>2000</td>
+<td>250000</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：连续结局和一组候选特征。</li>
+<li>关键变量：<code>alpha</code> 和 <code>l1_ratio</code>。</li>
+<li>需要预处理的内容：标准化、缺失处理、训练测试集划分。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：混合正则化后的系数、最佳 <code>alpha</code>、最佳 <code>l1_ratio</code>。</li>
+<li>参数估计：兼顾稀疏性与稳定性的收缩系数。</li>
+<li>预测结果：连续型预测值。</li>
+<li>不确定性指标：交叉验证误差、测试集性能。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：高维、变量相关性强、希望做稳定筛选的场景。</li>
+<li>不适合：特征很少且共线性不明显时。</li>
+<li>使用前需要特别检查的点：标准化、超参数网格、相关特征组结构。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="elastic-net-regression" data-i="0">Python</button><button class="codetab" data-uid="elastic-net-regression" data-i="1">R</button></div><div class="codepanel active" data-uid="elastic-net-regression" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">from sklearn.linear_model import ElasticNetCV
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+fit = make_pipeline(
+    StandardScaler(),
+    ElasticNetCV(
+        l1_ratio=[0.1, 0.3, 0.5, 0.7, 0.9],
+        cv=5,
+        max_iter=20000
+    )
+)
+fit.fit(X_train, y_train)
+</code></pre></div><div class="codepanel" data-uid="elastic-net-regression" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>glmnet</code></li>
+</ul>
+<pre><code class="language-r">library(glmnet)
+
+x &lt;- model.matrix(SalePrice ~ . - 1, data = df)
+y &lt;- df$SalePrice
+
+fit &lt;- cv.glmnet(x, y, alpha = 0.5)  # alpha between 0 and 1
+coef(fit, s = &quot;lambda.min&quot;)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：被保留的变量、系数大小、<code>l1_ratio</code> 所代表的惩罚平衡。</li>
+<li>每个主要参数如何解释：Elastic Net 系数同样受到收缩影响，更适合解释变量相对重要性和方向。</li>
+<li>临床或医学意义如何表达：适合在很多相关变量中筛出一组更稳定的候选因子。</li>
+<li>常见误读：Elastic Net 不是“自动最优”，仍然依赖超参数选择。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>系数条形图。</li>
+<li>系数路径图。</li>
+<li>不同 <code>l1_ratio</code> 下的性能比较图。</li>
+</ul>
+<h3>7.1 图像示例</h3>
+<p>下图展示 Elastic Net 回归在房价建模中的系数分布，体现了它在稀疏性和稳定性之间的折中。</p>
+<p><img alt="" src="img/elasticnet_coefficients_houseprice.png" /></p></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>兼顾变量选择和系数稳定性。</li>
+<li>对高度相关特征更友好。</li>
+<li>很适合中高维数据。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>超参数更多，调参更复杂。</li>
+<li>解释比普通线性回归更弱。</li>
+<li>若数据很简单，未必比 Ridge/Lasso 更必要。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>只调 <code>alpha</code> 不调 <code>l1_ratio</code>。</li>
+<li>不标准化就直接上 Elastic Net。</li>
+<li>把非零系数当成严格因果证据。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 Ridge 的区别：Elastic Net 允许产生稀疏解。</li>
+<li>和 Lasso 的区别：Elastic Net 对相关变量组更稳定。</li>
+<li>和逐步回归的区别：Elastic Net 通过连续优化完成筛选。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>多组学特征筛选。</li>
+<li>多个相关危险因素联合预测。</li>
+<li>需要在稀疏性和稳定性之间折中的预测模型。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归是在普通线性回归的损失函数中加入 L2 正则化项的一种方法，用来缓解多重共线性、减少过拟合，并提升模型在新数据上的稳定性。">Ridge回归（Ridge Regression）</a></li>
+<li><a class="xlink" href="m-lasso-regression.html" data-cn="Lasso回归" data-en="Lasso Regression" data-def="Lasso 回归是在普通线性回归中加入 L1 正则化项的一种方法，它不仅能做回归拟合，还能自动把部分不重要特征的系数压缩到 0，从而实现变量选择。">Lasso回归（Lasso Regression）</a></li>
+<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归通过把连续型结局表示为若干自变量的线性组合，来估计变量与结局之间的方向、大小和不确定性，是医学统计最基础的建模方法之一。">线性回归（Linear Regression）</a></li>
+<li><a class="xlink" href="m-embedded-feature-selection.html" data-cn="嵌入式特征选择" data-en="Embedded Feature Selection" data-def="嵌入式特征选择是在模型训练过程中同步完成特征评价或筛选的方法。常见形式包括 L1 正则化模型、树模型特征重要性和基于模型系数的 SelectFromModel。">嵌入式特征选择（Embedded Feature Selection）</a></li>
+<li><a class="xlink" href="m-correlation-based-feature-selection.html" data-cn="相关系数特征选择" data-en="Correlation-based Feature Selection" data-def="相关系数特征选择是一种基于变量间相关性的过滤方法。它通过计算特征之间，或特征与结局之间的相关系数，删除冗余特征或保留与结局关系更强的特征。">相关系数特征选择（Correlation-based Feature Selection）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Zou H, Hastie T. Regularization and variable selection via the elastic net. <em>J R Stat Soc Series B</em>. 2005;67(2):301-320.</li>
+<li>scikit-learn Developers. <code>sklearn.linear_model.ElasticNet</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.ElasticNet.html">https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.ElasticNet.html</a> （访问日期：2026-07-02）</li>
+<li>CRAN. Package <code>glmnet</code>. <a href="https://cran.r-project.org/package=glmnet">https://cran.r-project.org/package=glmnet</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-lasso-regression.html"><div class="pg-lab">← 前一则</div><div class="pg-t">Lasso回归</div></a><span></span></div>
+    <div class="colophon">— 黑盒词典 · 06·03 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

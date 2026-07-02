@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>长短期记忆网络 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-11.html">神经网络与深度学习</a><span class="sep">/</span><span class="cur">长短期记忆网络</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">神经网络与深度学习 · 11·05</div>
+      <h1 class="detail-h1">长短期记忆网络</h1>
+      <div class="detail-en">Long Short-Term Memory, LSTM</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>advanced</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 深度学习 / 序列建模</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>长短期记忆网络（Long Short-Term Memory, LSTM）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>LSTM 是循环神经网络的重要变体，通过遗忘门、输入门和输出门控制信息流动，专门用于缓解普通 RNN 难以学习长程依赖的问题。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：当序列历史较长、关键信息可能跨越多个时间步时，如何保留有用记忆并抑制无关信息。</li>
+<li>适用任务：时间序列预测、序列分类、文本建模、事件序列分析。</li>
+<li>常见医学场景：ICU 连续监测数据预测、药物处方序列分析、长期随访事件风险建模。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>LSTM 像一个带有“记忆抽屉”和“开关阀门”的序列模型。每到一个新时间点，它都会决定什么该忘掉、什么该写进去、什么该输出，因此比普通 RNN 更能处理远距离依赖。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>对时间步 $t$，LSTM 的门控更新为：</p>
+<p>$$
+f_t = \sigma(W_f x_t + U_f h_{t-1} + b_f)
+$$</p>
+<p>$$
+i_t = \sigma(W_i x_t + U_i h_{t-1} + b_i),\qquad
+\tilde c_t = \tanh(W_c x_t + U_c h_{t-1} + b_c)
+$$</p>
+<p>$$
+c_t = f_t \odot c_{t-1} + i_t \odot \tilde c_t
+$$</p>
+<p>$$
+o_t = \sigma(W_o x_t + U_o h_{t-1} + b_o),\qquad
+h_t = o_t \odot \tanh(c_t)
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$f_t$：遗忘门，控制旧记忆保留比例。</li>
+<li>$i_t$：输入门，控制新信息写入比例。</li>
+<li>$o_t$：输出门，控制当前隐藏状态暴露程度。</li>
+<li>$c_t$：细胞状态，是长期记忆通道。</li>
+<li>$h_t$：隐藏状态，是当前时刻对外输出的表征。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>远距离依赖对预测有价值。</li>
+<li>序列顺序和时间结构不能被打乱。</li>
+<li>训练样本足够支持门控参数学习。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：单变量或多变量序列、token 序列、事件流。</li>
+<li>因变量类型：未来值、序列标签、下一个事件或整个输出序列。</li>
+<li>数据结构：三维序列张量。</li>
+<li>是否适合高维数据：可以，但训练和正则化要求更高。</li>
+<li>是否适合缺失较多数据：需先做插补、缺失掩码或专门时序缺失建模。</li>
+<li>是否适合删失数据：不直接建模删失机制。</li>
+<li>是否适合重复测量数据：适合有顺序的重复测量，尤其是规则采样。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以连续血糖预测为例：</p>
+<table>
+<thead>
+<tr>
+<th>PatientID</th>
+<th>Time</th>
+<th>Glucose</th>
+<th>InsulinDose</th>
+<th>CarbIntake</th>
+<th>NextGlucoseRisk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P001</td>
+<td>08:00</td>
+<td>7.1</td>
+<td>4</td>
+<td>35</td>
+<td>normal</td>
+</tr>
+<tr>
+<td>P001</td>
+<td>09:00</td>
+<td>8.4</td>
+<td>0</td>
+<td>0</td>
+<td>high</td>
+</tr>
+<tr>
+<td>P001</td>
+<td>10:00</td>
+<td>9.2</td>
+<td>2</td>
+<td>10</td>
+<td>high</td>
+</tr>
+<tr>
+<td>P002</td>
+<td>08:00</td>
+<td>5.8</td>
+<td>3</td>
+<td>25</td>
+<td>normal</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：固定窗口或整段序列张量。</li>
+<li>关键变量：窗口长度、隐藏单元数、层数、dropout、学习率。</li>
+<li>需要预处理的内容：排序、标准化、时间切分、窗口构造、避免未来信息泄露。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：训练好的 LSTM 权重、损失曲线、验证性能。</li>
+<li>参数估计：门控层和输出层权重。</li>
+<li>预测结果：类别概率、连续值或下一步序列输出。</li>
+<li>不确定性指标：验证误差、时间外测试、bootstrap 或 ensemble 近似区间。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：存在长短期依赖、普通 RNN 难以稳定建模的序列任务。</li>
+<li>不适合：序列很短、样本太少、或更需要并行效率和全局依赖时。</li>
+<li>使用前需要特别检查的点：窗口设计、过拟合、训练不稳定、外部时移漂移。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="long-short-term-memory-lstm" data-i="0">Python</button><button class="codetab" data-uid="long-short-term-memory-lstm" data-i="1">R</button></div><div class="codepanel active" data-uid="long-short-term-memory-lstm" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>torch</code></li>
+</ul>
+<pre><code class="language-python">import torch
+from torch import nn
+
+class LSTMClassifier(nn.Module):
+    def __init__(self, n_features, hidden_size=64, n_classes=2):
+        super().__init__()
+        self.lstm = nn.LSTM(n_features, hidden_size, batch_first=True)
+        self.head = nn.Linear(hidden_size, n_classes)
+
+    def forward(self, x):
+        output, _ = self.lstm(x)
+        return self.head(output[:, -1, :])
+</code></pre></div><div class="codepanel" data-uid="long-short-term-memory-lstm" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>keras</code></li>
+</ul>
+<pre><code class="language-r">library(keras)
+
+model &lt;- keras_model_sequential() |&gt;
+  layer_lstm(units = 64, input_shape = c(seq_len, n_features)) |&gt;
+  layer_dense(units = 2, activation = &quot;softmax&quot;)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：验证误差、不同预测窗口的稳定性、长时间外测试表现。</li>
+<li>每个主要参数如何解释：隐藏单元数和层数控制容量，窗口长度控制模型可见历史。</li>
+<li>临床或医学意义如何表达：适合动态风险更新，但必须明确预测时间点和可干预时间。</li>
+<li>常见误读：LSTM 的“记忆”是统计意义上的状态表示，不等同于可直接解释的临床记忆机制。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>真实值与预测值时间曲线。</li>
+<li>训练/验证损失曲线。</li>
+<li>分时间窗或分患者亚组的误差图。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>比基础 RNN 更擅长捕捉长程依赖。</li>
+<li>对复杂多变量序列有较强表达能力。</li>
+<li>已广泛用于时间序列和文本任务。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>训练和调参成本较高。</li>
+<li>可解释性有限。</li>
+<li>仍然存在并行效率不高的问题。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>用随机拆分代替按时间或按患者拆分。</li>
+<li>序列太短却堆叠过深网络。</li>
+<li>只在内部验证集上报告效果。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-recurrent-neural-network-rnn.html" data-cn="循环神经网络" data-en="Recurrent Neural Network, RNN" data-def="循环神经网络是一类面向序列数据的神经网络。它在每个时间步共享同一组参数，并把前一时刻的隐藏状态传递到当前时刻，从而建模顺序依赖关系。">循环神经网络（Recurrent Neural Network, RNN）</a> 的区别：LSTM 用门控机制缓解梯度消失，适合更长依赖。</li>
+<li>和 <a class="xlink" href="m-gated-recurrent-unit-gru.html" data-cn="门控循环单元" data-en="Gated Recurrent Unit, GRU" data-def="GRU 是一种门控循环神经网络结构。它将 LSTM 的门控机制做了更紧凑的简化，通过更新门和重置门控制历史信息保留与新信息写入。">门控循环单元（Gated Recurrent Unit, GRU）</a> 的区别：GRU 结构更紧凑，参数更少，训练常更快。</li>
+<li>和 <a class="xlink" href="m-transformer.html" data-cn="Transformer" data-en="Transformer" data-def="Transformer 是以多头注意力为核心的序列建模架构。它不依赖传统递归结构，而是通过自注意力和位置编码并行建模序列中的全局依赖。">Transformer（Transformer）</a> 的区别：Transformer 通过注意力并行建模全局依赖，LSTM 仍以递归顺序处理序列。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>连续血糖、心率和血压等生理信号预测。</li>
+<li>长随访电子病历事件序列建模。</li>
+<li>ICU 短期恶化风险动态更新。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-recurrent-neural-network-rnn.html" data-cn="循环神经网络" data-en="Recurrent Neural Network, RNN" data-def="循环神经网络是一类面向序列数据的神经网络。它在每个时间步共享同一组参数，并把前一时刻的隐藏状态传递到当前时刻，从而建模顺序依赖关系。">循环神经网络（Recurrent Neural Network, RNN）</a></li>
+<li><a class="xlink" href="m-gated-recurrent-unit-gru.html" data-cn="门控循环单元" data-en="Gated Recurrent Unit, GRU" data-def="GRU 是一种门控循环神经网络结构。它将 LSTM 的门控机制做了更紧凑的简化，通过更新门和重置门控制历史信息保留与新信息写入。">门控循环单元（Gated Recurrent Unit, GRU）</a></li>
+<li><a class="xlink" href="m-transformer.html" data-cn="Transformer" data-en="Transformer" data-def="Transformer 是以多头注意力为核心的序列建模架构。它不依赖传统递归结构，而是通过自注意力和位置编码并行建模序列中的全局依赖。">Transformer（Transformer）</a></li>
+<li><a class="xlink" href="m-long-short-term-memory-for-time-series-forecasting.html" data-cn="LSTM时间序列预测" data-en="Long Short-Term Memory for Time Series Forecasting" data-def="LSTM 是循环神经网络的一种改进结构，通过门控机制保存、遗忘和输出序列信息。本条目聚焦 [[长短期记忆网络（Long Short-Term Memory, LSTM）]] 在时间序列预测中的应用型变体，强调窗口构造、时间切分和预测评估。">LSTM时间序列预测（Long Short-Term Memory for Time Series Forecasting）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Hochreiter S, Schmidhuber J. Long short-term memory. <em>Neural Computation</em>. 1997;9(8):1735-1780.</li>
+<li>Goodfellow I, Bengio Y, Courville A. <em>Deep Learning</em>. MIT Press; 2016.</li>
+<li>PyTorch Developers. <code>torch.nn.LSTM</code>. <a href="https://pytorch.org/docs/stable/generated/torch.nn.LSTM.html">https://pytorch.org/docs/stable/generated/torch.nn.LSTM.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-recurrent-neural-network-rnn.html"><div class="pg-lab">← 前一则</div><div class="pg-t">循环神经网络</div></a><a class="pg pg-next" href="m-gated-recurrent-unit-gru.html"><div class="pg-lab">后一则 →</div><div class="pg-t">门控循环单元</div></a></div>
+    <div class="colophon">— 黑盒词典 · 11·05 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

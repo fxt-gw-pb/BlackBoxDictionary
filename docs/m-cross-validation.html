@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>交叉验证 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-15.html">模型评估与解释</a><span class="sep">/</span><span class="cur">交叉验证</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">模型评估与解释 · 15·08</div>
+      <h1 class="detail-h1">交叉验证</h1>
+      <div class="detail-en">Cross-Validation</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 模型评估 / 重采样 / 泛化误差</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>交叉验证（Cross-Validation）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>交叉验证是一类重采样方法，通过反复把数据切成训练与验证子集来估计模型在新数据上的表现，也常用于超参数选择。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：模型在没见过的数据上大概表现如何，如何选超参数而不被训练误差误导。</li>
+<li>适用任务：泛化性能估计、超参数调优、模型选择、有限样本下的稳健评估。</li>
+<li>常见医学场景：样本量有限的临床预测模型开发、组学特征筛选后的性能估计、影像模型调参。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>只在训练数据上评估会过于乐观。交叉验证把数据轮流当“考试卷”，每份数据都当过一次没被训练的测试样本，最后把多次成绩平均，得到更接近真实泛化能力的估计。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>$K$ 折交叉验证把数据分成 $K$ 份，第 $k$ 折用其余数据训练、在第 $k$ 份评估，泛化误差估计为：</p>
+<p>$$
+\widehat{\mathrm{CV}}=\frac{1}{K}\sum_{k=1}^{K}\frac{1}{|D_k|}\sum_{i\in D_k} L\big(y_i,\hat{f}^{(-k)}(x_i)\big)
+$$</p>
+<p>其中 $\hat{f}^{(-k)}$ 是去掉第 $k$ 折训练得到的模型，$L$ 为损失。留一法（LOOCV）是 $K=n$ 的特例。</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$K$：折数，常用 5 或 10；偏差–方差权衡随 $K$ 变化。</li>
+<li>$\hat{f}^{(-k)}$：在训练折上拟合的模型。</li>
+<li>CV 估计：多折验证误差的平均，及其跨折标准差（反映稳定性）。</li>
+<li>嵌套 CV：外层估性能、内层选超参，避免选择偏倚。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>样本近似独立同分布；有聚类（同一患者多次测量）时须按组划分。</li>
+<li>时间序列须用时序切分，不能随机打乱（会造成未来信息泄漏）。</li>
+<li>所有依赖数据的步骤（标准化、特征选择、插补）必须放进 CV 循环内。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：任意可建模特征。</li>
+<li>因变量类型：二分类、多分类或连续型（分类问题用分层折）。</li>
+<li>数据结构：独立样本的表格数据；聚类/时序需特殊切分。</li>
+<li>是否适合高维数据：适合，且高维小样本尤其需要，但要防止特征选择泄漏。</li>
+<li>是否适合缺失较多数据：插补须在每折训练子集内拟合。</li>
+<li>是否适合删失数据：可用生存专用评分（如 C-index）作为 CV 指标。</li>
+<li>是否适合重复测量数据：需用 GroupKFold 等按个体划分。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>折</th>
+<th>训练样本数</th>
+<th>验证样本数</th>
+<th>验证 AUC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>455</td>
+<td>114</td>
+<td>0.982</td>
+</tr>
+<tr>
+<td>2</td>
+<td>455</td>
+<td>114</td>
+<td>0.971</td>
+</tr>
+<tr>
+<td>3</td>
+<td>455</td>
+<td>114</td>
+<td>0.990</td>
+</tr>
+<tr>
+<td>4</td>
+<td>456</td>
+<td>113</td>
+<td>0.977</td>
+</tr>
+<tr>
+<td>5</td>
+<td>456</td>
+<td>113</td>
+<td>0.985</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：特征矩阵、标签、可选分组变量。</li>
+<li>关键变量：折数、切分策略（分层/分组/时序）、评估指标。</li>
+<li>需要预处理的内容：把预处理封装进管线，随折重新拟合。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：各折得分及其均值、标准差。</li>
+<li>参数估计：调优选出的超参数。</li>
+<li>预测结果：out-of-fold 预测（可再评估校准/区分度）。</li>
+<li>不确定性指标：跨折得分离散度、重复 CV 的区间。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：样本有限、需要调参、需要相对稳健的性能估计。</li>
+<li>不适合：有独立大型外部验证集时（外部验证更可信）、忽视聚类/时序结构时。</li>
+<li>使用前需要特别检查的点：切分是否尊重分组与时间、预处理是否泄漏、调参是否需要嵌套 CV。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="cross-validation" data-i="0">Python</button><button class="codetab" data-uid="cross-validation" data-i="1">R</button></div><div class="codepanel active" data-uid="cross-validation" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">from sklearn.datasets import load_breast_cancer
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import StratifiedKFold, cross_val_score
+
+X, y = load_breast_cancer(return_X_y=True)
+pipe = make_pipeline(StandardScaler(), LogisticRegression(max_iter=5000))
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
+
+scores = cross_val_score(pipe, X, y, cv=cv, scoring=&quot;roc_auc&quot;)
+print(&quot;AUC 均值:&quot;, round(scores.mean(), 3), &quot;标准差:&quot;, round(scores.std(), 3))
+</code></pre></div><div class="codepanel" data-uid="cross-validation" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>rsample</code></li>
+<li><code>caret</code></li>
+</ul>
+<pre><code class="language-r">library(caret)
+
+ctrl &lt;- trainControl(method = &quot;cv&quot;, number = 5,
+                     classProbs = TRUE, summaryFunction = twoClassSummary)
+fit &lt;- train(y ~ ., data = df, method = &quot;glm&quot;, family = &quot;binomial&quot;,
+             metric = &quot;ROC&quot;, trControl = ctrl, preProcess = c(&quot;center&quot;, &quot;scale&quot;))
+print(fit)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：CV 得分均值及跨折波动；波动大提示模型/数据不稳定。</li>
+<li>每个主要参数如何解释：均值近似泛化性能；标准差反映稳定性；嵌套 CV 的外层得分才是无偏性能估计。</li>
+<li>临床或医学意义如何表达：CV 是内部验证，仍需外部验证支撑临床推广。</li>
+<li>常见误读：把“先在全数据调参再 CV”的得分当作无偏估计；用 CV 结果替代外部验证。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>各折/重复得分的箱线图或散点。</li>
+<li>学习曲线（性能随训练样本量变化）。</li>
+<li>超参数网格上的验证得分热图。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>充分利用有限样本，得到较稳健的性能估计。</li>
+<li>天然支持超参数选择与模型比较。</li>
+<li>可产生 out-of-fold 预测用于进一步评估。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>计算成本随折数和调参空间上升。</li>
+<li>iid 假设破坏（聚类/时序）时会高估性能。</li>
+<li>内部验证不能替代外部验证。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>在 CV 之外做标准化、特征选择或插补，导致数据泄漏。</li>
+<li>用同一层 CV 既调参又报告性能（应嵌套 CV）。</li>
+<li>同一患者的多条记录被拆到训练与验证两边。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 是一种从原始样本中“有放回重抽样”的方法，用来近似统计量的抽样分布，从而估计标准误、方差和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a> 的区别：CV 靠不重叠切分，Bootstrap 靠有放回重抽样，二者都可估泛化误差与不确定性。</li>
+<li>和单次留出法（hold-out）的区别：CV 用满所有数据、方差更低，小样本更可靠。</li>
+<li>和外部验证的区别：CV 是内部验证，外部验证在独立人群评估可推广性。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>有限样本临床预测模型的内部验证（配合 optimism 校正）。</li>
+<li>组学高维数据中特征筛选＋建模的嵌套 CV 评估。</li>
+<li>机器学习/影像模型的超参数选择。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 是一种从原始样本中“有放回重抽样”的方法，用来近似统计量的抽样分布，从而估计标准误、方差和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a></li>
+<li><a class="xlink" href="m-receiver-operating-characteristic-and-auc.html" data-cn="ROC曲线与AUC" data-en="Receiver Operating Characteristic and AUC" data-def="ROC 曲线（受试者工作特征曲线）把一个连续评分或预测概率在所有可能阈值下的敏感度与（1−特异度）连成一条曲线；AUC 是曲线下面积，用一个 0–1 的数概括模型的整体区分能力。">ROC曲线与AUC（Receiver Operating Characteristic and AUC）</a></li>
+<li><a class="xlink" href="m-calibration-curve.html" data-cn="校准曲线" data-en="Calibration Curve" data-def="校准曲线（可靠性图）比较模型的预测概率与实际观察到的事件发生频率，用来判断“模型说的 20% 风险，是不是真的大约 20% 的人发生了事件”。">校准曲线（Calibration Curve）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Hastie T, Tibshirani R, Friedman J. <em>The Elements of Statistical Learning</em>. 2nd ed. Springer; 2009. （第 7 章）</li>
+<li>Varma S, Simon R. Bias in error estimation when using cross-validation for model selection. <em>BMC Bioinformatics</em>. 2006;7:91.</li>
+<li>scikit-learn. Cross-validation. <a href="https://scikit-learn.org/stable/modules/cross_validation.html">https://scikit-learn.org/stable/modules/cross_validation.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-decision-curve-analysis-dca.html"><div class="pg-lab">← 前一则</div><div class="pg-t">决策曲线分析</div></a><a class="pg pg-next" href="m-shapley-additive-explanations-shap.html"><div class="pg-lab">后一则 →</div><div class="pg-t">SHAP</div></a></div>
+    <div class="colophon">— 黑盒词典 · 15·08 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

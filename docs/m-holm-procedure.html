@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Holm程序 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-15.html">模型评估与解释</a><span class="sep">/</span><span class="cur">Holm程序</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">模型评估与解释 · 15·03</div>
+      <h1 class="detail-h1">Holm程序</h1>
+      <div class="detail-en">Holm Procedure</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 多重检验 / FWER</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>Holm程序（Holm Procedure）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>Holm 程序是控制 FWER 的逐步法（step-down procedure），通常比 Bonferroni 更有力。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：如何在保持 FWER 控制的前提下，比 Bonferroni 更少损失检验力。</li>
+<li>适用任务：严格控制假阳性，同时尽量减少过度保守。</li>
+<li>常见医学场景：中等规模的多终点比较或多亚组比较。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>Holm 方法会先看最小的 p 值，对最有希望显著的检验先用最严格阈值；一旦前面几步通过，后面的阈值会逐步放宽。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>对有序 p 值 $p_{(1)} \le \cdots \le p_{(m)}$：</p>
+<ul>
+<li>若 $p_{(1)} > \alpha/m$，停止；</li>
+<li>否则拒绝 $H_{(1)}$，继续检验 $p_{(2)} > \alpha/(m-1)$；</li>
+<li>依此类推。</li>
+</ul>
+<p>调整后 p 值可写为：</p>
+<p>$$
+p_{(i)}^* = \min\left\{1,\ \max\left[(m-i+1)p_{(i)},\ p_{(i-1)}^*\right]\right\}
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$p_{(i)}$：从小到大排序后的第 $i$ 个 p 值。</li>
+<li>$p_{(i)}^*$：Holm 调整后 p 值。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>不要求检验独立。</li>
+<li>目标是控制 FWER。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：不适用。</li>
+<li>因变量类型：不适用。</li>
+<li>数据结构：一列原始 p 值。</li>
+<li>是否适合高维数据：可用，但仍偏保守。</li>
+<li>是否适合缺失较多数据：缺失 p 值需先处理。</li>
+<li>是否适合删失数据：不适用。</li>
+<li>是否适合重复测量数据：可用于其派生检验结果。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>hypothesis</th>
+<th>p_raw</th>
+<th>p_holm</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>H1</td>
+<td>0.0008</td>
+<td>0.0080</td>
+</tr>
+<tr>
+<td>H2</td>
+<td>0.0030</td>
+<td>0.0270</td>
+</tr>
+<tr>
+<td>H3</td>
+<td>0.0080</td>
+<td>0.0640</td>
+</tr>
+<tr>
+<td>H4</td>
+<td>0.0110</td>
+<td>0.0770</td>
+</tr>
+<tr>
+<td>H5</td>
+<td>0.0180</td>
+<td>0.1080</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：原始 p 值。</li>
+<li>关键变量：排序后的 p 值和目标 $\alpha$。</li>
+<li>需要预处理的内容：定义检验家族。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：Holm 调整后 p 值。</li>
+<li>参数估计：无。</li>
+<li>预测结果：无。</li>
+<li>不确定性指标：体现在 FWER 控制。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：希望比 Bonferroni 略有更高检验力，但仍严格控制 FWER。</li>
+<li>不适合：极大规模发现型研究。</li>
+<li>使用前需要特别检查的点：是否真的需要 FWER 而不是 FDR。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="holm-procedure" data-i="0">Python</button><button class="codetab" data-uid="holm-procedure" data-i="1">R</button></div><div class="codepanel active" data-uid="holm-procedure" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>statsmodels</code></li>
+</ul>
+<pre><code class="language-python">from statsmodels.stats.multitest import multipletests
+reject, p_adj, _, _ = multipletests(pvals, alpha=0.05, method=&quot;holm&quot;)
+</code></pre></div><div class="codepanel" data-uid="holm-procedure" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>stats</code></li>
+</ul>
+<pre><code class="language-r">p.adjust(pvals, method = &quot;holm&quot;)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：哪些检验在 Holm 校正后仍显著。</li>
+<li>每个主要参数如何解释：Holm 调整后 p 值可以直接与 0.05 比较。</li>
+<li>临床或医学意义如何表达：适合在严格控制假阳性的同时保留更多真实发现。</li>
+<li>常见误读：Holm 不是 FDR 方法，仍属于 FWER 控制。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>原始 p 值、Bonferroni 与 Holm 对比图。</li>
+<li>排序 p 值与 step-down 阈值图。</li>
+</ul>
+<h3>7.1 图像示例</h3>
+<p>下图中的蓝色折线展示了 Holm 调整后的 p 值，通常比 Bonferroni 略低，因此检验力更高。</p>
+<p><img alt="" src="img/multiple_testing_adjustments.png" /></p></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>控制 FWER。</li>
+<li>比 Bonferroni 更有力。</li>
+<li>对依赖结构要求较少。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>仍然偏保守。</li>
+<li>多检验场景下发现率可能不高。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>和 Hochberg、Hommel 混淆。</li>
+<li>在高维组学场景下误当默认方法。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 Bonferroni 的区别：Holm 是 sequential step-down，更不保守。</li>
+<li>和 BH 的区别：BH 控制 FDR，不是 FWER。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>多终点临床指标的严格校正。</li>
+<li>多个预设亚组比较。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-bonferroni-correction.html" data-cn="Bonferroni校正" data-en="Bonferroni Correction" data-def="Bonferroni 校正是控制 FWER 的最经典单步方法，把显著性水平 $\alpha$ 平均分配到每个检验上。">Bonferroni校正（Bonferroni Correction）</a></li>
+<li><a class="xlink" href="m-benjamini-hochberg-procedure.html" data-cn="Benjamini-Hochberg程序" data-en="Benjamini-Hochberg Procedure" data-def="Benjamini-Hochberg（BH）程序是控制 FDR 的经典方法，特别适合高维发现型研究。">Benjamini-Hochberg程序（Benjamini-Hochberg Procedure）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Holm S. A simple sequentially rejective multiple test procedure. <em>Scand J Stat</em>. 1979;6(2):65-70.</li>
+<li>R Core Team. <code>p.adjust</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-bonferroni-correction.html"><div class="pg-lab">← 前一则</div><div class="pg-t">Bonferroni校正</div></a><a class="pg pg-next" href="m-benjamini-hochberg-procedure.html"><div class="pg-lab">后一则 →</div><div class="pg-t">Benjamini-Hochberg程序</div></a></div>
+    <div class="colophon">— 黑盒词典 · 15·03 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

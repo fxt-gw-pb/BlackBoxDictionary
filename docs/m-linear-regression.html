@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>线性回归 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-03.html">回归与广义线性模型</a><span class="sep">/</span><span class="cur">线性回归</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">回归与广义线性模型 · 03·01</div>
+      <h1 class="detail-h1">线性回归</h1>
+      <div class="detail-en">Linear Regression</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 回归分析 / 线性模型</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>线性回归（Linear Regression）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>线性回归通过把连续型结局表示为若干自变量的线性组合，来估计变量与结局之间的方向、大小和不确定性，是医学统计最基础的建模方法之一。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：一个或多个变量与连续型结局之间存在怎样的平均关联。</li>
+<li>适用任务：效应估计、协变量调整、预测连续型结局。</li>
+<li>常见医学场景：分析年龄、治疗、BMI 与血压或实验室指标之间的关系。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>线性回归本质上是在找一条“最贴近数据总体趋势”的线或平面，让预测值和真实值之间的平方误差总和最小。系数告诉我们，在其他变量不变时，某变量增加 1 个单位，结局平均变化多少。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>$$
+\begin{aligned}
+Y_i &= \beta_0 + \beta_1X_{i1} + \cdots + \beta_pX_{ip} + \epsilon_i \\
+E(\epsilon_i) &= 0 \\
+\operatorname{Var}(\epsilon_i) &= \sigma^2 \\
+\hat{\boldsymbol{\beta}} &= (\mathbf{X}^\top \mathbf{X})^{-1}\mathbf{X}^\top \mathbf{Y}
+\end{aligned}
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$\beta_0$：截距。</li>
+<li>$\beta_j$：在其他变量固定时，第 $j$ 个自变量对结局均值的平均改变。</li>
+<li>$\epsilon_i$：误差项。</li>
+<li>$R^2$：模型解释的总变异比例。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>线性可加结构。</li>
+<li>观测独立。</li>
+<li>误差均值为 0。</li>
+<li>同方差性。</li>
+<li>小样本推断常额外依赖误差近似正态。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续、二分类、多分类哑变量都可。</li>
+<li>因变量类型：连续型。</li>
+<li>数据结构：独立个体的表格数据最典型。</li>
+<li>是否适合高维数据：可用，但变量很多时应考虑正则化。</li>
+<li>是否适合缺失较多数据：可以，但需先明确缺失处理策略。</li>
+<li>是否适合删失数据：不适合；删失应转向生存模型。</li>
+<li>是否适合重复测量数据：普通线性回归不适合，应考虑混合效应模型或 GEE。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>线性回归最典型的数据形式是“每行一个样本、至少一个连续自变量、一个连续结局变量”的宽表。下面用房价数据举例：</p>
+<table>
+<thead>
+<tr>
+<th>Id</th>
+<th>GrLivArea</th>
+<th>OverallQual</th>
+<th>Neighborhood</th>
+<th>YearBuilt</th>
+<th>SalePrice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>1710</td>
+<td>7</td>
+<td>CollgCr</td>
+<td>2003</td>
+<td>208500</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1262</td>
+<td>6</td>
+<td>Veenker</td>
+<td>1976</td>
+<td>181500</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1786</td>
+<td>7</td>
+<td>CollgCr</td>
+<td>2001</td>
+<td>223500</td>
+</tr>
+<tr>
+<td>4</td>
+<td>1717</td>
+<td>7</td>
+<td>Crawfor</td>
+<td>1915</td>
+<td>140000</td>
+</tr>
+<tr>
+<td>5</td>
+<td>2198</td>
+<td>8</td>
+<td>NoRidge</td>
+<td>2000</td>
+<td>250000</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：结局变量和若干预测变量。</li>
+<li>关键变量：结局、自变量、交互项、变换项。</li>
+<li>需要预处理的内容：缺失处理、分类变量编码、必要时变量变换。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：系数估计、标准误、t 值、p 值、$R^2$。</li>
+<li>参数估计：每个协变量的回归系数。</li>
+<li>预测结果：个体预测值、残差。</li>
+<li>不确定性指标：系数置信区间、残差标准误。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：连续结局建模、协变量调整、解释型分析。</li>
+<li>不适合：结局严重偏态且无法合理变换、强非线性未建模、相关数据。</li>
+<li>使用前需要特别检查的点：残差图、异常值、杠杆点、线性关系、同方差性。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="linear-regression" data-i="0">Python</button><button class="codetab" data-uid="linear-regression" data-i="1">R</button></div><div class="codepanel active" data-uid="linear-regression" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>statsmodels</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+import statsmodels.formula.api as smf
+
+df = pd.DataFrame({
+    &quot;sbp&quot;: [132, 128, 140, 135, 125, 138],
+    &quot;age&quot;: [50, 45, 63, 58, 40, 61],
+    &quot;bmi&quot;: [24.1, 22.5, 28.0, 26.2, 21.8, 27.1]
+})
+
+fit = smf.ols(&quot;sbp ~ age + bmi&quot;, data=df).fit()
+print(fit.summary())
+print(fit.conf_int())
+</code></pre></div><div class="codepanel" data-uid="linear-regression" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>stats</code></li>
+</ul>
+<pre><code class="language-r">df &lt;- data.frame(
+  sbp = c(132, 128, 140, 135, 125, 138),
+  age = c(50, 45, 63, 58, 40, 61),
+  bmi = c(24.1, 22.5, 28.0, 26.2, 21.8, 27.1)
+)
+
+fit &lt;- lm(sbp ~ age + bmi, data = df)
+summary(fit)
+confint(fit)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：系数方向、大小、区间和模型拟合。</li>
+<li>每个主要参数如何解释：例如 $\beta_1=0.8$ 可解释为年龄每增加 1 岁，平均收缩压增加 0.8 mmHg，其他变量固定。</li>
+<li>临床或医学意义如何表达：要结合单位、参考范围和临床阈值解释。</li>
+<li>常见误读：回归系数是条件平均效应，不自动代表因果效应。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>散点图加回归线。</li>
+<li>残差 vs 拟合值图。</li>
+<li>残差 QQ 图。</li>
+</ul>
+<h3>7.1 图像示例</h3>
+<p>下图展示居住面积与房价之间的散点关系及拟合直线，是连续结局线性建模的典型可视化方式。</p>
+<p><img alt="" src="img/linear_grlivarea_saleprice.png" /></p></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>系数解释直观。</li>
+<li>可同时控制多个协变量。</li>
+<li>是更复杂模型的重要基础。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>对模型设定敏感。</li>
+<li>对异常值和高杠杆点敏感。</li>
+<li>只能描述加性线性平均关系。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>把相关当因果。</li>
+<li>不检查残差和异常点。</li>
+<li>直接把非线性关系硬塞进线性模型而不做变换或样条。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 Spearman 相关的区别：Spearman 只度量关联，不做协变量调整。</li>
+<li>和 ANOVA 的区别：ANOVA 可视为线性回归在分类自变量场景下的特例。</li>
+<li>应该如何选择：需要控制混杂或估计连续结局效应时用线性回归。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>调整年龄、性别、BMI 后评估治疗与连续结局的关系。</li>
+<li>建立实验室指标预测模型。</li>
+<li>分析基线因素与随访连续结局之间的关联。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-one-way-anova.html" data-cn="单因素方差分析" data-en="One-Way ANOVA" data-def="单因素方差分析用于比较三组及以上独立样本的均值是否相同，是多组均值比较的标准参数方法。">单因素方差分析（One-Way ANOVA）</a></li>
+<li><a class="xlink" href="m-spearman-rank-correlation.html" data-cn="Spearman秩相关" data-en="Spearman Rank Correlation" data-def="Spearman 秩相关用两个变量各自的秩来衡量单调关联强度，适合非正态、含异常值或等级型数据。">Spearman秩相关（Spearman Rank Correlation）</a></li>
+<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归是最经典的二分类结局回归模型，用 logit 连接函数把事件概率映射到线性预测子上，从而估计协变量与事件发生 odds 的关系。">Logistic回归（Logistic Regression）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Kutner MH, Nachtsheim CJ, Neter J, Li W. <em>Applied Linear Statistical Models</em>. 5th ed. McGraw-Hill Irwin; 2005.</li>
+<li>statsmodels Developers. <code>statsmodels.regression.linear_model.OLS</code>. statsmodels API Reference. <a href="https://www.statsmodels.org/stable/generated/statsmodels.regression.linear_model.OLS.html">https://www.statsmodels.org/stable/generated/statsmodels.regression.linear_model.OLS.html</a> （访问日期：2026-07-02）</li>
+<li>R Core Team. <code>lm</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lm.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lm.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><span></span><a class="pg pg-next" href="m-generalized-linear-model-glm.html"><div class="pg-lab">后一则 →</div><div class="pg-t">广义线性模型</div></a></div>
+    <div class="colophon">— 黑盒词典 · 03·01 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

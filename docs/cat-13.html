@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数据预处理与特征工程 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap category">
+  <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><span class="cur">数据预处理与特征工程</span></div>
+  <div class="cat-title">
+    <div class="cat-title-l">
+      <div class="kicker dark-ink">第 13 部</div>
+      <h2 class="page-h2">数据预处理与特征工程</h2>
+      <div class="cat-title-en">Data Preprocessing &amp; Feature Engineering</div>
+      <p class="lede">把原始数据变成可建模输入。</p>
+    </div>
+    <div class="cat-title-r">
+      <div class="cat-big">8</div>
+      <div class="kicker">收录条目</div>
+    </div>
+  </div>
+  <div class="entries"><a class="entry" href="m-variance-threshold.html">
+      <span class="entry-no">13·01</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">方差阈值法</span>
+          <span class="entry-en">Variance Threshold</span>
+        </div>
+        <p class="entry-def">方差阈值法是一种过滤式特征选择方法。它计算每个特征在样本中的方差，并删除方差低于预设阈值的特征，用来去掉几乎不变化、信息量很低的变量。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-univariate-feature-selection.html">
+      <span class="entry-no">13·02</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">单变量特征选择</span>
+          <span class="entry-en">Univariate Feature Selection</span>
+        </div>
+        <p class="entry-def">单变量特征选择是一类过滤式方法。它逐个评估每个特征与目标变量之间的关系，根据统计量、P 值或信息量得分选择排名靠前或达到阈值的特征。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-correlation-based-feature-selection.html">
+      <span class="entry-no">13·03</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">相关系数特征选择</span>
+          <span class="entry-en">Correlation-based Feature Selection</span>
+        </div>
+        <p class="entry-def">相关系数特征选择是一种基于变量间相关性的过滤方法。它通过计算特征之间，或特征与结局之间的相关系数，删除冗余特征或保留与结局关系更强的特征。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">basic</span>
+      </div>
+    </a><a class="entry" href="m-information-gain.html">
+      <span class="entry-no">13·04</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">信息增益</span>
+          <span class="entry-en">Information Gain</span>
+        </div>
+        <p class="entry-def">信息增益是基于信息熵的特征评价指标，用来衡量使用某个特征划分数据后，类别不确定性减少了多少。它是 ID3 决策树和许多过滤式分类特征选择方法的核心思想。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-mutual-information-feature-selection.html">
+      <span class="entry-no">13·05</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">互信息特征选择</span>
+          <span class="entry-en">Mutual Information Feature Selection</span>
+        </div>
+        <p class="entry-def">互信息特征选择用互信息衡量每个特征与目标变量之间共享的信息量，并据此筛选特征。它可以捕捉非线性依赖，不局限于线性相关。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-embedded-feature-selection.html">
+      <span class="entry-no">13·06</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">嵌入式特征选择</span>
+          <span class="entry-en">Embedded Feature Selection</span>
+        </div>
+        <p class="entry-def">嵌入式特征选择是在模型训练过程中同步完成特征评价或筛选的方法。常见形式包括 L1 正则化模型、树模型特征重要性和基于模型系数的 SelectFromModel。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-tree-based-feature-selection.html">
+      <span class="entry-no">13·07</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">基于树模型的特征选择</span>
+          <span class="entry-en">Tree-based Feature Selection</span>
+        </div>
+        <p class="entry-def">基于树模型的特征选择利用决策树、随机森林、梯度提升树等模型产生的特征重要性，对特征进行排序或筛选。常用重要性包括不纯度减少、分裂次数、置换重要性和 SHAP 重要性。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a><a class="entry" href="m-multiple-imputation.html">
+      <span class="entry-no">13·08</span>
+      <div class="entry-mid">
+        <div class="entry-heads">
+          <span class="entry-cn">多重插补</span>
+          <span class="entry-en">Multiple Imputation</span>
+        </div>
+        <p class="entry-def">多重插补通过为每个缺失值生成多套（$m$ 套）“合理猜测”得到多份完整数据集，分别分析后按 Rubin 规则合并结果，使插补带来的不确定性被正确传播到最终推断中。</p>
+      </div>
+      <div class="entry-meta">
+        <span class="entry-status">◑&nbsp;已建</span>
+        <span class="entry-diff">intermediate</span>
+      </div>
+    </a></div>
+</main>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

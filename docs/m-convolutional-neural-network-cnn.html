@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>卷积神经网络 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-11.html">神经网络与深度学习</a><span class="sep">/</span><span class="cur">卷积神经网络</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">神经网络与深度学习 · 11·03</div>
+      <h1 class="detail-h1">卷积神经网络</h1>
+      <div class="detail-en">Convolutional Neural Network, CNN</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 深度学习 / 图像分析</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>卷积神经网络（Convolutional Neural Network, CNN）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>卷积神经网络是一类专门处理图像或局部空间结构数据的神经网络。它通过卷积核、激活函数和池化层，从原始像素中自动提取边缘、纹理和高级语义特征。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：当输入具有局部邻域结构时，如何高效学习位置相关又具一定平移鲁棒性的特征。</li>
+<li>适用任务：图像分类、目标检测、医学影像分型、波形或二维矩阵识别。</li>
+<li>常见医学场景：胸片异常识别、病理切片分类、眼底图像分级、ECG/EEG 图样识别。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>CNN 像一组在图像上滑动的小型“特征探测器”。浅层先识别边缘和纹理，深层再把这些基础模式组合成器官、病灶或其他更复杂的视觉结构。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>对输入特征图 $X$ 和卷积核 $K$，二维卷积可写为：</p>
+<p>$$
+Y_{i,j} = \sum_{m}\sum_{n} X_{i+m, j+n} K_{m,n} + b
+$$</p>
+<p>经过激活函数后得到：</p>
+<p>$$
+A_{i,j} = \phi(Y_{i,j})
+$$</p>
+<p>最大池化常写为：</p>
+<p>$$
+P_{i,j} = \max_{(m,n)\in \mathcal{W}_{i,j}} A_{m,n}
+$$</p>
+<p>最终特征经展平和全连接层输出分类或回归结果。</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>卷积核大小：决定局部感受野范围。</li>
+<li>通道数：决定可学习的特征图数量。</li>
+<li>stride：控制滑动步长。</li>
+<li>padding：控制边界处理与输出尺寸。</li>
+<li>pooling：用于下采样和增强鲁棒性。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>数据存在局部空间相关结构。</li>
+<li>相同模式可能在不同位置重复出现。</li>
+<li>样本量、增强策略和正则化足以支撑深层训练。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：二维或三维图像张量，也可扩展到一维信号和三维体数据。</li>
+<li>因变量类型：分类、回归、分割标签。</li>
+<li>数据结构：通常为 <code>batch × height × width × channel</code> 或 <code>batch × channel × height × width</code>。</li>
+<li>是否适合高维数据：适合高维像素输入，但需显存和样本支持。</li>
+<li>是否适合缺失较多数据：对系统性缺失不鲁棒，需先处理。</li>
+<li>是否适合删失数据：不直接处理删失。</li>
+<li>是否适合重复测量数据：若重复测量表现为图像序列，通常需结合时序结构。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以胸部 X 线分类为例：</p>
+<table>
+<thead>
+<tr>
+<th>PatientID</th>
+<th>ImagePath</th>
+<th>View</th>
+<th>Age</th>
+<th>Pneumonia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P001</td>
+<td>img_001.png</td>
+<td>PA</td>
+<td>67</td>
+<td>1</td>
+</tr>
+<tr>
+<td>P002</td>
+<td>img_002.png</td>
+<td>AP</td>
+<td>45</td>
+<td>0</td>
+</tr>
+<tr>
+<td>P003</td>
+<td>img_003.png</td>
+<td>PA</td>
+<td>72</td>
+<td>1</td>
+</tr>
+<tr>
+<td>P004</td>
+<td>img_004.png</td>
+<td>AP</td>
+<td>39</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：图像张量及标签。</li>
+<li>关键变量：卷积层数、卷积核大小、池化策略、学习率、batch size。</li>
+<li>需要预处理的内容：缩放、标准化、裁剪、数据增强、类别不平衡处理。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：训练好的 CNN 权重和验证指标。</li>
+<li>参数估计：卷积核和全连接层参数。</li>
+<li>预测结果：类别概率、连续值或像素级输出。</li>
+<li>不确定性指标：AUC、F1、校准、外部验证表现。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：图像和局部结构信号任务、需要自动特征提取的场景。</li>
+<li>不适合：样本极少且图像差异弱、主要依赖人工定义少量结构化变量的问题。</li>
+<li>使用前需要特别检查的点：标签质量、数据泄露、中心差异、图像增强是否合理。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="convolutional-neural-network-cnn" data-i="0">Python</button><button class="codetab" data-uid="convolutional-neural-network-cnn" data-i="1">R</button></div><div class="codepanel active" data-uid="convolutional-neural-network-cnn" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>tensorflow</code></li>
+<li><code>keras</code></li>
+</ul>
+<pre><code class="language-python">from tensorflow import keras
+
+model = keras.Sequential([
+    keras.layers.Input(shape=(128, 128, 1)),
+    keras.layers.Conv2D(32, 3, activation=&quot;relu&quot;),
+    keras.layers.MaxPooling2D(),
+    keras.layers.Conv2D(64, 3, activation=&quot;relu&quot;),
+    keras.layers.MaxPooling2D(),
+    keras.layers.Flatten(),
+    keras.layers.Dense(64, activation=&quot;relu&quot;),
+    keras.layers.Dense(2, activation=&quot;softmax&quot;)
+])
+</code></pre></div><div class="codepanel" data-uid="convolutional-neural-network-cnn" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>keras</code></li>
+</ul>
+<pre><code class="language-r">library(keras)
+
+model &lt;- keras_model_sequential() |&gt;
+  layer_conv_2d(filters = 32, kernel_size = 3, activation = &quot;relu&quot;,
+                input_shape = c(128, 128, 1)) |&gt;
+  layer_max_pooling_2d() |&gt;
+  layer_conv_2d(filters = 64, kernel_size = 3, activation = &quot;relu&quot;) |&gt;
+  layer_max_pooling_2d() |&gt;
+  layer_flatten() |&gt;
+  layer_dense(units = 64, activation = &quot;relu&quot;) |&gt;
+  layer_dense(units = 2, activation = &quot;softmax&quot;)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：验证集区分度、混淆矩阵、外部数据泛化能力。</li>
+<li>每个主要参数如何解释：卷积核和中间特征图通常难逐个解释，更常看总体性能和热图。</li>
+<li>临床或医学意义如何表达：需要结合 Grad-CAM、显著性图或错误案例复核，判断模型是否关注合理解剖区域。</li>
+<li>常见误读：高准确率不等于学到病灶，模型可能只利用设备差异、标记文字或背景伪特征。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>训练/验证损失和准确率曲线。</li>
+<li>混淆矩阵。</li>
+<li>热图解释，如 Grad-CAM。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>自动提取图像层级特征。</li>
+<li>对局部平移和形变较稳健。</li>
+<li>能迁移利用大量预训练模型。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>对标注质量和样本量要求高。</li>
+<li>训练成本较高。</li>
+<li>可解释性通常弱于结构化模型。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>病人级数据未分层，导致同一患者图像泄露到测试集。</li>
+<li>只看内部验证，不做设备或医院外验证。</li>
+<li>过度依赖图像增强，产生不真实分布。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-multilayer-perceptron-classifier-mlp.html" data-cn="多层感知机分类器" data-en="Multilayer Perceptron Classifier, MLP" data-def="多层感知机分类器是一类前馈神经网络模型。它通过若干隐藏层和非线性激活函数，把输入特征映射到输出类别概率，适合学习复杂的非线性判别边界。">多层感知机分类器（Multilayer Perceptron Classifier, MLP）</a> 的区别：MLP 直接处理展平向量，CNN 显式利用局部空间结构和参数共享。</li>
+<li>和 <a class="xlink" href="m-alexnet.html" data-cn="AlexNet" data-en="AlexNet" data-def="AlexNet 是深度学习图像识别史上的经典卷积神经网络架构。它通过较深的卷积层堆叠、ReLU、dropout 和大规模 GPU 训练，推动了现代深度视觉模型的发展。">AlexNet（AlexNet）</a> 的区别：AlexNet 是经典深层 CNN 架构之一。</li>
+<li>和 <a class="xlink" href="m-residual-network-resnet.html" data-cn="残差网络" data-en="Residual Network, ResNet" data-def="ResNet 是在深层 CNN 中引入残差连接的网络架构。它通过快捷连接把输入直接加到后续层输出上，从而缓解深层网络训练中的退化与梯度传播困难。">残差网络（Residual Network, ResNet）</a> 的区别：ResNet 通过残差连接支持更深网络训练。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>胸片、CT、MRI 的疾病识别。</li>
+<li>数字病理图像分类和分型。</li>
+<li>眼底图像和皮肤病变分级。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-artificial-neural-network-ann.html" data-cn="人工神经网络" data-en="Artificial Neural Network, ANN" data-def="人工神经网络是由多层神经元节点组成的一类函数逼近模型。它通过权重、偏置和非线性激活函数，把输入数据映射到分类、回归或表征学习目标上。">人工神经网络（Artificial Neural Network, ANN）</a></li>
+<li><a class="xlink" href="m-alexnet.html" data-cn="AlexNet" data-en="AlexNet" data-def="AlexNet 是深度学习图像识别史上的经典卷积神经网络架构。它通过较深的卷积层堆叠、ReLU、dropout 和大规模 GPU 训练，推动了现代深度视觉模型的发展。">AlexNet（AlexNet）</a></li>
+<li><a class="xlink" href="m-residual-network-resnet.html" data-cn="残差网络" data-en="Residual Network, ResNet" data-def="ResNet 是在深层 CNN 中引入残差连接的网络架构。它通过快捷连接把输入直接加到后续层输出上，从而缓解深层网络训练中的退化与梯度传播困难。">残差网络（Residual Network, ResNet）</a></li>
+<li><a class="xlink" href="m-densely-connected-convolutional-network-densenet.html" data-cn="DenseNet" data-en="Densely Connected Convolutional Network, DenseNet" data-def="DenseNet 是一种密集连接卷积网络。它让每一层都接收所有前面层的特征图作为输入，从而强化特征复用并改善梯度传播。">DenseNet（Densely Connected Convolutional Network, DenseNet）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>LeCun Y, Bengio Y, Hinton G. Deep learning. <em>Nature</em>. 2015;521(7553):436-444.</li>
+<li>Goodfellow I, Bengio Y, Courville A. <em>Deep Learning</em>. MIT Press; 2016.</li>
+<li>Chollet F. <em>Deep Learning with Python</em>. 2nd ed. Manning; 2021.</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-artificial-neural-network-ann.html"><div class="pg-lab">← 前一则</div><div class="pg-t">人工神经网络</div></a><a class="pg pg-next" href="m-recurrent-neural-network-rnn.html"><div class="pg-lab">后一则 →</div><div class="pg-t">循环神经网络</div></a></div>
+    <div class="colophon">— 黑盒词典 · 11·03 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

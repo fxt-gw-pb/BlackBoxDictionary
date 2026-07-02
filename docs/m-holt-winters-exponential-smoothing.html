@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Holt-Winters指数平滑 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-12.html">时间序列与时序建模</a><span class="sep">/</span><span class="cur">Holt-Winters指数平滑</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">时间序列与时序建模 · 12·08</div>
+      <h1 class="detail-h1">Holt-Winters指数平滑</h1>
+      <div class="detail-en">Holt-Winters Exponential Smoothing</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 时间序列 / 预测 / 季节性 / 指数平滑</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>Holt-Winters指数平滑（Holt-Winters Exponential Smoothing）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>Holt-Winters 指数平滑是一种用于带趋势和季节性的单变量时间序列预测方法。它递推更新水平、趋势和季节性三个成分，并用它们生成未来预测。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：具有稳定季节周期和趋势的序列如何快速预测。</li>
+<li>适用任务：季节性业务指标预测、平滑和短中期预测、运营需求预测。</li>
+<li>常见医学场景：月度门诊量、季节性呼吸道疾病就诊量、药品消耗、检验项目需求预测。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>Holt-Winters 把每个时间点的信息拆成当前水平、增长趋势和季节位置。新观测到来时，它让最近数据权重更高，逐步更新这三个成分。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>加法 Holt-Winters 模型：</p>
+<p>$$
+\ell_t=\alpha(y_t-s_{t-m})+(1-\alpha)(\ell_{t-1}+b_{t-1})
+$$</p>
+<p>$$
+b_t=\beta(\ell_t-\ell_{t-1})+(1-\beta)b_{t-1}
+$$</p>
+<p>$$
+s_t=\gamma(y_t-\ell_t)+(1-\gamma)s_{t-m}
+$$</p>
+<p>预测公式：</p>
+<p>$$
+\hat y_{t+h|t}=\ell_t+hb_t+s_{t+h-m(k+1)}
+$$</p>
+<p>其中 $m$ 为季节周期长度。</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$\ell_t$：水平项。</li>
+<li>$b_t$：趋势项。</li>
+<li>$s_t$：季节性项。</li>
+<li>$\alpha$：水平平滑参数。</li>
+<li>$\beta$：趋势平滑参数。</li>
+<li>$\gamma$：季节性平滑参数。</li>
+<li>$m$：季节周期，如月度数据中的 12。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>季节周期相对稳定。</li>
+<li>趋势和季节性可由指数平滑递推表达。</li>
+<li>加法模型适合季节波动幅度大致恒定的序列；乘法模型适合季节波动随水平放大的序列。</li>
+<li>序列频率规则且周期长度明确。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：时间索引和历史序列。</li>
+<li>因变量类型：连续型单变量时间序列。</li>
+<li>数据结构：等间隔、具有季节周期的序列。</li>
+<li>是否适合高维数据：不适合直接处理高维。</li>
+<li>是否适合缺失较多数据：需先补齐或插补。</li>
+<li>是否适合删失数据：不直接处理删失结局。</li>
+<li>是否适合重复测量数据：适合总体级序列，不适合直接处理个体重复测量。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以月度呼吸科门诊量为例：</p>
+<table>
+<thead>
+<tr>
+<th>Month</th>
+<th>RespiratoryVisits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2025-01</td>
+<td>3220</td>
+</tr>
+<tr>
+<td>2025-02</td>
+<td>2980</td>
+</tr>
+<tr>
+<td>2025-03</td>
+<td>2760</td>
+</tr>
+<tr>
+<td>2025-04</td>
+<td>2410</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：单变量等间隔季节性序列。</li>
+<li>关键变量：季节周期、加法/乘法季节性、平滑参数。</li>
+<li>需要预处理的内容：缺失处理、异常值检查、频率设定、训练测试时间切分。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：水平、趋势、季节性成分、拟合值。</li>
+<li>参数估计：$\alpha,\beta,\gamma$ 和初始状态。</li>
+<li>预测结果：未来值预测和预测区间。</li>
+<li>不确定性指标：预测区间、残差诊断、滚动预测误差。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：单变量、趋势和季节性稳定、需要快速可解释预测的序列。</li>
+<li>不适合：多个季节周期、强外部事件影响、季节性频繁改变或序列很短的场景。</li>
+<li>使用前需要特别检查的点：季节周期是否足够多、加法/乘法选择、残差是否有自相关。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="holt-winters-exponential-smoothing" data-i="0">Python</button><button class="codetab" data-uid="holt-winters-exponential-smoothing" data-i="1">R</button></div><div class="codepanel active" data-uid="holt-winters-exponential-smoothing" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>statsmodels</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
+
+df = pd.read_csv(&quot;monthly_respiratory_visits.csv&quot;, parse_dates=[&quot;Month&quot;])
+y = df.set_index(&quot;Month&quot;)[&quot;RespiratoryVisits&quot;].asfreq(&quot;MS&quot;)
+
+fit = ExponentialSmoothing(
+    y,
+    trend=&quot;add&quot;,
+    seasonal=&quot;add&quot;,
+    seasonal_periods=12
+).fit()
+
+forecast = fit.forecast(12)
+print(forecast)
+</code></pre></div><div class="codepanel" data-uid="holt-winters-exponential-smoothing" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>forecast</code></li>
+</ul>
+<pre><code class="language-r">library(forecast)
+
+y &lt;- ts(df$RespiratoryVisits, frequency = 12)
+fit &lt;- hw(y, seasonal = &quot;additive&quot;, h = 12)
+
+summary(fit)
+fit
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：水平、趋势、季节性成分、预测误差和残差结构。</li>
+<li>每个主要参数如何解释：$\alpha$ 越大，模型越快响应最新水平变化。</li>
+<li>临床或医学意义如何表达：适合解释某类服务需求的季节高峰和长期变化趋势。</li>
+<li>常见误读：季节性稳定是模型假设，不能自动适应重大政策、疫情或诊疗流程变化。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>原始序列和预测曲线。</li>
+<li>分解出的水平、趋势和季节性成分。</li>
+<li>季节图或月份箱线图。</li>
+<li>残差时间图和残差 ACF。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>简单、快速、解释性好。</li>
+<li>对稳定趋势和季节性序列表现稳健。</li>
+<li>不需要复杂特征工程。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>难以处理复杂外部变量。</li>
+<li>对多季节周期和结构突变表达有限。</li>
+<li>序列太短时季节性估计不稳定。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>月度序列不足两个完整季节周期就拟合季节模型。</li>
+<li>加法/乘法季节性选错。</li>
+<li>不做时间切分验证。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-autoregressive-integrated-moving-average-model-arima.html" data-cn="自回归积分滑动平均模型" data-en="Autoregressive Integrated Moving Average Model, ARIMA" data-def="ARIMA 是用于单变量时间序列预测的经典模型。它通过差分把非平稳序列转为平稳序列，再用 ARMA 模型刻画差分后序列的自相关结构。">自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）</a> 的区别：ARIMA 强调差分和自相关，Holt-Winters 强调水平、趋势和季节性递推平滑。</li>
+<li>和 <a class="xlink" href="m-prophet-forecasting-model.html" data-cn="Prophet时间序列模型" data-en="Prophet Forecasting Model" data-def="Prophet 是一种面向业务时间序列预测的可加性模型。它把序列分解为趋势、季节性、节假日效应和误差项，并通过变化点捕捉趋势斜率的改变。">Prophet时间序列模型（Prophet Forecasting Model）</a> 的区别：Prophet 支持变化点和节假日效应，Holt-Winters 更轻量。</li>
+<li>和 <a class="xlink" href="m-moving-average-model-ma.html" data-cn="移动平均模型" data-en="Moving Average Model, MA" data-def="移动平均模型在时间序列建模中通常指 MA($q$)：当前值由当前随机冲击和过去 $q$ 个随机冲击线性组合而成。实践中“移动平均”也常指简单移动平均平滑，用于去噪和观察趋势。">移动平均模型（Moving Average Model, MA）</a> 的区别：简单移动平均只平滑窗口内值，Holt-Winters 同时递推趋势和季节性。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>呼吸科、儿科等季节性明显科室的门诊量预测。</li>
+<li>药品、耗材、床位需求的月度预测。</li>
+<li>传染病季节性高峰的运营准备。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-moving-average-model-ma.html" data-cn="移动平均模型" data-en="Moving Average Model, MA" data-def="移动平均模型在时间序列建模中通常指 MA($q$)：当前值由当前随机冲击和过去 $q$ 个随机冲击线性组合而成。实践中“移动平均”也常指简单移动平均平滑，用于去噪和观察趋势。">移动平均模型（Moving Average Model, MA）</a></li>
+<li><a class="xlink" href="m-autoregressive-integrated-moving-average-model-arima.html" data-cn="自回归积分滑动平均模型" data-en="Autoregressive Integrated Moving Average Model, ARIMA" data-def="ARIMA 是用于单变量时间序列预测的经典模型。它通过差分把非平稳序列转为平稳序列，再用 ARMA 模型刻画差分后序列的自相关结构。">自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）</a></li>
+<li><a class="xlink" href="m-prophet-forecasting-model.html" data-cn="Prophet时间序列模型" data-en="Prophet Forecasting Model" data-def="Prophet 是一种面向业务时间序列预测的可加性模型。它把序列分解为趋势、季节性、节假日效应和误差项，并通过变化点捕捉趋势斜率的改变。">Prophet时间序列模型（Prophet Forecasting Model）</a></li>
+<li><a class="xlink" href="m-xgboost-for-time-series-forecasting.html" data-cn="XGBoost时间序列预测" data-en="XGBoost for Time Series Forecasting" data-def="XGBoost 时间序列预测是把时间序列问题转换为监督学习表格问题，再用 XGBoost 建模。核心做法是构造滞后特征、滚动统计量、日历特征和外部变量，用它们预测未来目标值。">XGBoost时间序列预测（XGBoost for Time Series Forecasting）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Holt CC. Forecasting seasonals and trends by exponentially weighted moving averages. <em>International Journal of Forecasting</em>. 2004;20(1):5-10.</li>
+<li>Winters PR. Forecasting sales by exponentially weighted moving averages. <em>Management Science</em>. 1960;6(3):324-342.</li>
+<li>Hyndman RJ, Athanasopoulos G. <em>Forecasting: Principles and Practice</em>. 3rd ed. OTexts; 2021. <a href="https://otexts.com/fpp3/">https://otexts.com/fpp3/</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-prophet-forecasting-model.html"><div class="pg-lab">← 前一则</div><div class="pg-t">Prophet时间序列模型</div></a><a class="pg pg-next" href="m-long-short-term-memory-for-time-series-forecasting.html"><div class="pg-lab">后一则 →</div><div class="pg-t">LSTM时间序列预测</div></a></div>
+    <div class="colophon">— 黑盒词典 · 12·08 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

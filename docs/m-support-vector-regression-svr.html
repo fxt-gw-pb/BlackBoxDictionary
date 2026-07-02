@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>支持向量回归 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-08.html">支持向量机与核方法</a><span class="sep">/</span><span class="cur">支持向量回归</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">支持向量机与核方法 · 08·01</div>
+      <h1 class="detail-h1">支持向量回归</h1>
+      <div class="detail-en">Support Vector Regression, SVR</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 支持向量机 / 回归分析</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>支持向量回归（Support Vector Regression, SVR）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>支持向量回归是支持向量机在回归问题中的扩展，它通过引入 $\epsilon$-不敏感损失函数，在允许一定误差带的同时寻找最平滑的回归函数。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：如何在复杂非线性关系下做稳健的连续结局预测。</li>
+<li>适用任务：非线性回归、小到中等规模数据预测、核方法回归。</li>
+<li>常见医学场景：复杂生理指标预测、连续风险评分估计、非线性剂量-反应曲线拟合。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>SVR 不要求每个点都精确拟合，而是在预测曲线周围放一个“容忍带”（$\epsilon$-tube）。只要点落在带内，就不产生损失；真正决定模型形状的是落在带外的那些支持向量。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>线性 SVR 的优化问题可写成：</p>
+<p>$$
+\min_{w,b,\xi_i,\xi_i^*}
+\frac{1}{2}\|w\|^2
++
+C\sum_{i=1}^n(\xi_i+\xi_i^*)
+$$</p>
+<p>满足约束：</p>
+<p>$$
+\begin{aligned}
+y_i - (w^\top x_i + b) &\le \epsilon + \xi_i \\
+(w^\top x_i + b) - y_i &\le \epsilon + \xi_i^* \\
+\xi_i,\xi_i^* &\ge 0
+\end{aligned}
+$$</p>
+<p>核化后预测函数为：</p>
+<p>$$
+f(x)=\sum_{i=1}^n (\alpha_i-\alpha_i^*)K(x_i,x)+b
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$\epsilon$：误差容忍带宽度。</li>
+<li>$C$：误差惩罚强度。</li>
+<li>$K(\cdot,\cdot)$：核函数，如线性核、多项式核、RBF 核。</li>
+<li>支持向量：落在 $\epsilon$ 带外、真正决定模型的样本点。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>结局为连续型。</li>
+<li>数据规模通常不宜过大，否则计算成本会较高。</li>
+<li>特征尺度通常需要标准化。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续变量为主，也可混合编码后的分类变量。</li>
+<li>因变量类型：连续型。</li>
+<li>数据结构：宽表数据，或低维非线性散点数据。</li>
+<li>是否适合高维数据：可以，但训练成本会提高。</li>
+<li>是否适合缺失较多数据：需先处理缺失值。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：不直接适合。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>一个简单的一维非线性回归表格如下：</p>
+<table>
+<thead>
+<tr>
+<th>X</th>
+<th>y</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.026</td>
+<td>0.045</td>
+</tr>
+<tr>
+<td>1.126</td>
+<td>0.735</td>
+</tr>
+<tr>
+<td>1.392</td>
+<td>0.979</td>
+</tr>
+<tr>
+<td>1.501</td>
+<td>1.123</td>
+</tr>
+<tr>
+<td>1.515</td>
+<td>0.756</td>
+</tr>
+<tr>
+<td>2.340</td>
+<td>0.636</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：连续结局和特征矩阵。</li>
+<li>关键变量：核函数、<code>C</code>、<code>epsilon</code>、<code>gamma</code>。</li>
+<li>需要预处理的内容：标准化、训练测试集划分、超参数搜索。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：支持向量集合、拟合函数、最佳超参数。</li>
+<li>参数估计：核参数和支持向量权重，不像线性回归那样直观。</li>
+<li>预测结果：连续型预测值。</li>
+<li>不确定性指标：通常依赖交叉验证误差和测试集性能。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：复杂非线性、小到中等规模回归任务。</li>
+<li>不适合：超大规模数据、强调强可解释性的场景。</li>
+<li>使用前需要特别检查的点：标准化、核函数选择、<code>C/epsilon/gamma</code> 调参。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="support-vector-regression-svr" data-i="0">Python</button><button class="codetab" data-uid="support-vector-regression-svr" data-i="1">R</button></div><div class="codepanel active" data-uid="support-vector-regression-svr" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVR
+
+fit = make_pipeline(
+    StandardScaler(),
+    SVR(kernel=&quot;rbf&quot;, C=10, epsilon=0.1, gamma=&quot;scale&quot;)
+)
+fit.fit(X_train, y_train)
+y_pred = fit.predict(X_test)
+</code></pre></div><div class="codepanel" data-uid="support-vector-regression-svr" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>e1071</code></li>
+</ul>
+<pre><code class="language-r">library(e1071)
+
+fit &lt;- svm(y ~ ., data = df, type = &quot;eps-regression&quot;, kernel = &quot;radial&quot;)
+pred &lt;- predict(fit, newdata = df_test)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：预测误差、支持向量数量、核参数。</li>
+<li>每个主要参数如何解释：SVR 更偏预测导向，参数解释通常不如线性模型直接。</li>
+<li>临床或医学意义如何表达：更适合强调“预测性能”和“非线性拟合能力”。</li>
+<li>常见误读：支持向量回归不是简单的“线性回归 + 核函数”，其损失函数和优化目标都不同。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>原始散点图 + SVR 拟合曲线。</li>
+<li>真实值 vs 预测值散点图。</li>
+<li>不同核函数拟合曲线对比图。</li>
+</ul>
+<h3>7.1 图像示例</h3>
+<p>下图展示 SVR 在一组非线性数据上的拟合曲线，体现了核方法对复杂曲线关系的刻画能力。</p>
+<p><img alt="" src="img/svr_nonlinear_curve.png" /></p>
+<p>下图为 SVR 在房价数据上的真实值 vs 预测值散点图，点越贴近对角线说明预测越准确。</p>
+<p><img alt="" src="img/svr_actual_vs_pred_houseprice.png" /></p></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>非线性拟合能力强。</li>
+<li>对小误差不敏感，具有一定稳健性。</li>
+<li>核技巧让它在低到中等规模问题上很灵活。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>大样本计算成本高。</li>
+<li>参数调优复杂。</li>
+<li>模型解释性一般。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>不标准化特征就直接训练。</li>
+<li>在大数据上直接用 RBF-SVR。</li>
+<li>只调 <code>C</code> 不调 <code>epsilon</code> 和 <code>gamma</code>。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和线性回归的区别：SVR 关注支持向量和 $\epsilon$-带，而不是整体平方误差最小化。</li>
+<li>和支持向量机的区别：SVR 处理连续结局，SVM 主条目聚焦分类任务。</li>
+<li>和多项式回归的区别：多项式回归靠特征扩展，SVR 靠核函数与 margin 思想。</li>
+<li>和随机森林回归的区别：SVR 更适合平滑非线性曲线，树模型更擅长复杂交互和局部结构。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>非线性连续风险预测。</li>
+<li>生理参数与疾病评分之间的复杂关系拟合。</li>
+<li>小中样本、高维但非线性明显的预测任务。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-support-vector-machine-svm.html" data-cn="支持向量机" data-en="Support Vector Machine, SVM" data-def="支持向量机是一类通过最大化分类间隔来学习判别边界的监督学习方法。它最经典的用途是二分类，也可以扩展到多分类和非线性分类。">支持向量机（Support Vector Machine, SVM）</a></li>
+<li><a class="xlink" href="m-polynomial-regression.html" data-cn="多项式回归" data-en="Polynomial Regression" data-def="多项式回归是在普通线性回归的基础上加入自变量的高次项，从而用一条更灵活的曲线来拟合非线性关系。">多项式回归（Polynomial Regression）</a></li>
+<li><a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归是在普通线性回归的损失函数中加入 L2 正则化项的一种方法，用来缓解多重共线性、减少过拟合，并提升模型在新数据上的稳定性。">Ridge回归（Ridge Regression）</a></li>
+<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归通过把连续型结局表示为若干自变量的线性组合，来估计变量与结局之间的方向、大小和不确定性，是医学统计最基础的建模方法之一。">线性回归（Linear Regression）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Smola AJ, Schölkopf B. A tutorial on support vector regression. <em>Stat Comput</em>. 2004;14:199-222.</li>
+<li>scikit-learn Developers. <code>sklearn.svm.SVR</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html">https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html</a> （访问日期：2026-07-02）</li>
+<li>CRAN. Package <code>e1071</code>. <a href="https://cran.r-project.org/package=e1071">https://cran.r-project.org/package=e1071</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><span></span><a class="pg pg-next" href="m-gaussian-process-regression.html"><div class="pg-lab">后一则 →</div><div class="pg-t">高斯过程回归</div></a></div>
+    <div class="colophon">— 黑盒词典 · 08·01 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

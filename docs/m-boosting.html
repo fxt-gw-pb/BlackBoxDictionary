@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boosting算法 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-07.html">树模型与集成学习</a><span class="sep">/</span><span class="cur">Boosting算法</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">树模型与集成学习 · 07·09</div>
+      <h1 class="detail-h1">Boosting算法</h1>
+      <div class="detail-en">Boosting</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 集成学习 / 提升方法</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>Boosting算法（Boosting）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>Boosting 是一类串行集成学习方法，它把多个弱学习器按顺序组合起来，每一轮都让新模型重点修正当前集成模型的错误。AdaBoost、GBDT、XGBoost 和 LightGBM 都属于 Boosting 家族。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：如何把多个略优于随机猜测的弱模型逐步组合成强预测模型。</li>
+<li>适用任务：二分类、多分类、连续结局预测和排序任务。</li>
+<li>常见医学场景：疾病风险预测、并发症预测、电子病历表格数据建模。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>Boosting 像是连续改错：先用一个简单模型做初步预测，然后让后续模型专门学习前面没处理好的样本或残差。多轮之后，整体模型会比任何单个弱学习器更强。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>Boosting 通常写成加法模型：</p>
+<p>$$
+F_M(x)=\sum_{m=1}^{M}\alpha_m h_m(x)
+$$</p>
+<p>其中 $h_m(x)$ 是第 $m$ 个弱学习器，$\alpha_m$ 是其权重或步长。</p>
+<p>以二分类 AdaBoost 为例，样本权重初始化为：</p>
+<p>$$
+w_i^{(1)}=\frac{1}{n}
+$$</p>
+<p>第 $m$ 轮弱分类器的加权误差为：</p>
+<p>$$
+\epsilon_m=\sum_{i=1}^{n}w_i^{(m)}I(h_m(x_i)\neq y_i)
+$$</p>
+<p>分类器权重为：</p>
+<p>$$
+\alpha_m=\frac{1}{2}\log\frac{1-\epsilon_m}{\epsilon_m}
+$$</p>
+<p>最终分类器为：</p>
+<p>$$
+H(x)=\mathrm{sign}\left(\sum_{m=1}^{M}\alpha_m h_m(x)\right)
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li><code>n_estimators</code>：提升轮数或弱学习器数量。</li>
+<li><code>learning_rate</code>：每轮更新幅度，也称 shrinkage。</li>
+<li>弱学习器：通常是浅层决策树或树桩。</li>
+<li>样本权重/负梯度：决定下一轮模型重点学习哪里。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>数据中存在弱学习器可逐步捕捉的结构。</li>
+<li>标注错误和异常值不过多，否则后续模型可能反复追逐噪声。</li>
+<li>需要通过验证集、早停或正则化控制过拟合。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续、二分类、多分类变量均可，类别变量常需编码。</li>
+<li>因变量类型：二分类、多分类或连续型。</li>
+<li>数据结构：宽表数据。</li>
+<li>是否适合高维数据：适合中高维表格数据，但需调参。</li>
+<li>是否适合缺失较多数据：取决于具体实现，XGBoost/LightGBM 有原生缺失处理能力。</li>
+<li>是否适合删失数据：普通 Boosting 不直接适合，需使用专门生存 Boosting。</li>
+<li>是否适合重复测量数据：不直接适合。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以败血症早期预警为例：</p>
+<table>
+<thead>
+<tr>
+<th>Age</th>
+<th>HR</th>
+<th>SBP</th>
+<th>Lactate</th>
+<th>WBC</th>
+<th>Sepsis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>76</td>
+<td>118</td>
+<td>88</td>
+<td>3.4</td>
+<td>16.2</td>
+<td>1</td>
+</tr>
+<tr>
+<td>52</td>
+<td>82</td>
+<td>126</td>
+<td>1.1</td>
+<td>7.8</td>
+<td>0</td>
+</tr>
+<tr>
+<td>69</td>
+<td>105</td>
+<td>94</td>
+<td>2.6</td>
+<td>12.4</td>
+<td>1</td>
+</tr>
+<tr>
+<td>41</td>
+<td>74</td>
+<td>132</td>
+<td>0.9</td>
+<td>6.1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>63</td>
+<td>96</td>
+<td>108</td>
+<td>1.8</td>
+<td>10.2</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：目标变量和特征矩阵。</li>
+<li>关键变量：弱学习器数量、学习率、树深、损失函数、采样和正则化参数。</li>
+<li>需要预处理的内容：训练验证划分、类别编码、缺失机制判断、异常值检查。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：Boosting 集成模型、训练/验证误差曲线、特征重要性。</li>
+<li>参数估计：一般不输出传统可解释系数。</li>
+<li>预测结果：类别、概率或连续预测值。</li>
+<li>不确定性指标：交叉验证性能、测试集 AUC / PR-AUC / MSE、校准指标。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：复杂非线性、交互较多、追求预测性能的表格数据任务。</li>
+<li>不适合：标签噪声很高、样本极小、强因果解释为主要目标的任务。</li>
+<li>使用前需要特别检查的点：学习率与树数平衡、过拟合、异常值、类别不平衡、概率校准。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="boosting" data-i="0">Python</button><button class="codetab" data-uid="boosting" data-i="1">R</button></div><div class="codepanel active" data-uid="boosting" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.model_selection import train_test_split
+
+df = pd.read_csv(&quot;sepsis_alert.csv&quot;)
+X = df&amp;quot;Age&amp;quot;, &amp;quot;HR&amp;quot;, &amp;quot;SBP&amp;quot;, &amp;quot;Lactate&amp;quot;, &amp;quot;WBC&amp;quot;
+y = df[&quot;Sepsis&quot;].astype(int)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+fit = GradientBoostingClassifier(
+    n_estimators=200,
+    learning_rate=0.05,
+    max_depth=3,
+    random_state=42
+)
+fit.fit(X_train, y_train)
+
+pred_prob = fit.predict_proba(X_test)[:, 1]
+</code></pre></div><div class="codepanel" data-uid="boosting" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>gbm</code></li>
+</ul>
+<pre><code class="language-r">library(gbm)
+
+fit &lt;- gbm(
+  Sepsis ~ Age + HR + SBP + Lactate + WBC,
+  data = df_train,
+  distribution = &quot;bernoulli&quot;,
+  n.trees = 200,
+  interaction.depth = 3,
+  shrinkage = 0.05
+)
+
+pred &lt;- predict(fit, newdata = df_test, n.trees = 200, type = &quot;response&quot;)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：验证集性能、早停轮数、学习曲线、特征重要性、概率校准。</li>
+<li>每个主要参数如何解释：学习率越小通常需要更多轮数；树越深越能捕捉交互但越容易过拟合。</li>
+<li>临床或医学意义如何表达：适合表达模型区分高危个体的能力，不应把重要性排序直接解释为因果作用。</li>
+<li>常见误读：训练误差持续下降不代表泛化性能持续提升。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>训练集和验证集损失随迭代轮数变化图。</li>
+<li>ROC 曲线、PR 曲线和校准曲线。</li>
+<li>特征重要性图或 SHAP 总结图。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>能逐步降低偏差，预测性能通常较强。</li>
+<li>可灵活适配多种损失函数。</li>
+<li>对非线性和交互建模能力强。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>对噪声和异常值较敏感。</li>
+<li>调参空间较大。</li>
+<li>训练过程串行，通常比 Bagging 更难并行。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>学习率过大、树太深或轮数过多导致过拟合。</li>
+<li>只报告 AUC，忽略校准和临床阈值。</li>
+<li>在医学研究中把模型解释图误写成因果发现。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-bootstrap-aggregating.html" data-cn="Bagging算法" data-en="Bootstrap Aggregating" data-def="Bagging 是 Bootstrap Aggregating 的缩写，是一种通过自助抽样生成多个训练子集、分别训练基学习器、再对预测结果投票或平均的集成学习方法。它主要用于降低不稳定模型的方差，典型代表是 [[随机森林（Random Fo">Bagging算法（Bootstrap Aggregating）</a> 的区别：Bagging 并行降方差；Boosting 串行纠错，常能更强地降低偏差。</li>
+<li>和 <a class="xlink" href="m-adaptive-boosting.html" data-cn="AdaBoost" data-en="Adaptive Boosting" data-def="AdaBoost 是 Adaptive Boosting 的缩写，是一种经典 Boosting 算法。它通过反复调整样本权重，让后续弱分类器更关注前一轮错分的样本，并把多个弱分类器加权组合成强分类器。">AdaBoost（Adaptive Boosting）</a> 的区别：AdaBoost 是经典 Boosting 实现，显式更新样本权重。</li>
+<li>和 <a class="xlink" href="m-gradient-boosting-decision-tree-gbdt.html" data-cn="梯度提升决策树" data-en="Gradient Boosting Decision Tree, GBDT" data-def="梯度提升决策树是以决策树为基学习器的梯度提升方法。它通过逐轮拟合损失函数的负梯度或伪残差，把多棵浅树叠加成一个强预测模型。">梯度提升决策树（Gradient Boosting Decision Tree, GBDT）</a> 的区别：GBDT 用负梯度统一描述每轮修正，是现代 Boosting 树模型的主线。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>ICU 患者死亡或恶化风险预测。</li>
+<li>住院再入院、术后并发症、疾病复发等二分类预测。</li>
+<li>电子病历表格数据中的高性能预测基线。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-adaptive-boosting.html" data-cn="AdaBoost" data-en="Adaptive Boosting" data-def="AdaBoost 是 Adaptive Boosting 的缩写，是一种经典 Boosting 算法。它通过反复调整样本权重，让后续弱分类器更关注前一轮错分的样本，并把多个弱分类器加权组合成强分类器。">AdaBoost（Adaptive Boosting）</a></li>
+<li><a class="xlink" href="m-gradient-boosting-decision-tree-gbdt.html" data-cn="梯度提升决策树" data-en="Gradient Boosting Decision Tree, GBDT" data-def="梯度提升决策树是以决策树为基学习器的梯度提升方法。它通过逐轮拟合损失函数的负梯度或伪残差，把多棵浅树叠加成一个强预测模型。">梯度提升决策树（Gradient Boosting Decision Tree, GBDT）</a></li>
+<li><a class="xlink" href="m-extreme-gradient-boosting-xgboost.html" data-cn="XGBoost" data-en="Extreme Gradient Boosting, XGBoost" data-def="XGBoost 是一种基于梯度提升树的高性能集成学习方法。它在经典 GBDT 基础上加入了二阶优化、显式正则化、列采样、缺失值处理和工程级并行优化，因此在表格数据预测中非常常用。">XGBoost（Extreme Gradient Boosting, XGBoost）</a></li>
+<li><a class="xlink" href="m-light-gradient-boosting-machine.html" data-cn="LightGBM" data-en="Light Gradient Boosting Machine" data-def="LightGBM 是一种高效的梯度提升树实现。它在传统 GBDT 基础上引入直方图分桶、leaf-wise 生长策略，以及大样本场景常用的 GOSS 和 EFB 等优化，使其在大规模表格数据上训练更快、内存占用更低。">LightGBM（Light Gradient Boosting Machine）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Schapire RE. The strength of weak learnability. <em>Mach Learn</em>. 1990;5:197-227.</li>
+<li>Freund Y, Schapire RE. A decision-theoretic generalization of on-line learning and an application to boosting. <em>J Comput Syst Sci</em>. 1997;55(1):119-139.</li>
+<li>Friedman JH. Greedy function approximation: a gradient boosting machine. <em>Ann Stat</em>. 2001;29(5):1189-1232.</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-extremely-randomized-trees.html"><div class="pg-lab">← 前一则</div><div class="pg-t">极端随机树</div></a><a class="pg pg-next" href="m-adaptive-boosting.html"><div class="pg-lab">后一则 →</div><div class="pg-t">AdaBoost</div></a></div>
+    <div class="colophon">— 黑盒词典 · 07·09 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

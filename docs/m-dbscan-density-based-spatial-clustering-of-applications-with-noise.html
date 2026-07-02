@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DBSCAN · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">检字表</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目次 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-09.html">聚类与无监督学习</a><span class="sep">/</span><span class="cur">DBSCAN</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">聚类与无监督学习 · 09·04</div>
+      <h1 class="detail-h1">DBSCAN</h1>
+      <div class="detail-en">Density-Based Spatial Clustering of Applications with Noise</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 聚类 / 无监督学习 / 密度方法 / 异常点</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>DBSCAN（Density-Based Spatial Clustering of Applications with Noise）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>DBSCAN 是一种基于密度的聚类方法。它把高密度区域连接成簇，并把低密度区域中的点标记为噪声或离群点。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：数据中是否存在任意形状的高密度样本群，同时伴随噪声点。</li>
+<li>适用任务：非球形簇识别、噪声识别、空间聚类、异常样本探索。</li>
+<li>常见医学场景：地理流行病学热点探索，影像特征异常区域识别，患者相似性空间中的离群样本发现。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>DBSCAN 的核心想法是“人多的地方连成片”。如果一个点周围半径 $\varepsilon$ 内有足够多邻居，它就是核心点；核心点之间能互相连通时，就形成一个簇。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>给定半径 $\varepsilon$，样本 $x_i$ 的邻域为：</p>
+<p>$$
+N_\varepsilon(x_i)=\{x_j:\ d(x_i,x_j)\le \varepsilon\}
+$$</p>
+<p>若：</p>
+<p>$$
+|N_\varepsilon(x_i)|\ge \mathrm{MinPts}
+$$</p>
+<p>则 $x_i$ 是核心点。若 $x_j\in N_\varepsilon(x_i)$ 且 $x_i$ 为核心点，则 $x_j$ 从 $x_i$ 密度可达。由密度可达关系连接起来的最大样本集合构成一个簇。</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li><code>eps</code>：邻域半径 $\varepsilon$。</li>
+<li><code>min_samples</code>：成为核心点所需的最小邻域样本数。</li>
+<li>核心点：邻域内样本数足够多的点。</li>
+<li>边界点：不满足核心点条件，但位于某个核心点邻域内。</li>
+<li>噪声点：既不是核心点也不能从核心点密度可达的点。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>簇可由密度连通区域定义。</li>
+<li>同一数据集中各簇密度差异不宜过大。</li>
+<li>所选距离度量能反映样本相似性。</li>
+<li><code>eps</code> 和 <code>min_samples</code> 设置合理。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续特征、空间坐标或可定义距离的特征。</li>
+<li>因变量类型：无监督方法，不需要结局变量。</li>
+<li>数据结构：样本乘以特征矩阵。</li>
+<li>是否适合高维数据：高维距离可能失效，常需降维或特征筛选。</li>
+<li>是否适合缺失较多数据：需先处理缺失。</li>
+<li>是否适合删失数据：不直接处理删失结局。</li>
+<li>是否适合重复测量数据：需先构造样本级特征或使用合适距离。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>以社区病例空间聚类为例：</p>
+<table>
+<thead>
+<tr>
+<th>Longitude</th>
+<th>Latitude</th>
+<th>PM25</th>
+<th>PopulationDensity</th>
+<th>CaseRate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>116.31</td>
+<td>39.98</td>
+<td>48</td>
+<td>9300</td>
+<td>0.12</td>
+</tr>
+<tr>
+<td>116.33</td>
+<td>39.97</td>
+<td>52</td>
+<td>9100</td>
+<td>0.15</td>
+</tr>
+<tr>
+<td>116.80</td>
+<td>40.20</td>
+<td>31</td>
+<td>2500</td>
+<td>0.03</td>
+</tr>
+<tr>
+<td>116.82</td>
+<td>40.22</td>
+<td>29</td>
+<td>2400</td>
+<td>0.02</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：数值特征矩阵或预计算距离矩阵。</li>
+<li>关键变量：<code>eps</code>、<code>min_samples</code>、距离度量。</li>
+<li>需要预处理的内容：缺失处理、标准化、距离尺度确认、K 距离图辅助选参。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：簇标签、核心样本索引、噪声点标签。</li>
+<li>参数估计：DBSCAN 无传统参数估计，输出密度连通结构。</li>
+<li>预测结果：标准 DBSCAN 不自然支持新样本预测。</li>
+<li>不确定性指标：参数敏感性、噪声比例、轮廓系数或领域指标。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：簇形状不规则、存在噪声点、不想预先指定簇数的场景。</li>
+<li>不适合：不同簇密度差异很大、样本维度很高、所有簇都接近球形且需要质心解释的场景。</li>
+<li>使用前需要特别检查的点：<code>eps</code> 选择、噪声比例、标准化和距离度量。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="dbscan-density-based-spatial-clustering-of-applications-with-noise" data-i="0">Python</button><button class="codetab" data-uid="dbscan-density-based-spatial-clustering-of-applications-with-noise" data-i="1">R</button></div><div class="codepanel active" data-uid="dbscan-density-based-spatial-clustering-of-applications-with-noise" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">import pandas as pd
+from sklearn.cluster import DBSCAN
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv(&quot;spatial_cases.csv&quot;)
+X = df&amp;quot;Longitude&amp;quot;, &amp;quot;Latitude&amp;quot;, &amp;quot;PM25&amp;quot;, &amp;quot;PopulationDensity&amp;quot;
+
+model = make_pipeline(
+    StandardScaler(),
+    DBSCAN(eps=0.6, min_samples=8)
+)
+cluster = model.fit_predict(X)
+
+df[&quot;cluster&quot;] = cluster
+print(df[&quot;cluster&quot;].value_counts().sort_index())
+</code></pre></div><div class="codepanel" data-uid="dbscan-density-based-spatial-clustering-of-applications-with-noise" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>dbscan</code></li>
+</ul>
+<pre><code class="language-r">library(dbscan)
+
+x &lt;- scale(df[, c(&quot;Longitude&quot;, &quot;Latitude&quot;, &quot;PM25&quot;, &quot;PopulationDensity&quot;)])
+fit &lt;- dbscan(x, eps = 0.6, minPts = 8)
+
+cluster &lt;- fit$cluster
+table(cluster)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：簇数量、每簇样本量、噪声点比例、核心点分布。</li>
+<li>每个主要参数如何解释：<code>eps</code> 决定邻域半径，过小会产生很多噪声，过大可能把多个簇连成一片。</li>
+<li>临床或医学意义如何表达：可说“在给定距离尺度下识别出若干密度连通的高风险区域/患者群”。</li>
+<li>常见误读：噪声点不一定是错误数据，也可能代表罕见或异质临床个体。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>聚类散点图，噪声点单独标色。</li>
+<li>K 距离曲线辅助选择 <code>eps</code>。</li>
+<li>参数网格下簇数和噪声比例热图。</li>
+<li>空间数据中的地图叠加图。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>不需要预先指定簇数。</li>
+<li>能识别任意形状簇。</li>
+<li>能显式标记噪声点。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>对 <code>eps</code> 敏感。</li>
+<li>不适合密度差异很大的簇。</li>
+<li>高维数据中距离度量容易失效。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>直接使用未经标准化的多量纲特征。</li>
+<li>只试一组参数就解释结果。</li>
+<li>把所有噪声点都当作无意义异常删除。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a> 的区别：K-means 偏球形簇且需指定 $K$，DBSCAN 可发现任意形状簇并识别噪声。</li>
+<li>和 <a class="xlink" href="m-mean-shift-clustering.html" data-cn="均值漂移聚类" data-en="Mean Shift Clustering" data-def="均值漂移聚类是一种基于密度峰的无监督方法。它通过不断把样本点移动到邻域内样本的加权均值位置，使点沿着密度上升方向收敛到局部密度峰，最终把收敛到同一峰的点归为一簇。">均值漂移聚类（Mean Shift Clustering）</a> 的区别：两者都与密度有关，均值漂移寻找密度峰，DBSCAN 基于密度连通。</li>
+<li>和 <a class="xlink" href="m-spectral-clustering.html" data-cn="谱聚类" data-en="Spectral Clustering" data-def="谱聚类是一种基于图的聚类方法。它先把样本表示成相似度图，再利用图拉普拉斯矩阵的特征向量把样本嵌入到低维空间，最后在该空间中进行聚类。">谱聚类（Spectral Clustering）</a> 的区别：谱聚类通过图分割处理复杂结构，DBSCAN 通过局部密度和连通性定义簇。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>疾病地理热点和环境暴露聚集区识别。</li>
+<li>高维患者相似性空间中的异常个体发现。</li>
+<li>图像或空间组学数据中不规则区域分割。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a></li>
+<li><a class="xlink" href="m-mean-shift-clustering.html" data-cn="均值漂移聚类" data-en="Mean Shift Clustering" data-def="均值漂移聚类是一种基于密度峰的无监督方法。它通过不断把样本点移动到邻域内样本的加权均值位置，使点沿着密度上升方向收敛到局部密度峰，最终把收敛到同一峰的点归为一簇。">均值漂移聚类（Mean Shift Clustering）</a></li>
+<li><a class="xlink" href="m-spectral-clustering.html" data-cn="谱聚类" data-en="Spectral Clustering" data-def="谱聚类是一种基于图的聚类方法。它先把样本表示成相似度图，再利用图拉普拉斯矩阵的特征向量把样本嵌入到低维空间，最后在该空间中进行聚类。">谱聚类（Spectral Clustering）</a></li>
+<li><a class="xlink" href="m-uniform-manifold-approximation-and-projection.html" data-cn="UMAP" data-en="Uniform Manifold Approximation and Projection" data-def="UMAP 是一种非线性降维和可视化方法，基于流形假设和近邻图构建高维数据的模糊拓扑结构，再在低维空间中寻找相似的结构。">UMAP（Uniform Manifold Approximation and Projection）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Ester M, Kriegel HP, Sander J, Xu X. A density-based algorithm for discovering clusters in large spatial databases with noise. <em>KDD</em>. 1996:226-231.</li>
+<li>Schubert E, Sander J, Ester M, Kriegel HP, Xu X. DBSCAN revisited, revisited. <em>ACM TODS</em>. 2017;42(3):19.</li>
+<li>scikit-learn Developers. <code>sklearn.cluster.DBSCAN</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html">https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html</a> （访问日期：2026-07-02）</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-hierarchical-clustering.html"><div class="pg-lab">← 前一则</div><div class="pg-t">层次聚类</div></a><a class="pg pg-next" href="m-mean-shift-clustering.html"><div class="pg-lab">后一则 →</div><div class="pg-t">均值漂移聚类</div></a></div>
+    <div class="colophon">— 黑盒词典 · 09·04 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if(window.renderMathInElement){
+    renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+  } else {
+    var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);renderMathInElement(document.getElementById('article'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}},150);
+  }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>
