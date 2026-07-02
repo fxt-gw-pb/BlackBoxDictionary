@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>组内相关系数 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<script>window.Prism=window.Prism||{};window.Prism.manual=true;</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-clike.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">目录</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目录 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">目录</a><span class="sep">/</span><a href="cat-02.html">描述统计与统计推断</a><span class="sep">/</span><span class="cur">组内相关系数</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">描述统计与统计推断 · 02·19</div>
+      <h1 class="detail-h1">组内相关系数</h1>
+      <div class="detail-en">Intraclass Correlation Coefficient, ICC</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 信度 / 重复测量 / 方差分解</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>组内相关系数（Intraclass Correlation Coefficient, ICC）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>组内相关系数衡量连续测量的信度，即同一对象被不同评分者或不同次测量时结果的一致程度，本质是「对象间方差占总方差的比例」。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：一项连续测量在不同评分者或不同时间点下有多可重复。</li>
+<li>适用任务：评分者间信度、重测信度、仪器一致性、量表信度。</li>
+<li>常见医学场景：血压/超声测量的可重复性、量表总分的稳定性、多阅片者定量读数。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>若测量可靠，同一个人重复测得的值应彼此接近，而不同人之间应有真实差异。ICC 就是把「真实的个体间差异」从「测量噪声」中分离出来，占比越高说明测量越可靠。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>以单向随机模型为例：</p>
+<p>$$
+\mathrm{ICC}=\frac{\sigma_b^2}{\sigma_b^2+\sigma_e^2}
+$$</p>
+<p>双向模型中还可区分「绝对一致」与「一致性」，绝对一致额外计入评分者系统偏差 $\sigma_r^2$：</p>
+<p>$$
+\mathrm{ICC}_{\text{agreement}}=\frac{\sigma_b^2}{\sigma_b^2+\sigma_r^2+\sigma_e^2}
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$\sigma_b^2$：对象（被测个体）间方差，即「真实」信号。</li>
+<li>$\sigma_e^2$：残差方差，即测量误差。</li>
+<li>$\sigma_r^2$：评分者主效应方差（系统偏差）。</li>
+<li>Shrout-Fleiss 记号 ICC(1,1)/(2,1)/(3,1) 区分模型与单次/均值形式。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>方差分量模型（单向或双向 ANOVA）设定正确。</li>
+<li>明确区分「一致性 consistency」与「绝对一致 agreement」目标。</li>
+<li>明确报告单次评分还是 $k$ 次均值的信度。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：无，多列（评分者/时间点）连续测量。</li>
+<li>因变量类型：连续测量值。</li>
+<li>数据结构：对象 × 评分者的宽表或长表。</li>
+<li>是否适合高维数据：可多评分者。</li>
+<li>是否适合缺失较多数据：混合模型可处理部分缺失。</li>
+<li>是否适合删失数据：不适用。</li>
+<li>是否适合重复测量数据：正是其用途（重测信度）。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>3 名评分者对 5 名受试者的评分：</p>
+<table>
+<thead>
+<tr>
+<th>Subject</th>
+<th>Rater1</th>
+<th>Rater2</th>
+<th>Rater3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>9</td>
+<td>8</td>
+<td>9</td>
+</tr>
+<tr>
+<td>2</td>
+<td>6</td>
+<td>6</td>
+<td>5</td>
+</tr>
+<tr>
+<td>3</td>
+<td>8</td>
+<td>7</td>
+<td>8</td>
+</tr>
+<tr>
+<td>4</td>
+<td>3</td>
+<td>4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>5</td>
+<td>7</td>
+<td>8</td>
+<td>7</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：对象在多个评分者/时点上的测量。</li>
+<li>关键变量：模型类型（1/2/3）、目标（一致性/绝对一致）、单次/均值。</li>
+<li>需要预处理的内容：整理成对象 × 评分者结构、处理缺失。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：ICC 及 95% CI，方差分量。</li>
+<li>参数估计：各方差分量。</li>
+<li>预测结果：无。</li>
+<li>不确定性指标：ICC 置信区间、F 检验。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：连续测量的评分者间/重测信度评估。</li>
+<li>不适合：分类结局（用 <a class="xlink" href="m-cohen-s-kappa.html" data-cn="Cohen&#x27;s Kappa一致性系数" data-en="Cohen&#x27;s Kappa" data-def="Cohen&#x27;s Kappa 衡量两名评分者对同一批对象做分类判断时的一致程度，并扣除仅凭机遇就能达成的一致，是评分者间信度的标准指标。">Cohen Kappa一致性系数（Cohen&#x27;s Kappa）</a>）、评估固定偏差与量程依赖（用 <a class="xlink" href="m-bland-altman-analysis.html" data-cn="Bland-Altman分析" data-en="Bland-Altman Analysis" data-def="Bland-Altman 分析通过绘制两种测量方法的「差值对均值」散点图，评估它们是否可以互换：给出平均偏差和 95% 一致性界限（limits of agreement）。">Bland-Altman分析（Bland-Altman Analysis）</a>）。</li>
+<li>使用前需要特别检查的点：选对模型（1/2/3）与形式（单次/均值）、一致性 vs 绝对一致。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="intraclass-correlation-coefficient-icc" data-i="0">Python</button><button class="codetab" data-uid="intraclass-correlation-coefficient-icc" data-i="1">R</button></div><div class="codepanel active" data-uid="intraclass-correlation-coefficient-icc" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>pingouin</code></li>
+</ul>
+<pre><code class="language-python">import pingouin as pg
+import pandas as pd
+
+long = pd.DataFrame({
+    &quot;subject&quot;: [1,1,1,2,2,2],
+    &quot;rater&quot;:   [&quot;r1&quot;,&quot;r2&quot;,&quot;r3&quot;,&quot;r1&quot;,&quot;r2&quot;,&quot;r3&quot;],
+    &quot;score&quot;:   [9,8,9,6,6,5],
+})
+icc = pg.intraclass_corr(data=long, targets=&quot;subject&quot;,
+                         raters=&quot;rater&quot;, ratings=&quot;score&quot;)
+print(icc[[&quot;Type&quot;,&quot;ICC&quot;,&quot;CI95%&quot;]])
+</code></pre></div><div class="codepanel" data-uid="intraclass-correlation-coefficient-icc" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>irr</code></li>
+</ul>
+<pre><code class="language-r">library(irr)
+m &lt;- matrix(c(9,8,9, 6,6,5, 8,7,8, 3,4,3, 7,8,7),
+            ncol = 3, byrow = TRUE)
+icc(m, model = &quot;twoway&quot;, type = &quot;agreement&quot;, unit = &quot;single&quot;)
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：ICC 值、置信区间下限、所选模型/形式。</li>
+<li>每个主要参数如何解释：常用 Koo-Li 标准——$&lt;0.5$ 差、$0.5$–$0.75$ 中、$0.75$–$0.9$ 好、$&gt;0.9$ 优。</li>
+<li>临床或医学意义如何表达：高 ICC 支持该测量可用于个体随访与多中心比较。</li>
+<li>常见误读：混淆「一致性」与「绝对一致」；只报点估计不报 CI 下限。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>评分者两两散点图 + 对角线。</li>
+<li>各对象测量的误差棒图。</li>
+<li>方差分量堆叠条形图。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>直接给出 0–1 的信度尺度，易沟通。</li>
+<li>可分解方差、区分一致性与绝对一致。</li>
+<li>支持多评分者与均值信度。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>依赖对象间的真实变异（同质样本会低估）。</li>
+<li>模型选择不当会得到很不同的数值。</li>
+<li>不显示偏差是否随量程变化（需 Bland-Altman 补充）。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>不声明 ICC(1/2/3) 与单次/均值，导致不可复现。</li>
+<li>在极同质人群上报低 ICC，误判测量不可靠。</li>
+<li>用 Pearson 相关代替 ICC（前者对系统偏差不敏感）。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-pearson-correlation.html" data-cn="Pearson相关" data-en="Pearson Correlation" data-def="Pearson 相关系数衡量两个连续变量之间线性关系的方向与强度，取值在 −1 到 1 之间。">Pearson相关（Pearson Correlation）</a> 的区别：Pearson 只看线性相关、对系统偏差不敏感；ICC 计入偏差与量级一致。</li>
+<li>和 <a class="xlink" href="m-cohen-s-kappa.html" data-cn="Cohen&#x27;s Kappa一致性系数" data-en="Cohen&#x27;s Kappa" data-def="Cohen&#x27;s Kappa 衡量两名评分者对同一批对象做分类判断时的一致程度，并扣除仅凭机遇就能达成的一致，是评分者间信度的标准指标。">Cohen Kappa一致性系数（Cohen&#x27;s Kappa）</a> 的区别：Kappa 用于分类，ICC 用于连续。</li>
+<li>和 <a class="xlink" href="m-bland-altman-analysis.html" data-cn="Bland-Altman分析" data-en="Bland-Altman Analysis" data-def="Bland-Altman 分析通过绘制两种测量方法的「差值对均值」散点图，评估它们是否可以互换：给出平均偏差和 95% 一致性界限（limits of agreement）。">Bland-Altman分析（Bland-Altman Analysis）</a> 的区别：Bland-Altman 展示偏差与一致限，ICC 给单一信度指数。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>血压计/超声定量测量的重测与阅片者信度。</li>
+<li>量表总分的评分者间与重测稳定性。</li>
+<li>影像组学特征在不同扫描仪/分割者间的稳定性。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-cohen-s-kappa.html" data-cn="Cohen&#x27;s Kappa一致性系数" data-en="Cohen&#x27;s Kappa" data-def="Cohen&#x27;s Kappa 衡量两名评分者对同一批对象做分类判断时的一致程度，并扣除仅凭机遇就能达成的一致，是评分者间信度的标准指标。">Cohen Kappa一致性系数（Cohen&#x27;s Kappa）</a></li>
+<li><a class="xlink" href="m-bland-altman-analysis.html" data-cn="Bland-Altman分析" data-en="Bland-Altman Analysis" data-def="Bland-Altman 分析通过绘制两种测量方法的「差值对均值」散点图，评估它们是否可以互换：给出平均偏差和 95% 一致性界限（limits of agreement）。">Bland-Altman分析（Bland-Altman Analysis）</a></li>
+<li><a class="xlink" href="m-linear-mixed-effects-model-lmm.html" data-cn="线性混合效应模型" data-en="Linear Mixed-Effects Model, LMM" data-def="线性混合效应模型用于分析重复测量或层级数据中的连续结局，在固定效应之外加入随机效应来刻画个体间异质性和组内相关性。">线性混合效应模型（Linear Mixed-Effects Model, LMM）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Shrout PE, Fleiss JL. Intraclass correlations: uses in assessing rater reliability. <em>Psychol Bull</em>. 1979;86(2):420-428.</li>
+<li>Koo TK, Li MY. A guideline of selecting and reporting intraclass correlation coefficients for reliability research. <em>J Chiropr Med</em>. 2016;15(2):155-163.</li>
+<li>McGraw KO, Wong SP. Forming inferences about some intraclass correlation coefficients. <em>Psychol Methods</em>. 1996;1(1):30-46.</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-cohen-s-kappa.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">Cohen&#x27;s Kappa一致性系数</div></a><a class="pg pg-next" href="m-bland-altman-analysis.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">Bland-Altman分析</div></a></div>
+    <div class="colophon">— 黑盒词典 · 02·19 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  function doMath(){ renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false}); }
+  if(window.renderMathInElement){ doMath(); }
+  else { var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);doMath();}},150); }
+  if(window.Prism){ Prism.highlightAllUnder(document.getElementById('article')); }
+  else { var p=setInterval(function(){if(window.Prism){clearInterval(p);Prism.highlightAllUnder(document.getElementById('article'));}},150); }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cohen&#x27;s Kappa一致性系数 · 黑盒词典</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<script>window.Prism=window.Prism||{};window.Prism.manual=true;</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-clike.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-r.min.js"></script>
+<script>(function(){try{if(localStorage.getItem('bb-dark')==='1')document.documentElement.classList.add('dark');}catch(e){}})();</script>
+</head>
+<body class="page detail-page">
+<header class="mast">
+  <div class="wrap mast-in">
+    <a class="brand" href="index.html">
+      <span class="brand-cn">黑盒词典</span>
+      <span class="brand-en">Blackbox&nbsp;Dictionary</span>
+    </a>
+    <nav class="mast-nav">
+      <a href="catalog.html">目录</a>
+      <a href="about.html">关于</a>
+      <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
+    </nav>
+  </div>
+</header>
+<main class="wrap detail">
+  <aside class="toc-wrap">
+    <div class="toc-sticky">
+      <div class="toc-label">目录 · Contents</div>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+    </div>
+  </aside>
+  <article id="article">
+    <div class="crumb"><a href="catalog.html">目录</a><span class="sep">/</span><a href="cat-02.html">描述统计与统计推断</a><span class="sep">/</span><span class="cur">Cohen&#x27;s Kappa一致性系数</span></div>
+    <div class="titleblock">
+      <div class="kicker dark-ink">描述统计与统计推断 · 02·18</div>
+      <h1 class="detail-h1">Cohen&#x27;s Kappa一致性系数</h1>
+      <div class="detail-en">Cohen&#x27;s Kappa</div>
+      <div class="detail-meta">
+        <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
+        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 一致性 / 评分者信度 / 分类数据</b></span>
+      </div>
+    </div>
+    <div class="intro-note"><h1>Cohen Kappa一致性系数（Cohen's Kappa）</h1></div>
+    <section id="sec-1" data-sec="1" class="sec">
+      <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
+      <div class="sec-body"><h3>1.1 定义</h3>
+<p>Cohen's Kappa 衡量两名评分者对同一批对象做分类判断时的一致程度，并扣除仅凭机遇就能达成的一致，是评分者间信度的标准指标。</p>
+<h3>1.2 它主要解决什么问题</h3>
+<ul>
+<li>研究问题：两位医生／两种方法对同一批病例的分类判断有多一致。</li>
+<li>适用任务：评分者间一致性、诊断可重复性、编码信度评估。</li>
+<li>常见医学场景：影像分级、病理诊断、量表条目编码、疾病是否存在的判读。</li>
+</ul>
+<h3>1.3 直觉理解</h3>
+<p>两人分类结果的原始一致率会「虚高」，因为即使随便猜也可能碰巧一致。Kappa 把这部分机遇一致剔除后，再看实际一致比机遇一致「多出多少」，因此更能反映真实的判断一致性。</p></div>
+    </section><section id="sec-2" data-sec="2" class="sec">
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>2.1 核心公式</h3>
+<p>$$
+\kappa=\frac{p_o-p_e}{1-p_e}
+$$</p>
+<p>加权 Kappa（用于有序类别）引入权重 $w_{ij}$：</p>
+<p>$$
+\kappa_w=1-\frac{\sum_{i,j} w_{ij}\,p_{ij}}{\sum_{i,j} w_{ij}\,p_{i\cdot}p_{\cdot j}}
+$$</p>
+<h3>2.2 参数或统计量含义</h3>
+<ul>
+<li>$p_o$：观测到的一致比例（对角线之和）。</li>
+<li>$p_e$：期望（机遇）一致比例，由两边缘分布相乘得到。</li>
+<li>$w_{ij}$：类别 $i$ 与 $j$ 不一致的代价，线性或二次权重最常用。</li>
+<li>$\kappa$ 取值范围一般在 $-1$ 到 $1$，$0$ 表示仅达机遇水平。</li>
+</ul>
+<h3>2.3 关键假设</h3>
+<ul>
+<li>两评分者相互独立评分，类别定义相同且互斥穷尽。</li>
+<li>对象为随机样本；边缘分布会影响 Kappa 的量级。</li>
+<li>名义类别用无权重 Kappa，有序类别用加权 Kappa。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：无，两列分类评分。</li>
+<li>因变量类型：名义或有序分类。</li>
+<li>数据结构：同一批对象两位评分者的配对分类，或 $k\times k$ 列联表。</li>
+<li>是否适合高维数据：仅二评分者；多评分者用 Fleiss' Kappa。</li>
+<li>是否适合缺失较多数据：需成对完整评分。</li>
+<li>是否适合删失数据：不适用。</li>
+<li>是否适合重复测量数据：可用于同一评分者两次评分（重测信度）。</li>
+</ul>
+<h3>3.2 示例表格</h3>
+<p>两位放射科医师对 100 张片子分「阴性/可疑/阳性」：</p>
+<table>
+<thead>
+<tr>
+<th>医师A\医师B</th>
+<th>阴性</th>
+<th>可疑</th>
+<th>阳性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>阴性</td>
+<td>40</td>
+<td>4</td>
+<td>1</td>
+</tr>
+<tr>
+<td>可疑</td>
+<td>3</td>
+<td>18</td>
+<td>5</td>
+</tr>
+<tr>
+<td>阳性</td>
+<td>1</td>
+<td>6</td>
+<td>22</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 输入与产出</h3>
+<h4>输入</h4>
+<ul>
+<li>输入数据：两列等长的分类标签。</li>
+<li>关键变量：类别集合、是否有序（决定是否加权）。</li>
+<li>需要预处理的内容：统一类别编码、剔除缺失对。</li>
+</ul>
+<h4>产出</h4>
+<ul>
+<li>模型对象/统计结果：$\kappa$ 及其标准误、置信区间。</li>
+<li>参数估计：$p_o$、$p_e$。</li>
+<li>预测结果：无。</li>
+<li>不确定性指标：Kappa 的 95% CI、显著性检验。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>适合：名义/有序分类的评分者间或重测一致性评估。</li>
+<li>不适合：连续测量（用 <a class="xlink" href="m-intraclass-correlation-coefficient-icc.html" data-cn="组内相关系数" data-en="Intraclass Correlation Coefficient, ICC" data-def="组内相关系数衡量连续测量的信度，即同一对象被不同评分者或不同次测量时结果的一致程度，本质是「对象间方差占总方差的比例」。">组内相关系数（Intraclass Correlation Coefficient, ICC）</a> 或 <a class="xlink" href="m-bland-altman-analysis.html" data-cn="Bland-Altman分析" data-en="Bland-Altman Analysis" data-def="Bland-Altman 分析通过绘制两种测量方法的「差值对均值」散点图，评估它们是否可以互换：给出平均偏差和 95% 一致性界限（limits of agreement）。">Bland-Altman分析（Bland-Altman Analysis）</a>）、评分者多于两位（用 Fleiss）。</li>
+<li>使用前需要特别检查的点：类别患病率是否极端（Kappa 悖论）、类别是否有序。</li>
+</ul></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="cohen-s-kappa" data-i="0">Python</button><button class="codetab" data-uid="cohen-s-kappa" data-i="1">R</button></div><div class="codepanel active" data-uid="cohen-s-kappa" data-i="0"><p>常用包：</p>
+<ul>
+<li><code>scikit-learn</code></li>
+</ul>
+<pre><code class="language-python">from sklearn.metrics import cohen_kappa_score
+
+a = [&quot;neg&quot;,&quot;pos&quot;,&quot;susp&quot;,&quot;neg&quot;,&quot;pos&quot;]
+b = [&quot;neg&quot;,&quot;pos&quot;,&quot;neg&quot;,&quot;neg&quot;,&quot;susp&quot;]
+print(cohen_kappa_score(a, b))                 # 无权重
+print(cohen_kappa_score(a, b, weights=&quot;quadratic&quot;))  # 有序加权
+</code></pre></div><div class="codepanel" data-uid="cohen-s-kappa" data-i="1"><p>常用包：</p>
+<ul>
+<li><code>irr</code></li>
+</ul>
+<pre><code class="language-r">library(irr)
+ratings &lt;- data.frame(
+  A = c(&quot;neg&quot;,&quot;pos&quot;,&quot;susp&quot;,&quot;neg&quot;,&quot;pos&quot;),
+  B = c(&quot;neg&quot;,&quot;pos&quot;,&quot;neg&quot;,&quot;neg&quot;,&quot;susp&quot;)
+)
+kappa2(ratings)                       # 无权重
+kappa2(ratings, weight = &quot;squared&quot;)   # 有序加权
+</code></pre></div></div></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：$\kappa$ 值、置信区间及是否显著大于 0。</li>
+<li>每个主要参数如何解释：常用 Landis-Koch 标准——$&lt;0.2$ 差、$0.2$–$0.4$ 尚可、$0.4$–$0.6$ 中等、$0.6$–$0.8$ 好、$&gt;0.8$ 很好。</li>
+<li>临床或医学意义如何表达：高 Kappa 说明诊断/分级可重复，可支持多中心一致性。</li>
+<li>常见误读：把原始一致率当 Kappa；忽视患病率极端时 Kappa 会异常偏低（Kappa 悖论）。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>混淆矩阵热图（观测一致结构）。</li>
+<li>一致/不一致条形图。</li>
+<li>多评分者时的一致性矩阵。</li>
+</ul></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><h3>优势</h3>
+<ul>
+<li>扣除机遇一致，比原始一致率更严格。</li>
+<li>有加权版本处理有序类别的「近似一致」。</li>
+<li>有成熟的标准误与区间。</li>
+</ul>
+<h3>局限</h3>
+<ul>
+<li>受边缘分布/患病率影响大（Kappa 悖论）。</li>
+<li>仅两评分者；多评分者需 Fleiss。</li>
+<li>不同类别数间的 Kappa 不可直接比较。</li>
+</ul>
+<h3>常见坑</h3>
+<ul>
+<li>有序类别用无权重 Kappa，低估一致性。</li>
+<li>不报告患病率与边缘分布，导致 Kappa 难以解释。</li>
+<li>用单一阈值机械判定「好/坏」。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-intraclass-correlation-coefficient-icc.html" data-cn="组内相关系数" data-en="Intraclass Correlation Coefficient, ICC" data-def="组内相关系数衡量连续测量的信度，即同一对象被不同评分者或不同次测量时结果的一致程度，本质是「对象间方差占总方差的比例」。">组内相关系数（Intraclass Correlation Coefficient, ICC）</a> 的区别：ICC 用于连续测量的信度，Kappa 用于分类。</li>
+<li>和 <a class="xlink" href="m-pearson-chi-squared-test-of-independence.html" data-cn="Pearson卡方独立性检验" data-en="Pearson Chi-Squared Test of Independence" data-def="Pearson 卡方独立性检验用于判断两个分类变量在列联表中是否独立，是分类数据分析的基础方法。">Pearson卡方独立性检验（Pearson Chi-Squared Test of Independence）</a> 的区别：卡方检验关联性，Kappa 度量一致性（对角线）。</li>
+<li>和百分比一致率的区别：Kappa 扣除了机遇一致。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>两位放射/病理医师诊断分级的一致性。</li>
+<li>量表条目或病历编码的评分者信度。</li>
+<li>同一诊断工具的重测可重复性。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-intraclass-correlation-coefficient-icc.html" data-cn="组内相关系数" data-en="Intraclass Correlation Coefficient, ICC" data-def="组内相关系数衡量连续测量的信度，即同一对象被不同评分者或不同次测量时结果的一致程度，本质是「对象间方差占总方差的比例」。">组内相关系数（Intraclass Correlation Coefficient, ICC）</a></li>
+<li><a class="xlink" href="m-bland-altman-analysis.html" data-cn="Bland-Altman分析" data-en="Bland-Altman Analysis" data-def="Bland-Altman 分析通过绘制两种测量方法的「差值对均值」散点图，评估它们是否可以互换：给出平均偏差和 95% 一致性界限（limits of agreement）。">Bland-Altman分析（Bland-Altman Analysis）</a></li>
+<li><a class="xlink" href="m-pearson-chi-squared-test-of-independence.html" data-cn="Pearson卡方独立性检验" data-en="Pearson Chi-Squared Test of Independence" data-def="Pearson 卡方独立性检验用于判断两个分类变量在列联表中是否独立，是分类数据分析的基础方法。">Pearson卡方独立性检验（Pearson Chi-Squared Test of Independence）</a></li>
+</ul></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Cohen J. A coefficient of agreement for nominal scales. <em>Educ Psychol Meas</em>. 1960;20(1):37-46.</li>
+<li>Landis JR, Koch GG. The measurement of observer agreement for categorical data. <em>Biometrics</em>. 1977;33(1):159-174.</li>
+<li>Sim J, Wright CC. The kappa statistic in reliability studies. <em>Phys Ther</em>. 2005;85(3):257-268.</li>
+</ul></div>
+    </section>
+    <div class="pager"><a class="pg pg-prev" href="m-bootstrap-resampling.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">Bootstrap重抽样</div></a><a class="pg pg-next" href="m-intraclass-correlation-coefficient-icc.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">组内相关系数</div></a></div>
+    <div class="colophon">— 黑盒词典 · 02·18 —</div>
+  </article>
+</main>
+<div id="hovercard" class="hovercard"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  function doMath(){ renderMathInElement(document.getElementById('article'), {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false}); }
+  if(window.renderMathInElement){ doMath(); }
+  else { var t=setInterval(function(){if(window.renderMathInElement){clearInterval(t);doMath();}},150); }
+  if(window.Prism){ Prism.highlightAllUnder(document.getElementById('article')); }
+  else { var p=setInterval(function(){if(window.Prism){clearInterval(p);Prism.highlightAllUnder(document.getElementById('article'));}},150); }
+});
+</script>
+<script src="assets/app.js"></script>
+
+</body>
+</html>
