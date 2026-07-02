@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,192 +54,258 @@
     <div class="intro-note"><h1>单样本t检验（One-Sample t-Test）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>单样本 t 检验用于判断一个样本均值是否与某个给定的参考值不同，是最经典的均值推断方法之一。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>单样本 t 检验问一个问题：这组数据的均值，离某个「参照值」是不是远到不像抽样运气？做法是把「均值与参照值之差」除以它的标准误，得到信噪比 $t$。</p>
+<h3>1.2 定义</h3>
+<p>单样本 t 检验用于判断一个连续变量的总体均值是否等于某个指定的参照值 $\mu_0$。它是 t 检验家族里最基础的一员，也是配对 t 检验的内核。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：某组受试者的平均水平是否达到或偏离一个既定标准。</li>
-<li>适用任务：检验单组连续结局均值是否等于某个假设值。</li>
-<li>常见医学场景：检验某药物治疗后平均收缩压是否低于临床目标值。</li>
+<li>研究问题：这组测量的平均水平是否偏离了某个已知标准/历史值？</li>
+<li>适用任务：单组均值与参照值比较、给出均值的置信区间。</li>
+<li>常见医学场景：某科室患者平均住院日是否偏离全院标准、某仪器读数是否偏离校准值、某人群指标是否偏离参考范围中点。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>它比较的是“观测到的样本均值”和“假设均值”之间的距离，这个距离再除以标准误之后，得到一个标准化差异。如果这个差异足够大，就说明样本均值不太像是从零假设下来的。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>好比称一批标称 500 克的药片，实测平均 503 克。3 克的差是「工艺真的偏了」还是「随机称量误差」？如果每片称量都很稳（标准误小）、称了很多片（样本大），同样的 3 克就更「刺耳」，越值得怀疑是系统偏差。单样本 t 就是把这个「差 vs 波动」的直觉量化。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-T = \frac{\bar X - \mu_0}{S / \sqrt{n}}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>样本均值几乎不会精确等于参照值，哪怕总体均值真的就是 $\mu_0$。根本困难是：<strong>观测到的偏差，是真实偏离还是抽样噪声？</strong> 必须给这点偏差配一把「随机波动的尺子」。</p>
+<h3>2.2 关键洞察</h3>
+<p>尺子就是均值的标准误 $s/\sqrt{n}$。把偏差标准化：$t=\dfrac{\bar{x}-\mu_0}{s/\sqrt{n}}$。若真无偏离，$t$ 服从自由度 $n-1$ 的 $t$ 分布；因为分母的 $\sigma$ 是用样本估计的，分布比正态<strong>尾更厚</strong>——样本越小尾越厚，越难显著，这正是对「小样本更不确定」的诚实惩罚。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$\bar X$：样本均值。</li>
-<li>$\mu_0$：零假设下的参考均值。</li>
-<li>$S$：样本标准差。</li>
-<li>$n$：样本量。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>观测值独立。</li>
-<li>小样本时总体近似正态。</li>
-<li>大样本时可依赖中心极限定理放宽正态要求。</li>
+<li>相对「直接看差有多大」：t 检验把差放到「随机波动」的尺度上，可判断显著性。</li>
+<li>相对 <strong>z 检验</strong>：$\sigma$ 已知时用 z；实际几乎总要估计 $\sigma$，故用 $t$。</li>
+<li>相对<strong>置信区间</strong>：单样本 t 与「均值 CI 是否含 $\mu_0$」完全等价，是一体两面。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>$$
+t=\frac{\bar{x}-\mu_0}{s/\sqrt{n}},\qquad df=n-1
+$$</p>
+<p>这个式子在说：分子是样本均值与参照值的差，分母是这个均值的标准误；两者相除得到「偏差是多少个标准误」。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>自变量类型：可无自变量，也可是一组单样本观测。</li>
-<li>因变量类型：连续型。</li>
-<li>数据结构：单组独立样本。</li>
-<li>是否适合高维数据：不适合高维多变量同时检验。</li>
-<li>是否适合缺失较多数据：可用，但需先明确缺失处理。</li>
-<li>是否适合删失数据：不适合。</li>
-<li>是否适合重复测量数据：若是前后差值，可转化为差值后一组样本再检验。</li>
+<li>若 $X_i\sim N(\mu,\sigma^2)$，则 $\bar{x}\sim N(\mu,\sigma^2/n)$，故 $\dfrac{\bar{x}-\mu}{\sigma/\sqrt{n}}\sim N(0,1)$。</li>
+<li>$\sigma$ 未知，用样本标准差 $s$ 替代；由于 $s$ 本身有波动，$\dfrac{\bar{x}-\mu}{s/\sqrt{n}}$ 不再是正态，而是自由度 $n-1$ 的 $t$ 分布（Gosset 1908）。</li>
+<li>原假设 $H_0:\mu=\mu_0$ 下，把 $\mu$ 换成 $\mu_0$ 即得检验统计量；$|t|$ 超过临界值就拒绝。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>例如，在 <code>Framingham_data.csv</code> 基线样本中，可以把 <code>TOTCHOL</code> 看作单样本连续变量，检验其均值是否偏离某个医学参考值（如 200 mg/dL）：</p>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$\bar{x}$：样本均值；$\mu_0$：参照值。</li>
+<li>$s$：样本标准差；$s/\sqrt{n}$：均值的标准误。</li>
+<li>$df=n-1$：自由度，决定 $t$ 分布尾部厚度。</li>
+<li>p 值：$H_0$ 下出现如此极端 $t$ 的概率。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>RANDID</th>
-<th>PERIOD</th>
-<th>TOTCHOL</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>2448</td>
-<td>1</td>
-<td>195</td>
+<td>独立</td>
+<td>观测互不影响</td>
+<td>p 值失真</td>
+<td>看抽样设计</td>
 </tr>
 <tr>
-<td>6238</td>
-<td>1</td>
-<td>250</td>
+<td>正态</td>
+<td>数据近似正态（或 n 较大）</td>
+<td>小样本 p 不准</td>
+<td>直方图/QQ 图</td>
 </tr>
 <tr>
-<td>9428</td>
+<td>无强异常值</td>
+<td>无极端点主导</td>
+<td>均值与 $s$ 被带偏</td>
+<td>箱线图</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>某新流程下 16 名患者的平均康复评分 $\bar{x}=5.2$，样本标准差 $s=0.4$；历史标准值 $\mu_0=5.0$。问：新流程是否显著不同？</p>
+<p><strong>一步步计算：</strong></p>
+<ul>
+<li>标准误：$s/\sqrt{n}=0.4/\sqrt{16}=0.4/4=0.1$。</li>
+<li>统计量：$t=\dfrac{5.2-5.0}{0.1}=\dfrac{0.2}{0.1}=2.0$，自由度 $df=15$。</li>
+<li>临界值 $t_{0.975,15}=2.131$；因 $2.0\lt 2.131$，在 0.05 水平<strong>不拒绝</strong>（$p\approx 0.064$）。</li>
+<li>均值 95% CI：$5.2\pm 2.131\times 0.1=(4.99,\ 5.41)$——区间恰好<strong>几乎贴着</strong> 5.0，与「差点显著」一致。</li>
+</ul>
+<p><strong>结论：</strong> 观测到 0.2 的提升，但相对波动还不够「响」，证据不足以断定真有差异（注意：这不等于「证明没差异」）。若样本量翻到 64，标准误降到 0.05、$t$ 升到 4.0，同样的 0.2 就会显著——<strong>再次说明显著性同时取决于效应、变异和样本量</strong>。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：无（单组）。</li>
+<li>因变量类型：连续型。</li>
+<li>数据结构：一组独立观测 + 一个参照值。</li>
+<li>是否适合高维数据：否。</li>
+<li>是否适合缺失较多数据：按可用样本，注意缺失机制。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：不适合；配对/重复测量另用配对 t 或混合模型。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>患者</th>
+<th>评分</th>
+</tr>
+</thead>
+<tbody>
+<tr>
 <td>1</td>
-<td>245</td>
+<td>5.1</td>
 </tr>
 <tr>
-<td>10552</td>
-<td>1</td>
-<td>225</td>
+<td>2</td>
+<td>5.4</td>
 </tr>
 <tr>
-<td>11252</td>
-<td>1</td>
-<td>285</td>
+<td>3</td>
+<td>4.9</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr>
+<td>参照 $\mu_0$</td>
+<td>5.0</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：一组连续观测。</li>
-<li>关键变量：数值型结局、参考值 $\mu_0$。</li>
-<li>需要预处理的内容：缺失值和异常值检查。</li>
+<li>输入数据：一组连续观测 + 参照值 $\mu_0$。</li>
+<li>关键变量：结局值、参照值。</li>
+<li>需要预处理的内容：检查正态与异常值。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：t 统计量、自由度、p 值。</li>
-<li>参数估计：样本均值及其置信区间。</li>
+<li>模型对象/统计结果：$t$、自由度、p 值。</li>
+<li>参数估计：样本均值与 $\mu_0$ 之差。</li>
 <li>预测结果：无。</li>
-<li>不确定性指标：均值的标准误和置信区间。</li>
+<li>不确定性指标：均值的 95% 置信区间。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：检验单组均值是否等于某标准值。</li>
-<li>不适合：分布极偏且样本很小；有明显异常值时。</li>
-<li>使用前需要特别检查的点：异常值、正态性、小样本稳健性。</li>
+<li>适合：单组连续结局与已知标准比较、样本近似正态或样本量适中。</li>
+<li>不适合：两组比较（用两样本 t）、配对数据（用配对 t）、严重偏态小样本（用符号秩检验）。</li>
+<li>使用前需要特别检查的点：独立性、正态性（小样本时）、异常值。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="one-sample-t-test" data-i="0">Python</button><button class="codetab" data-uid="one-sample-t-test" data-i="1">R</button></div><div class="codepanel active" data-uid="one-sample-t-test" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>scipy</code></li>
 </ul>
-<pre><code class="language-python">import numpy as np
-from scipy import stats
+<pre><code class="language-python">from scipy import stats
 
-x = np.array([122, 118, 121, 125, 119, 117, 123, 120])
-res = stats.ttest_1samp(x, popmean=125, alternative=&quot;less&quot;)
-print(res.statistic, res.pvalue)
-print(res.confidence_interval(confidence_level=0.95))
+x = [5.1, 5.4, 4.9, 5.3, 5.0, 5.2, 5.5, 5.1, 5.3, 4.8, 5.2, 5.4, 5.0, 5.6, 5.1, 5.3]
+t, p = stats.ttest_1samp(x, popmean=5.0)
+print(f&quot;t={t:.3f}, p={p:.3f}&quot;)
 </code></pre></div><div class="codepanel" data-uid="one-sample-t-test" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>stats</code></li>
 </ul>
-<pre><code class="language-r">x &lt;- c(122, 118, 121, 125, 119, 117, 123, 120)
-t.test(x, mu = 125, alternative = &quot;less&quot;)
+<pre><code class="language-r">x &lt;- c(5.1,5.4,4.9,5.3,5.0,5.2,5.5,5.1,5.3,4.8,5.2,5.4,5.0,5.6,5.1,5.3)
+t.test(x, mu = 5.0)          # 含 t、p 与均值 95% CI
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：样本均值是否显著偏离参考值。</li>
-<li>每个主要参数如何解释：t 值越远离 0，说明标准化差异越大。</li>
-<li>临床或医学意义如何表达：统计显著不等于临床显著，需同时看均值差和置信区间。</li>
-<li>常见误读：p 值小不代表效果大；p 值大也不等于均值完全相同。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>直方图或密度图。</li>
-<li>QQ 图检查正态性。</li>
-<li>带均值和置信区间的点图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图展示总胆固醇的单变量分布，并加上 <code>200 mg/dL</code> 参考线。这类图很适合放在单样本 t 检验前的探索部分。</p>
-<p><img alt="" src="img/onesample_totchol_hist.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：均值与 $\mu_0$ 之差、95% 置信区间、p 值。</li>
+<li>每个主要参数如何解读：CI 含 $\mu_0$ ≈ 不显著；CI 越窄越精确。</li>
+<li>临床或医学意义如何表达：报告「偏离多少 + 区间 + 是否有临床意义」。</li>
+<li>常见误读：p 大就是「等于参照值」（其实证据不足）；忽视异常值把均值带偏。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>正态性：小样本用 QQ 图/Shapiro-Wilk；大样本靠中心极限定理较稳。</li>
+<li>异常值：单样本 t 对极端值敏感，箱线图排查，必要时改用符号检验或 Wilcoxon 符号秩。</li>
+<li>独立性：时间序列或聚类数据破坏独立性，需相应方法。</li>
+<li>效能：小样本「无差异」可能只是效能不足，宜配合效应量与样本量估计。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>数据直方图 + 参照线 $\mu_0$。</li>
+<li>均值 ± 置信区间的点区间图（看是否跨过 $\mu_0$）。</li>
+<li>箱线图（查异常值与分布形状）。</li>
+</ul>
+<h3>10.1 图像示例</h3>
+<p>下图展示某指标分布与参照均值的比较。</p>
+<p><img alt="" src="img/onesample_totchol_hist.png" /></p></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>简单直接。</li>
-<li>可同时给出均值差的区间估计。</li>
-<li>大样本下较稳健。</li>
+<li>最简单直观的单组均值推断，附带置信区间。</li>
+<li>与均值 CI 等价，逻辑清晰。</li>
+<li>计算与解释门槛低。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>对异常值敏感。</li>
-<li>小样本时依赖正态假设。</li>
-<li>只适合单组均值问题。</li>
+<li>对正态假设与异常值敏感（小样本）。</li>
+<li>只比较均值，不反映分布形状。</li>
+<li>需要一个明确的参照值 $\mu_0$。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>把“未显著”解读成“等效”。</li>
-<li>忽视单侧和双侧假设的预先设定。</li>
-<li>先看数据再改假设方向。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和两独立样本 t 检验的区别：这里只比较单组均值与参考值。</li>
-<li>和 Wilcoxon 符号秩检验的区别：t 检验更关注均值，Wilcoxon 更偏向位置中位数且更稳健。</li>
-<li>应该如何选择：样本较小且偏态明显时，可考虑 Wilcoxon。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>判断某连续生化指标是否达到预设标准。</li>
-<li>判断某治疗后平均改善值是否高于 0。</li>
-<li>比较前后差值的均值是否为 0。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="它把「两组均值的差」除以「这个差本身的随机波动（标准误）」，得到一个信噪比 $t$：差异相对波动足够大，就判断两组总体均值真的不同。">两独立样本t检验（Two-Sample t-Test）</a></li>
-<li><a class="xlink" href="m-wilcoxon-signed-rank-test.html" data-cn="Wilcoxon符号秩检验" data-en="Wilcoxon Signed-Rank Test" data-def="Wilcoxon 符号秩检验是单样本或配对样本的非参数检验，用于判断数据的中心位置是否等于某参考值，或配对差值的中心位置是否为 0。">Wilcoxon符号秩检验（Wilcoxon Signed-Rank Test）</a></li>
-<li><a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 是一种从原始样本中“有放回重抽样”的方法，用来近似统计量的抽样分布，从而估计标准误、方差和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a></li>
-<li><a class="xlink" href="m-confidence-interval.html" data-cn="置信区间" data-en="Confidence Interval" data-def="置信区间是围绕点估计构造的一段取值范围，用来表达对未知参数的估计不确定性；在反复抽样意义下，一定比例（如 95%）的区间会覆盖真值。">置信区间（Confidence Interval）</a></li>
+<li>把配对数据（前后差）当独立数据处理。</li>
+<li>只报 p 值不报差值与置信区间。</li>
+<li>参照值来自同一数据（循环论证）。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Casella G, Berger RL. <em>Statistical Inference</em>. 2nd ed. Duxbury; 2002.</li>
-<li>SciPy Developers. <code>scipy.stats.ttest_1samp</code>. SciPy API Reference. <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_1samp.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_1samp.html</a> （访问日期：2026-07-02）</li>
-<li>R Core Team. <code>t.test</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/t.test.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/t.test.html</a> （访问日期：2026-07-02）</li>
+<li>和<strong>两独立样本 t 检验</strong>：单样本比「一组 vs 常数」，两样本比「两组之间」。</li>
+<li>和<strong>配对样本 t 检验</strong>：配对 t 就是「对差值做单样本 t（$\mu_0=0$）」。</li>
+<li>和 <strong>Wilcoxon 符号秩检验</strong>：严重偏态/小样本非正态时的非参数替代。</li>
+<li>如何选择：一组对固定标准 → 单样本 t；同一批人前后 → 配对 t；非正态 → 符号秩。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>某中心指标是否偏离全国参考均值。</li>
+<li>器械/试剂读数是否偏离校准标准。</li>
+<li>单组前后设计里对差值的检验（即配对 t）。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>参照值（$\mu_0$）</strong>：要比较的已知或假设的总体均值。</li>
+<li><strong>标准误（SE）</strong>：均值的抽样波动，$s/\sqrt{n}$。</li>
+<li><strong>自由度（df）</strong>：$n-1$，决定 $t$ 分布尾部厚度。</li>
+<li><strong>t 分布</strong>：方差需估计时均值统计量的分布，尾比正态厚。</li>
+<li><strong>p 值</strong>：原假设下出现当前或更极端结果的概率。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="它把「两组均值的差」除以「这个差本身的随机波动（标准误）」，得到一个信噪比 $t$：差异相对波动足够大，就判断两组总体均值真的不同。">两独立样本t检验（Two-Sample t-Test）</a></li>
+<li><a class="xlink" href="m-paired-t-test.html" data-cn="配对样本t检验" data-en="Paired t-Test" data-def="配对 t 检验把「每一对的差值」算出来，再对这一列差值做单样本 t 检验（看它是否偏离 0）——用「配对」抵消个体之间的差异，只留下处理效应。">配对样本t检验（Paired t-Test）</a></li>
+<li><a class="xlink" href="m-confidence-interval.html" data-cn="置信区间" data-en="Confidence Interval" data-def="置信区间给点估计配上一段范围，回答「这个数字有多可信」；95% 指的是方法的长期表现——反复抽样构造的区间里，约 95% 会罩住真值。">置信区间（Confidence Interval）</a></li>
+<li><a class="xlink" href="m-wilcoxon-signed-rank-test.html" data-cn="Wilcoxon符号秩检验" data-en="Wilcoxon Signed-Rank Test" data-def="Wilcoxon 符号秩检验是单样本或配对样本的非参数检验，用于判断数据的中心位置是否等于某参考值，或配对差值的中心位置是否为 0。">Wilcoxon符号秩检验（Wilcoxon Signed-Rank Test）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Student. The probable error of a mean. <em>Biometrika</em>. 1908;6(1):1-25.</li>
+<li>Bland M. <em>An Introduction to Medical Statistics</em>. 4th ed. Oxford University Press; 2015.</li>
+<li>Altman DG. <em>Practical Statistics for Medical Research</em>. Chapman &amp; Hall; 1990.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-confidence-interval.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">置信区间</div></a><a class="pg pg-next" href="m-paired-t-test.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">配对样本t检验</div></a></div>

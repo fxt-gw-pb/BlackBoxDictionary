@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,44 +54,98 @@
     <div class="intro-note"><h1>置信区间（Confidence Interval）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>置信区间是围绕点估计构造的一段取值范围，用来表达对未知参数的估计不确定性；在反复抽样意义下，一定比例（如 95%）的区间会覆盖真值。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>置信区间给点估计配上一段范围，回答「这个数字有多可信」；95% 指的是<strong>方法的长期表现</strong>——反复抽样构造的区间里，约 95% 会罩住真值。</p>
+<h3>1.2 定义</h3>
+<p>置信区间是围绕点估计构造的一段取值范围，用来表达对未知参数的估计不确定性。它把「我们估计的效应有多大」和「这个估计有多精确」一次说清，是比 p 值信息量更高的报告方式。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：一个估计值有多可信，真值大概落在什么范围。</li>
+<li>研究问题：一个估计值有多可信？真值大概落在什么范围？</li>
 <li>适用任务：均值/比例/风险比等参数的区间估计、效应量不确定性表达、等效/非劣判断。</li>
 <li>常见医学场景：疗效差异的区间、患病率区间、OR/HR/RR 的 95% CI 报告。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>点估计只给一个数字，置信区间告诉你这个数字有多“晃”。区间越窄越精确；关键在于理解它是关于“方法长期覆盖率”的陈述，而不是“真值有 95% 概率在此区间”的概率陈述。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>点估计像用一根针指出「就是这里」，但抽样有随机性，针尖不可能刚好落在真值上。置信区间改用「一段渔网」去罩：网越窄越精确。关键要理解——这段网是随数据变的，「95%」说的是「用这套撒网法，长期有 95% 的网能罩住鱼」，而不是「这条鱼有 95% 概率在这张网里」。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>大样本下参数 $\theta$ 的 Wald 型区间：</p>
-<p>$$
-\hat{\theta}\pm z_{1-\alpha/2}\cdot \mathrm{SE}(\hat{\theta})
-$$</p>
-<p>正态均值（未知方差、小样本）用 $t$ 分布：</p>
-<p>$$
-\bar{x}\pm t_{1-\alpha/2,\,n-1}\cdot \frac{s}{\sqrt{n}}
-$$</p>
-<p>比例可用更稳健的 Wilson 区间替代 Wald。</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>一个点估计（如均值 130）本身<strong>不带任何不确定性信息</strong>——它可能非常稳，也可能因样本小而摇摆不定。根本困难是：<strong>怎样把「估计的抖动幅度」量化并附在结论上？</strong> 否则读者无法判断该不该相信这个数字。</p>
+<h3>2.2 关键洞察</h3>
+<p>估计量有一个「抽样分布」——想象把研究重复无数次，每次的估计会围绕真值散开，散开的宽度就是<strong>标准误（SE）</strong>。已知这个分布，就能反过来在点估计两侧划出一段范围，使它以指定概率罩住真值。区间宽度 $\propto \mathrm{SE}\propto 1/\sqrt{n}$，所以样本翻 4 倍，区间才窄一半。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$\hat{\theta}$：点估计；$\mathrm{SE}$：标准误。</li>
-<li>$z_{1-\alpha/2}$、$t_{1-\alpha/2,n-1}$：置信水平对应的临界值。</li>
-<li>$1-\alpha$：置信水平（如 0.95）。</li>
-<li>区间宽度：随样本量增大而变窄。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>估计量的抽样分布近似（正态/ $t$），或用精确/自助法替代。</li>
-<li>观测独立、模型设定合理。</li>
-<li>对于比例/率等，边界附近 Wald 近似可能失效，需专用区间。</li>
+<li>相对<strong>只报点估计</strong>：CI 额外给出精度，避免「看起来精确、其实很虚」。</li>
+<li>相对 <strong>p 值/假设检验</strong>：CI 同时给方向、大小、精度；「CI 是否含无效值」还蕴含了检验结论，信息更全。</li>
+<li>相对<strong>贝叶斯可信区间</strong>：贝叶斯区间可直接说「真值有 95% 概率在此」；频率派 CI 不能这样说，解释框架不同。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>大样本 Wald 型区间与小样本正态均值的 $t$ 区间：</p>
+<p>$$
+\hat{\theta}\pm z_{1-\alpha/2}\,\mathrm{SE}(\hat{\theta}),\qquad
+\bar{x}\pm t_{1-\alpha/2,\,n-1}\,\frac{s}{\sqrt{n}}
+$$</p>
+<p>这个式子在说：区间 = 点估计 ± 「临界值 × 标准误」；临界值决定信心水平（95% 对应约 1.96 或对应的 $t$ 值），标准误决定宽度。</p>
+<h3>3.2 推导脉络</h3>
+<ul>
+<li>以正态均值为例：$\dfrac{\bar{x}-\mu}{s/\sqrt{n}}\sim t_{n-1}$。</li>
+<li>于是 $P\!\left(-t_{1-\alpha/2}\le \dfrac{\bar{x}-\mu}{s/\sqrt{n}}\le t_{1-\alpha/2}\right)=1-\alpha$。</li>
+<li>把不等式里的 $\mu$ 解出来，得到 $\bar{x}\pm t_{1-\alpha/2}\,s/\sqrt{n}$ 覆盖 $\mu$ 的概率为 $1-\alpha$——注意「随机的是区间端点，不是 $\mu$」。</li>
+<li>比例、率、OR/HR 等换成对应的估计量与标准误；边界附近（比例接近 0/1）Wald 近似失效，改用 Wilson 或精确区间。</li>
+</ul>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$\hat{\theta}$：点估计（均值、比例、系数等）。</li>
+<li>$\mathrm{SE}(\hat{\theta})$：标准误，估计量的抽样波动。</li>
+<li>$z_{1-\alpha/2}$、$t_{1-\alpha/2,n-1}$：置信水平对应的临界值（95% 时 $z=1.96$）。</li>
+<li>$1-\alpha$：置信水平（如 0.95）；区间宽度反映精度。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>抽样分布近似</td>
+<td>估计量近正态或用 $t$</td>
+<td>小样本/偏态时覆盖率偏离</td>
+<td>QQ 图、改用 bootstrap</td>
+</tr>
+<tr>
+<td>独立观测</td>
+<td>观测互不影响</td>
+<td>SE 低估、区间过窄</td>
+<td>看设计；聚类用稳健 SE</td>
+</tr>
+<tr>
+<td>边界近似有效</td>
+<td>参数不贴近边界</td>
+<td>比例近 0/1 时 Wald 失效</td>
+<td>改用 Wilson/精确区间</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>某组 16 名患者收缩压均值 $\bar{x}=130$，样本标准差 $s=12$，求 95% 置信区间。</p>
+<p><strong>一步步计算：</strong></p>
+<ul>
+<li>标准误：$\mathrm{SE}=s/\sqrt{n}=12/\sqrt{16}=12/4=3$。</li>
+<li>临界值：$t_{0.975,\,15}=2.131$（自由度 $n-1=15$）。</li>
+<li>半宽（误差幅度）：$2.131\times 3=6.39$。</li>
+<li>区间：$130\pm 6.39=(123.6,\ 136.4)$。</li>
+</ul>
+<p><strong>结论：</strong> 我们对总体均值的最佳猜测是 130，但考虑抽样波动，它合理地落在约 124 到 136 之间。若把样本量增到 64（4 倍），$\mathrm{SE}$ 降到 1.5、半宽降到约 3.2，区间收窄一半——<strong>这直观展示了「精度随 $\sqrt{n}$ 提升」</strong>。注意 95% 说的是方法长期覆盖率，而非「真值有 95% 概率在 124–136 内」。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
 <li>自变量类型：视所估参数而定。</li>
 <li>因变量类型：连续、二分类、计数、时间到事件均可（各有对应区间）。</li>
@@ -101,7 +155,7 @@ $$</p>
 <li>是否适合删失数据：生存参数有专门区间（如 KM 的对数变换区间）。</li>
 <li>是否适合重复测量数据：需用稳健/聚类标准误。</li>
 </ul>
-<h3>3.2 示例表格</h3>
+<h3>5.2 示例表格</h3>
 <table>
 <thead>
 <tr>
@@ -112,14 +166,14 @@ $$</p>
 </thead>
 <tbody>
 <tr>
-<td>均值差</td>
-<td>−8.0 mmHg</td>
-<td>−11.2 ~ −4.8</td>
+<td>均值</td>
+<td>130</td>
+<td>123.6 ~ 136.4</td>
 </tr>
 <tr>
-<td>比例</td>
-<td>0.34</td>
-<td>0.28 ~ 0.41</td>
+<td>均值差</td>
+<td>−8.0</td>
+<td>−11.2 ~ −4.8</td>
 </tr>
 <tr>
 <td>风险比 HR</td>
@@ -128,10 +182,10 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：样本数据或点估计 + 标准误。</li>
+<li>输入数据：样本数据，或点估计 + 标准误。</li>
 <li>关键变量：估计量、标准误、置信水平。</li>
 <li>需要预处理的内容：选择合适的区间方法（Wald / t / Wilson / bootstrap）。</li>
 </ul>
@@ -142,15 +196,15 @@ $$</p>
 <li>预测结果：无（区间是推断，不是预测；预测区间是另一概念）。</li>
 <li>不确定性指标：区间宽度本身即不确定性度量。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
 <li>适合：几乎所有效应量的报告，替代或补充 p 值。</li>
 <li>不适合：把区间当作真值的概率分布来解读、边界近似失效却仍用 Wald。</li>
-<li>使用前需要特别检查的点：抽样分布近似是否成立、比例/率是否需要专用区间、是否需要多重比较调整。</li>
+<li>使用前需要特别检查的点：抽样分布近似是否成立、比例/率是否需专用区间、是否需多重比较调整。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="confidence-interval" data-i="0">Python</button><button class="codetab" data-uid="confidence-interval" data-i="1">R</button></div><div class="codepanel active" data-uid="confidence-interval" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>scipy</code></li>
@@ -159,40 +213,46 @@ $$</p>
 <pre><code class="language-python">import numpy as np
 from scipy import stats
 
-x = np.random.normal(130, 12, 60)
-m, se = x.mean(), stats.sem(x)
-ci = stats.t.interval(0.95, len(x) - 1, loc=m, scale=se)
-print(f&quot;均值={m:.1f}, 95% CI={ci[0]:.1f} ~ {ci[1]:.1f}&quot;)
+x = np.random.normal(130, 12, 16)
+m, se = x.mean(), stats.sem(x)          # sem = s/sqrt(n)
+lo, hi = stats.t.interval(0.95, len(x) - 1, loc=m, scale=se)
+print(f&quot;均值={m:.1f}, 95% CI=({lo:.1f}, {hi:.1f})&quot;)
 
-# 比例的 Wilson 区间
 from statsmodels.stats.proportion import proportion_confint
-print(proportion_confint(count=34, nobs=100, method=&quot;wilson&quot;))
+print(proportion_confint(34, 100, method=&quot;wilson&quot;))   # 比例用 Wilson
 </code></pre></div><div class="codepanel" data-uid="confidence-interval" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>stats</code></li>
 </ul>
-<pre><code class="language-r">x &lt;- rnorm(60, 130, 12)
+<pre><code class="language-r">x &lt;- rnorm(16, 130, 12)
 t.test(x)$conf.int            # 均值 95% CI
-
 prop.test(34, 100)$conf.int   # 比例区间(含连续性校正)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
       <div class="sec-body"><ul>
 <li>核心结果看什么：区间是否包含无效值（均差 0、比值 1）、区间宽度。</li>
-<li>每个主要参数如何解释：不含无效值≈在该水平上显著；宽区间提示证据不足。</li>
-<li>临床或医学意义如何表达：报告区间端点是否都具临床意义（如下限是否仍有效）。</li>
-<li>常见误读：说“真值有 95% 概率落在此区间”（频率派下不成立）；把不显著等同于无效应。</li>
+<li>每个主要参数如何解读：不含无效值≈在该水平显著；宽区间提示证据不足。</li>
+<li>临床或医学意义如何表达：报告区间两端是否都具临床意义（如下限是否仍有效）。</li>
+<li>常见误读：说「真值有 95% 概率落在此区间」（频率派下不成立）；把不显著等同于无效应。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>分布近似：小样本或强偏态时，正态/ $t$ 近似可能不准，改用 bootstrap 区间。</li>
+<li>比例/率边界：接近 0 或 1 时 Wald 区间会越界或过窄，用 Wilson、Clopper-Pearson。</li>
+<li>相关/聚类数据：普通 SE 会低估，用稳健或聚类标准误，否则区间过窄。</li>
+<li>多重比较：同时报很多区间时，单个 95% 的「同时覆盖率」会下降，需校正。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
 <li>森林图（多个效应量的点估计与区间）。</li>
 <li>误差棒图。</li>
-<li>区间随样本量变化的示意。</li>
+<li>区间宽度随样本量变化的示意。</li>
 </ul></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
 <li>同时传达效应方向、大小与精度，信息量高于 p 值。</li>
@@ -203,37 +263,48 @@ prop.test(34, 100)$conf.int   # 比例区间(含连续性校正)
 <ul>
 <li>依赖抽样分布近似或重抽样。</li>
 <li>频率派解释常被误读为概率陈述。</li>
-<li>边界参数（如比例接近 0/1）需专用方法。</li>
+<li>边界参数需专用方法。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
 <li>比例接近 0 或 1 仍用 Wald 区间。</li>
 <li>把 95% CI 解读为真值概率。</li>
-<li>多重比较下不调整区间宽度。</li>
+<li>多重比较下不调整。</li>
 </ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和 p 值/假设检验的区别：CI 提供效应大小与精度，检验只给是否显著；二者互补。</li>
-<li>和 <a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 是一种从原始样本中“有放回重抽样”的方法，用来近似统计量的抽样分布，从而估计标准误、方差和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a> 的关系：分布近似难成立时，可用 bootstrap 构造区间。</li>
-<li>和贝叶斯可信区间的区别：贝叶斯区间可直接作概率陈述，解释不同。</li>
+<li>和 <strong>p 值/假设检验</strong>：CI 给效应大小与精度，检验只给是否显著，二者互补。</li>
+<li>和 <strong>Bootstrap</strong>：分布近似难成立时，用 bootstrap 构造区间。</li>
+<li>和<strong>贝叶斯可信区间</strong>：贝叶斯区间可直接作概率陈述，解释不同。</li>
+<li>如何选择：能算解析 SE 且近似成立就用经典 CI；否则 bootstrap；想要概率解释用贝叶斯。</li>
 </ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
       <div class="sec-body"><ul>
 <li>疗效差异、OR/RR/HR 的 95% CI 报告（期刊规范要求）。</li>
 <li>患病率、敏感度/特异度的区间估计。</li>
 <li>等效性与非劣效性试验的区间判定。</li>
 </ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-one-sample-t-test.html" data-cn="单样本t检验" data-en="One-Sample t-Test" data-def="单样本 t 检验用于判断一个样本均值是否与某个给定的参考值不同，是最经典的均值推断方法之一。">单样本t检验（One-Sample t-Test）</a></li>
+<li><strong>点估计（Point Estimate）</strong>：对参数的单一最佳猜测，如样本均值。</li>
+<li><strong>标准误（Standard Error, SE）</strong>：估计量的抽样波动，决定区间宽度。</li>
+<li><strong>置信水平（Confidence Level, $1-\alpha$）</strong>：方法长期覆盖真值的比例，如 95%。</li>
+<li><strong>覆盖率（Coverage）</strong>：区间真正罩住参数的实际比例。</li>
+<li><strong>误差幅度（Margin of Error）</strong>：临界值 × 标准误，即区间半宽。</li>
+<li><strong>Wilson 区间</strong>：比例参数比 Wald 更可靠的区间构造。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-one-sample-t-test.html" data-cn="单样本t检验" data-en="One-Sample t-Test" data-def="单样本 t 检验问一个问题：这组数据的均值，离某个「参照值」是不是远到不像抽样运气？做法是把「均值与参照值之差」除以它的标准误，得到信噪比 $t$。">单样本t检验（One-Sample t-Test）</a></li>
 <li><a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 是一种从原始样本中“有放回重抽样”的方法，用来近似统计量的抽样分布，从而估计标准误、方差和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a></li>
 <li><a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="它把「两组均值的差」除以「这个差本身的随机波动（标准误）」，得到一个信噪比 $t$：差异相对波动足够大，就判断两组总体均值真的不同。">两独立样本t检验（Two-Sample t-Test）</a></li>
 </ul></div>
-    </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Altman DG, Machin D, Bryant TN, Gardner MJ. <em>Statistics with Confidence</em>. 2nd ed. BMJ Books; 2000.</li>
 <li>Brown LD, Cai TT, DasGupta A. Interval estimation for a binomial proportion. <em>Stat Sci</em>. 2001;16(2):101-133.</li>

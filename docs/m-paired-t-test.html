@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -48,192 +48,305 @@
       <div class="detail-meta">
         <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
         <span>难度&nbsp;·&nbsp;<b>basic</b></span>
-        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 参数检验 / 配对设计</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 假设检验 / 配对设计 / 参数检验</b></span>
       </div>
     </div>
     <div class="intro-note"><h1>配对样本t检验（Paired t-Test）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>配对样本 t 检验比较同一批个体（或匹配对）在两种条件下的连续测量，通过检验“配对差值的均值是否为 0”来判断两条件是否有系统差异。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>配对 t 检验把「每一对的差值」算出来，再对这一列差值做单样本 t 检验（看它是否偏离 0）——用「配对」抵消个体之间的差异，只留下处理效应。</p>
+<h3>1.2 定义</h3>
+<p>配对样本 t 检验用于同一批对象在两种条件下（如治疗前后、左右侧、两种方法）的连续测量比较。它把配对差值转化为单组问题，检验差值均值是否为 0。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：治疗前后、左右侧、两种方法在同一对象上的测量是否有差异。</li>
-<li>适用任务：前后对照、自身配对、匹配设计的均值比较。</li>
-<li>常见医学场景：干预前后血压、同一患者两种测量仪器读数、配对病例对照的连续指标。</li>
+<li>研究问题：同一批对象在两种条件下的测量是否有系统差异？</li>
+<li>适用任务：前后测比较、自身对照、两种测量方法在同一对象上的差异。</li>
+<li>常见医学场景：用药前后血压变化、同一患者左右眼指标、干预前后评分。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>配对设计让每个人当自己的对照，先算每个个体的“后减前”差值，再看这些差值平均是否显著偏离 0。因为同一个体内部相关被消掉，配对检验通常比两独立样本检验更有效。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>想比较「运动前后体重」。人和人的基础体重差得很大（60 kg 与 90 kg），若直接比两堆数字，这些巨大的个体差异会把「运动减了多少」淹没。配对的高招是：只看<strong>每个人自己</strong>减了多少，把「你本来多重」这个无关因素消掉，信号一下子清晰。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>对配对差 $d_i=x_{i2}-x_{i1}$，检验 $H_0:\mu_d=0$：</p>
-<p>$$
-t=\frac{\bar{d}}{s_d/\sqrt{n}}\sim t_{n-1}
-$$</p>
-<p>其中 $\bar{d}$ 为差值均值、$s_d$ 为差值标准差、$n$ 为配对数。</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>前后测数据<strong>不独立</strong>（同一个人的两次测量高度相关），直接套用两独立样本 t 会违背独立假设。更关键的是，个体间基线差异往往远大于处理效应，成为巨大的噪声。根本困难是：<strong>如何在个体差异的噪声里，捞出小小的处理效应？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>对每对取差值 $d_i=x_{i,\text{后}}-x_{i,\text{前}}$。这一步<strong>同时</strong>解决两件事：差值之间相互独立了（回到单样本框架）；每个人的基线水平在相减中被消掉了（个体差异这个噪声被移除）。于是对 $d_i$ 做「$\mu_0=0$ 的单样本 t 检验」即可。当前后测正相关时，差值的方差远小于原始方差，配对检验的<strong>功效因此远高于</strong>不配对的做法。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$\bar{d}$：平均配对差（效应估计）。</li>
-<li>$s_d$：配对差的标准差。</li>
-<li>$t$：检验统计量，自由度 $n-1$。</li>
-<li>效应量 Cohen's $d_z=\bar{d}/s_d$。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>配对差值近似正态（不是原始测量正态）。</li>
-<li>各配对之间相互独立。</li>
-<li>测量为连续量、配对关系正确对应。</li>
+<li>相对<strong>两独立样本 t</strong>：数据配对时必须用配对 t；误用独立样本 t 会浪费配对带来的功效、且违反独立性。</li>
+<li>相对<strong>单样本 t</strong>：配对 t 本质就是对差值的单样本 t。</li>
+<li>相对 <strong>Wilcoxon 符号秩</strong>：差值严重偏态或有序时改用非参数版。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>$$
+t=\frac{\bar{d}}{s_d/\sqrt{n}},\qquad d_i=x_{i,\text{后}}-x_{i,\text{前}},\quad df=n-1
+$$</p>
+<p>这个式子在说：先把每对相减得到 $d_i$，再看这列差值的均值 $\bar{d}$ 距 0 有多少个标准误。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>自变量类型：两水平的配对条件（前/后、方法 A/B）。</li>
-<li>因变量类型：连续型测量。</li>
-<li>数据结构：每行一个个体，含两次测量或一列差值。</li>
-<li>是否适合高维数据：单指标检验；多指标需多重比较校正。</li>
-<li>是否适合缺失较多数据：缺失配对通常整对剔除或需插补。</li>
-<li>是否适合删失数据：不适用。</li>
-<li>是否适合重复测量数据：仅两个时间点；多时间点用重复测量/混合模型。</li>
+<li>设每对差值 $d_i\sim N(\mu_d,\sigma_d^2)$，原假设 $H_0:\mu_d=0$（前后无系统差异）。</li>
+<li>差值均值 $\bar{d}\sim N(\mu_d,\sigma_d^2/n)$，用样本 $s_d$ 估 $\sigma_d$。</li>
+<li>得 $t=\dfrac{\bar{d}}{s_d/\sqrt{n}}\sim t_{n-1}$——与单样本 t 完全同构。</li>
+<li>方差关系：$\sigma_d^2=\sigma_1^2+\sigma_2^2-2\rho\sigma_1\sigma_2$；正相关 $\rho\gt 0$ 使 $\sigma_d^2$ 变小，这就是配对提升功效的数学来源。</li>
 </ul>
-<h3>3.2 示例表格</h3>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$d_i$：第 $i$ 对的差值；$\bar{d}$：差值均值（即平均处理效应）。</li>
+<li>$s_d$：差值的样本标准差。</li>
+<li>$s_d/\sqrt{n}$：差值均值的标准误。</li>
+<li>$df=n-1$（$n$ 为对子数，不是总观测数）。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>个体</th>
-<th>治疗前 SBP</th>
-<th>治疗后 SBP</th>
-<th>差值 d</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>对子独立</td>
+<td>不同对子互不影响</td>
+<td>p 值失真</td>
+<td>看设计</td>
+</tr>
+<tr>
+<td>差值正态</td>
+<td>$d_i$ 近似正态</td>
+<td>小样本 p 不准</td>
+<td>差值的 QQ 图</td>
+</tr>
+<tr>
+<td>无强异常差</td>
+<td>无极端差值</td>
+<td>$\bar{d},s_d$ 被带偏</td>
+<td>差值箱线图</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>5 名高血压患者用药前后的收缩压（mmHg）：</p>
+<table>
+<thead>
+<tr>
+<th>患者</th>
+<th>前</th>
+<th>后</th>
+<th>差 $d=$前−后</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>1</td>
-<td>148</td>
-<td>138</td>
-<td>−10</td>
+<td>140</td>
+<td>132</td>
+<td>8</td>
 </tr>
 <tr>
 <td>2</td>
-<td>155</td>
-<td>149</td>
-<td>−6</td>
+<td>135</td>
+<td>130</td>
+<td>5</td>
 </tr>
 <tr>
 <td>3</td>
-<td>141</td>
-<td>142</td>
-<td>+1</td>
+<td>150</td>
+<td>145</td>
+<td>5</td>
 </tr>
 <tr>
 <td>4</td>
-<td>160</td>
-<td>150</td>
-<td>−10</td>
+<td>145</td>
+<td>138</td>
+<td>7</td>
+</tr>
+<tr>
+<td>5</td>
+<td>138</td>
+<td>133</td>
+<td>5</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<p><strong>一步步计算：</strong></p>
+<ul>
+<li>差值均值：$\bar{d}=(8+5+5+7+5)/5=30/5=6.0$。</li>
+<li>差值离均差：$2,-1,-1,1,-1$；平方和 $=4+1+1+1+1=8$。</li>
+<li>差值方差：$s_d^2=8/(5-1)=2.0$，$s_d=1.414$。</li>
+<li>标准误：$s_d/\sqrt{n}=1.414/\sqrt{5}=1.414/2.236=0.632$。</li>
+<li>统计量：$t=6.0/0.632=9.49$，自由度 $df=4$。</li>
+<li>临界值 $t_{0.975,4}=2.776$；因 $9.49\gg 2.776$，<strong>强烈拒绝</strong>（$p\lt 0.001$）。</li>
+<li>平均降幅 95% CI：$6.0\pm 2.776\times 0.632=(4.2,\ 7.8)$。</li>
+</ul>
+<p><strong>结论：</strong> 用药后收缩压平均下降 6.0 mmHg（95% CI 4.2–7.8），差异高度显著。注意 $t$ 高达 9.49 的关键在于<strong>差值波动极小</strong>（$s_d=1.4$）——因为消掉了患者间基线差异。若忽视配对、把 10 个数当两独立组比，个体差异会把信号淹没、$t$ 会小得多。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：配对条件（前/后、左/右、方法 A/B）。</li>
+<li>因变量类型：连续型。</li>
+<li>数据结构：每行一个对象，含两次测量。</li>
+<li>是否适合高维数据：否。</li>
+<li>是否适合缺失较多数据：仅用完整对子。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：两时点适用；三个及以上时点用重复测量 ANOVA/混合模型。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>患者</th>
+<th>前</th>
+<th>后</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>140</td>
+<td>132</td>
+</tr>
+<tr>
+<td>2</td>
+<td>135</td>
+<td>130</td>
+</tr>
+<tr>
+<td>3</td>
+<td>150</td>
+<td>145</td>
+</tr>
+</tbody>
+</table>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：两次配对测量或其差值。</li>
-<li>关键变量：配对标识、两次测量值。</li>
-<li>需要预处理的内容：核对配对对应关系、检查差值分布。</li>
+<li>输入数据：配对的两列测量。</li>
+<li>关键变量：两次测量、对子标识。</li>
+<li>需要预处理的内容：构造差值、检查差值正态与异常值。</li>
 </ul>
 <h4>产出</h4>
 <ul>
 <li>模型对象/统计结果：$t$、自由度、p 值。</li>
-<li>参数估计：平均差 $\bar{d}$ 及其置信区间。</li>
+<li>参数估计：差值均值 $\bar{d}$。</li>
 <li>预测结果：无。</li>
-<li>不确定性指标：均差 CI、效应量。</li>
+<li>不确定性指标：差值均值的 95% 置信区间。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：自身前后对照、匹配对、同一对象两法比较。</li>
-<li>不适合：差值明显偏态或有强离群值（用 Wilcoxon 符号秩）、多于两个时间点。</li>
-<li>使用前需要特别检查的点：差值正态性、配对是否真实、是否应报告一致性（Bland-Altman）。</li>
+<li>适合：同一对象两条件比较、自身对照、前后测设计。</li>
+<li>不适合：两独立组（用两样本 t）、三时点以上（用重复测量 ANOVA）、差值严重偏态（用符号秩）。</li>
+<li>使用前需要特别检查的点：数据确为配对、差值正态、异常差值。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="paired-t-test" data-i="0">Python</button><button class="codetab" data-uid="paired-t-test" data-i="1">R</button></div><div class="codepanel active" data-uid="paired-t-test" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>scipy</code></li>
 </ul>
 <pre><code class="language-python">from scipy import stats
 
-t, p = stats.ttest_rel(df[&quot;post&quot;], df[&quot;pre&quot;])
-diff = df[&quot;post&quot;] - df[&quot;pre&quot;]
-print(f&quot;t={t:.3f}, p={p:.4f}, 平均差={diff.mean():.2f}&quot;)
+before = [140, 135, 150, 145, 138]
+after  = [132, 130, 145, 138, 133]
+t, p = stats.ttest_rel(before, after)      # 配对 t
+print(f&quot;t={t:.2f}, p={p:.4f}&quot;)
 </code></pre></div><div class="codepanel" data-uid="paired-t-test" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>stats</code></li>
 </ul>
-<pre><code class="language-r">t.test(df$post, df$pre, paired = TRUE)
+<pre><code class="language-r">before &lt;- c(140,135,150,145,138)
+after  &lt;- c(132,130,145,138,133)
+t.test(before, after, paired = TRUE)       # 含差值均值 95% CI
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：平均差及其 95% CI、p 值。</li>
-<li>每个主要参数如何解释：平均差为负（如 −8 mmHg）表示治疗后系统性下降；CI 反映效应精度。</li>
-<li>临床或医学意义如何表达：优先报告有临床意义的均差与区间，而非只报 p 值。</li>
-<li>常见误读：误用两独立样本 t 检验处理配对数据；只看 p 值忽视效应大小。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>前后配对连线图（spaghetti plot）。</li>
-<li>差值的直方图/箱线图配 0 参考线。</li>
-<li>Bland-Altman 图（两法一致性场景）。</li>
-</ul></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：差值均值、其 95% 置信区间、p 值。</li>
+<li>每个主要参数如何解读：$\bar{d}$ 是平均处理效应；CI 不含 0 ≈ 显著。</li>
+<li>临床或医学意义如何表达：报告「平均变化 + 区间 + 是否有临床意义」。</li>
+<li>常见误读：把配对 t 当独立样本 t；只报 p 值不报平均变化与区间。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>差值正态：对<strong>差值</strong>（而非原始两组）做 QQ 图/Shapiro-Wilk。</li>
+<li>异常差值：个别极端差会主导结论，用差值箱线图排查。</li>
+<li>学习/时间效应：前后设计易混入非处理因素（回归到均值、季节），必要时加对照组。</li>
+<li>非正态：差值严重偏态改用 Wilcoxon 符号秩检验。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>配对连线图（每个对象一条前后连线）。</li>
+<li>差值的直方图/箱线图 + 0 参照线。</li>
+<li>差值均值 ± 置信区间点区间图。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>消除个体间变异，检验效率高。</li>
-<li>结果直观、易于报告平均改变量。</li>
-<li>计算与假设简单。</li>
+<li>消除个体间差异，功效高于不配对比较。</li>
+<li>计算简单，直接给平均变化与区间。</li>
+<li>天然贴合前后测/自身对照设计。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>依赖差值正态。</li>
-<li>仅限两个条件/时间点。</li>
-<li>对差值离群值敏感。</li>
+<li>需要真正的配对结构。</li>
+<li>对差值正态与异常值敏感。</li>
+<li>前后设计难分离处理效应与时间效应。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>把配对数据当独立两样本分析。</li>
-<li>检验原始值正态而非差值正态。</li>
-<li>忽略回归到均值效应对“前后差”的影响。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="它把「两组均值的差」除以「这个差本身的随机波动（标准误）」，得到一个信噪比 $t$：差异相对波动足够大，就判断两组总体均值真的不同。">两独立样本t检验（Two-Sample t-Test）</a> 的区别：后者用于独立两组，配对检验用于同一/匹配对象。</li>
-<li>和 <a class="xlink" href="m-wilcoxon-signed-rank-test.html" data-cn="Wilcoxon符号秩检验" data-en="Wilcoxon Signed-Rank Test" data-def="Wilcoxon 符号秩检验是单样本或配对样本的非参数检验，用于判断数据的中心位置是否等于某参考值，或配对差值的中心位置是否为 0。">Wilcoxon符号秩检验（Wilcoxon Signed-Rank Test）</a> 的区别：差值偏态或小样本时用后者（非参数）。</li>
-<li>和 <a class="xlink" href="m-linear-mixed-effects-model-lmm.html" data-cn="线性混合效应模型" data-en="Linear Mixed-Effects Model, LMM" data-def="线性混合效应模型用于分析重复测量或层级数据中的连续结局，在固定效应之外加入随机效应来刻画个体间异质性和组内相关性。">线性混合效应模型（Linear Mixed-Effects Model, LMM）</a> 的区别：多于两个时间点或含协变量时用混合模型。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>干预前后连续指标改变的评估。</li>
-<li>同一患者两种测量方法/仪器的系统差异。</li>
-<li>匹配设计中连续结局的比较。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="它把「两组均值的差」除以「这个差本身的随机波动（标准误）」，得到一个信噪比 $t$：差异相对波动足够大，就判断两组总体均值真的不同。">两独立样本t检验（Two-Sample t-Test）</a></li>
-<li><a class="xlink" href="m-one-sample-t-test.html" data-cn="单样本t检验" data-en="One-Sample t-Test" data-def="单样本 t 检验用于判断一个样本均值是否与某个给定的参考值不同，是最经典的均值推断方法之一。">单样本t检验（One-Sample t-Test）</a></li>
-<li><a class="xlink" href="m-wilcoxon-signed-rank-test.html" data-cn="Wilcoxon符号秩检验" data-en="Wilcoxon Signed-Rank Test" data-def="Wilcoxon 符号秩检验是单样本或配对样本的非参数检验，用于判断数据的中心位置是否等于某参考值，或配对差值的中心位置是否为 0。">Wilcoxon符号秩检验（Wilcoxon Signed-Rank Test）</a></li>
+<li>数据配对却误用独立样本 t（丢功效、违独立）。</li>
+<li>对原始数据而非差值检验正态。</li>
+<li>无对照的前后比较把自然变化当疗效。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Altman DG. <em>Practical Statistics for Medical Research</em>. Chapman and Hall/CRC; 1990.</li>
-<li>Bland JM, Altman DG. Statistical methods for assessing agreement between two methods of clinical measurement. <em>Lancet</em>. 1986;327(8476):307-310.</li>
-<li>R Core Team. <code>t.test</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/t.test.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/t.test.html</a> （访问日期：2026-07-02）</li>
+<li>和<strong>两独立样本 t</strong>：配对 vs 独立由数据结构决定；配对时功效更高。</li>
+<li>和<strong>单样本 t</strong>：配对 t = 对差值、$\mu_0=0$ 的单样本 t。</li>
+<li>和 <strong>Wilcoxon 符号秩</strong>：差值非正态的非参数替代。</li>
+<li>和<strong>重复测量 ANOVA / 混合模型</strong>：三个及以上时点或含协变量时的推广。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>干预前后同一批患者的指标变化。</li>
+<li>同一患者两侧肢体/眼睛的对称比较。</li>
+<li>两种测量方法在同一批样本上的系统差异。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>配对差值（$d_i$）</strong>：同一对象两条件测量之差，检验的实际对象。</li>
+<li><strong>自身对照</strong>：以对象自己作对照，消除个体间差异的设计。</li>
+<li><strong>标准误（SE）</strong>：差值均值的抽样波动，$s_d/\sqrt{n}$。</li>
+<li><strong>回归到均值</strong>：极端基线在复测时趋向平均的现象，会伪装成疗效。</li>
+<li><strong>相关性与功效</strong>：前后正相关越强，差值方差越小、功效越高。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-one-sample-t-test.html" data-cn="单样本t检验" data-en="One-Sample t-Test" data-def="单样本 t 检验问一个问题：这组数据的均值，离某个「参照值」是不是远到不像抽样运气？做法是把「均值与参照值之差」除以它的标准误，得到信噪比 $t$。">单样本t检验（One-Sample t-Test）</a></li>
+<li><a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="它把「两组均值的差」除以「这个差本身的随机波动（标准误）」，得到一个信噪比 $t$：差异相对波动足够大，就判断两组总体均值真的不同。">两独立样本t检验（Two-Sample t-Test）</a></li>
+<li><a class="xlink" href="m-wilcoxon-signed-rank-test.html" data-cn="Wilcoxon符号秩检验" data-en="Wilcoxon Signed-Rank Test" data-def="Wilcoxon 符号秩检验是单样本或配对样本的非参数检验，用于判断数据的中心位置是否等于某参考值，或配对差值的中心位置是否为 0。">Wilcoxon符号秩检验（Wilcoxon Signed-Rank Test）</a></li>
+<li><a class="xlink" href="m-linear-mixed-effects-model-lmm.html" data-cn="线性混合效应模型" data-en="Linear Mixed-Effects Model, LMM" data-def="线性混合效应模型用于分析重复测量或层级数据中的连续结局，在固定效应之外加入随机效应来刻画个体间异质性和组内相关性。">线性混合效应模型（Linear Mixed-Effects Model, LMM）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Altman DG. <em>Practical Statistics for Medical Research</em>. Chapman &amp; Hall; 1990.</li>
+<li>Bland M. <em>An Introduction to Medical Statistics</em>. 4th ed. Oxford University Press; 2015.</li>
+<li>Student. The probable error of a mean. <em>Biometrika</em>. 1908;6(1):1-25.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-one-sample-t-test.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">单样本t检验</div></a><a class="pg pg-next" href="m-two-sample-t-test.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">两独立样本t检验</div></a></div>

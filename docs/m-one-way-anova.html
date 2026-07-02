@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -48,210 +48,264 @@
       <div class="detail-meta">
         <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
         <span>难度&nbsp;·&nbsp;<b>basic</b></span>
-        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 假设检验 / 方差分析</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 假设检验 / 方差分析 / 多组比较</b></span>
       </div>
     </div>
     <div class="intro-note"><h1>单因素方差分析（One-Way ANOVA）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>单因素方差分析用于比较三组及以上独立样本的均值是否相同，是多组均值比较的标准参数方法。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>ANOVA 用一个巧妙的对比回答「多组均值是否相同」：把数据的总变异拆成「组与组之间的差异」和「组内部的波动」，若前者远大于后者（$F$ 大），就说明组间真有差别。</p>
+<h3>1.2 定义</h3>
+<p>单因素方差分析比较三个及以上独立组的连续结局均值是否全部相等。它通过方差分解构造 $F$ 统计量，是多组均值比较的标准参数方法。名字叫「方差」分析，检验的却是「均值」。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：多个组的连续型结局均值是否一致。</li>
-<li>适用任务：多组治疗、多分期、多亚组的均值比较。</li>
-<li>常见医学场景：比较不同治疗方案的平均指标、不同分期患者的均值差异。</li>
+<li>研究问题：多个组的平均水平是否存在差异（至少有一组与众不同）？</li>
+<li>适用任务：多组均值的整体（omnibus）检验，通常配合事后两两比较。</li>
+<li>常见医学场景：三种剂量组的疗效比较、多个年龄段的指标差异、不同治疗方案的结局均值。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>如果组间均值差异真实存在，那么“组间变异”应该显著大于“组内随机波动”。ANOVA 就是在比较这两部分变异的相对大小。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>想象几支球队的身高。如果各队平均身高差不多，队与队之间的差就和「同队内部高矮不齐」差不多大；但如果某队明显更高，队间差就会<strong>盖过</strong>队内波动。ANOVA 就是比较这两把尺子：「组间差异」相对「组内波动」大到什么程度，才能断定各队真的不一样。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-\begin{aligned}
-Y_{ij} &amp;= \mu + \alpha_i + \epsilon_{ij} \\
-F &amp;= \frac{SSB / (k - 1)}{SSE / (n - k)}
-\end{aligned}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>三组比较若做三次两两 t 检验，每次 5% 假阳性会累积——3 次约 14%、5 组 10 次高达 40%，<strong>多重比较使总体假阳性率失控</strong>。根本困难是：<strong>如何用一次检验，判断「所有组均值相等」这个整体假设？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>变异可以分解：总变异（每个点离总均值多远）= 组间变异（各组均值离总均值多远）+ 组内变异（各点离本组均值多远）。若各组均值真相等，「组间」只反映随机波动，应与「组内」同量级，比值 $F=\text{组间均方}/\text{组内均方}\approx 1$；若组间被真实差异撑大，$F$ 显著大于 1。这把「多组比较」浓缩成一个 $F$ 值。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$SSB$：组间平方和。</li>
-<li>$SSE$：组内误差平方和。</li>
-<li>$k$：组数。</li>
-<li>$F$：F 统计量。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>各组独立。</li>
-<li>各组误差近似正态。</li>
-<li>组内方差大致相等。</li>
+<li>相对<strong>多次两两 t 检验</strong>：ANOVA 一次检验控制整体假阳性率，再由事后检验定位差异。</li>
+<li>相对<strong>两样本 t</strong>：两组时 ANOVA 与 t 检验等价（$F=t^2$）。</li>
+<li>相对 <strong>Kruskal-Wallis</strong>：数据非正态/有序时用其非参数版。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>$$
+F=\frac{\text{MS}_{\text{组间}}}{\text{MS}_{\text{组内}}}
+=\frac{\text{SS}_{\text{组间}}/(k-1)}{\text{SS}_{\text{组内}}/(N-k)}
+$$</p>
+<p>其中 $\text{SS}_{\text{组间}}=\sum_j n_j(\bar{x}_j-\bar{x})^2$，$\text{SS}_{\text{组内}}=\sum_j\sum_i (x_{ij}-\bar{x}_j)^2$。这个式子在说：把两种变异各自平均（除以自由度）成「均方」，再看组间均方是组内均方的几倍。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>自变量类型：单个多分类因素。</li>
-<li>因变量类型：连续型。</li>
-<li>数据结构：多组独立样本。</li>
-<li>是否适合高维数据：不适合多结局反复检验而不校正。</li>
-<li>是否适合缺失较多数据：可用，但需明确缺失机制。</li>
-<li>是否适合删失数据：不适合。</li>
-<li>是否适合重复测量数据：不适合。</li>
+<li>平方和分解恒等式：$\text{SS}_{\text{总}}=\text{SS}_{\text{组间}}+\text{SS}_{\text{组内}}$（交叉项为 0）。</li>
+<li>在 $H_0$（各组均值相等）与正态等方差假设下，$\text{MS}_{\text{组内}}$ 与 $\text{MS}_{\text{组间}}$ 都是 $\sigma^2$ 的无偏估计，故 $F\approx 1$。</li>
+<li>$H_0$ 下 $F\sim F_{k-1,\,N-k}$；组间被真实差异撑大时 $F$ 偏大，落入右尾即拒绝。</li>
+<li>拒绝只说明「至少两组不同」，不指明是哪两组——需事后比较（如 Tukey HSD）。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>ANOVA 很适合下面这种“一个多分类因素 + 一个连续结局”的结构：</p>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$k$：组数；$N$：总样本量；$n_j,\bar{x}_j$：第 $j$ 组样本量与均值；$\bar{x}$：总均值。</li>
+<li>$\text{SS}$：平方和；$\text{MS}=\text{SS}/df$：均方。</li>
+<li>自由度：组间 $k-1$、组内 $N-k$。</li>
+<li>$F$：组间与组内均方之比，$\ge 0$。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>RANDID</th>
-<th>AGE_group</th>
-<th>TOTCHOL</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>2448</td>
-<td>1</td>
-<td>195</td>
+<td>独立</td>
+<td>组间、组内观测独立</td>
+<td>p 值失真</td>
+<td>看设计</td>
 </tr>
 <tr>
-<td>6238</td>
-<td>1</td>
-<td>250</td>
+<td>正态</td>
+<td>各组结局近似正态</td>
+<td>小样本 p 不准</td>
+<td>残差 QQ 图</td>
 </tr>
 <tr>
-<td>10552</td>
-<td>2</td>
-<td>225</td>
+<td>方差齐</td>
+<td>各组方差相等</td>
+<td>F 偏差</td>
+<td>Levene 检验；不齐用 Welch ANOVA</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>三个剂量组各 3 名患者的疗效评分：A = {5,6,7}，B = {7,8,9}，C = {9,10,11}。</p>
+<p><strong>一步步计算：</strong></p>
+<ul>
+<li>各组均值：$\bar{x}_A=6,\ \bar{x}_B=8,\ \bar{x}_C=10$；总均值 $\bar{x}=8$。</li>
+<li>组间平方和：$\text{SS}_{\text{组间}}=3[(6-8)^2+(8-8)^2+(10-8)^2]=3[4+0+4]=24$，$df=k-1=2$，$\text{MS}_{\text{组间}}=12$。</li>
+<li>组内平方和：每组离均差都是 $\{-1,0,1\}$，平方和各 2，合计 $\text{SS}_{\text{组内}}=6$，$df=N-k=6$，$\text{MS}_{\text{组内}}=1$。</li>
+<li>$F=\text{MS}_{\text{组间}}/\text{MS}_{\text{组内}}=12/1=12$。</li>
+<li>临界值 $F_{0.05}(2,6)=5.14$；因 $12\gt 5.14$，<strong>拒绝</strong>「三组均值相等」。</li>
+</ul>
+<p><strong>结论：</strong> 组间差异是组内波动的 12 倍，远超随机能解释的范围，说明剂量组之间确有均值差异。但 ANOVA 只说「有组不同」，究竟哪两组不同，要接着做 <a class="xlink" href="m-tukey-honest-significant-difference.html" data-cn="TukeyHSD多重比较" data-en="Tukey Honest Significant Difference" data-def="Tukey HSD 在 ANOVA 显著之后，对所有组两两比较均值，并用一个「统一加高」的临界值，保证整族比较的假阳性率仍控制在 5%——回答「到底是哪两组不同」。">TukeyHSD多重比较（Tukey Honest Significant Difference）</a>（下一张卡用同一份数据继续算）。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：一个多分类分组变量（≥3 组）。</li>
+<li>因变量类型：连续型。</li>
+<li>数据结构：多组独立观测。</li>
+<li>是否适合高维数据：单因素单结局；多因素用多因素 ANOVA。</li>
+<li>是否适合缺失较多数据：按可用样本，注意缺失机制。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：不适合；重复测量用重复测量 ANOVA/混合模型。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>剂量组</th>
+<th>评分</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>5, 6, 7</td>
 </tr>
 <tr>
-<td>14729</td>
-<td>3</td>
-<td>250</td>
+<td>B</td>
+<td>7, 8, 9</td>
 </tr>
 <tr>
-<td>19539</td>
-<td>2</td>
-<td>235</td>
+<td>C</td>
+<td>9, 10, 11</td>
 </tr>
 </tbody>
 </table>
-<p>在这种结构下，可以比较不同年龄组的总胆固醇均值是否存在整体差异。</p>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：一个连续结局和一个分类因素。</li>
-<li>关键变量：组别、结局。</li>
-<li>需要预处理的内容：分类编码、缺失值处理。</li>
+<li>输入数据：分组变量 + 连续结局。</li>
+<li>关键变量：组别、结局值。</li>
+<li>需要预处理的内容：检查正态、方差齐、异常值。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：ANOVA 表、F 值、p 值。</li>
-<li>参数估计：各组均值、组间平方和等。</li>
+<li>模型对象/统计结果：ANOVA 表（SS、df、MS、$F$、p）。</li>
+<li>参数估计：各组均值。</li>
 <li>预测结果：无。</li>
-<li>不确定性指标：误差均方、必要时各组均值区间。</li>
+<li>不确定性指标：各组均值区间；事后比较的差值区间。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：三组及以上均值比较。</li>
-<li>不适合：分布偏态严重、方差差异极大、等级数据。</li>
-<li>使用前需要特别检查的点：方差齐性、异常值、正态性和样本量平衡。</li>
+<li>适合：三组及以上独立组连续结局的整体均值比较。</li>
+<li>不适合：两组（直接用 t）、重复测量、严重偏态（用 Kruskal-Wallis）。</li>
+<li>使用前需要特别检查的点：独立性、正态性、方差齐性（不齐用 Welch ANOVA）。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="one-way-anova" data-i="0">Python</button><button class="codetab" data-uid="one-way-anova" data-i="1">R</button></div><div class="codepanel active" data-uid="one-way-anova" data-i="0"><p>常用包：</p>
 <ul>
+<li><code>scipy</code></li>
 <li><code>statsmodels</code></li>
 </ul>
-<pre><code class="language-python">import pandas as pd
-import statsmodels.api as sm
-import statsmodels.formula.api as smf
+<pre><code class="language-python">from scipy import stats
 
-df = pd.DataFrame({
-    &quot;value&quot;: [5.1, 5.3, 4.9, 6.0, 6.2, 5.8, 7.1, 6.9, 7.0],
-    &quot;group&quot;: [&quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;B&quot;, &quot;B&quot;, &quot;B&quot;, &quot;C&quot;, &quot;C&quot;, &quot;C&quot;]
-})
-
-fit = smf.ols(&quot;value ~ C(group)&quot;, data=df).fit()
-print(sm.stats.anova_lm(fit, typ=2))
+A = [5, 6, 7]; B = [7, 8, 9]; C = [9, 10, 11]
+F, p = stats.f_oneway(A, B, C)
+print(f&quot;F={F:.2f}, p={p:.4f}&quot;)     # F=12.00
+# 方差不齐时用 Welch: pingouin.welch_anova
 </code></pre></div><div class="codepanel" data-uid="one-way-anova" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>stats</code></li>
 </ul>
-<pre><code class="language-r">df &lt;- data.frame(
-  value = c(5.1, 5.3, 4.9, 6.0, 6.2, 5.8, 7.1, 6.9, 7.0),
-  group = factor(c(&quot;A&quot;,&quot;A&quot;,&quot;A&quot;,&quot;B&quot;,&quot;B&quot;,&quot;B&quot;,&quot;C&quot;,&quot;C&quot;,&quot;C&quot;))
-)
-
-fit &lt;- aov(value ~ group, data = df)
-summary(fit)
+<pre><code class="language-r">score &lt;- c(5,6,7, 7,8,9, 9,10,11)
+group &lt;- factor(rep(c(&quot;A&quot;,&quot;B&quot;,&quot;C&quot;), each = 3))
+summary(aov(score ~ group))        # ANOVA 表
+oneway.test(score ~ group)         # Welch(不假设方差齐)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：是否至少有一组均值不同。</li>
-<li>每个主要参数如何解释：F 值越大，说明组间差异相对组内波动越大。</li>
-<li>临床或医学意义如何表达：应同时报告各组均值、标准差和事后比较结果。</li>
-<li>常见误读：ANOVA 显著不代表每两组都显著不同。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>箱线图。</li>
-<li>各组均值和置信区间点图。</li>
-<li>残差 QQ 图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图给出总胆固醇按年龄组分层后的箱线图，适合作为单因素 ANOVA 的配套探索图。</p>
-<p><img alt="" src="img/anova_totchol_agegroup.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：$F$ 与 p，以及各组均值的差距。</li>
+<li>每个主要参数如何解读：p 小说明「至少有一组均值不同」，但不指明哪组。</li>
+<li>临床或医学意义如何表达：整体显著后，用事后比较报告具体哪两组差、差多少（带区间）。</li>
+<li>常见误读：把「整体显著」当成「每两组都不同」；只报 F/p 不看效应量（如 $\eta^2$）。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>正态性：看残差 QQ 图；小样本更关键，大样本较稳。</li>
+<li>方差齐性：Levene/Bartlett 检验；不齐改用 Welch ANOVA（推荐做法）。</li>
+<li>异常值：箱线图排查，极端值会撑大组内或组间。</li>
+<li>非正态：严重偏态/有序结局改用 Kruskal-Wallis。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>各组箱线图/小提琴图 + 抖动点。</li>
+<li>各组均值 ± 置信区间的点区间图。</li>
+<li>事后两两差值的置信区间图。</li>
+</ul>
+<h3>10.1 图像示例</h3>
+<p>下图按年龄段比较总胆固醇的分布。</p>
+<p><img alt="" src="img/anova_totchol_agegroup.png" /></p></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>是多组均值比较的标准方法。</li>
-<li>与线性模型体系一致。</li>
-<li>可自然衔接事后比较。</li>
+<li>一次检验控制多组比较的整体假阳性率。</li>
+<li>方差分解框架可扩展到多因素、协方差分析。</li>
+<li>与回归/线性模型统一。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>依赖参数假设。</li>
-<li>不直接指出哪两组不同。</li>
-<li>对异常值和方差不齐较敏感。</li>
+<li>只给「是否有组不同」，需事后比较定位。</li>
+<li>对正态与方差齐敏感。</li>
+<li>不处理重复测量（需混合模型）。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>显著后不做事后比较。</li>
-<li>不检查方差齐性。</li>
-<li>用于明显偏态或等级型结局而不考虑 Kruskal-Wallis。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和两独立样本 t 检验的区别：ANOVA 处理三组及以上；两组时本质上可等价。</li>
-<li>和 Kruskal-Wallis 的区别：后者是非参数多组比较。</li>
-<li>应该如何选择：均值比较且假设大体成立时优先 ANOVA。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>比较三种治疗方案的平均疗效指标。</li>
-<li>比较不同疾病分期的平均实验室指标。</li>
-<li>比较多中心或多亚组的连续结局差异。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="它把「两组均值的差」除以「这个差本身的随机波动（标准误）」，得到一个信噪比 $t$：差异相对波动足够大，就判断两组总体均值真的不同。">两独立样本t检验（Two-Sample t-Test）</a></li>
-<li><a class="xlink" href="m-kruskal-wallis-test.html" data-cn="Kruskal-Wallis检验" data-en="Kruskal-Wallis Test" data-def="Kruskal-Wallis 检验是比较三组及以上独立样本位置差异的非参数方法，可视为 Wilcoxon 秩和检验向多组情形的推广。">Kruskal-Wallis检验（Kruskal-Wallis Test）</a></li>
-<li><a class="xlink" href="m-tukey-honest-significant-difference.html" data-cn="TukeyHSD多重比较" data-en="Tukey Honest Significant Difference" data-def="Tukey HSD 是在 ANOVA 显著之后进行所有两两组间比较的事后方法，目标是在控制家族错误率的同时找出到底哪些组不同。">TukeyHSD多重比较（Tukey Honest Significant Difference）</a></li>
+<li>显著后直接说「各组都不同」。</li>
+<li>方差明显不齐仍用经典 ANOVA（应 Welch）。</li>
+<li>多个结局各做一次 ANOVA 却不校正多重性。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Kutner MH, Nachtsheim CJ, Neter J, Li W. <em>Applied Linear Statistical Models</em>. 5th ed. McGraw-Hill Irwin; 2005.</li>
-<li>statsmodels Developers. <code>statsmodels.stats.anova.anova_lm</code>. statsmodels API Reference. <a href="https://www.statsmodels.org/stable/generated/statsmodels.stats.anova.anova_lm.html">https://www.statsmodels.org/stable/generated/statsmodels.stats.anova.anova_lm.html</a> （访问日期：2026-07-02）</li>
-<li>R Core Team. <code>aov</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/aov.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/aov.html</a> （访问日期：2026-07-02）</li>
+<li>和<strong>两样本 t 检验</strong>：两组时等价（$F=t^2$）；三组以上才需 ANOVA。</li>
+<li>和 <strong>Tukey HSD 等事后检验</strong>：ANOVA 管整体，事后检验管两两定位。</li>
+<li>和 <strong>Kruskal-Wallis</strong>：非正态/有序时的非参数替代。</li>
+<li>和<strong>线性回归</strong>：ANOVA 是以分类自变量为主的线性模型的特例。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>多剂量/多方案组的连续结局比较。</li>
+<li>多个疾病亚型或年龄段的指标差异。</li>
+<li>多中心研究中各中心均值的整体比较。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>组间平方和（$\text{SS}_{\text{组间}}$）</strong>：各组均值离总均值的加权平方和，反映组间差异。</li>
+<li><strong>组内平方和（$\text{SS}_{\text{组内}}$）</strong>：各点离本组均值的平方和，反映组内波动。</li>
+<li><strong>均方（MS）</strong>：平方和除以自由度，是方差的估计。</li>
+<li><strong>F 统计量</strong>：组间均方与组内均方之比。</li>
+<li><strong>omnibus 检验</strong>：一次性检验「所有组相等」的整体检验。</li>
+<li><strong>事后比较（Post hoc）</strong>：整体显著后定位具体差异的两两比较。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="它把「两组均值的差」除以「这个差本身的随机波动（标准误）」，得到一个信噪比 $t$：差异相对波动足够大，就判断两组总体均值真的不同。">两独立样本t检验（Two-Sample t-Test）</a></li>
+<li><a class="xlink" href="m-tukey-honest-significant-difference.html" data-cn="TukeyHSD多重比较" data-en="Tukey Honest Significant Difference" data-def="Tukey HSD 在 ANOVA 显著之后，对所有组两两比较均值，并用一个「统一加高」的临界值，保证整族比较的假阳性率仍控制在 5%——回答「到底是哪两组不同」。">TukeyHSD多重比较（Tukey Honest Significant Difference）</a></li>
+<li><a class="xlink" href="m-kruskal-wallis-test.html" data-cn="Kruskal-Wallis检验" data-en="Kruskal-Wallis Test" data-def="Kruskal-Wallis 检验是比较三组及以上独立样本位置差异的非参数方法，可视为 Wilcoxon 秩和检验向多组情形的推广。">Kruskal-Wallis检验（Kruskal-Wallis Test）</a></li>
+<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归通过把连续型结局表示为若干自变量的线性组合，来估计变量与结局之间的方向、大小和不确定性，是医学统计最基础的建模方法之一。">线性回归（Linear Regression）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Fisher RA. <em>Statistical Methods for Research Workers</em>. Oliver &amp; Boyd; 1925.</li>
+<li>Montgomery DC. <em>Design and Analysis of Experiments</em>. 8th ed. Wiley; 2012.</li>
+<li>Maxwell SE, Delaney HD. <em>Designing Experiments and Analyzing Data</em>. 2nd ed. Routledge; 2004.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-two-sample-t-test.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">两独立样本t检验</div></a><a class="pg pg-next" href="m-tukey-honest-significant-difference.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">TukeyHSD多重比较</div></a></div>

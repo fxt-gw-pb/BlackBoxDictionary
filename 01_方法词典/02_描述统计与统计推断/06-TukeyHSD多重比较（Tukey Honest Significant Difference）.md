@@ -5,10 +5,10 @@ slug: tukey-honest-significant-difference
 aliases: [Tukey HSD, Tukey post hoc test, "TukeyHSD多重比较（Tukey Honest Significant Difference）"]
 category: 描述统计与统计推断
 subcategory: 多重比较
-tags: [医学统计, 数据科学, 方差分析, 多重比较]
+tags: [医学统计, 数据科学, 多重比较, 事后检验, 方差分析]
 status: 已建
 difficulty: intermediate
-question_type: 事后两两比较
+question_type: ANOVA 后的两两均值比较
 data_type: [表格数据]
 outcome_type: [连续型]
 python_packages: [statsmodels]
@@ -19,184 +19,232 @@ r_packages: [stats]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-Tukey HSD 是在 ANOVA 显著之后进行所有两两组间比较的事后方法，目标是在控制家族错误率的同时找出到底哪些组不同。
+Tukey HSD 在 ANOVA 显著之后，对所有组两两比较均值，并用一个「统一加高」的临界值，保证**整族比较**的假阳性率仍控制在 5%——回答「到底是哪两组不同」。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：ANOVA 告诉我们“至少有差异”，Tukey HSD 告诉我们“到底哪两组有差异”。
-- 适用任务：所有组间两两比较。
-- 常见医学场景：三种及以上治疗方案比较后，确定具体哪两种存在均值差异。
+Tukey Honest Significant Difference 是 ANOVA 的事后（post hoc）多重比较方法，基于 studentized range 分布，为所有两两均值差同时构造置信区间并给校正后的 p 值。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-如果直接做很多次 t 检验，假阳性会累积。Tukey HSD 通过提高比较阈值，把“整组两两比较”的错误率控制在预设水平内。
+- 研究问题：整体检验说「有组不同」，具体是哪几对组不同、差多少？
+- 适用任务：ANOVA 后的全部两两比较，控制族错误率。
+- 常见医学场景：多剂量组之间两两疗效比较、多个亚型两两差异定位。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+ANOVA 像烟雾报警器响了——「屋里有火」，但不告诉你在哪个房间。Tukey HSD 挨个房间去查。麻烦在于查得越多，越容易「误报」（把随机波动当火）。Tukey 的办法是把每次判定的门槛统一抬高一点，使得「查遍所有房间、总误报率」仍不超过 5%。
+
+## 2. 核心思想与原理
+
+### 2.1 它到底在解决什么根本困难
+
+$k$ 组有 $\binom{k}{2}$ 对比较（3 组 3 对、5 组 10 对）。若每对都用 0.05 判定，只要比较够多，「至少一次假阳性」的概率会飙升。根本困难是：**如何在做很多次两两比较时，控制「整族至少犯一次错」的概率（族错误率 FWER）？**
+
+### 2.2 关键洞察
+
+关注「一组均值里**最大值与最小值之差**」的分布——studentized range 分布 $q$。因为最极端的一对差最容易假阳性，只要用 $q$ 校准这对，其余更小的差自然也被覆盖。于是所有两两比较共用一个由 $q$ 决定的、比普通 t 更高的临界值 HSD，从而把整族错误率钉在 $\alpha$。
+
+### 2.3 与朴素/相邻做法的对比
+
+- 相对**不校正的多次 t**：Tukey 控制 FWER，不校正会大量假阳性。
+- 相对 **Bonferroni**：Bonferroni 通用但对「全部两两比较」偏保守；Tukey 专为此设计、功效更高。
+- 相对 **Dunnett**：只比「各组 vs 一个对照」时 Dunnett 更有效；全体两两比较用 Tukey。
+
+## 3. 数学形式
+
+### 3.1 核心公式
+
+两组 $i,j$ 的差显著，当且仅当
 
 $$
-(\hat\alpha_i - \hat\alpha_j)
-\pm
-q_{k,n-k,1-\alpha/2}\,\hat\sigma\sqrt{\frac{1}{2}\left(\frac{1}{n_i}+\frac{1}{n_j}\right)}
+|\bar{x}_i-\bar{x}_j| \gt \text{HSD}=q_{\alpha,\,k,\,N-k}\,\sqrt{\frac{\text{MS}_{\text{组内}}}{n}}
 $$
 
-### 2.2 参数或统计量含义
+这个式子在说：把两组均值差和一个统一门槛 HSD 比；HSD = 「studentized range 临界值」乘以「组内标准误」。等价地给出每对差的同时置信区间。
 
-- $q$：studentized range 分布分位数。
-- $\hat\sigma$：组内合并标准差。
-- $n_i,n_j$：被比较两组样本量。
+### 3.2 推导脉络
 
-### 2.3 关键假设
+- 在等样本、正态等方差下，标准化的极差 $\dfrac{\max_j\bar{x}_j-\min_j\bar{x}_j}{\sqrt{\text{MS}_{\text{组内}}/n}}$ 服从 studentized range 分布 $q_{k,N-k}$。
+- 控制「最极端一对」的错误率在 $\alpha$，就同时控制了所有对——这是「同时推断」的关键。
+- 由 $q$ 的临界值反推出 HSD 阈值；不等样本用 Tukey-Kramer 修正把 $\sqrt{1/n}$ 换成 $\sqrt{\tfrac12(1/n_i+1/n_j)}$。
 
-- 基于 ANOVA 的常规前提：独立、近似正态、方差齐。
-- 关注所有两两比较。
+### 3.3 参数与统计量含义
 
-## 3. 数据形式与输入输出
+- $q_{\alpha,k,N-k}$：studentized range 临界值，随组数 $k$ 增大而增大（比较越多、门槛越高）。
+- $\text{MS}_{\text{组内}}$：来自 ANOVA 的组内均方（共用的方差估计）。
+- $n$：每组样本量；HSD：判定两组差异所需的最小差。
+- 校正后 p 值：整族层面的显著性。
 
-### 3.1 适合的数据形式
+### 3.4 关键假设（含违反后果）
 
-- 自变量类型：多分类因素。
+| 假设 | 含义 | 违反后会怎样 | 如何粗查 |
+| --- | --- | --- | --- |
+| ANOVA 假设成立 | 正态、等方差、独立 | 阈值失真 | 残差诊断、Levene |
+| 方差齐 | 各组共用一个方差 | 不齐时用 Games-Howell | Levene |
+| 事先未挑比较 | 做全部两两比较 | 只挑显著的会失控 | 预先声明 |
+
+## 4. 手把手算例
+
+沿用 ANOVA 那张卡的数据：A = {5,6,7}，B = {7,8,9}，C = {9,10,11}，得 $\bar{x}_A=6,\bar{x}_B=8,\bar{x}_C=10$，$\text{MS}_{\text{组内}}=1$，每组 $n=3$，$k=3$，$df=6$。
+
+**一步步计算：**
+
+- 查 studentized range 临界值：$q_{0.05,\,3,\,6}\approx 4.34$。
+- 组内标准误：$\sqrt{\text{MS}_{\text{组内}}/n}=\sqrt{1/3}=0.577$。
+- 门槛：$\text{HSD}=4.34\times 0.577=2.51$。
+- 三对差：$|\bar{x}_A-\bar{x}_B|=2$，$|\bar{x}_B-\bar{x}_C|=2$，$|\bar{x}_A-\bar{x}_C|=4$。
+- 与 HSD=2.51 比较：只有 A 与 C（差 4）超过门槛 → **仅 A 与 C 显著不同**；A-B、B-C 不显著。
+
+**结论：** ANOVA 告诉我们「三组里有差异」，Tukey 进一步定位到**差异来自 A 与 C**（相邻的 A-B、B-C 各差 2，未达 2.51 的门槛）。注意门槛 2.51 比普通两样本 t 的临界差更大——这多出来的部分，正是为「同时做三次比较」买的「防假阳性保险」。
+
+## 5. 数据形式与输入输出
+
+### 5.1 适合的数据形式
+
+- 自变量类型：多分类分组变量。
 - 因变量类型：连续型。
-- 数据结构：多组独立样本。
-- 是否适合高维数据：不适合作为高维多结局场景的通用校正方案。
-- 是否适合缺失较多数据：可用，但组间极不平衡时需谨慎。
+- 数据结构：多组独立观测（通常先做 ANOVA）。
+- 是否适合高维数据：比较数随组数平方增长，组很多时慎用。
+- 是否适合缺失较多数据：按可用样本。
 - 是否适合删失数据：不适合。
 - 是否适合重复测量数据：不适合。
 
-### 3.2 示例表格
+### 5.2 示例表格
 
-Tukey HSD 的输入数据形式与单因素 ANOVA 一致，都是“一个多分类因素 + 一个连续结局”：
+| 比较 | 均值差 | HSD 门槛 | 是否显著 |
+| --- | --- | --- | --- |
+| A vs B | 2 | 2.51 | 否 |
+| B vs C | 2 | 2.51 | 否 |
+| A vs C | 4 | 2.51 | 是 |
 
-| RANDID | AGE_group | TOTCHOL |
-| --- | --- | --- |
-| 2448 | 1 | 195 |
-| 6238 | 1 | 250 |
-| 10552 | 2 | 225 |
-| 14729 | 3 | 250 |
-| 19539 | 2 | 235 |
-
-区别在于：ANOVA 先回答“是否至少有一组不同”，Tukey HSD 再回答“具体哪几组不同”。
-
-### 3.3 输入与产出
+### 5.3 输入与产出
 
 #### 输入
 
-- 输入数据：连续结局和多分类组别。
-- 关键变量：组别、结局、显著性水平。
-- 需要预处理的内容：通常先完成 ANOVA。
+- 输入数据：分组变量 + 连续结局（或 ANOVA 结果）。
+- 关键变量：组别、结局、组内均方。
+- 需要预处理的内容：先拟合 ANOVA、检查假设。
 
 #### 产出
 
-- 模型对象/统计结果：每一对组别的均值差、校正后的区间和显著性判断。
+- 模型对象/统计结果：各两两差的估计、同时置信区间、校正 p 值。
 - 参数估计：两两均值差。
 - 预测结果：无。
-- 不确定性指标：FWER 控制下的置信区间。
+- 不确定性指标：同时置信区间（family-wise）。
 
-## 4. 适用场景
+## 6. 适用场景
 
-- 适合：ANOVA 显著后，想做全部两两均值比较。
-- 不适合：只关心少数预先设定比较、分布假设明显不满足。
-- 使用前需要特别检查的点：是否真的需要全部两两比较，是否已满足 ANOVA 前提。
+- 适合：ANOVA 显著后，对全部组做两两比较并控制族错误率。
+- 不适合：只比各组 vs 单一对照（用 Dunnett）、方差明显不齐（用 Games-Howell）、非正态（用 Dunn 检验）。
+- 使用前需要特别检查的点：ANOVA 假设、是否等方差、是否为「全部两两」比较。
 
-## 5. 实现
+## 7. 实现
 
-### 5.1 Python
+### 7.1 Python
 
 常用包：
 
 - `statsmodels`
 
 ```python
-import pandas as pd
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
+import numpy as np
 
-df = pd.DataFrame({
-    "value": [5.1, 5.3, 4.9, 6.0, 6.2, 5.8, 7.1, 6.9, 7.0],
-    "group": ["A", "A", "A", "B", "B", "B", "C", "C", "C"]
-})
-
-res = pairwise_tukeyhsd(endog=df["value"], groups=df["group"], alpha=0.05)
-print(res)
+score = np.array([5,6,7, 7,8,9, 9,10,11])
+group = np.repeat(["A","B","C"], 3)
+print(pairwise_tukeyhsd(score, group, alpha=0.05))
 ```
 
-### 5.2 R
+### 7.2 R
 
 常用包：
 
 - `stats`
 
 ```r
-df <- data.frame(
-  value = c(5.1, 5.3, 4.9, 6.0, 6.2, 5.8, 7.1, 6.9, 7.0),
-  group = factor(c("A","A","A","B","B","B","C","C","C"))
-)
-
-fit <- aov(value ~ group, data = df)
-TukeyHSD(fit)
+score <- c(5,6,7, 7,8,9, 9,10,11)
+group <- factor(rep(c("A","B","C"), each = 3))
+TukeyHSD(aov(score ~ group))       # 各对差、置信区间、校正 p
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解读
 
-- 核心结果看什么：哪些组对的均值差区间不包含 0。
-- 每个主要参数如何解释：均值差大小、方向和校正后显著性。
-- 临床或医学意义如何表达：同时报告差值和区间，而不是只说“显著”。
-- 常见误读：Tukey 结论依赖前提，不是对任意数据都稳健。
+- 核心结果看什么：每对的均值差、同时置信区间是否含 0、校正 p。
+- 每个主要参数如何解读：区间不含 0 ≈ 该对显著；区间同时成立（family-wise 95%）。
+- 临床或医学意义如何表达：报告「哪几对差、差多少（带区间）」而非只说整体显著。
+- 常见误读：把 Tukey 的区间当作单对的普通 CI（它更宽，是同时区间）。
 
-## 7. 推荐可视化
+## 9. 假设诊断与稳健性
 
-- 两两均值差的区间图。
-- Tukey HSD summary plot。
-- 各组均值加字母分组图。
+- 继承 ANOVA 的诊断：残差正态、方差齐、独立。
+- 方差不齐：改用 Games-Howell（不假设等方差）。
+- 非正态：改用 Dunn 检验（Kruskal-Wallis 的事后比较）。
+- 不等样本：软件用 Tukey-Kramer 自动修正。
 
-### 7.1 图像示例
+## 10. 推荐可视化
 
-下图给出年龄组比较对应的区间图，适合作为 Tukey HSD 事后比较的展示方式。
+- 各两两差的同时置信区间图（含 0 参照线）。
+- 带显著性字母标记的分组箱线图（同字母表示无显著差异）。
+- 均值 ± CI 的点区间图。
+
+### 10.1 图像示例
+
+下图为各年龄段总胆固醇两两比较的 Tukey 同时置信区间。
 
 ![](../../04_示例图像/tukey_totchol_agegroup.png)
 
-## 8. 优势、局限与常见坑
+## 11. 优势、局限与常见坑
 
 ### 优势
 
-- 适合全体两两比较。
-- 控制家族错误率。
-- 输出直接可解释。
+- 专为「全部两两比较」设计，控制族错误率且功效优于 Bonferroni。
+- 直接给同时置信区间，解释直观。
+- 软件支持完善。
 
 ### 局限
 
-- 依赖 ANOVA 类似假设。
-- 若只关心少量预先比较，未必最有效率。
-- 对非常不平衡设计不够灵活。
+- 依赖正态、等方差假设。
+- 组很多时比较数暴增、功效下降。
+- 只适合全体两两比较的场景。
 
 ### 常见坑
 
-- 在 ANOVA 不显著时仍机械做大量事后比较。
-- 忽视研究问题其实只关心部分比较。
-- 只报显著性，不报均值差和区间。
+- 不做整体 ANOVA 或不控制族错误率就到处两两比。
+- 方差不齐仍用经典 Tukey。
+- 把同时置信区间误当单对普通区间。
 
-## 9. 与相近方法的区别
+## 12. 与相近方法的区别
 
-- 和 Bonferroni 的区别：Bonferroni 更通用但往往更保守。
-- 和独立做多次 t 检验的区别：Tukey 控制了整体错误率。
-- 应该如何选择：需要所有组间两两比较时，Tukey HSD 是很好的默认选择。
+- 和 **Bonferroni**：Tukey 针对全体两两、功效更高；Bonferroni 通用但保守。
+- 和 **Dunnett**：只比对照用 Dunnett（更省）；全体两两用 Tukey。
+- 和 **Games-Howell**：方差不齐时用 Games-Howell。
+- 和**单因素 ANOVA**：ANOVA 管整体，Tukey 管两两定位，二者配套。
 
-## 10. 医学研究中的典型应用
+## 13. 医学研究中的典型应用
 
-- 比较三种治疗方案两两之间的均值差。
-- 比较多个分期、多个剂量组之间的连续结局。
-- ANOVA 显著后的标准事后分析。
+- 多剂量组疗效的两两比较。
+- 多个疾病亚型/中心之间的两两差异定位。
+- 多时点（作为分组）指标的两两比较（严格重复测量需混合模型）。
 
-## 11. 相关方法
+## 14. 关键术语
+
+- **族错误率（FWER）**：一族比较中「至少犯一次假阳性」的概率。
+- **事后比较（Post hoc）**：整体检验后进行的具体两两比较。
+- **studentized range 分布（$q$）**：一组均值极差标准化后的分布，Tukey 临界值来源。
+- **同时置信区间**：一族区间以整体置信水平同时成立。
+- **Tukey-Kramer 修正**：不等样本量下的 Tukey 版本。
+
+## 15. 相关方法
 
 - [[单因素方差分析（One-Way ANOVA）]]
-- [[两独立样本t检验（Two-Sample t-Test）]]
-- [[Kruskal-Wallis检验（Kruskal-Wallis Test）]]
+- [[Bonferroni校正（Bonferroni Correction）]]
+- [[多重检验与错误率控制（Multiple Testing and Error Rate Control）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
-- Miller RG Jr. *Simultaneous Statistical Inference*. 2nd ed. Springer; 1981.
-- statsmodels Developers. `statsmodels.stats.multicomp.pairwise_tukeyhsd`. statsmodels API Reference. [https://www.statsmodels.org/stable/generated/statsmodels.stats.multicomp.pairwise_tukeyhsd.html](https://www.statsmodels.org/stable/generated/statsmodels.stats.multicomp.pairwise_tukeyhsd.html) （访问日期：2026-07-02）
-- R Core Team. `TukeyHSD`. R Manual. [https://stat.ethz.ch/R-manual/R-devel/library/stats/html/TukeyHSD.html](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/TukeyHSD.html) （访问日期：2026-07-02）
+- Tukey JW. Comparing individual means in the analysis of variance. *Biometrics*. 1949;5(2):99-114.
+- Hochberg Y, Tamhane AC. *Multiple Comparison Procedures*. Wiley; 1987.
+- Montgomery DC. *Design and Analysis of Experiments*. 8th ed. Wiley; 2012.
