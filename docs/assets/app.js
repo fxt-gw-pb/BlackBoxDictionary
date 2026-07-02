@@ -12,7 +12,7 @@ document.addEventListener('click',function(e){
   document.querySelectorAll('.codetab[data-uid="'+uid+'"]').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-i')===i);});
   document.querySelectorAll('.codepanel[data-uid="'+uid+'"]').forEach(function(p){p.classList.toggle('active',p.getAttribute('data-i')===i);});
 });
-// 目次滚动高亮
+// 目录滚动高亮
 (function(){
   var secs=[].slice.call(document.querySelectorAll('[data-sec]'));if(!secs.length)return;
   var links={};document.querySelectorAll('.toc-item').forEach(function(a){links[a.getAttribute('data-sec')]=a;});
@@ -37,11 +37,11 @@ document.addEventListener('click',function(e){
   var results=document.getElementById('searchResults'),table=document.getElementById('radicalTable'),hint=document.getElementById('searchHint');
   input.addEventListener('input',function(){
     var q=input.value.trim().toLowerCase();
-    if(!q){results.innerHTML='';table.style.display='';hint.textContent='键入以检索全书条目';return;}
+    if(!q){results.innerHTML='';table.style.display='';hint.textContent='输入关键词搜索';return;}
     table.style.display='none';
     var hits=window.BB_INDEX.filter(function(m){return (m.cn+' '+m.en+' '+m.cat+' '+m.tags).toLowerCase().indexOf(q)>=0;});
-    hint.textContent='检索结果 · '+hits.length;
-    if(!hits.length){results.innerHTML='<div style="font-family:Noto Serif SC;font-size:15px;color:var(--faint);padding:12px;">未检得相符条目。</div>';return;}
+    hint.textContent='搜索结果 · '+hits.length;
+    if(!hits.length){results.innerHTML='<div style="font-family:Noto Serif SC;font-size:15px;color:var(--faint);padding:12px;">没有找到匹配的条目。</div>';return;}
     results.innerHTML=hits.map(function(m){return '<a class="sr" href="'+m.url+'"><span class="sr-no">'+m.catNo+'</span><span><span class="sr-cn">'+m.cn+'</span><span class="sr-en">'+m.en+'</span></span><span class="sr-cat">'+m.cat+'</span></a>';}).join('');
   });
 })();

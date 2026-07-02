@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 """黑盒词典静态站点生成器。
 
-把 01_方法词典/ 下的全部方法卡渲染成一个静态网站（Hero 首页、检字表、
+把 01_方法词典/ 下的全部方法卡渲染成一个静态网站（Hero 首页、目录、
 分类页、方法详情页），视觉沿用「黑盒词典」Claude Design 稿：纸白/墨黑
 配色 + 朱砂强调、Noto Serif SC / Spectral / IBM Plex Mono 三字体、KaTeX
-公式、Python/R 代码分栏、粘性目次、深色模式。输出到 docs/（供 GitHub Pages）。
+公式、Python/R 代码分栏、粘性目录、深色模式。输出到 docs/（供 GitHub Pages）。
 
 用法: python3 scripts/build_site.py
 依赖: markdown, pyyaml
@@ -234,7 +234,7 @@ def masthead(active=""):
       <span class="brand-en">Blackbox&nbsp;Dictionary</span>
     </a>
     <nav class="mast-nav">
-      <a href="catalog.html"{cls('catalog')}>检字表</a>
+      <a href="catalog.html"{cls('catalog')}>目录</a>
       <a href="about.html"{cls('about')}>关于</a>
       <button id="darkToggle" class="darkbtn" type="button"><span class="dot"></span><span class="dlab">深色</span></button>
     </nav>
@@ -251,22 +251,22 @@ def render_hero(total, ncats):
   </svg>
   <div class="wrap hero-top">
     <div class="brand"><span class="brand-cn light">黑盒词典</span><span class="brand-en">Blackbox Dictionary</span></div>
-    <span class="hero-ed">Ed. 2026 · {total} 方法卡 · {ncats} 部</span>
+    <span class="hero-ed">2026 版 · {total} 张方法卡 · {ncats} 个分类</span>
   </div>
   <div class="wrap hero-main">
     <div class="hero-block">
       <div class="kicker">打开统计方法的黑箱</div>
       <h1 class="hero-h1">黑盒词典</h1>
-      <p class="hero-sub">A working dictionary of statistical methods for medical research &amp; data science —<span class="hero-sub-cn">&nbsp;为医学研究与数据科学编纂的方法词典。</span></p>
+      <p class="hero-sub">A working dictionary of statistical methods for medical research &amp; data science —<span class="hero-sub-cn">&nbsp;为医学研究与数据科学整理的方法字典。</span></p>
       <div class="preface">
         <div class="preface-bar"></div>
-        <div class="preface-label">序 · Preface</div>
+        <div class="preface-label">前言 · Preface</div>
         <p class="preface-text">每一种统计方法都是一只黑箱：数据从一端进入，结论从另一端走出，中间的机理常被交给软件与惯例。这部词典想做的，是把箱子打开——写清每种方法的数学、假设、代价与边界，让使用者既会用，也知道它何时会失效。</p>
         <div class="preface-sign">— 编者</div>
       </div>
       <div class="hero-cta">
         <a class="cta-main" href="catalog.html">进入词典 →</a>
-        <a class="cta-sub" href="catalog.html">按部检字</a>
+        <a class="cta-sub" href="catalog.html">浏览目录</a>
       </div>
     </div>
   </div>
@@ -291,33 +291,33 @@ def render_catalog(cats, search_index):
         <span class="cat-en">{html.escape(en)}</span>
         <span class="cat-desc">{html.escape(desc)}</span>
       </div>
-      <span class="cat-count">{count}<span class="cat-count-u">&nbsp;则</span></span>
+      <span class="cat-count">{count}<span class="cat-count-u">&nbsp;个</span></span>
     </{tag}>""")
     body = f"""{masthead('catalog')}
 <main class="wrap catalog">
   <div class="cat-head">
     <div class="cat-head-l">
-      <div class="kicker dark-ink">部首检字表 · Radical Index</div>
-      <h2 class="page-h2">检字表</h2>
-      <p class="lede">全书 {len(CAT_META)} 部，收方法 {len(search_index)} 则。按部检字，或以中文名 / 英文名 / 标签直检。</p>
+      <div class="kicker dark-ink">目录 · Contents</div>
+      <h2 class="page-h2">目录</h2>
+      <p class="lede">共 {len(CAT_META)} 个分类，收录 {len(search_index)} 张方法卡。按分类浏览，或用中文名 / 英文名 / 标签搜索。</p>
     </div>
     <div class="cat-head-r">
-      <div class="kicker dark-ink">检索 · Search</div>
+      <div class="kicker dark-ink">搜索 · Search</div>
       <div class="searchbox">
         <span class="search-icon">⌕</span>
         <input id="searchInput" placeholder="Cox / 生存 / hazard / 标签…" autocomplete="off">
       </div>
-      <div id="searchHint" class="search-hint">键入以检索全书条目</div>
+      <div id="searchHint" class="search-hint">输入关键词搜索</div>
     </div>
   </div>
   <div id="searchResults" class="search-results"></div>
   <div id="radicalTable">
-    <div class="cat-th"><span>部序</span><span>部类 · Category</span><span class="ra">收录</span></div>
+    <div class="cat-th"><span>序号</span><span>分类 · Category</span><span class="ra">数量</span></div>
     {''.join(rows)}
   </div>
 </main>
 <script>window.BB_INDEX = {json.dumps(search_index, ensure_ascii=False)};</script>"""
-    return page("检字表 · 黑盒词典", body, body_class="page")
+    return page("目录 · 黑盒词典", body, body_class="page")
 
 
 def render_category(cno, cname, items):
@@ -341,10 +341,10 @@ def render_category(cno, cname, items):
     </a>""")
     body = f"""{masthead()}
 <main class="wrap category">
-  <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><span class="cur">{html.escape(cname)}</span></div>
+  <div class="crumb"><a href="catalog.html">目录</a><span class="sep">/</span><span class="cur">{html.escape(cname)}</span></div>
   <div class="cat-title">
     <div class="cat-title-l">
-      <div class="kicker dark-ink">第 {cno} 部</div>
+      <div class="kicker dark-ink">第 {cno} 类</div>
       <h2 class="page-h2">{html.escape(cname)}</h2>
       <div class="cat-title-en">{html.escape(en)}</div>
       <p class="lede">{html.escape(desc)}</p>
@@ -389,11 +389,11 @@ def render_detail(c, cats, index):
 
     pager = []
     if prev_c:
-        pager.append(f'<a class="pg pg-prev" href="m-{prev_c["slug"]}.html"><div class="pg-lab">← 前一则</div><div class="pg-t">{html.escape(prev_c["title"])}</div></a>')
+        pager.append(f'<a class="pg pg-prev" href="m-{prev_c["slug"]}.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">{html.escape(prev_c["title"])}</div></a>')
     else:
         pager.append('<span></span>')
     if next_c:
-        pager.append(f'<a class="pg pg-next" href="m-{next_c["slug"]}.html"><div class="pg-lab">后一则 →</div><div class="pg-t">{html.escape(next_c["title"])}</div></a>')
+        pager.append(f'<a class="pg pg-next" href="m-{next_c["slug"]}.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">{html.escape(next_c["title"])}</div></a>')
     else:
         pager.append('<span></span>')
 
@@ -405,12 +405,12 @@ def render_detail(c, cats, index):
 <main class="wrap detail">
   <aside class="toc-wrap">
     <div class="toc-sticky">
-      <div class="toc-label">目次 · Contents</div>
+      <div class="toc-label">目录 · Contents</div>
       <nav id="toc">{''.join(toc_items)}</nav>
     </div>
   </aside>
   <article id="article">
-    <div class="crumb"><a href="catalog.html">检字表</a><span class="sep">/</span><a href="cat-{c['cat_no']}.html">{html.escape(c['cat'])}</a><span class="sep">/</span><span class="cur">{html.escape(c['title'])}</span></div>
+    <div class="crumb"><a href="catalog.html">目录</a><span class="sep">/</span><a href="cat-{c['cat_no']}.html">{html.escape(c['cat'])}</a><span class="sep">/</span><span class="cur">{html.escape(c['title'])}</span></div>
     <div class="titleblock">
       <div class="kicker dark-ink">{html.escape(c['cat'])} · {c['cat_no']}·{c['no']:02d}</div>
       <h1 class="detail-h1">{html.escape(c['title'])}</h1>
@@ -443,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function(){{
 def render_about(total, cats):
     parts = []
     for (cno, cname), items in cats.items():
-        parts.append(f'<li><span class="ab-no">{cno}</span> {html.escape(cname)} <span class="ab-c">{len(items)} 则</span></li>')
+        parts.append(f'<li><span class="ab-no">{cno}</span> {html.escape(cname)} <span class="ab-c">{len(items)} 个</span></li>')
     body = f"""{masthead('about')}
 <main class="wrap about">
   <div class="cat-head">
@@ -453,10 +453,10 @@ def render_about(total, cats):
     </div>
   </div>
   <div class="about-body">
-    <p>黑盒词典是一部面向医学研究与数据科学的统计方法词典，收录 {total} 张方法卡，分属 {len(CAT_META)} 部。每张方法卡按同一套结构编写：方法概览、数学形式、数据形式与输入输出、适用场景、Python/R 实现、结果解释、推荐可视化、优势局限与常见坑、与相近方法的区别、医学应用、相关方法与参考资料。</p>
-    <p>编纂原则是「先说解决什么问题，再讲怎么推导」：公式配参数解释，代码给最小可运行版本，并为医学场景标注结局类型、缺失机制、删失与混杂等关键前提。方法卡之间以相关方法互链，构成一张可检索的方法网络。</p>
+    <p>黑盒词典是一个面向医学研究与数据科学的统计方法字典，收录 {total} 张方法卡，分属 {len(CAT_META)} 个分类。每张方法卡按同一套结构编写：方法概览、数学形式、数据形式与输入输出、适用场景、Python/R 实现、结果解释、推荐可视化、优势局限与常见坑、与相近方法的区别、医学应用、相关方法与参考资料。</p>
+    <p>编写原则是「先说解决什么问题，再讲怎么推导」：公式配参数解释，代码给最小可运行版本，并为医学场景标注结局类型、缺失机制、删失与混杂等关键前提。方法卡之间以相关方法互链，构成一张可检索的方法网络。</p>
     <p>本站由知识库中的 Markdown 方法卡自动生成，源码见 <a href="https://github.com/fxt-gw-pb/BlackBoxDictionary" class="xlink">GitHub · BlackBoxDictionary</a>。</p>
-    <div class="kicker dark-ink" style="margin-top:40px;">部类一览</div>
+    <div class="kicker dark-ink" style="margin-top:40px;">分类一览</div>
     <ul class="about-cats">{''.join(parts)}</ul>
   </div>
 </main>"""
@@ -680,7 +680,7 @@ document.addEventListener('click',function(e){
   document.querySelectorAll('.codetab[data-uid="'+uid+'"]').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-i')===i);});
   document.querySelectorAll('.codepanel[data-uid="'+uid+'"]').forEach(function(p){p.classList.toggle('active',p.getAttribute('data-i')===i);});
 });
-// 目次滚动高亮
+// 目录滚动高亮
 (function(){
   var secs=[].slice.call(document.querySelectorAll('[data-sec]'));if(!secs.length)return;
   var links={};document.querySelectorAll('.toc-item').forEach(function(a){links[a.getAttribute('data-sec')]=a;});
@@ -705,11 +705,11 @@ document.addEventListener('click',function(e){
   var results=document.getElementById('searchResults'),table=document.getElementById('radicalTable'),hint=document.getElementById('searchHint');
   input.addEventListener('input',function(){
     var q=input.value.trim().toLowerCase();
-    if(!q){results.innerHTML='';table.style.display='';hint.textContent='键入以检索全书条目';return;}
+    if(!q){results.innerHTML='';table.style.display='';hint.textContent='输入关键词搜索';return;}
     table.style.display='none';
     var hits=window.BB_INDEX.filter(function(m){return (m.cn+' '+m.en+' '+m.cat+' '+m.tags).toLowerCase().indexOf(q)>=0;});
-    hint.textContent='检索结果 · '+hits.length;
-    if(!hits.length){results.innerHTML='<div style="font-family:Noto Serif SC;font-size:15px;color:var(--faint);padding:12px;">未检得相符条目。</div>';return;}
+    hint.textContent='搜索结果 · '+hits.length;
+    if(!hits.length){results.innerHTML='<div style="font-family:Noto Serif SC;font-size:15px;color:var(--faint);padding:12px;">没有找到匹配的条目。</div>';return;}
     results.innerHTML=hits.map(function(m){return '<a class="sr" href="'+m.url+'"><span class="sr-no">'+m.catNo+'</span><span><span class="sr-cn">'+m.cn+'</span><span class="sr-en">'+m.en+'</span></span><span class="sr-cat">'+m.cat+'</span></a>';}).join('');
   });
 })();
