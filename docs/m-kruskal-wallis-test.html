@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -47,210 +47,269 @@
       <div class="detail-en">Kruskal-Wallis Test</div>
       <div class="detail-meta">
         <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
-        <span>难度&nbsp;·&nbsp;<b>basic</b></span>
-        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 非参数统计 / 假设检验</b></span>
+        <span>难度&nbsp;·&nbsp;<b>intermediate</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 非参数检验 / 多组比较</b></span>
       </div>
     </div>
     <div class="intro-note"><h1>Kruskal-Wallis检验（Kruskal-Wallis Test）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>Kruskal-Wallis 检验是比较三组及以上独立样本位置差异的非参数方法，可视为 Wilcoxon 秩和检验向多组情形的推广。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>它是单因素方差分析的非参数版：把所有组混在一起排名，比较各组的<strong>平均名次</strong>是否相当——若某些组的名次系统性地偏高或偏低，就说明组间分布不同。</p>
+<h3>1.2 定义</h3>
+<p>Kruskal-Wallis 检验比较三个及以上独立组的分布位置，基于混合排秩，构造近似服从卡方分布的 $H$ 统计量，不要求数据正态，适用于连续或有序结局。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：多组样本是否来自相同分布位置。</li>
-<li>适用任务：偏态数据或等级数据的多组比较。</li>
-<li>常见医学场景：比较不同治疗方案、不同分期、不同亚组的连续指标。</li>
+<li>研究问题：多个独立组的水平是否不同（在不敢假设正态时）？</li>
+<li>适用任务：多组非参数整体比较，通常配合事后两两比较（Dunn 检验）。</li>
+<li>常见医学场景：多组偏态指标比较、多个有序等级组比较、含异常值的多组数据。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>如果某些组整体偏大，它们在合并排序后会拿到更高的平均秩。Kruskal-Wallis 就是检验这些平均秩差异是否大到不能用随机波动解释。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>几个班级的考试排名混在一起。若各班水平相当，每班学生的名次应上下均匀分布、平均名次接近整体中点。若某班明显更强，他们会更多占据前排、平均名次更靠前。Kruskal-Wallis 就是检验「各班平均名次的差异」是否超出随机。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-H = \frac{12}{N(N+1)}\sum_{g=1}^k n_g\left(\bar R_g - \frac{N+1}{2}\right)^2
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>ANOVA 依赖正态与方差齐；多组偏态、有序或含异常值时不可靠。而多组又不能靠多次秩和检验（会膨胀假阳性）。根本困难是：<strong>如何用一次非参数检验，判断「多组分布位置是否全相同」？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>把全部 $N$ 个观测混合排秩，计算各组的平均秩 $\bar{R}_j$。若各组同分布，所有组的平均秩都应接近总平均秩 $(N+1)/2$；$H$ 统计量正是各组平均秩偏离总平均秩的加权平方和。它可看作「在秩上做的 ANOVA」——把 ANOVA 的组间平方和搬到秩尺度，于是继承了 ANOVA 的整体检验逻辑，又获得了秩方法的稳健性。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$k$：组数。</li>
-<li>$H$：基于各组秩和构造的检验统计量。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>各组相互独立。</li>
-<li>数据至少可排序。</li>
-<li>若解释为位置差异，常默认各组分布形状相近。</li>
+<li>相对<strong>单因素 ANOVA</strong>：不要求正态、抗异常值。</li>
+<li>相对<strong>多次秩和检验</strong>：一次检验控制整体假阳性率。</li>
+<li>相对 <strong>Wilcoxon 秩和检验</strong>：Kruskal-Wallis 是它从两组到多组的推广（两组时二者等价）。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>$$
+H=\frac{12}{N(N+1)}\sum_{j=1}^{k}\frac{R_j^2}{n_j}-3(N+1)
+$$</p>
+<p>其中 $R_j$ 是第 $j$ 组的秩和，$n_j$ 是其样本量，$N=\sum n_j$。这个式子在说：把各组秩和平方后按样本量归一再求和，衡量组间平均秩的分散程度；常数项使 $H$ 在原假设下以卡方分布为参照。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>自变量类型：多分类分组变量。</li>
-<li>因变量类型：连续型或等级型。</li>
-<li>数据结构：三组及以上独立组。</li>
-<li>是否适合高维数据：不适合多变量反复检验而不校正。</li>
-<li>是否适合缺失较多数据：可用，但组间缺失不平衡会影响比较。</li>
-<li>是否适合删失数据：不适合。</li>
-<li>是否适合重复测量数据：不适合。</li>
+<li>混合排秩后，$H$ 等价于「对秩做单因素 ANOVA 的组间平方和」除以秩的总方差。</li>
+<li>原假设（各组同分布）下，$H$ 近似服从自由度 $k-1$ 的卡方分布。</li>
+<li>大 $H$ 意味某些组平均秩系统偏离总体，落入卡方右尾即拒绝。</li>
+<li>有结点时需除以结点校正因子；小样本可用精确分布。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>例如 <code>Mall_Customers.csv</code> 可以构造“年龄组 - 消费评分”的多组位置比较：</p>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$k$：组数；$N$：总样本量；$n_j,R_j$：第 $j$ 组样本量与秩和。</li>
+<li>$\bar{R}_j=R_j/n_j$：各组平均秩，越偏离 $(N+1)/2$ 越异常。</li>
+<li>$H$：检验统计量，$\ge 0$；自由度 $k-1$。</li>
+<li>p 值：卡方分布右尾概率。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>CustomerID</th>
-<th>Age</th>
-<th>AgeGroup</th>
-<th>Annual Income (k$)</th>
-<th>Spending Score (1-100)</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>1</td>
-<td>19</td>
-<td>Younger</td>
-<td>15</td>
-<td>39</td>
+<td>独立</td>
+<td>组间、组内独立</td>
+<td>p 值失真</td>
+<td>看设计</td>
 </tr>
 <tr>
-<td>2</td>
-<td>21</td>
-<td>Younger</td>
-<td>15</td>
-<td>81</td>
+<td>可排序</td>
+<td>结局可比大小</td>
+<td>大量结点降低效力</td>
+<td>看重复值</td>
 </tr>
 <tr>
-<td>3</td>
-<td>20</td>
-<td>Younger</td>
-<td>16</td>
+<td>形状相近</td>
+<td>各组分布形状类似</td>
+<td>「位置」解释需谨慎</td>
+<td>各组分布图</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>三组各 3 例的花费评分：A = {1, 2, 3}，B = {4, 5, 6}，C = {7, 8, 9}（已从小到大，故秩即数值位次）。</p>
+<p><strong>一步步计算：</strong></p>
+<ul>
+<li>$N=9$，混合秩 $1\dots9$。各组秩和：$R_A=1+2+3=6$，$R_B=4+5+6=15$，$R_C=7+8+9=24$。</li>
+<li>代入：$\dfrac{12}{9\times10}\left(\dfrac{6^2}{3}+\dfrac{15^2}{3}+\dfrac{24^2}{3}\right)-3\times10$。</li>
+<li>括号内：$\dfrac{36}{3}+\dfrac{225}{3}+\dfrac{576}{3}=12+75+192=279$。</li>
+<li>$H=\dfrac{12}{90}\times279-30=0.1333\times279-30=37.2-30=7.2$。</li>
+<li>自由度 $k-1=2$，卡方临界值 $\chi^2_{0.05,2}=5.99$；因 $7.2\gt 5.99$，<strong>拒绝</strong>「三组同分布」。</li>
+</ul>
+<p><strong>结论：</strong> 三组的平均秩分别是 2、5、8，单调递增且分散明显，$H=7.2$ 超过临界值，说明组间存在差异。与 ANOVA 一样，Kruskal-Wallis 只说「有组不同」，具体哪两组要用 <strong>Dunn 事后检验</strong>（并做多重比较校正）。注意每组仅 3 例，实务中应以精确检验复核。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：多分类分组变量（≥3 组）。</li>
+<li>因变量类型：连续或有序等级。</li>
+<li>数据结构：多组独立观测。</li>
+<li>是否适合高维数据：否。</li>
+<li>是否适合缺失较多数据：按可用样本。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：不适合；重复测量多组用 Friedman。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>组</th>
+<th>值</th>
+<th>秩和</th>
+<th>平均秩</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>1,2,3</td>
 <td>6</td>
+<td>2</td>
 </tr>
 <tr>
-<td>4</td>
-<td>23</td>
-<td>Younger</td>
-<td>16</td>
-<td>77</td>
-</tr>
-<tr>
+<td>B</td>
+<td>4,5,6</td>
+<td>15</td>
 <td>5</td>
-<td>31</td>
-<td>Younger</td>
-<td>17</td>
-<td>40</td>
+</tr>
+<tr>
+<td>C</td>
+<td>7,8,9</td>
+<td>24</td>
+<td>8</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：多组独立观测。</li>
-<li>关键变量：组别、数值或等级型结局。</li>
-<li>需要预处理的内容：缺失值、ties 处理。</li>
+<li>输入数据：分组变量 + 结局。</li>
+<li>关键变量：组别、结局值。</li>
+<li>需要预处理的内容：处理结点、确认独立。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：H 统计量、自由度、p 值。</li>
-<li>参数估计：不直接给某两组差值。</li>
+<li>模型对象/统计结果：$H$、自由度、p 值。</li>
+<li>参数估计：各组平均秩。</li>
 <li>预测结果：无。</li>
-<li>不确定性指标：主要是总体检验；若显著需做事后比较。</li>
+<li>不确定性指标：事后两两比较的校正 p。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：三组及以上独立样本的偏态连续变量比较。</li>
-<li>不适合：需要协变量调整、需要明确均值差解释、配对或纵向设计。</li>
-<li>使用前需要特别检查的点：独立性、组大小不平衡、事后比较方案。</li>
+<li>适合：三组及以上、非正态或有序结局的整体比较。</li>
+<li>不适合：两组（用秩和检验）、重复测量（用 Friedman）。</li>
+<li>使用前需要特别检查的点：独立性、各组形状是否相近、是否需事后比较。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="kruskal-wallis-test" data-i="0">Python</button><button class="codetab" data-uid="kruskal-wallis-test" data-i="1">R</button></div><div class="codepanel active" data-uid="kruskal-wallis-test" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>scipy</code></li>
 </ul>
 <pre><code class="language-python">from scipy import stats
 
-group_a = [5, 7, 8, 9]
-group_b = [10, 11, 9, 12]
-group_c = [13, 12, 15, 14]
-
-res = stats.kruskal(group_a, group_b, group_c)
-print(res.statistic, res.pvalue)
+A = [1, 2, 3]; B = [4, 5, 6]; C = [7, 8, 9]
+H, p = stats.kruskal(A, B, C)
+print(f&quot;H={H:.2f}, p={p:.4f}&quot;)     # H≈7.2
+# 事后: scikit_posthocs.posthoc_dunn
 </code></pre></div><div class="codepanel" data-uid="kruskal-wallis-test" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>stats</code></li>
 </ul>
-<pre><code class="language-r">x &lt;- c(5, 7, 8, 9, 10, 11, 9, 12, 13, 12, 15, 14)
-group &lt;- factor(rep(c(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;), each = 4))
-kruskal.test(x ~ group)
+<pre><code class="language-r">val &lt;- c(1,2,3, 4,5,6, 7,8,9)
+grp &lt;- factor(rep(c(&quot;A&quot;,&quot;B&quot;,&quot;C&quot;), each = 3))
+kruskal.test(val ~ grp)
+# 事后: dunn.test::dunn.test(val, grp, method = &quot;bh&quot;)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：至少有一组与其他组在分布位置上不同。</li>
-<li>每个主要参数如何解释：p 值只告诉“是否存在差异”，不告诉“哪两组不同”。</li>
-<li>临床或医学意义如何表达：应补充各组中位数、IQR 和事后比较。</li>
-<li>常见误读：显著结果不能直接说所有组两两都不同。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>分组箱线图或小提琴图。</li>
-<li>分组 ECDF 图。</li>
-<li>各组中位数和 IQR 点图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图给出按年龄三分组后的消费评分箱线图，适合与 Kruskal-Wallis 检验配套展示。</p>
-<p><img alt="" src="img/kruskal_spending_agegroup.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：$H$/p，以及各组平均秩的排序。</li>
+<li>每个主要参数如何解读：p 小说明至少一组分布位置不同；平均秩显示方向。</li>
+<li>临床或医学意义如何表达：整体显著后用 Dunn 检验报告具体哪两组差。</li>
+<li>常见误读：把整体显著当成「每两组都不同」；形状差异大却硬说「中位数不同」。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>分布形状：各组形状相近时可解释为「中位数/位置差」。</li>
+<li>结点：大量相等值需结点校正，软件自动处理。</li>
+<li>稳健性：对异常值远比 ANOVA 稳健。</li>
+<li>事后与校正：Dunn 检验做两两比较，务必对多重性校正（如 BH）。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>各组箱线图/小提琴图 + 抖动点。</li>
+<li>各组 ECDF 叠加。</li>
+<li>事后两两比较的显著性矩阵/字母标注。</li>
+</ul>
+<h3>10.1 图像示例</h3>
+<p>下图按年龄段比较某花费指标分布。</p>
+<p><img alt="" src="img/kruskal_spending_agegroup.png" /></p></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>对偏态和异常值更稳健。</li>
-<li>适合等级数据。</li>
-<li>是多组非参数比较的经典起点。</li>
+<li>不依赖正态、抗异常值。</li>
+<li>一次检验控制多组假阳性率。</li>
+<li>适用有序结局。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>不直接给具体组间差异。</li>
-<li>解释依赖分布形状相近。</li>
-<li>无法控制混杂。</li>
+<li>只给整体结论，需事后定位。</li>
+<li>形状差异大时解释受限。</li>
+<li>大量结点降低效力。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>做出总体显著后不做事后比较。</li>
-<li>把它直接解释成均值差异。</li>
-<li>忽视多重比较控制。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 Wilcoxon 秩和检验的区别：后者仅适用于两组。</li>
-<li>和单因素 ANOVA 的区别：ANOVA 更关注均值且依赖更强假设。</li>
-<li>应该如何选择：偏态明显时优先考虑本方法；若需要模型化和协变量调整，可转向回归。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>比较三个治疗方案的评分分布。</li>
-<li>比较不同疾病分期的某连续指标。</li>
-<li>比较多亚组的住院时长或费用。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-wilcoxon-rank-sum-test.html" data-cn="Wilcoxon秩和检验" data-en="Wilcoxon Rank-Sum Test" data-def="Wilcoxon 秩和检验是两独立样本的非参数检验，通过比较两组观测的秩来判断它们是否来自相同位置分布。">Wilcoxon秩和检验（Wilcoxon Rank-Sum Test）</a></li>
-<li><a class="xlink" href="m-one-way-anova.html" data-cn="单因素方差分析" data-en="One-Way ANOVA" data-def="ANOVA 用一个巧妙的对比回答「多组均值是否相同」：把数据的总变异拆成「组与组之间的差异」和「组内部的波动」，若前者远大于后者（$F$ 大），就说明组间真有差别。">单因素方差分析（One-Way ANOVA）</a></li>
-<li><a class="xlink" href="m-tukey-honest-significant-difference.html" data-cn="TukeyHSD多重比较" data-en="Tukey Honest Significant Difference" data-def="Tukey HSD 在 ANOVA 显著之后，对所有组两两比较均值，并用一个「统一加高」的临界值，保证整族比较的假阳性率仍控制在 5%——回答「到底是哪两组不同」。">TukeyHSD多重比较（Tukey Honest Significant Difference）</a></li>
+<li>显著后说「各组都不同」。</li>
+<li>事后两两比较不校正多重性。</li>
+<li>与 Friedman（重复测量）混用。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
+<li>和<strong>单因素 ANOVA</strong>：ANOVA 比均值、要正态；KW 比位置、更稳健。</li>
+<li>和 <strong>Wilcoxon 秩和检验</strong>：KW 是其多组推广。</li>
+<li>和 <strong>Friedman 检验</strong>：Friedman 用于重复测量多组。</li>
+<li>如何选择：多独立组且非正态 → KW；正态 → ANOVA。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>多组偏态实验室指标的整体比较。</li>
+<li>多个有序分级组的比较。</li>
+<li>多中心/多亚型含异常值数据的比较。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>平均秩（Mean Rank）</strong>：某组在混合排序中的名次均值。</li>
+<li><strong>H 统计量</strong>：衡量组间平均秩分散度、近似卡方的统计量。</li>
+<li><strong>卡方近似</strong>：$H$ 在原假设下近似卡方分布（自由度 $k-1$）。</li>
+<li><strong>Dunn 检验</strong>：Kruskal-Wallis 的事后两两比较方法。</li>
+<li><strong>结点校正</strong>：存在相等观测时对 $H$ 的修正。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-one-way-anova.html" data-cn="单因素方差分析" data-en="One-Way ANOVA" data-def="ANOVA 用一个巧妙的对比回答「多组均值是否相同」：把数据的总变异拆成「组与组之间的差异」和「组内部的波动」，若前者远大于后者（$F$ 大），就说明组间真有差别。">单因素方差分析（One-Way ANOVA）</a></li>
+<li><a class="xlink" href="m-wilcoxon-rank-sum-test.html" data-cn="Wilcoxon秩和检验" data-en="Wilcoxon Rank-Sum Test" data-def="它是两独立样本 t 检验的非参数版：把两组数据混在一起从小到大排名，看某一组的「名次总分」是否系统性地偏高或偏低——等价于问「随机各取一个，A 大于 B 的概率是不是 0.5」。">Wilcoxon秩和检验（Wilcoxon Rank-Sum Test）</a></li>
+<li><a class="xlink" href="m-multiple-testing-and-error-rate-control.html" data-cn="多重检验与错误率控制" data-en="Multiple Testing and Error Rate Control" data-def="多重检验与错误率控制关注的是：当同时进行很多次假设检验时，如何控制整体假阳性风险或错误发现比例。">多重检验与错误率控制（Multiple Testing and Error Rate Control）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Kruskal WH, Wallis WA. Use of ranks in one-criterion variance analysis. <em>J Am Stat Assoc</em>. 1952;47(260):583-621.</li>
+<li>Hollander M, Wolfe DA, Chicken E. <em>Nonparametric Statistical Methods</em>. 3rd ed. Wiley; 2013.</li>
 <li>Conover WJ. <em>Practical Nonparametric Statistics</em>. 3rd ed. Wiley; 1999.</li>
-<li>SciPy Developers. <code>scipy.stats.kruskal</code>. SciPy API Reference. <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.kruskal.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.kruskal.html</a> （访问日期：2026-07-02）</li>
-<li>R Core Team. <code>kruskal.test</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kruskal.test.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kruskal.test.html</a> （访问日期：2026-07-02）</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-wilcoxon-rank-sum-test.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">Wilcoxon秩和检验</div></a><a class="pg pg-next" href="m-pearson-correlation.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">Pearson相关</div></a></div>

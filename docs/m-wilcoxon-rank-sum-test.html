@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -48,197 +48,256 @@
       <div class="detail-meta">
         <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
         <span>难度&nbsp;·&nbsp;<b>basic</b></span>
-        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 非参数统计 / 假设检验</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 非参数检验 / 两组比较</b></span>
       </div>
     </div>
     <div class="intro-note"><h1>Wilcoxon秩和检验（Wilcoxon Rank-Sum Test）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>Wilcoxon 秩和检验是两独立样本的非参数检验，通过比较两组观测的秩来判断它们是否来自相同位置分布。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>它是两独立样本 t 检验的非参数版：把两组数据混在一起从小到大排名，看某一组的「名次总分」是否系统性地偏高或偏低——等价于问「随机各取一个，A 大于 B 的概率是不是 0.5」。</p>
+<h3>1.2 定义</h3>
+<p>Wilcoxon 秩和检验（等价于 Mann-Whitney U 检验）比较两个独立组的分布位置，基于混合排秩，不要求数据正态，适用于连续或有序结局。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：两组独立样本的中心位置是否存在差异。</li>
-<li>适用任务：偏态数据、等级数据、异常值较多时的两组比较。</li>
-<li>常见医学场景：比较治疗组与对照组的住院天数、中位数炎症指标、评分量表。</li>
+<li>研究问题：两个独立组的水平是否不同（在不敢假设正态时）？</li>
+<li>适用任务：两组非参数位置比较、有序结局比较。</li>
+<li>常见医学场景：两组小样本偏态指标比较、量表评分等有序结局的两组比较、有异常值的实验室数据。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>如果某组整体更大，那么这组样本在合并排序后会更常拿到靠后的高秩，于是秩和会系统性偏大。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>两组身高混在一起排队。如果两组来自同一分布，高个矮个应该均匀交错，两组的「名次总分」应差不多。如果 A 组普遍更高，A 组的人就会更多地排在队伍后段、名次更大、名次总分更高。秩和检验就是量出这种「名次总分的失衡」。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-W = \sum_{i=1}^{n_1} R_{1i}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>两样本 t 检验依赖正态与（经典版）方差齐。小样本偏态、有序或含异常值时不可靠。根本困难是：<strong>如何不假设分布形状，就能比较两个独立组的位置？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>把两组 $N=n_1+n_2$ 个观测混合排秩。若两组同分布，秩在两组间随机分配，某组秩和的期望是已知的；实际秩和偏离期望越远，越说明两组不同。更深的等价视角：统计量 $U$ 直接估计 $P(X\gt Y)$（从两组各随机取一个，A 大于 B 的概率）——原假设是它等于 0.5。用秩使检验对异常值稳健、且原假设下分布与数据分布无关。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$W$：某一组样本秩和。</li>
-<li>零假设下，若两组分布相同，则秩应大致均匀混合。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>两组样本独立。</li>
-<li>数据至少可排序。</li>
-<li>若要解释为位置差异，通常还需要两组分布形状相近。</li>
+<li>相对<strong>两样本 t</strong>：不要求正态、抗异常值；正态时功效仅略低（约 95%）。</li>
+<li>相对 <strong>Wilcoxon 符号秩</strong>：秩和用于<strong>两独立组</strong>，符号秩用于<strong>配对</strong>。</li>
+<li>相对 <strong>Kruskal-Wallis</strong>：Kruskal-Wallis 是它在「三组及以上」的推广。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>$$
+U_1=R_1-\frac{n_1(n_1+1)}{2}
+$$</p>
+<p>其中 $R_1$ 是第 1 组在混合排秩中的秩和。这个式子在说：$U_1$ 把第 1 组的秩和减去「它自己内部排序就会占用的最小秩和」，剩下的正是「第 1 组观测大于第 2 组观测的对数」。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>自变量类型：二分类分组变量。</li>
-<li>因变量类型：连续型或等级型。</li>
-<li>数据结构：两独立组。</li>
-<li>是否适合高维数据：不适合批量高维未经校正的反复检验。</li>
-<li>是否适合缺失较多数据：可用，但组间缺失不平衡会影响解释。</li>
-<li>是否适合删失数据：不适合。</li>
-<li>是否适合重复测量数据：不适合。</li>
+<li>混合 $N$ 个观测排秩，得两组秩和 $R_1,R_2$（$R_1+R_2=N(N+1)/2$）。</li>
+<li>$U_1$ 恰等于「所有跨组对 $(x_i,y_j)$ 中 $x_i\gt y_j$ 的个数」，故 $U_1/(n_1 n_2)$ 估计 $P(X\gt Y)$。</li>
+<li>原假设下 $E[U]=\dfrac{n_1 n_2}{2}$，方差 $\dfrac{n_1 n_2 (N+1)}{12}$。</li>
+<li>小样本查精确表；大样本用正态近似（含结点校正）。取 $U=\min(U_1,U_2)$，越小越偏离。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>一个典型场景是用 <code>Framingham_data.csv</code> 基线数据比较不同高血压状态下的 BMI 分布：</p>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$R_1$：第 1 组秩和；$U_1$：Mann-Whitney U 统计量。</li>
+<li>$U/(n_1 n_2)$：估计的「优势概率」$P(X\gt Y)$。</li>
+<li>期望 $n_1 n_2/2$：原假设下 U 的中心。</li>
+<li>p 值：原假设下出现如此极端秩和的概率。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>RANDID</th>
-<th>PREVHYP</th>
-<th>BMI</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>2448</td>
-<td>0</td>
-<td>26.97</td>
+<td>独立</td>
+<td>两组、组内独立</td>
+<td>p 值失真</td>
+<td>看设计</td>
 </tr>
 <tr>
-<td>6238</td>
-<td>0</td>
-<td>28.73</td>
+<td>可排序</td>
+<td>结局可比大小</td>
+<td>大量结点降低效力</td>
+<td>看重复值</td>
 </tr>
 <tr>
-<td>9428</td>
-<td>0</td>
-<td>25.34</td>
+<td>形状相近</td>
+<td>两组分布形状类似</td>
+<td>只能说「位置」需谨慎</td>
+<td>两组分布图</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>比较两组各 3 例的指标：A = {12, 15, 18}，B = {10, 11, 14}。</p>
+<p><strong>一步步计算：</strong></p>
+<ul>
+<li>混合排序：$10(B),11(B),12(A),14(B),15(A),18(A)$，对应秩 $1,2,3,4,5,6$。</li>
+<li>秩和：$R_A=3+5+6=14$，$R_B=1+2+4=7$。</li>
+<li>$U_A=R_A-\dfrac{n_A(n_A+1)}{2}=14-\dfrac{3\times4}{2}=14-6=8$；$U_B=7-6=1$。</li>
+<li>检验统计量 $U=\min(8,1)=1$。优势概率估计 $U_A/(n_A n_B)=8/9\approx0.89$（A 更大）。</li>
+<li>$n_1=n_2=3$ 时 $\alpha=0.05$（双侧）临界值为 0（规则「$U\le$ 临界值才拒绝」）；因 $U=1\gt 0$，<strong>不拒绝</strong>。</li>
+</ul>
+<p><strong>结论：</strong> A 组看起来系统性更高（9 对跨组比较里 8 对 A 更大，优势概率约 0.89），但每组只有 3 例，样本太小、达不到显著。这清楚说明：<strong>秩和检验能捕捉到方向，但小样本的功效极其有限</strong>——效应看着大，证据仍不足。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：一个二分类分组变量。</li>
+<li>因变量类型：连续或有序等级。</li>
+<li>数据结构：两组独立观测。</li>
+<li>是否适合高维数据：否。</li>
+<li>是否适合缺失较多数据：按可用样本。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：不适合。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>组</th>
+<th>值</th>
+<th>混合秩</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>12, 15, 18</td>
+<td>3, 5, 6</td>
 </tr>
 <tr>
-<td>10552</td>
-<td>1</td>
-<td>28.58</td>
-</tr>
-<tr>
-<td>11263</td>
-<td>1</td>
-<td>30.30</td>
+<td>B</td>
+<td>10, 11, 14</td>
+<td>1, 2, 4</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：两组独立观测。</li>
-<li>关键变量：组别、连续或等级结局。</li>
-<li>需要预处理的内容：缺失值、ties 处理。</li>
+<li>输入数据：分组变量 + 结局。</li>
+<li>关键变量：组别、结局值。</li>
+<li>需要预处理的内容：处理结点、确认独立。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：U 统计量或秩和统计量、p 值。</li>
-<li>参数估计：有时可补充 Hodges-Lehmann 位置差估计。</li>
+<li>模型对象/统计结果：$U$、p 值。</li>
+<li>参数估计：优势概率 $P(X\gt Y)$、Hodges-Lehmann 位置差。</li>
 <li>预测结果：无。</li>
-<li>不确定性指标：主要是检验结果，可补充区间估计。</li>
+<li>不确定性指标：位置差的置信区间（可选）。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：两组独立样本、偏态分布、等级数据。</li>
-<li>不适合：配对设计、三组及以上比较。</li>
-<li>使用前需要特别检查的点：独立性、分布形状是否差异过大。</li>
+<li>适合：两独立组、非正态或小样本、有序结局。</li>
+<li>不适合：配对（用符号秩）、三组以上（用 Kruskal-Wallis）。</li>
+<li>使用前需要特别检查的点：独立性、两组分布形状是否相近（影响解释为「位置差」）。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="wilcoxon-rank-sum-test" data-i="0">Python</button><button class="codetab" data-uid="wilcoxon-rank-sum-test" data-i="1">R</button></div><div class="codepanel active" data-uid="wilcoxon-rank-sum-test" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>scipy</code></li>
 </ul>
-<pre><code class="language-python">import numpy as np
-from scipy import stats
+<pre><code class="language-python">from scipy import stats
 
-group1 = np.array([5, 7, 9, 10, 12])
-group2 = np.array([8, 11, 13, 15, 16])
-
-res = stats.mannwhitneyu(group1, group2, alternative=&quot;two-sided&quot;)
-print(res.statistic, res.pvalue)
+A = [12, 15, 18]; B = [10, 11, 14]
+U, p = stats.mannwhitneyu(A, B, alternative=&quot;two-sided&quot;)
+print(f&quot;U={U}, p={p:.3f}&quot;)
 </code></pre></div><div class="codepanel" data-uid="wilcoxon-rank-sum-test" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>stats</code></li>
 </ul>
-<pre><code class="language-r">group1 &lt;- c(5, 7, 9, 10, 12)
-group2 &lt;- c(8, 11, 13, 15, 16)
-wilcox.test(group1, group2, paired = FALSE)
+<pre><code class="language-r">A &lt;- c(12, 15, 18); B &lt;- c(10, 11, 14)
+wilcox.test(A, B)          # 即 Mann-Whitney
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：两组观测是否存在系统性高低排序差异。</li>
-<li>每个主要参数如何解释：p 值反映秩混合程度是否偏离零假设。</li>
-<li>临床或医学意义如何表达：最好同时给中位数、IQR 或位置差估计。</li>
-<li>常见误读：它并不总是检验“中位数差”，只有在特定形状假设下才可这样理解。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>箱线图。</li>
-<li>小提琴图。</li>
-<li>ECDF 叠加图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图给出 BMI 按高血压状态分组后的箱线图，适合与 Wilcoxon 秩和检验一起出现。</p>
-<p><img alt="" src="img/ranksum_bmi_prevhyp.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：$U$/p，以及优势概率 $P(X\gt Y)$ 或位置差。</li>
+<li>每个主要参数如何解读：优势概率偏离 0.5 越远，两组差异越明显。</li>
+<li>临床或医学意义如何表达：报告中位数差或优势概率，而非均值差。</li>
+<li>常见误读：把它简单说成「比中位数」（形状不同时未必）；只报 p 值不报效应量。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>分布形状：两组形状相近时可解释为「中位数/位置差」，否则只说「分布不同」。</li>
+<li>结点：大量相等值降低功效，软件用近似校正。</li>
+<li>稳健性：对异常值远比 t 检验稳健。</li>
+<li>效能：正态时约为 t 检验的 95%，非正态常更优。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>两组箱线图/小提琴图 + 抖动点。</li>
+<li>两组 ECDF 叠加。</li>
+<li>优势概率/位置差的点区间图。</li>
+</ul>
+<h3>10.1 图像示例</h3>
+<p>下图比较有无高血压两组的 BMI 分布。</p>
+<p><img alt="" src="img/ranksum_bmi_prevhyp.png" /></p></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>对异常值更稳健。</li>
-<li>可处理等级数据。</li>
-<li>实现简单。</li>
+<li>不依赖正态、抗异常值。</li>
+<li>适用有序结局。</li>
+<li>有直观的「优势概率」解释。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>不能自动控制混杂。</li>
-<li>分布形状不同会影响解释。</li>
-<li>多 ties 时近似会变复杂。</li>
+<li>丢弃数值信息，正态时功效略低。</li>
+<li>形状差异大时「位置差」解释受限。</li>
+<li>大量结点降低效力。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>把秩差异误解为均值差异。</li>
-<li>忽略两组并非独立。</li>
-<li>用它替代所有两组比较而不看研究设计。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和两独立样本 t 检验的区别：本方法更稳健，不依赖均值和正态性。</li>
-<li>和 Kruskal-Wallis 的区别：后者是多组推广。</li>
-<li>应该如何选择：两组偏态数据且关心位置差异时优先考虑本方法。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>比较两组住院天数。</li>
-<li>比较两组疼痛评分或等级量表。</li>
-<li>用于小样本且异常值明显的两组连续变量比较。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="它把「两组均值的差」除以「这个差本身的随机波动（标准误）」，得到一个信噪比 $t$：差异相对波动足够大，就判断两组总体均值真的不同。">两独立样本t检验（Two-Sample t-Test）</a></li>
-<li><a class="xlink" href="m-wilcoxon-signed-rank-test.html" data-cn="Wilcoxon符号秩检验" data-en="Wilcoxon Signed-Rank Test" data-def="Wilcoxon 符号秩检验是单样本或配对样本的非参数检验，用于判断数据的中心位置是否等于某参考值，或配对差值的中心位置是否为 0。">Wilcoxon符号秩检验（Wilcoxon Signed-Rank Test）</a></li>
-<li><a class="xlink" href="m-kruskal-wallis-test.html" data-cn="Kruskal-Wallis检验" data-en="Kruskal-Wallis Test" data-def="Kruskal-Wallis 检验是比较三组及以上独立样本位置差异的非参数方法，可视为 Wilcoxon 秩和检验向多组情形的推广。">Kruskal-Wallis检验（Kruskal-Wallis Test）</a></li>
+<li>与符号秩（配对）混用。</li>
+<li>把「分布不同」直接当「中位数不同」。</li>
+<li>忽略两组方差/形状差异。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Conover WJ. <em>Practical Nonparametric Statistics</em>. 3rd ed. Wiley; 1999.</li>
-<li>SciPy Developers. <code>scipy.stats.mannwhitneyu</code>. SciPy API Reference. <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.mannwhitneyu.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.mannwhitneyu.html</a> （访问日期：2026-07-02）</li>
-<li>R Core Team. <code>wilcox.test</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/wilcox.test.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/wilcox.test.html</a> （访问日期：2026-07-02）</li>
+<li>和<strong>两样本 t</strong>：t 比均值、要正态；秩和比位置、更稳健。</li>
+<li>和 <strong>Wilcoxon 符号秩</strong>：秩和两独立组、符号秩配对。</li>
+<li>和 <strong>Kruskal-Wallis</strong>：后者是它在多组的推广。</li>
+<li>如何选择：两独立组且非正态 → 秩和；正态 → 两样本 t。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>两组偏态实验室指标比较。</li>
+<li>有序量表评分的两组比较。</li>
+<li>小样本或含异常值的两组结局比较。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>秩和（Rank Sum）</strong>：某组在混合排序中的名次总和。</li>
+<li><strong>Mann-Whitney U</strong>：与秩和等价的统计量，计数跨组优势对。</li>
+<li><strong>优势概率（$P(X\gt Y)$）</strong>：随机各取一个，某组更大的概率。</li>
+<li><strong>结点（Ties）</strong>：相等观测，影响秩与近似。</li>
+<li><strong>Hodges-Lehmann 估计</strong>：两组位置差的稳健点估计。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="它把「两组均值的差」除以「这个差本身的随机波动（标准误）」，得到一个信噪比 $t$：差异相对波动足够大，就判断两组总体均值真的不同。">两独立样本t检验（Two-Sample t-Test）</a></li>
+<li><a class="xlink" href="m-wilcoxon-signed-rank-test.html" data-cn="Wilcoxon符号秩检验" data-en="Wilcoxon Signed-Rank Test" data-def="它是配对 t 检验的非参数版：不去比差值的「平均大小」，而是比差值的符号和秩（谁大谁小的顺序），因此对偏态和异常值稳健。">Wilcoxon符号秩检验（Wilcoxon Signed-Rank Test）</a></li>
+<li><a class="xlink" href="m-kruskal-wallis-test.html" data-cn="Kruskal-Wallis检验" data-en="Kruskal-Wallis Test" data-def="它是单因素方差分析的非参数版：把所有组混在一起排名，比较各组的平均名次是否相当——若某些组的名次系统性地偏高或偏低，就说明组间分布不同。">Kruskal-Wallis检验（Kruskal-Wallis Test）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Mann HB, Whitney DR. On a test of whether one of two random variables is stochastically larger than the other. <em>Ann Math Stat</em>. 1947;18(1):50-60.</li>
+<li>Wilcoxon F. Individual comparisons by ranking methods. <em>Biometrics Bull</em>. 1945;1(6):80-83.</li>
+<li>Hollander M, Wolfe DA, Chicken E. <em>Nonparametric Statistical Methods</em>. 3rd ed. Wiley; 2013.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-wilcoxon-signed-rank-test.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">Wilcoxon符号秩检验</div></a><a class="pg pg-next" href="m-kruskal-wallis-test.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">Kruskal-Wallis检验</div></a></div>

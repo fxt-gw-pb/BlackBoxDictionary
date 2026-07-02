@@ -251,7 +251,7 @@ x_selected &lt;- x[, -drop_idx]
     </section><section id="sec-9" data-sec="9" class="sec">
       <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-spearman-rank-correlation.html" data-cn="Spearman秩相关" data-en="Spearman Rank Correlation" data-def="Spearman 秩相关用两个变量各自的秩来衡量单调关联强度，适合非正态、含异常值或等级型数据。">Spearman秩相关（Spearman Rank Correlation）</a> 的区别：Spearman 是一种相关系数；本卡强调用相关矩阵做特征筛选流程。</li>
+<li>和 <a class="xlink" href="m-spearman-rank-correlation.html" data-cn="Spearman秩相关" data-en="Spearman Rank Correlation" data-def="Spearman 相关就是「把数据换成名次后再算 Pearson 相关」：它衡量两个变量是否同增同减（单调关系），不要求关系是直线，且对异常值稳健。">Spearman秩相关（Spearman Rank Correlation）</a> 的区别：Spearman 是一种相关系数；本卡强调用相关矩阵做特征筛选流程。</li>
 <li>和 <a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归是在普通线性回归的损失函数中加入 L2 正则化项的一种方法，用来缓解多重共线性、减少过拟合，并提升模型在新数据上的稳定性。">Ridge回归（Ridge Regression）</a> 的区别：Ridge 保留相关变量并收缩系数；相关系数法直接删除部分冗余变量。</li>
 <li>和 <a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a> 的区别：PCA 把相关特征组合成新成分；相关系数法仍保留原始变量。</li>
 </ul></div>
@@ -265,7 +265,7 @@ x_selected &lt;- x[, -drop_idx]
     </section><section id="sec-11" data-sec="11" class="sec">
       <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-spearman-rank-correlation.html" data-cn="Spearman秩相关" data-en="Spearman Rank Correlation" data-def="Spearman 秩相关用两个变量各自的秩来衡量单调关联强度，适合非正态、含异常值或等级型数据。">Spearman秩相关（Spearman Rank Correlation）</a></li>
+<li><a class="xlink" href="m-spearman-rank-correlation.html" data-cn="Spearman秩相关" data-en="Spearman Rank Correlation" data-def="Spearman 相关就是「把数据换成名次后再算 Pearson 相关」：它衡量两个变量是否同增同减（单调关系），不要求关系是直线，且对异常值稳健。">Spearman秩相关（Spearman Rank Correlation）</a></li>
 <li><a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归是在普通线性回归的损失函数中加入 L2 正则化项的一种方法，用来缓解多重共线性、减少过拟合，并提升模型在新数据上的稳定性。">Ridge回归（Ridge Regression）</a></li>
 <li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
 <li><a class="xlink" href="m-variance-threshold.html" data-cn="方差阈值法" data-en="Variance Threshold" data-def="方差阈值法是一种过滤式特征选择方法。它计算每个特征在样本中的方差，并删除方差低于预设阈值的特征，用来去掉几乎不变化、信息量很低的变量。">方差阈值法（Variance Threshold）</a></li>

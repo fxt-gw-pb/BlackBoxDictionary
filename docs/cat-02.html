@@ -124,7 +124,7 @@
           <span class="entry-cn">Wilcoxon符号秩检验</span>
           <span class="entry-en">Wilcoxon Signed-Rank Test</span>
         </div>
-        <p class="entry-def">Wilcoxon 符号秩检验是单样本或配对样本的非参数检验，用于判断数据的中心位置是否等于某参考值，或配对差值的中心位置是否为 0。</p>
+        <p class="entry-def">它是配对 t 检验的非参数版：不去比差值的「平均大小」，而是比差值的符号和秩（谁大谁小的顺序），因此对偏态和异常值稳健。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -137,7 +137,7 @@
           <span class="entry-cn">Wilcoxon秩和检验</span>
           <span class="entry-en">Wilcoxon Rank-Sum Test</span>
         </div>
-        <p class="entry-def">Wilcoxon 秩和检验是两独立样本的非参数检验，通过比较两组观测的秩来判断它们是否来自相同位置分布。</p>
+        <p class="entry-def">它是两独立样本 t 检验的非参数版：把两组数据混在一起从小到大排名，看某一组的「名次总分」是否系统性地偏高或偏低——等价于问「随机各取一个，A 大于 B 的概率是不是 0.5」。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -150,11 +150,11 @@
           <span class="entry-cn">Kruskal-Wallis检验</span>
           <span class="entry-en">Kruskal-Wallis Test</span>
         </div>
-        <p class="entry-def">Kruskal-Wallis 检验是比较三组及以上独立样本位置差异的非参数方法，可视为 Wilcoxon 秩和检验向多组情形的推广。</p>
+        <p class="entry-def">它是单因素方差分析的非参数版：把所有组混在一起排名，比较各组的平均名次是否相当——若某些组的名次系统性地偏高或偏低，就说明组间分布不同。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
-        <span class="entry-diff">basic</span>
+        <span class="entry-diff">intermediate</span>
       </div>
     </a><a class="entry" href="m-pearson-correlation.html">
       <span class="entry-no">02·10</span>
@@ -163,7 +163,7 @@
           <span class="entry-cn">Pearson相关</span>
           <span class="entry-en">Pearson Correlation</span>
         </div>
-        <p class="entry-def">Pearson 相关系数衡量两个连续变量之间线性关系的方向与强度，取值在 −1 到 1 之间。</p>
+        <p class="entry-def">Pearson 相关系数 $r$ 是「标准化的协方差」：把两个变量各自的单位除掉，得到一个 $-1$ 到 $1$ 之间、无量纲的数，衡量它们线性关系的方向与强度。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -176,7 +176,7 @@
           <span class="entry-cn">Spearman秩相关</span>
           <span class="entry-en">Spearman Rank Correlation</span>
         </div>
-        <p class="entry-def">Spearman 秩相关用两个变量各自的秩来衡量单调关联强度，适合非正态、含异常值或等级型数据。</p>
+        <p class="entry-def">Spearman 相关就是「把数据换成名次后再算 Pearson 相关」：它衡量两个变量是否同增同减（单调关系），不要求关系是直线，且对异常值稳健。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -189,11 +189,11 @@
           <span class="entry-cn">Kendall秩相关</span>
           <span class="entry-en">Kendall Rank Correlation</span>
         </div>
-        <p class="entry-def">Kendall 秩相关系数（$\tau$）通过比较所有样本对的“一致”与“不一致”，衡量两个变量之间单调关系的方向与强度，是一种非参数相关。</p>
+        <p class="entry-def">Kendall $\tau$ 直接数「排序一致的对」减去「排序矛盾的对」，再归一化：它回答「随机挑两个个体，两个变量给出相同大小顺序的概率，比相反顺序高多少」。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
-        <span class="entry-diff">basic</span>
+        <span class="entry-diff">intermediate</span>
       </div>
     </a><a class="entry" href="m-pearson-chi-squared-test-of-independence.html">
       <span class="entry-no">02·13</span>

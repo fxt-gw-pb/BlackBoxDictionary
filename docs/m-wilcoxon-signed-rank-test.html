@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -48,214 +48,274 @@
       <div class="detail-meta">
         <span>状态&nbsp;·&nbsp;<b>◑ 已建</b></span>
         <span>难度&nbsp;·&nbsp;<b>basic</b></span>
-        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 非参数统计 / 假设检验</b></span>
+        <span>标签&nbsp;·&nbsp;<b>医学统计 / 数据科学 / 非参数检验 / 配对设计</b></span>
       </div>
     </div>
     <div class="intro-note"><h1>Wilcoxon符号秩检验（Wilcoxon Signed-Rank Test）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>Wilcoxon 符号秩检验是单样本或配对样本的非参数检验，用于判断数据的中心位置是否等于某参考值，或配对差值的中心位置是否为 0。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>它是配对 t 检验的非参数版：不去比差值的「平均大小」，而是比差值的<strong>符号和秩</strong>（谁大谁小的顺序），因此对偏态和异常值稳健。</p>
+<h3>1.2 定义</h3>
+<p>Wilcoxon 符号秩检验用于配对或单样本数据，检验差值（或与参照值之差）的分布是否关于 0 对称、中位数是否为 0，不要求差值服从正态分布。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：在不强依赖正态假设时，单组或配对差值是否偏离 0。</li>
-<li>适用任务：单样本位置检验、配对前后比较。</li>
-<li>常见医学场景：治疗前后同一患者指标变化是否显著。</li>
+<li>研究问题：同一批对象两条件下的测量是否有系统差异（在不敢假设正态时）？</li>
+<li>适用任务：配对设计的非参数比较、单组中位数与参照值比较。</li>
+<li>常见医学场景：小样本前后测、评分/等级类结局的配对比较、差值明显偏态时。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>它不是直接比较原始数值，而是比较“差值的方向”和“差值的大小排序”。如果大多数较大的秩都集中在正号或负号一边，就说明位置发生了系统性偏移。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>配对 t 用差值的「具体数值」，一旦有个别极端差（如某人降了 60 mmHg）就会被带偏。符号秩检验换个策略：把差值按绝对值从小到大<strong>排名</strong>，只看「往正方向的名次总分」和「往负方向的名次总分」谁更重。这样一个极端值最多贡献「最大的名次」，而不是它夸张的数值——顿时稳健许多。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-\begin{aligned}
-Z_i &amp;= X_i - \mu_0 \quad \text{或} \quad Z_i = Y_i - X_i \\
-R_i &amp;= \operatorname{rank}(|Z_i|) \\
-T &amp;= \sum_i \operatorname{sgn}(Z_i) R_i
-\end{aligned}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>配对 t 检验依赖「差值近似正态」。小样本又偏态时，这个假设不可靠，t 检验的 p 值会失真。根本困难是：<strong>如何在不假设差值分布形状的前提下，检验「前后有无系统差异」？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>只用差值的<strong>两点信息</strong>：符号（正/负）和绝对值的秩（大小排名），丢掉具体数值。若前后无差异，正差与负差应大小相当、秩也随机分布，于是「正差的秩和」与「负差的秩和」应接近；若一方系统地更大更多，其秩和会显著占优。用秩代替原值，正是它稳健、且在原假设下分布已知（与数据分布无关）的原因。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$Z_i$：单样本相对参考值的偏差，或配对差值。</li>
-<li>$R_i$：绝对差值的秩。</li>
-<li>$T$：带符号秩和统计量。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>观测独立，或差值独立。</li>
-<li>零假设下分布关于参考值对称。</li>
-<li>数据至少可排序。</li>
+<li>相对<strong>配对 t 检验</strong>：不要求正态、抗异常值；代价是丢弃部分信息，正态时功效略低。</li>
+<li>相对<strong>符号检验</strong>：符号检验只用正负号，符号秩还用了「差的大小排名」，功效更高。</li>
+<li>相对 <strong>Wilcoxon 秩和检验</strong>：符号秩用于<strong>配对</strong>，秩和用于<strong>两独立组</strong>，别混淆。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>$$
+W^{+}=\sum_{i:\,d_i\gt 0} R_i,\qquad d_i=x_{i,\text{后}}-x_{i,\text{前}}
+$$</p>
+<p>其中 $R_i$ 是 $|d_i|$ 在所有非零差值中的秩。这个式子在说：把每个差值按绝对值大小排名，再把「正差值」对应的名次加起来，就是检验统计量。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>自变量类型：无，或配对标识。</li>
-<li>因变量类型：连续型或等级型。</li>
-<li>数据结构：单样本或配对样本。</li>
-<li>是否适合高维数据：不适合批量高维未经校正的反复检验。</li>
-<li>是否适合缺失较多数据：配对设计中缺失会直接减少可用配对数。</li>
-<li>是否适合删失数据：不适合。</li>
-<li>是否适合重复测量数据：仅适用于两次测量的简单配对。</li>
+<li>去掉 $d_i=0$ 的对子，对 $|d_i|$ 排秩得 $R_i$。</li>
+<li>计算正差秩和 $W^{+}$ 与负差秩和 $W^{-}$，二者之和为 $n(n+1)/2$。</li>
+<li>原假设（差值关于 0 对称）下，每个秩以等概率落到正或负侧，故 $E[W^{+}]=\dfrac{n(n+1)}{4}$，方差 $\dfrac{n(n+1)(2n+1)}{24}$。</li>
+<li>小样本查精确临界值；大样本用正态近似（含结点校正）。检验统计量常取 $W=\min(W^{+},W^{-})$，越小越偏离原假设。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>Wilcoxon 符号秩检验非常适合“同一对象两次测量”的配对结构，例如 <code>Framingham_data.csv</code> 中部分受试者在第 1 期和第 2 期的 BMI：</p>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$d_i$：配对差值（或与参照值之差）。</li>
+<li>$R_i$：$|d_i|$ 的秩。</li>
+<li>$W^{+},W^{-}$：正/负差的秩和；$W=\min$ 为常用统计量。</li>
+<li>p 值：原假设下出现如此不平衡秩和的概率。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>RANDID</th>
-<th>BMI_P1</th>
-<th>BMI_P2</th>
-<th>PREVHYP_P1</th>
-<th>PREVHYP_P2</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>6238</td>
-<td>28.73</td>
-<td>29.43</td>
-<td>0</td>
-<td>0</td>
+<td>对子独立</td>
+<td>不同对子互不影响</td>
+<td>p 值失真</td>
+<td>看设计</td>
 </tr>
 <tr>
-<td>9428</td>
-<td>25.34</td>
-<td>25.34</td>
-<td>0</td>
-<td>0</td>
+<td>差值对称</td>
+<td>差值分布关于中位对称</td>
+<td>检验的解释变模糊</td>
+<td>差值直方图</td>
 </tr>
 <tr>
-<td>10552</td>
-<td>28.58</td>
-<td>30.18</td>
+<td>差可排序</td>
+<td>差值可比大小</td>
+<td>大量结点降低效力</td>
+<td>看重复差值</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>6 名患者干预前后某评分的差值 $d$（后−前）= +8, +5, −2, +7, +6, +3。</p>
+<p><strong>一步步计算：</strong></p>
+<ul>
+<li>取绝对值：8, 5, 2, 7, 6, 3；按从小到大排秩：$2\to1,\ 3\to2,\ 5\to3,\ 6\to4,\ 7\to5,\ 8\to6$。</li>
+<li>对应符号：$+8(秩6,+),\ +5(3,+),\ -2(1,-),\ +7(5,+),\ +6(4,+),\ +3(2,+)$。</li>
+<li>正差秩和 $W^{+}=6+3+5+4+2=20$；负差秩和 $W^{-}=1$。</li>
+<li>检验统计量 $W=\min(20,1)=1$。$n=6$ 时 $\alpha=0.05$（双侧）的临界值约为 1，判定规则「$W\le$ 临界值则拒绝」→ 处于<strong>拒绝边界</strong>（$p\approx0.06$，精确计算略大于 0.05）。</li>
+</ul>
+<p><strong>结论：</strong> 6 个差里 5 个为正、且正差的名次都靠前，秩和高度不平衡（20 vs 1），提示干预后评分系统性升高。注意这里唯一的负差（−2）绝对值最小、只贡献秩 1——<strong>一个「反方向但很小」的变化几乎不削弱结论，这正是秩方法稳健的体现</strong>。小样本时结论接近临界，说明还需更多样本。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：配对条件（前/后等）。</li>
+<li>因变量类型：连续或有序等级。</li>
+<li>数据结构：配对两列或单列与参照值。</li>
+<li>是否适合高维数据：否。</li>
+<li>是否适合缺失较多数据：仅用完整对子。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：两时点；多时点用 Friedman 检验。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>患者</th>
+<th>前</th>
+<th>后</th>
+<th>差 d</th>
+<th>|d| 秩</th>
+<th>符号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
 <td>1</td>
-<td>1</td>
+<td>40</td>
+<td>48</td>
+<td>+8</td>
+<td>6</td>
+<td>+</td>
 </tr>
 <tr>
-<td>11252</td>
-<td>23.10</td>
-<td>23.48</td>
-<td>0</td>
-<td>0</td>
+<td>2</td>
+<td>42</td>
+<td>47</td>
+<td>+5</td>
+<td>3</td>
+<td>+</td>
 </tr>
 <tr>
-<td>11263</td>
-<td>30.30</td>
-<td>31.36</td>
+<td>3</td>
+<td>50</td>
+<td>48</td>
+<td>−2</td>
 <td>1</td>
-<td>1</td>
+<td>−</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：单组观测或两列配对观测。</li>
-<li>关键变量：差值方向与大小。</li>
-<li>需要预处理的内容：形成配对差值、处理完全相同或缺失观测。</li>
+<li>输入数据：配对两列或差值。</li>
+<li>关键变量：两次测量、对子标识。</li>
+<li>需要预处理的内容：算差值、去零差、处理结点。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：检验统计量、p 值。</li>
-<li>参数估计：通常不直接给均值差，重点在位置差异。</li>
+<li>模型对象/统计结果：$W$、p 值。</li>
+<li>参数估计：Hodges-Lehmann 中位数差（可选）。</li>
 <li>预测结果：无。</li>
-<li>不确定性指标：可结合 Hodges-Lehmann 估计和区间，但默认输出多为检验结果。</li>
+<li>不确定性指标：中位数差的置信区间（可选）。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：配对前后比较、单组偏态连续变量位置检验。</li>
-<li>不适合：组间独立样本比较、差值分布极不对称且样本很小。</li>
-<li>使用前需要特别检查的点：是否真的是配对数据、差值分布是否大体对称。</li>
+<li>适合：配对/单样本、非正态或小样本、有序结局。</li>
+<li>不适合：两独立组（用秩和检验）、多时点（用 Friedman）。</li>
+<li>使用前需要特别检查的点：数据确为配对、差值是否对称（影响解释）。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="wilcoxon-signed-rank-test" data-i="0">Python</button><button class="codetab" data-uid="wilcoxon-signed-rank-test" data-i="1">R</button></div><div class="codepanel active" data-uid="wilcoxon-signed-rank-test" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>scipy</code></li>
 </ul>
-<pre><code class="language-python">import numpy as np
-from scipy import stats
+<pre><code class="language-python">from scipy import stats
 
-before = np.array([7.1, 6.8, 7.5, 8.0, 7.2])
-after = np.array([6.5, 6.6, 7.1, 7.4, 6.8])
-
-res = stats.wilcoxon(before, after, alternative=&quot;greater&quot;)
-print(res.statistic, res.pvalue)
+before = [40, 42, 50, 41, 44, 47]
+after  = [48, 47, 48, 48, 50, 50]
+stat, p = stats.wilcoxon(before, after)   # 配对
+print(f&quot;W={stat}, p={p:.3f}&quot;)
 </code></pre></div><div class="codepanel" data-uid="wilcoxon-signed-rank-test" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>stats</code></li>
 </ul>
-<pre><code class="language-r">before &lt;- c(7.1, 6.8, 7.5, 8.0, 7.2)
-after  &lt;- c(6.5, 6.6, 7.1, 7.4, 6.8)
-wilcox.test(before, after, paired = TRUE, alternative = &quot;greater&quot;)
+<pre><code class="language-r">before &lt;- c(40,42,50,41,44,47)
+after  &lt;- c(48,47,48,48,50,50)
+wilcox.test(after, before, paired = TRUE)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：差值是否系统性偏离 0。</li>
-<li>每个主要参数如何解释：p 值反映配对差值偏向一侧的证据。</li>
-<li>临床或医学意义如何表达：最好同时报告中位数变化或配对差值分布。</li>
-<li>常见误读：它不是“中位数检验”的万能替代，仍有对称性前提。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>配对散点图。</li>
-<li>差值箱线图或小提琴图。</li>
-<li>before-after 连线图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图给出有第 1 期和第 2 期观测的受试者 BMI 配对连线图，适合说明配对设计的核心结构。</p>
-<p><img alt="" src="img/wilcoxon_paired_bmi_p12.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：$W$、p 值，以及中位数差方向。</li>
+<li>每个主要参数如何解读：p 小说明前后中位数有系统差异；配合 Hodges-Lehmann 估计差的大小。</li>
+<li>临床或医学意义如何表达：报告中位数变化及方向，而非均值。</li>
+<li>常见误读：把它当成「比较均值」；忽略对称假设直接把结论说成中位数差。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>对称性：差值直方图看是否大致对称；严重不对称时结论应改述为「分布位置」。</li>
+<li>结点与零差：大量相等差值或零差会降低功效，软件用近似校正。</li>
+<li>稳健性：对异常值远比配对 t 稳健。</li>
+<li>功效：正态时略低于配对 t；非正态时反而更优。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>配对连线图。</li>
+<li>差值的点图/箱线图 + 0 参照线。</li>
+<li>正负差秩和对比。</li>
+</ul>
+<h3>10.1 图像示例</h3>
+<p>下图展示配对样本 BMI 前后变化。</p>
+<p><img alt="" src="img/wilcoxon_paired_bmi_p12.png" /></p></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>对异常值比 t 检验更稳健。</li>
-<li>适合偏态或等级数据。</li>
-<li>非常适合简单前后对照设计。</li>
+<li>不依赖正态、抗异常值。</li>
+<li>适用有序等级结局。</li>
+<li>小样本有精确分布。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>需要配对或单样本结构。</li>
-<li>对差值分布对称性有要求。</li>
-<li>不直接提供均值层面的解释。</li>
+<li>丢弃部分数值信息，正态时功效略低。</li>
+<li>依赖差值对称才好解释为中位数差。</li>
+<li>大量结点/零差降低效力。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>把独立样本误做成配对检验。</li>
-<li>忽视大量 ties 对近似分布的影响。</li>
-<li>报告 p 值但不报告变化方向和大小。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和单样本/配对 t 检验的区别：更稳健，但若正态假设成立，t 检验通常更有效率。</li>
-<li>和 Wilcoxon 秩和检验的区别：后者用于两独立组。</li>
-<li>应该如何选择：前后配对且偏态明显时优先考虑本方法。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>比较治疗前后疼痛评分。</li>
-<li>比较同一受试者干预前后实验室指标。</li>
-<li>评价小样本前后配对设计的疗效趋势。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-one-sample-t-test.html" data-cn="单样本t检验" data-en="One-Sample t-Test" data-def="单样本 t 检验问一个问题：这组数据的均值，离某个「参照值」是不是远到不像抽样运气？做法是把「均值与参照值之差」除以它的标准误，得到信噪比 $t$。">单样本t检验（One-Sample t-Test）</a></li>
-<li><a class="xlink" href="m-wilcoxon-rank-sum-test.html" data-cn="Wilcoxon秩和检验" data-en="Wilcoxon Rank-Sum Test" data-def="Wilcoxon 秩和检验是两独立样本的非参数检验，通过比较两组观测的秩来判断它们是否来自相同位置分布。">Wilcoxon秩和检验（Wilcoxon Rank-Sum Test）</a></li>
-<li><a class="xlink" href="m-kruskal-wallis-test.html" data-cn="Kruskal-Wallis检验" data-en="Kruskal-Wallis Test" data-def="Kruskal-Wallis 检验是比较三组及以上独立样本位置差异的非参数方法，可视为 Wilcoxon 秩和检验向多组情形的推广。">Kruskal-Wallis检验（Kruskal-Wallis Test）</a></li>
+<li>与秩和检验（两独立组）混用。</li>
+<li>忽略对称假设。</li>
+<li>只报 p 值不报效应量（中位数差/HL 估计）。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
+<li>和<strong>配对 t 检验</strong>：配对 t 比均值、要正态；符号秩比中位数、更稳健。</li>
+<li>和 <strong>Wilcoxon 秩和检验</strong>：符号秩用于配对，秩和用于两独立组。</li>
+<li>和<strong>符号检验</strong>：符号秩额外用了差的大小排名，功效更高。</li>
+<li>如何选择：配对且非正态 → 符号秩；配对且正态 → 配对 t。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>小样本前后测（如新疗法前后症状评分）。</li>
+<li>有序量表的配对比较。</li>
+<li>差值明显偏态的配对设计。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>秩（Rank）</strong>：数值按大小排序后的名次。</li>
+<li><strong>符号秩和（$W^{+}$）</strong>：正差值对应秩的总和。</li>
+<li><strong>中位数差</strong>：符号秩检验关注的位置参数。</li>
+<li><strong>Hodges-Lehmann 估计</strong>：配对差中位数的稳健点估计。</li>
+<li><strong>结点（Ties）</strong>：相等的绝对差值，影响秩与近似。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-paired-t-test.html" data-cn="配对样本t检验" data-en="Paired t-Test" data-def="配对 t 检验把「每一对的差值」算出来，再对这一列差值做单样本 t 检验（看它是否偏离 0）——用「配对」抵消个体之间的差异，只留下处理效应。">配对样本t检验（Paired t-Test）</a></li>
+<li><a class="xlink" href="m-wilcoxon-rank-sum-test.html" data-cn="Wilcoxon秩和检验" data-en="Wilcoxon Rank-Sum Test" data-def="它是两独立样本 t 检验的非参数版：把两组数据混在一起从小到大排名，看某一组的「名次总分」是否系统性地偏高或偏低——等价于问「随机各取一个，A 大于 B 的概率是不是 0.5」。">Wilcoxon秩和检验（Wilcoxon Rank-Sum Test）</a></li>
+<li><a class="xlink" href="m-one-sample-t-test.html" data-cn="单样本t检验" data-en="One-Sample t-Test" data-def="单样本 t 检验问一个问题：这组数据的均值，离某个「参照值」是不是远到不像抽样运气？做法是把「均值与参照值之差」除以它的标准误，得到信噪比 $t$。">单样本t检验（One-Sample t-Test）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Wilcoxon F. Individual comparisons by ranking methods. <em>Biometrics Bull</em>. 1945;1(6):80-83.</li>
+<li>Hollander M, Wolfe DA, Chicken E. <em>Nonparametric Statistical Methods</em>. 3rd ed. Wiley; 2013.</li>
 <li>Conover WJ. <em>Practical Nonparametric Statistics</em>. 3rd ed. Wiley; 1999.</li>
-<li>SciPy Developers. <code>scipy.stats.wilcoxon</code>. SciPy API Reference. <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.wilcoxon.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.wilcoxon.html</a> （访问日期：2026-07-02）</li>
-<li>R Core Team. <code>wilcox.test</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/wilcox.test.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/wilcox.test.html</a> （访问日期：2026-07-02）</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-tukey-honest-significant-difference.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">TukeyHSD多重比较</div></a><a class="pg pg-next" href="m-wilcoxon-rank-sum-test.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">Wilcoxon秩和检验</div></a></div>

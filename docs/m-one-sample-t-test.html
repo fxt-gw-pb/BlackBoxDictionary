@@ -298,7 +298,7 @@ t.test(x, mu = 5.0)          # 含 t、p 与均值 95% CI
 <li><a class="xlink" href="m-two-sample-t-test.html" data-cn="两独立样本t检验" data-en="Two-Sample t-Test" data-def="它把「两组均值的差」除以「这个差本身的随机波动（标准误）」，得到一个信噪比 $t$：差异相对波动足够大，就判断两组总体均值真的不同。">两独立样本t检验（Two-Sample t-Test）</a></li>
 <li><a class="xlink" href="m-paired-t-test.html" data-cn="配对样本t检验" data-en="Paired t-Test" data-def="配对 t 检验把「每一对的差值」算出来，再对这一列差值做单样本 t 检验（看它是否偏离 0）——用「配对」抵消个体之间的差异，只留下处理效应。">配对样本t检验（Paired t-Test）</a></li>
 <li><a class="xlink" href="m-confidence-interval.html" data-cn="置信区间" data-en="Confidence Interval" data-def="置信区间给点估计配上一段范围，回答「这个数字有多可信」；95% 指的是方法的长期表现——反复抽样构造的区间里，约 95% 会罩住真值。">置信区间（Confidence Interval）</a></li>
-<li><a class="xlink" href="m-wilcoxon-signed-rank-test.html" data-cn="Wilcoxon符号秩检验" data-en="Wilcoxon Signed-Rank Test" data-def="Wilcoxon 符号秩检验是单样本或配对样本的非参数检验，用于判断数据的中心位置是否等于某参考值，或配对差值的中心位置是否为 0。">Wilcoxon符号秩检验（Wilcoxon Signed-Rank Test）</a></li>
+<li><a class="xlink" href="m-wilcoxon-signed-rank-test.html" data-cn="Wilcoxon符号秩检验" data-en="Wilcoxon Signed-Rank Test" data-def="它是配对 t 检验的非参数版：不去比差值的「平均大小」，而是比差值的符号和秩（谁大谁小的顺序），因此对偏态和异常值稳健。">Wilcoxon符号秩检验（Wilcoxon Signed-Rank Test）</a></li>
 </ul></div>
     </section><section id="sec-16" data-sec="16" class="sec">
       <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>

@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,182 +54,262 @@
     <div class="intro-note"><h1>Pearson相关（Pearson Correlation）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>Pearson 相关系数衡量两个连续变量之间线性关系的方向与强度，取值在 −1 到 1 之间。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>Pearson 相关系数 $r$ 是「标准化的协方差」：把两个变量各自的单位除掉，得到一个 $-1$ 到 $1$ 之间、无量纲的数，衡量它们<strong>线性</strong>关系的方向与强度。</p>
+<h3>1.2 定义</h3>
+<p>Pearson 相关系数度量两个连续变量之间线性关联的强弱与方向。$r=1$/$-1$ 表示完全正/负线性关系，$r=0$ 表示无线性关系。它是最常用的关联度量。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：两个连续指标是否同增同减，线性关联有多强。</li>
-<li>适用任务：线性相关强度度量、变量筛选前的初步关联探索。</li>
-<li>常见医学场景：BMI 与血压、剂量与生物标志物浓度、两次测量的一致性初探。</li>
+<li>研究问题：两个连续指标是否同增同减，关系有多强？</li>
+<li>适用任务：关联强度量化、探索性分析、共线性检查。</li>
+<li>常见医学场景：身高与体重、剂量与血药浓度、两项生化指标之间的关联。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>把两个变量都标准化后，Pearson 相关就是它们的“协同波动”程度：一起偏离均值时为正，反向偏离为负。它只捕捉直线关系，弯曲关系可能被严重低估。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>想象把每个人画成散点图上的一个点（横轴身高、纵轴体重）。如果点大致排成一条上升直线，$r$ 接近 $+1$；排成下降直线，接近 $-1$；乱成一团云，接近 0。$r$ 就是「这团点有多像一条直线，以及朝哪个方向」的浓缩数字。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-r=\frac{\sum_{i=1}^{n}(x_i-\bar{x})(y_i-\bar{y})}{\sqrt{\sum_{i=1}^{n}(x_i-\bar{x})^2}\sqrt{\sum_{i=1}^{n}(y_i-\bar{y})^2}}
-$$</p>
-<p>显著性检验统计量与 Fisher z 变换（用于置信区间）：</p>
-<p>$$
-t=\frac{r\sqrt{n-2}}{\sqrt{1-r^2}}\sim t_{n-2},\qquad z=\tfrac{1}{2}\ln\frac{1+r}{1-r}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>协方差 $\mathrm{cov}(x,y)$ 能反映两变量是否同向变动，但它带着两个变量的<strong>单位</strong>（如「厘米·千克」），换个单位数值就变，无法横向比较不同变量对的关联强弱。根本困难是：<strong>如何得到一个不依赖单位、可比的关联度量？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>用两个变量各自的标准差去「除掉」单位：$r=\dfrac{\mathrm{cov}(x,y)}{s_x s_y}$。这一步标准化把协方差压进 $[-1,1]$，且无量纲——等价于「先把两变量都换成 z 分数（均值 0、标准差 1）再算协方差」。几何上，$r$ 是两个中心化向量夹角的余弦：完全同向 $r=1$、垂直 $r=0$、反向 $r=-1$。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$r$：相关系数，符号表方向、绝对值表强度。</li>
-<li>$r^2$：决定系数，可解释的方差比例。</li>
-<li>$t$ 统计量：检验总体相关是否为 0。</li>
-<li>Fisher $z$：使抽样分布近似正态，用于构造 CI。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>两变量近似为区间/连续量，关系近似线性。</li>
-<li>推断（p 值、CI）依赖双变量近似正态且方差有限。</li>
-<li>对离群值敏感；无极端异常点或已妥善处理。</li>
+<li>相对<strong>协方差</strong>：$r$ 无量纲、可比，协方差不可比。</li>
+<li>相对 <strong>Spearman/Kendall</strong>：Pearson 只抓<strong>线性</strong>、对异常值敏感；秩相关抓<strong>单调</strong>、更稳健。</li>
+<li>相对<strong>回归斜率</strong>：斜率有量纲、区分自变量；$r$ 对称、无量纲，$r^2$ 是回归的决定系数。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>$$
+r=\frac{\sum_{i}(x_i-\bar{x})(y_i-\bar{y})}{\sqrt{\sum_i (x_i-\bar{x})^2}\,\sqrt{\sum_i (y_i-\bar{y})^2}}
+$$</p>
+<p>这个式子在说：分子是两变量「共同偏离各自均值」的累积（协方差的分子），分母把它按各自的离散程度归一，于是结果落在 $[-1,1]$。</p>
+<h3>3.2 推导脉络</h3>
 <ul>
-<li>自变量类型：连续变量。</li>
-<li>因变量类型：连续变量（相关无因果方向之分）。</li>
-<li>数据结构：成对观测，每行含两个数值。</li>
-<li>是否适合高维数据：两两相关可扩展为相关矩阵。</li>
-<li>是否适合缺失较多数据：需成对完整；缺失多时结果不稳。</li>
-<li>是否适合删失数据：不适用。</li>
-<li>是否适合重复测量数据：独立性被破坏时需专门方法（如重复测量相关）。</li>
+<li>从协方差 $\mathrm{cov}(x,y)=\frac{1}{n-1}\sum(x_i-\bar{x})(y_i-\bar{y})$ 出发，它同向为正、反向为负。</li>
+<li>除以 $s_x s_y$ 消去单位，得 $r$；由柯西-施瓦茨不等式保证 $|r|\le 1$。</li>
+<li>显著性检验：在双变量正态下，$t=r\sqrt{\dfrac{n-2}{1-r^2}}$ 服从 $t_{n-2}$；也可用 Fisher z 变换构造置信区间。</li>
 </ul>
-<h3>3.2 示例表格</h3>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$r$：相关系数，方向（符号）+ 强度（绝对值）。</li>
+<li>$r^2$：决定系数，一个变量的方差被另一个线性解释的比例。</li>
+<li>$\bar{x},\bar{y},s_x,s_y$：两变量均值与标准差。</li>
+<li>p 值 / CI：关联是否显著、区间估计。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>个体</th>
-<th>BMI</th>
-<th>收缩压</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>线性</td>
+<td>关系近似直线</td>
+<td>非线性关系被漏掉（$r\approx0$ 却强相关）</td>
+<td>看散点图</td>
+</tr>
+<tr>
+<td>双变量正态</td>
+<td>用于推断</td>
+<td>小样本 p/CI 不准</td>
+<td>QQ 图、改用 bootstrap</td>
+</tr>
+<tr>
+<td>无强异常值</td>
+<td>无极端点</td>
+<td>单点可翻转 $r$</td>
+<td>散点图/影响分析</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>5 对观测：$x=\{1,2,3,4,5\}$，$y=\{2,3,5,4,6\}$。</p>
+<p><strong>一步步计算：</strong></p>
+<ul>
+<li>均值：$\bar{x}=3$，$\bar{y}=4$。</li>
+<li>离均差 $dx=\{-2,-1,0,1,2\}$，$dy=\{-2,-1,1,0,2\}$。</li>
+<li>分子 $\sum dx\,dy=(-2)(-2)+(-1)(-1)+0(1)+1(0)+2(2)=4+1+0+0+4=9$。</li>
+<li>$\sum dx^2=4+1+0+1+4=10$，$\sum dy^2=4+1+1+0+4=10$。</li>
+<li>$r=\dfrac{9}{\sqrt{10}\sqrt{10}}=\dfrac{9}{10}=0.90$；$r^2=0.81$。</li>
+</ul>
+<p><strong>结论：</strong> $r=0.90$ 表示强正线性关系，$x$ 的变化能线性解释 $y$ 约 81% 的方差。稍后的 <a class="xlink" href="m-spearman-rank-correlation.html" data-cn="Spearman秩相关" data-en="Spearman Rank Correlation" data-def="Spearman 相关就是「把数据换成名次后再算 Pearson 相关」：它衡量两个变量是否同增同减（单调关系），不要求关系是直线，且对异常值稳健。">Spearman秩相关（Spearman Rank Correlation）</a> 与 <a class="xlink" href="m-kendall-rank-correlation.html" data-cn="Kendall秩相关" data-en="Kendall Rank Correlation" data-def="Kendall $\tau$ 直接数「排序一致的对」减去「排序矛盾的对」，再归一化：它回答「随机挑两个个体，两个变量给出相同大小顺序的概率，比相反顺序高多少」。">Kendall秩相关（Kendall Rank Correlation）</a> 卡将对<strong>同一份数据</strong>分别得到 $\rho=0.90$、$\tau=0.80$——三者数值不同，因为它们量的是不同意义上的「相关」（线性 vs 单调 vs 排序一致对）。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：两个连续变量（地位对称）。</li>
+<li>因变量类型：不区分自/因变量。</li>
+<li>数据结构：成对连续观测。</li>
+<li>是否适合高维数据：可算相关矩阵，但需注意多重比较。</li>
+<li>是否适合缺失较多数据：需成对完整或恰当处理。</li>
+<li>是否适合删失数据：不适合。</li>
+<li>是否适合重复测量数据：需考虑组内相关，否则夸大关联。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>i</th>
+<th>x</th>
+<th>y</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>1</td>
-<td>22.4</td>
-<td>118</td>
+<td>1</td>
+<td>2</td>
 </tr>
 <tr>
 <td>2</td>
-<td>27.9</td>
-<td>134</td>
+<td>2</td>
+<td>3</td>
 </tr>
 <tr>
 <td>3</td>
-<td>31.2</td>
-<td>145</td>
+<td>3</td>
+<td>5</td>
 </tr>
 <tr>
 <td>4</td>
-<td>24.1</td>
-<td>122</td>
+<td>4</td>
+<td>4</td>
+</tr>
+<tr>
+<td>5</td>
+<td>5</td>
+<td>6</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：两个成对的连续变量。</li>
-<li>关键变量：$x$、$y$。</li>
-<li>需要预处理的内容：检查线性、离群值、必要时变换。</li>
+<li>输入数据：两列成对连续变量。</li>
+<li>关键变量：两变量。</li>
+<li>需要预处理的内容：查散点图（线性/异常值）、处理缺失。</li>
 </ul>
 <h4>产出</h4>
 <ul>
 <li>模型对象/统计结果：$r$、p 值、置信区间。</li>
-<li>参数估计：相关系数点估计。</li>
-<li>预测结果：无（相关不预测）。</li>
-<li>不确定性指标：Fisher z 区间、p 值。</li>
+<li>参数估计：$r$、$r^2$。</li>
+<li>预测结果：无（关联非因果、非预测）。</li>
+<li>不确定性指标：$r$ 的置信区间（Fisher z）。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：连续变量间的线性关联度量与初步探索。</li>
-<li>不适合：非线性关系、等级/序数数据、存在强离群值、需要因果解释。</li>
-<li>使用前需要特别检查的点：散点图形态、离群值、是否存在混杂导致的伪相关。</li>
+<li>适合：两连续变量近似线性、无强异常值的关联量化。</li>
+<li>不适合：非线性关系、有序/偏态数据（用秩相关）、含极端值。</li>
+<li>使用前需要特别检查的点：先画散点图确认线性与异常值。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="pearson-correlation" data-i="0">Python</button><button class="codetab" data-uid="pearson-correlation" data-i="1">R</button></div><div class="codepanel active" data-uid="pearson-correlation" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>scipy</code></li>
 </ul>
 <pre><code class="language-python">from scipy import stats
 
-r, p = stats.pearsonr(df[&quot;BMI&quot;], df[&quot;SBP&quot;])
-print(f&quot;r={r:.3f}, p={p:.4f}&quot;)
+x = [1, 2, 3, 4, 5]
+y = [2, 3, 5, 4, 6]
+r, p = stats.pearsonr(x, y)
+print(f&quot;r={r:.2f}, p={p:.3f}&quot;)     # r=0.90
 </code></pre></div><div class="codepanel" data-uid="pearson-correlation" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>stats</code></li>
 </ul>
-<pre><code class="language-r">cor.test(df$BMI, df$SBP, method = &quot;pearson&quot;)
+<pre><code class="language-r">x &lt;- c(1,2,3,4,5); y &lt;- c(2,3,5,4,6)
+cor.test(x, y, method = &quot;pearson&quot;)   # r、p、95% CI
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：$r$ 的方向与大小、置信区间、p 值。</li>
-<li>每个主要参数如何解释：如 $r=0.6$ 表示较强正线性关联，$r^2=0.36$ 表示解释了约 36% 的方差。</li>
-<li>临床或医学意义如何表达：相关不等于因果；强相关也可能来自共同混杂。</li>
-<li>常见误读：把相关当因果；忽略离群值制造的假相关；用 Pearson 描述明显非线性的关系。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>散点图叠加线性拟合线与置信带。</li>
-<li>多变量相关矩阵热图。</li>
-<li>离群值诊断（如带标注的散点）。</li>
-</ul></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：$r$ 的符号与绝对值、置信区间、p 值。</li>
+<li>每个主要参数如何解读：$|r|$ 约 0.1/0.3/0.5 常粗略对应弱/中/强（依领域）；$r^2$ 给解释力。</li>
+<li>临床或医学意义如何表达：强调「相关不等于因果」，并报告区间。</li>
+<li>常见误读：$r=0$ 当作「无关系」（可能是强非线性）；用相关代替一致性（方法比较应用 Bland-Altman）。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>线性：务必先看散点图；非线性时 $r$ 会误导（可变换或用秩相关）。</li>
+<li>异常值：单个杠杆点能把 $r$ 从 0 拉到 0.9 或反之，用影响分析排查。</li>
+<li>正态性：仅推断（p/CI）需要，点估计不需要；不确定时用 bootstrap CI。</li>
+<li>聚类/重复测量：会人为放大相关，需分层或混合模型。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>散点图 + 拟合直线（必看）。</li>
+<li>相关矩阵热图（多变量）。</li>
+<li>分组着色散点，排查辛普森悖论。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>概念直观、计算简单、可解释性强。</li>
-<li>有成熟的检验与区间理论。</li>
-<li>易扩展为相关矩阵用于探索。</li>
+<li>无量纲、可比、解释直观。</li>
+<li>$r^2$ 直接给线性解释力。</li>
+<li>计算简单、应用广泛。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>只捕捉线性关系。</li>
-<li>对离群值高度敏感。</li>
-<li>受测量误差衰减、范围受限影响。</li>
+<li>只抓线性关系。</li>
+<li>对异常值敏感。</li>
+<li>不能推因果。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>未看散点图直接报 $r$。</li>
-<li>用于序数或明显偏态数据（应转 <a class="xlink" href="m-spearman-rank-correlation.html" data-cn="Spearman秩相关" data-en="Spearman Rank Correlation" data-def="Spearman 秩相关用两个变量各自的秩来衡量单调关联强度，适合非正态、含异常值或等级型数据。">Spearman秩相关（Spearman Rank Correlation）</a> 或 <a class="xlink" href="m-kendall-rank-correlation.html" data-cn="Kendall秩相关" data-en="Kendall Rank Correlation" data-def="Kendall 秩相关系数（$\tau$）通过比较所有样本对的“一致”与“不一致”，衡量两个变量之间单调关系的方向与强度，是一种非参数相关。">Kendall秩相关（Kendall Rank Correlation）</a>）。</li>
-<li>把相关系数当效应量做因果推断。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-spearman-rank-correlation.html" data-cn="Spearman秩相关" data-en="Spearman Rank Correlation" data-def="Spearman 秩相关用两个变量各自的秩来衡量单调关联强度，适合非正态、含异常值或等级型数据。">Spearman秩相关（Spearman Rank Correlation）</a> 的区别：Spearman 基于秩，捕捉单调关系、对离群值更稳健。</li>
-<li>和 <a class="xlink" href="m-kendall-rank-correlation.html" data-cn="Kendall秩相关" data-en="Kendall Rank Correlation" data-def="Kendall 秩相关系数（$\tau$）通过比较所有样本对的“一致”与“不一致”，衡量两个变量之间单调关系的方向与强度，是一种非参数相关。">Kendall秩相关（Kendall Rank Correlation）</a> 的区别：Kendall 基于一致/不一致对，小样本与多结点时更稳健。</li>
-<li>和 <a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归通过把连续型结局表示为若干自变量的线性组合，来估计变量与结局之间的方向、大小和不确定性，是医学统计最基础的建模方法之一。">线性回归（Linear Regression）</a> 的区别：简单线性回归的标准化斜率即 $r$，但回归有因变量方向并可多元调整。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>连续生理指标间关联的初步描述。</li>
-<li>生物标志物与临床连续结局的关联探索。</li>
-<li>建模前的共线性与关联结构检查。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-spearman-rank-correlation.html" data-cn="Spearman秩相关" data-en="Spearman Rank Correlation" data-def="Spearman 秩相关用两个变量各自的秩来衡量单调关联强度，适合非正态、含异常值或等级型数据。">Spearman秩相关（Spearman Rank Correlation）</a></li>
-<li><a class="xlink" href="m-kendall-rank-correlation.html" data-cn="Kendall秩相关" data-en="Kendall Rank Correlation" data-def="Kendall 秩相关系数（$\tau$）通过比较所有样本对的“一致”与“不一致”，衡量两个变量之间单调关系的方向与强度，是一种非参数相关。">Kendall秩相关（Kendall Rank Correlation）</a></li>
-<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归通过把连续型结局表示为若干自变量的线性组合，来估计变量与结局之间的方向、大小和不确定性，是医学统计最基础的建模方法之一。">线性回归（Linear Regression）</a></li>
+<li>不画散点图，漏掉非线性或异常值。</li>
+<li>把相关当因果。</li>
+<li>用相关评估两法一致性（应 Bland-Altman/ICC）。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Altman DG. <em>Practical Statistics for Medical Research</em>. Chapman and Hall/CRC; 1990.</li>
+<li>和 <strong>Spearman/Kendall</strong>：Pearson 抓线性、敏感；秩相关抓单调、稳健。</li>
+<li>和<strong>回归</strong>：$r$ 对称无量纲，回归斜率有方向有量纲；$r^2$ 是回归决定系数。</li>
+<li>和<strong>协方差</strong>：$r$ 是标准化的协方差。</li>
+<li>如何选择：线性且无异常值 → Pearson；单调/偏态/有异常值 → Spearman/Kendall。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>两项连续生化指标的关联探索。</li>
+<li>剂量与暴露/浓度的线性关系。</li>
+<li>构建预测模型前的共线性初查。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>协方差（Covariance）</strong>：两变量共同偏离均值的平均乘积，有量纲。</li>
+<li><strong>相关系数（$r$）</strong>：标准化协方差，$[-1,1]$，无量纲。</li>
+<li><strong>决定系数（$r^2$）</strong>：线性可解释的方差比例。</li>
+<li><strong>Fisher z 变换</strong>：为 $r$ 构造置信区间的变换。</li>
+<li><strong>辛普森悖论</strong>：分层与合并方向相反的关联陷阱。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-spearman-rank-correlation.html" data-cn="Spearman秩相关" data-en="Spearman Rank Correlation" data-def="Spearman 相关就是「把数据换成名次后再算 Pearson 相关」：它衡量两个变量是否同增同减（单调关系），不要求关系是直线，且对异常值稳健。">Spearman秩相关（Spearman Rank Correlation）</a></li>
+<li><a class="xlink" href="m-kendall-rank-correlation.html" data-cn="Kendall秩相关" data-en="Kendall Rank Correlation" data-def="Kendall $\tau$ 直接数「排序一致的对」减去「排序矛盾的对」，再归一化：它回答「随机挑两个个体，两个变量给出相同大小顺序的概率，比相反顺序高多少」。">Kendall秩相关（Kendall Rank Correlation）</a></li>
+<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归通过把连续型结局表示为若干自变量的线性组合，来估计变量与结局之间的方向、大小和不确定性，是医学统计最基础的建模方法之一。">线性回归（Linear Regression）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Pearson K. Notes on the history of correlation. <em>Biometrika</em>. 1920;13(1):25-45.</li>
+<li>Altman DG. <em>Practical Statistics for Medical Research</em>. Chapman &amp; Hall; 1990.</li>
 <li>Bland M. <em>An Introduction to Medical Statistics</em>. 4th ed. Oxford University Press; 2015.</li>
-<li>R Core Team. <code>cor.test</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/cor.test.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/cor.test.html</a> （访问日期：2026-07-02）</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-kruskal-wallis-test.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">Kruskal-Wallis检验</div></a><a class="pg pg-next" href="m-spearman-rank-correlation.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">Spearman秩相关</div></a></div>
