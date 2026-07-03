@@ -290,7 +290,7 @@ summary(fit)
       <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
 <li>和 <a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a> 的区别：Logistic 回归可用于结局建模或倾向评分估计，但因果推断还需要识别假设和可比性检查。</li>
-<li>和 <a class="xlink" href="m-conditional-logistic-regression.html" data-cn="条件Logistic回归" data-en="Conditional Logistic Regression" data-def="条件 Logistic 回归用于分析匹配设计中的二元结局，通过对匹配组进行条件化来消去组特异截距，从而估计暴露效应。">条件Logistic回归（Conditional Logistic Regression）</a> 的区别：条件 Logistic 回归处理匹配数据关联分析，因果推断关注处理效应识别与估计。</li>
+<li>和 <a class="xlink" href="m-conditional-logistic-regression.html" data-cn="条件Logistic回归" data-en="Conditional Logistic Regression" data-def="匹配设计里每个匹配组天生就不一样，硬估各组的截距既费参数又估不准；条件 Logistic 回归在匹配组内部条件化，把组特异截距 $\alpha_i$ 从似然里彻底约掉——只用「同组内谁暴露、谁发病」的对比来估暴露效应。">条件Logistic回归（Conditional Logistic Regression）</a> 的区别：条件 Logistic 回归处理匹配数据关联分析，因果推断关注处理效应识别与估计。</li>
 <li>和 <a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a> 的区别：Cox 模型用于时间到事件结局建模，因果问题还需处理混杂、删失和目标效应。</li>
 </ul></div>
     </section><section id="sec-10" data-sec="10" class="sec">

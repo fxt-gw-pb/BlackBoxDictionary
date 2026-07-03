@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,60 +54,135 @@
     <div class="intro-note"><h1>广义估计方程（Generalized Estimating Equations, GEE）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>GEE 是把 quasi-likelihood 思想扩展到相关数据的一类边际模型，重点估计总体平均效应，并通过工作相关结构和 sandwich 方差来处理重复测量相关性。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>GEE 不给每个人建模，只盯<strong>人群平均</strong>：先用一个「工作相关结构」大致猜同人测量怎么相关（猜错也没关系），再用<strong>三明治（sandwich）稳健方差</strong>兜底——只要均值模型写对，标准误在大样本下就可信。</p>
+<h3>1.2 定义</h3>
+<p>广义估计方程是把 quasi-likelihood 扩展到相关数据的一类<strong>边际模型</strong>，直接估计 population-average 效应。它通过工作相关矩阵 $\mathbf R(\boldsymbol\alpha)$ 提升效率、通过 sandwich 方差保证稳健推断，是纵向/聚类数据的主力方法之一。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：在重复测量或聚类数据里，协变量对总体平均结局的影响是什么。</li>
-<li>适用任务：边际均值建模、稳健标准误、重复测量二元或计数结局分析。</li>
-<li>常见医学场景：多次随访的高血压率、症状发生率、治疗反应比例。</li>
+<li>研究问题：在重复测量或聚类数据里，协变量对<strong>总体平均</strong>结局的影响是多少？</li>
+<li>适用任务：边际均值建模、稳健标准误下的重复测量二元/计数/连续结局分析。</li>
+<li>常见医学场景：多次随访的人群高血压率、症状发生率、治疗反应比例；同一医院/家庭内聚集的结局。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>GEE 不试图给每个人都拟合一条个体曲线，而是更关注“整个总体平均水平如何变化”，并用一个工作相关结构来提高估计效率。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>延续纵向数据的场景，但换个提问角度。<a class="xlink" href="m-generalized-linear-mixed-effects-model-glmm.html" data-cn="广义线性混合效应模型" data-en="Generalized Linear Mixed-Effects Model, GLMM" data-def="GLMM = [[广义线性模型（Generalized Linear Model, GLM）]] + 随机效应：给每个受试者一条自己的 Logistic/Poisson 曲线（随机截距/斜率），在连接函数尺度上围绕总体结构波动，从而对相关的">广义线性混合效应模型（Generalized Linear Mixed-Effects Model, GLMM）</a> 问「对<strong>某个病人</strong>，干预会怎样改变他自己的概率」；GEE 问「在<strong>整个人群</strong>里铺开，平均概率会怎么变」。就像评估一项公共卫生政策：卫生部门通常不关心张三个人的曲线，只关心「全市高血压率从 30% 降到多少」。GEE 因此不去费劲估计每个人的随机效应，而是把「同人相关」当成一个需要<strong>校正标准误</strong>的麻烦，用工作相关结构 + 三明治方差处理掉——它对相关结构的具体形状「不较真」，只求人群平均效应的点估计准、SE 稳。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>要估人群平均效应，只需把均值模型写对（如 $\text{logit}\,E[Y]=\mathbf X^\top\boldsymbol\beta$）。但重复测量不独立，若按独立似然算，<strong>标准误会错</strong>。想把相关结构建对又很难——你未必知道同人两次测量到底是等相关、还是随时间衰减的 AR(1)。根本困难是：<strong>如何在『不确定相关结构长什么样』的情况下，仍得到可信的人群平均效应及其标准误？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p><strong>把相关结构降级为「工作假设」，用稳健方差兜底。</strong> GEE 只要求指定一个可能错的<strong>工作相关矩阵</strong> $\mathbf R(\boldsymbol\alpha)$（independent / exchangeable / AR(1)），它只影响<strong>效率</strong>（猜得越准 SE 越小），不影响点估计的一致性。真正保证推断可靠的是 <strong>sandwich（三明治）方差估计</strong>：</p>
 <p>$$
-\sum_{i=1}^{n}
-\mathbf{D}_i^\top
-\mathbf{V}_i^{-1}
-(\mathbf{Y}_i - \boldsymbol{\mu}_i)
-= 0
+\widehat{\text{Var}}(\hat{\boldsymbol\beta})=\underbrace{\mathbf B^{-1}}_{\text{面包}}\ \underbrace{\mathbf M}_{\text{肉(经验)}}\ \underbrace{\mathbf B^{-1}}_{\text{面包}}
 $$</p>
-<p>其中</p>
-<p>$$
-\mathbf{V}_i
-=
-\mathbf{A}_i^{1/2}
-\mathbf{R}_i(\boldsymbol{\alpha})
-\mathbf{A}_i^{1/2}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+<p>其中「肉」用<strong>实际残差的经验协方差</strong>替代模型假设的协方差——于是即便工作相关写错，SE 也在大样本下正确。这就是「均值对 + 大样本 ⇒ 稳健」的来历。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$\boldsymbol{\mu}_i$：第 $i$ 个主体的边际均值向量。</li>
-<li>$\mathbf R_i(\alpha)$：工作相关矩阵，如 independent、exchangeable、AR(1)。</li>
-<li>sandwich variance：即使工作相关结构写错，也能在大样本下提供稳健推断。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>均值模型正确是最关键前提。</li>
-<li>主体之间独立。</li>
-<li>工作相关结构可以近似指定，不要求完全正确。</li>
+<li>相对<strong>忽略相关直接做 GLM</strong>：点估计接近，但 SE 错（过窄）；GEE 用 sandwich 修正 SE。</li>
+<li>相对 <a class="xlink" href="m-quasi-likelihood-and-overdispersion.html" data-cn="Quasi-Likelihood与过度离散" data-en="Quasi-Likelihood and Overdispersion" data-def="拟似然不承诺结局的完整分布，只规定「均值-方差关系」：它用一个离散因子 $\phi$ 把标准误按实际观测到的分散程度放大，从而在过度离散时得到诚实的推断，而系数点估计不变。">Quasi-Likelihood与过度离散（Quasi-Likelihood and Overdispersion）</a>：GEE 是 quasi-likelihood 向「相关数据」的推广（多了工作相关矩阵）。</li>
+<li>相对 <a class="xlink" href="m-generalized-linear-mixed-effects-model-glmm.html" data-cn="广义线性混合效应模型" data-en="Generalized Linear Mixed-Effects Model, GLMM" data-def="GLMM = [[广义线性模型（Generalized Linear Model, GLM）]] + 随机效应：给每个受试者一条自己的 Logistic/Poisson 曲线（随机截距/斜率），在连接函数尺度上围绕总体结构波动，从而对相关的">广义线性混合效应模型（Generalized Linear Mixed-Effects Model, GLMM）</a>：<strong>同一份数据</strong>，GEE 给边际（population-average）系数、GLMM 给条件（subject-specific）系数；非线性连接下 GEE 系数绝对值更小。GEE 不产出个体随机效应、不做个体预测。</li>
+<li>相对 <a class="xlink" href="m-linear-mixed-effects-model-lmm.html" data-cn="线性混合效应模型" data-en="Linear Mixed-Effects Model, LMM" data-def="LMM 在普通回归的「一条总体平均线」之外，给每个受试者配一个随机偏移（随机截距/斜率），从而把「同一个人多次测量必然相似」这件事显式建进方差结构——既估出总体趋势，又不把相关的重复测量误当独立。">线性混合效应模型（Linear Mixed-Effects Model, LMM）</a>：连续正态结局下 GEE 与 LMM 的系数一致（边际=条件），差别只在推断哲学与 SE 构造。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>GEE 不最大化似然，而是解一组<strong>估计方程</strong>：</p>
+<p>$$
+\sum_{i=1}^{n}\mathbf D_i^\top\mathbf V_i^{-1}(\mathbf Y_i-\boldsymbol\mu_i)=\mathbf 0,\qquad
+\mathbf V_i=\mathbf A_i^{1/2}\,\mathbf R_i(\boldsymbol\alpha)\,\mathbf A_i^{1/2}
+$$</p>
+<p>这个式子在说：对每个主体 $i$，把「观测减模型均值」的残差 $(\mathbf Y_i-\boldsymbol\mu_i)$ 按工作协方差 $\mathbf V_i$ 加权、再乘均值对参数的导数 $\mathbf D_i$，全体求和为零——解出使加权残差平衡的 $\boldsymbol\beta$。$\mathbf A_i$ 是边际方差（由均值决定，如 $p(1-p)$），$\mathbf R_i(\boldsymbol\alpha)$ 是工作相关矩阵。</p>
+<h3>3.2 推导脉络</h3>
+<ol>
+<li>设边际均值模型 $g(\mu_{ij})=\mathbf X_{ij}^\top\boldsymbol\beta$——<strong>只对均值负责</strong>，不设完整联合分布。</li>
+<li>借用 quasi-likelihood 的 score 形式，把独立情形的 $\mathbf V_i=\mathbf A_i$ 换成含相关的 $\mathbf V_i=\mathbf A_i^{1/2}\mathbf R_i(\boldsymbol\alpha)\mathbf A_i^{1/2}$。</li>
+<li>$\boldsymbol\alpha$（相关参数）用残差矩估计，与 $\boldsymbol\beta$ 交替更新至收敛。</li>
+<li>推断用 sandwich 方差（§2.2）：只要均值模型对，$\hat{\boldsymbol\beta}$ 一致且渐近正态，SE 对工作相关误设稳健。</li>
+</ol>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：时间、处理组、性别、暴露、年龄等。</li>
-<li>因变量类型：连续、二元或计数型。</li>
-<li>数据结构：long format 的重复测量或聚类数据。</li>
-<li>是否适合高维数据：不是默认首选。</li>
-<li>是否适合缺失较多数据：可用，但需注意缺失机制。</li>
-<li>是否适合删失数据：不直接处理删失。</li>
-<li>是否适合重复测量数据：非常适合。</li>
+<li>$\boldsymbol\beta$：<strong>population-average（边际）</strong> 效应；二元 logit 下 $e^\beta$ 是人群平均 OR。</li>
+<li>$\boldsymbol\mu_i$：第 $i$ 主体的边际均值向量。</li>
+<li>$\mathbf R_i(\boldsymbol\alpha)$：工作相关矩阵——independent（对角）、exchangeable（等相关）、AR(1)（随时间衰减）、unstructured（全自由）。</li>
+<li>sandwich（稳健/经验）方差：抗工作相关误设的 SE；对应还有 model-based（假设正确时更有效）方差。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>下面是 <code>Framingham_data.csv</code> 中适合 GEE 的 long format 结构：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>均值模型正确</strong></td>
+<td>$g(E[Y])=\mathbf X^\top\boldsymbol\beta$ 设对</td>
+<td>点估计有偏（这是最关键前提）</td>
+<td>残差图、拟合优度</td>
+</tr>
+<tr>
+<td>大样本（主体数多）</td>
+<td>sandwich 靠渐近</td>
+<td>主体少时 SE 偏小、覆盖不足</td>
+<td>主体数经验上 ≥40–50</td>
+</tr>
+<tr>
+<td>主体间独立</td>
+<td>聚类之间不相关</td>
+<td>SE 失真</td>
+<td>设计审查</td>
+</tr>
+<tr>
+<td>缺失完全随机 MCAR</td>
+<td>标准 GEE 需 MCAR</td>
+<td>MAR 下有偏，需加权 GEE（IPW）</td>
+<td>缺失机制分析</td>
+</tr>
+<tr>
+<td>工作相关不必正确</td>
+<td>只影响效率非一致性</td>
+<td>猜太差则效率低（但不偏）</td>
+<td>比较不同 corstr 的 SE</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>用<strong>独立工作相关</strong>的情形做手算——此时 GEE 的点估计恰好等于普通边际 GLM，可以直接从人群比例算出来，而 GEE 的贡献体现在<strong>用 sandwich 方差修正标准误</strong>。数据与 <a class="xlink" href="m-generalized-linear-mixed-effects-model-glmm.html" data-cn="广义线性混合效应模型" data-en="Generalized Linear Mixed-Effects Model, GLMM" data-def="GLMM = [[广义线性模型（Generalized Linear Model, GLM）]] + 随机效应：给每个受试者一条自己的 Logistic/Poisson 曲线（随机截距/斜率），在连接函数尺度上围绕总体结构波动，从而对相关的">广义线性混合效应模型（Generalized Linear Mixed-Effects Model, GLMM）</a> 卡共用。</p>
+<p><strong>数据：</strong> 10 名受试者两期随访，结局「是否高血压」。人群比例：期 1 = 3/10 = 30%，期 2 = 6/10 = 60%。</p>
+<p><strong>Step 1：边际 log-odds 与人群平均时间效应。</strong></p>
+<p>$$
+\text{logit}(0.30)=\log\tfrac{0.30}{0.70}=-0.847,\qquad
+\text{logit}(0.60)=\log\tfrac{0.60}{0.40}=+0.405
+$$</p>
+<p>$$
+\hat\beta_{\text{PERIOD}}=0.405-(-0.847)=1.253,\qquad
+OR=e^{1.253}=\mathbf{3.50}
+$$</p>
+<p><strong>Step 2：这就是 GEE（边际）给的答案。</strong> 读作「<strong>整个人群</strong>里，期 2 相对期 1 的患高血压 odds 是 3.5 倍」。工作相关设成 independent 时点估计与此相同；设成 exchangeable 只是让 SE 更有效率，点估计几乎不变。</p>
+<p><strong>Step 3：与 GLMM 的条件效应对照（同一数据）。</strong> GLMM 卡算出条件 OR = 5.10（$\tau^2=2$）。二者关系：</p>
+<p>$$
+\beta_{\text{边际}}=\frac{\beta_{\text{条件}}}{\sqrt{1+0.346\tau^2}}=\frac{1.63}{1.301}=1.253\ \checkmark
+$$</p>
+<p><strong>Step 4：sandwich 方差在做什么。</strong> 若无视相关、用独立似然的朴素 SE，会低估不确定性（把 20 个相关观测当 20 个独立点）。sandwich 方差用「同主体残差的经验协方差」把重复测量的信息冗余扣回来，给出<strong>更大、更诚实</strong>的 SE。相关越强，朴素 SE 与 sandwich SE 的差距越大。</p>
+<p><strong>结论：</strong> GEE 的人群平均时间效应 OR=3.50，比 GLMM 的个体效应 OR=5.10 小——<strong>不是矛盾，是问「人群」还是问「个体」的差别</strong>。GEE 的核心价值在于：点估计像普通 GLM 一样好算好懂（边际、直给人群），而 sandwich 方差在你不确定相关结构时兜住了标准误。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：时间/期别、处理组、性别、暴露、年龄等。</li>
+<li>因变量类型：连续、二元、计数型。</li>
+<li>数据结构：long format 重复测量或聚类数据，需主体/聚类 ID。</li>
+<li>是否适合高维数据：非默认首选。</li>
+<li>是否适合缺失较多数据：标准 GEE 需 MCAR；MAR 用加权 GEE（IPW）。</li>
+<li>是否适合删失数据：不直接处理删失。</li>
+<li>是否适合重复测量数据：主场。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<p><code>Framingham_data.csv</code> 中适合 GEE 的 long format：</p>
 <table>
 <thead>
 <tr>
@@ -150,7 +225,7 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<p>总体平均层面上，<code>PREVHYP</code> 在不同期别和性别上的观测比例为：</p>
+<p>总体平均层面，<code>PREVHYP</code> 在不同期别、性别上的观测比例（GEE 正是刻画这张边际趋势表）：</p>
 <table>
 <thead>
 <tr>
@@ -192,29 +267,29 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
 <li>输入数据：long format 重复测量数据。</li>
 <li>关键变量：主体 ID、结局、协变量、工作相关结构。</li>
-<li>需要预处理的内容：长表整理、结局编码、相关结构选择。</li>
+<li>需要预处理的内容：长表整理、结局编码、相关结构选择、按主体排序（AR(1) 需时间有序）。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：边际效应系数、稳健标准误、工作相关参数。</li>
+<li>模型对象/统计结果：边际系数、稳健（sandwich）标准误、工作相关参数 $\boldsymbol\alpha$。</li>
 <li>参数估计：population-average 效应。</li>
-<li>预测结果：总体平均概率或均值。</li>
-<li>不确定性指标：robust / sandwich variance。</li>
+<li>预测结果：总体平均概率/均值。</li>
+<li>不确定性指标：robust/sandwich variance（及 model-based 对照）。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：关心 population-average 效应的重复测量分析。</li>
-<li>不适合：强烈关心 subject-specific 解释或个体预测时。</li>
-<li>使用前需要特别检查的点：主体 ID、工作相关结构、样本量是否足够大。</li>
+<li>适合：关心 population-average 效应的重复测量/聚类分析；主体数足够多；相关结构不确定。</li>
+<li>不适合：强调 subject-specific 解释或个体预测（用 GLMM）；主体数很少（sandwich 失灵）；结局删失（用生存分析）。</li>
+<li>使用前需要特别检查的点：主体 ID、工作相关结构、主体数、缺失机制（MCAR？否则用加权 GEE）。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="generalized-estimating-equations-gee" data-i="0">Python</button><button class="codetab" data-uid="generalized-estimating-equations-gee" data-i="1">R</button></div><div class="codepanel active" data-uid="generalized-estimating-equations-gee" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>statsmodels</code></li>
@@ -224,92 +299,119 @@ import statsmodels.formula.api as smf
 
 fit = smf.gee(
     &quot;PREVHYP ~ PERIOD + SEX&quot;,
-    groups=&quot;RANDID&quot;,
+    groups=&quot;RANDID&quot;,                       # 聚类 ID
     data=df,
     family=sm.families.Binomial(),
-    cov_struct=sm.cov_struct.Exchangeable()
+    cov_struct=sm.cov_struct.Exchangeable(),  # 工作相关: 等相关
 ).fit()
-
-print(fit.summary())
+print(fit.summary())                        # 系数为边际(人群平均)log-OR
+print(fit.cov_struct.summary())             # 估计的工作相关 alpha
+# SE 默认即 sandwich(robust)
 </code></pre></div><div class="codepanel" data-uid="generalized-estimating-equations-gee" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>geepack</code></li>
 </ul>
 <pre><code class="language-r">library(geepack)
 
-fit &lt;- geeglm(
-  PREVHYP ~ PERIOD + SEX,
-  id = RANDID,
-  family = binomial(link = &quot;logit&quot;),
-  corstr = &quot;exchangeable&quot;,
-  data = df
-)
-summary(fit)
+fit &lt;- geeglm(PREVHYP ~ PERIOD + SEX,
+              id = RANDID,                  # 聚类 ID(需按 id 排序)
+              family = binomial(link = &quot;logit&quot;),
+              corstr = &quot;exchangeable&quot;,      # 工作相关结构
+              data = df)
+summary(fit)                                # Std.err 即稳健 SE
+exp(cbind(OR = coef(fit),                   # 边际 OR
+          confint.default(fit)))
+QIC(fit)                                     # 选工作相关结构的准则
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：边际平均效应和稳健标准误。</li>
-<li>每个主要参数如何解释：在总体平均层面，协变量变化如何影响事件概率或均值。</li>
-<li>临床或医学意义如何表达：GEE 结果更接近公共卫生或人群平均解释。</li>
-<li>常见误读：GEE 系数通常不同于 GLMM 的条件效应系数。</li>
+<li>核心结果看什么：边际系数（人群平均 OR/均值差）、<strong>稳健 SE</strong>、工作相关参数。</li>
+<li>每个主要参数如何解读：<code>PERIOD</code> 的 OR=3.50 读作「人群中每过一期患病 odds 增到 3.5 倍」；SEX 系数为人群平均的性别差异。</li>
+<li>临床或医学意义如何表达：更贴近公共卫生/人群决策语言（「全人群比例如何变」）。</li>
+<li>常见误读：把 GEE 边际系数当个体效应（它比 GLMM 条件系数小）；主体数很少还依赖 sandwich；无依据地选工作相关结构。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
       <div class="sec-body"><ul>
-<li>按时间和分组的边际均值 / 概率折线图。</li>
-<li>工作相关结构示意图。</li>
-<li>观测均值和模型拟合均值对比图。</li>
+<li>均值模型：这是唯一影响点估计一致性的前提——用残差图、拟合优度检查，比工作相关选择重要得多。</li>
+<li>工作相关选择：用 <strong>QIC</strong> 准则比较 independent/exchangeable/AR(1)；选得好只是提高效率。</li>
+<li>主体数：sandwich 靠大样本，主体数少（\&lt;40）时 SE 偏小，用小样本校正（如 Mancl-DeRouen、Kauermann-Carroll）。</li>
+<li>缺失：标准 GEE 要 MCAR；若 MAR，用逆概率加权 GEE（IPW-GEE）。</li>
+<li>稳健性对照：比较 model-based 与 sandwich SE，差距大提示工作相关误设（但 sandwich 仍可信）。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>按时间/分组的边际均值/概率折线图：GEE 的核心刻画对象。</li>
+<li>观测边际均值 vs 模型拟合均值对比：检查均值模型。</li>
+<li>工作相关结构示意（相关矩阵热图）：解释 exchangeable/AR(1) 的差别。</li>
 </ul>
-<h3>7.1 图像示例</h3>
+<h3>10.1 图像示例</h3>
 <p>下图按性别和期别展示总体平均高血压比例，这正是 GEE 重点刻画的边际模式。</p>
 <p><img alt="" src="img/gee_prehyp_marginal_by_sex.png" /></p></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>对工作相关结构误设更稳健。</li>
-<li>边际平均效应解释自然。</li>
-<li>适合公共卫生和群体平均问题。</li>
+<li>对工作相关误设稳健（sandwich 方差兜底）。</li>
+<li>边际效应解释自然，贴合人群/公共卫生问题。</li>
+<li>只需设均值模型，比 GLMM 拟合更轻、更少收敛问题。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>更依赖大样本近似。</li>
-<li>不提供个体随机效应。</li>
-<li>不适合强调 subject-specific 预测的问题。</li>
+<li>依赖大样本近似（主体数要多）。</li>
+<li>不产出个体随机效应、不做个体预测。</li>
+<li>标准 GEE 对缺失要求高（MCAR）。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>误把 GEE 系数当成个体层面效应。</li>
-<li>样本太小却过度依赖稳健方差。</li>
-<li>工作相关结构选择没有任何依据。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 GLMM 的区别：GEE 是边际模型，GLMM 是条件模型。</li>
-<li>和 Quasi-Likelihood 的区别：GEE 是其相关数据扩展。</li>
-<li>和 LMM 的区别：LMM 主要针对连续正态结局。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>随访中高血压比例的总体变化。</li>
-<li>重复二元结局的群体平均效应分析。</li>
-<li>聚类数据中的稳健边际回归。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-generalized-linear-mixed-effects-model-glmm.html" data-cn="广义线性混合效应模型" data-en="Generalized Linear Mixed-Effects Model, GLMM" data-def="GLMM 是把混合效应思想与广义线性模型结合起来的方法，适用于重复测量或层级数据中的二元、计数等非高斯结局。">广义线性混合效应模型（Generalized Linear Mixed-Effects Model, GLMM）</a></li>
-<li><a class="xlink" href="m-linear-mixed-effects-model-lmm.html" data-cn="线性混合效应模型" data-en="Linear Mixed-Effects Model, LMM" data-def="线性混合效应模型用于分析重复测量或层级数据中的连续结局，在固定效应之外加入随机效应来刻画个体间异质性和组内相关性。">线性混合效应模型（Linear Mixed-Effects Model, LMM）</a></li>
-<li><a class="xlink" href="m-quasi-likelihood-and-overdispersion.html" data-cn="Quasi-Likelihood与过度离散" data-en="Quasi-Likelihood and Overdispersion" data-def="拟似然不承诺结局的完整分布，只规定「均值-方差关系」：它用一个离散因子 $\phi$ 把标准误按实际观测到的分散程度放大，从而在过度离散时得到诚实的推断，而系数点估计不变。">Quasi-Likelihood与过度离散（Quasi-Likelihood and Overdispersion）</a></li>
+<li>误把边际系数当个体层面效应。</li>
+<li>主体太少却依赖稳健方差（SE 偏小）。</li>
+<li>工作相关结构乱选（虽不偏但影响效率与 QIC 判断）。</li>
+<li>MAR 缺失直接上标准 GEE 导致有偏。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-generalized-linear-mixed-effects-model-glmm.html" data-cn="广义线性混合效应模型" data-en="Generalized Linear Mixed-Effects Model, GLMM" data-def="GLMM = [[广义线性模型（Generalized Linear Model, GLM）]] + 随机效应：给每个受试者一条自己的 Logistic/Poisson 曲线（随机截距/斜率），在连接函数尺度上围绕总体结构波动，从而对相关的">广义线性混合效应模型（Generalized Linear Mixed-Effects Model, GLMM）</a>：GEE 边际、GLMM 条件；同数据 GEE 系数绝对值更小（差距随 $\tau^2$）。要人群效应用 GEE，要个体效应用 GLMM。</li>
+<li>和 <a class="xlink" href="m-linear-mixed-effects-model-lmm.html" data-cn="线性混合效应模型" data-en="Linear Mixed-Effects Model, LMM" data-def="LMM 在普通回归的「一条总体平均线」之外，给每个受试者配一个随机偏移（随机截距/斜率），从而把「同一个人多次测量必然相似」这件事显式建进方差结构——既估出总体趋势，又不把相关的重复测量误当独立。">线性混合效应模型（Linear Mixed-Effects Model, LMM）</a>：连续正态下 GEE 与 LMM 系数一致；GEE 不给随机效应/个体轨迹。</li>
+<li>和 <a class="xlink" href="m-quasi-likelihood-and-overdispersion.html" data-cn="Quasi-Likelihood与过度离散" data-en="Quasi-Likelihood and Overdispersion" data-def="拟似然不承诺结局的完整分布，只规定「均值-方差关系」：它用一个离散因子 $\phi$ 把标准误按实际观测到的分散程度放大，从而在过度离散时得到诚实的推断，而系数点估计不变。">Quasi-Likelihood与过度离散（Quasi-Likelihood and Overdispersion）</a>：GEE 是其相关数据扩展（加工作相关矩阵）。</li>
+<li>和普通 GLM：GEE 点估计近似、但用 sandwich 修正相关导致的 SE 偏差。</li>
+<li>如何选择：<strong>只要人群平均效应、相关结构没把握、主体数多 → GEE；要个体效应/预测 → GLMM；连续正态且要个体轨迹 → LMM</strong>。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>随访中人群高血压比例/达标率的总体变化趋势。</li>
+<li>重复二元结局的群体平均干预效应（尤其公共卫生评估）。</li>
+<li>家庭/医院/学校等聚类数据中的稳健边际回归。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>边际模型 / population-average</strong>：对整个人群平均建模，GEE 的系数含义。</li>
+<li><strong>工作相关矩阵（Working correlation）</strong>：对同人测量相关结构的假设（independent/exchangeable/AR(1)/unstructured），可错。</li>
+<li><strong>sandwich（三明治/稳健/经验）方差</strong>：用经验残差协方差构造的方差估计，对工作相关误设稳健。</li>
+<li><strong>quasi-likelihood</strong>：只设均值-方差关系、不设完整分布的准似然，GEE 的理论基础。</li>
+<li><strong>QIC</strong>：GEE 版的 AIC 类准则，用于选工作相关结构。</li>
+<li><strong>IPW-GEE（加权 GEE）</strong>：用逆概率加权处理 MAR 缺失的 GEE 扩展。</li>
+<li><strong>model-based 方差</strong>：假设工作相关正确时的方差估计，正确时比 sandwich 更有效。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-generalized-linear-mixed-effects-model-glmm.html" data-cn="广义线性混合效应模型" data-en="Generalized Linear Mixed-Effects Model, GLMM" data-def="GLMM = [[广义线性模型（Generalized Linear Model, GLM）]] + 随机效应：给每个受试者一条自己的 Logistic/Poisson 曲线（随机截距/斜率），在连接函数尺度上围绕总体结构波动，从而对相关的">广义线性混合效应模型（Generalized Linear Mixed-Effects Model, GLMM）</a></li>
+<li><a class="xlink" href="m-linear-mixed-effects-model-lmm.html" data-cn="线性混合效应模型" data-en="Linear Mixed-Effects Model, LMM" data-def="LMM 在普通回归的「一条总体平均线」之外，给每个受试者配一个随机偏移（随机截距/斜率），从而把「同一个人多次测量必然相似」这件事显式建进方差结构——既估出总体趋势，又不把相关的重复测量误当独立。">线性混合效应模型（Linear Mixed-Effects Model, LMM）</a></li>
+<li><a class="xlink" href="m-quasi-likelihood-and-overdispersion.html" data-cn="Quasi-Likelihood与过度离散" data-en="Quasi-Likelihood and Overdispersion" data-def="拟似然不承诺结局的完整分布，只规定「均值-方差关系」：它用一个离散因子 $\phi$ 把标准误按实际观测到的分散程度放大，从而在过度离散时得到诚实的推断，而系数点估计不变。">Quasi-Likelihood与过度离散（Quasi-Likelihood and Overdispersion）</a></li>
+<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Liang KY, Zeger SL. Longitudinal data analysis using generalized linear models. <em>Biometrika</em>. 1986;73(1):13-22.</li>
-<li>statsmodels Developers. <code>statsmodels.genmod.generalized_estimating_equations.GEE</code>. statsmodels API Reference. <a href="https://www.statsmodels.org/stable/generated/statsmodels.genmod.generalized_estimating_equations.GEE.html">https://www.statsmodels.org/stable/generated/statsmodels.genmod.generalized_estimating_equations.GEE.html</a> （访问日期：2026-07-02）</li>
+<li>Zeger SL, Liang KY, Albert PS. Models for longitudinal data: a generalized estimating equation approach. <em>Biometrics</em>. 1988;44(4):1049-1060.</li>
+<li>Fitzmaurice GM, Laird NM, Ware JH. <em>Applied Longitudinal Analysis</em>. 2nd ed. Wiley; 2011.</li>
 <li>CRAN. Package <code>geepack</code>. <a href="https://cran.r-project.org/web/packages/geepack/index.html">https://cran.r-project.org/web/packages/geepack/index.html</a> （访问日期：2026-07-02）</li>
 </ul></div>
     </section>

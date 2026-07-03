@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,226 +54,343 @@
     <div class="intro-note"><h1>条件Logistic回归（Conditional Logistic Regression）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>条件 Logistic 回归用于分析匹配设计中的二元结局，通过对匹配组进行条件化来消去组特异截距，从而估计暴露效应。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>匹配设计里每个匹配组天生就不一样，硬估各组的截距既费参数又估不准；条件 Logistic 回归<strong>在匹配组内部条件化</strong>，把组特异截距 $\alpha_i$ 从似然里彻底约掉——只用「同组内谁暴露、谁发病」的对比来估暴露效应。</p>
+<h3>1.2 定义</h3>
+<p>条件 Logistic 回归用于分析匹配设计（1:1 或 1:M 匹配病例-对照、配对前后设计）中的二元结局。它以匹配组为条件构造条件似然，消去每组的固定截距，仅由<strong>不一致对（discordant pairs/sets）</strong>贡献信息，产出组内暴露的 odds ratio。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：在配对或匹配设计中，暴露与二元结局之间的关联有多强。</li>
-<li>适用任务：1:1 匹配病例-对照、匹配对前后比较、成组二元数据建模。</li>
-<li>常见医学场景：年龄和性别匹配后的病例-对照研究，匹配对中的糖尿病暴露与心肌梗死关联。</li>
+<li>研究问题：在按年龄、性别等混杂因素匹配后，暴露与二元结局的关联有多强？</li>
+<li>适用任务：1:1 或 1:M 匹配病例-对照、配对二元设计、成组二元数据的固定效应建模。</li>
+<li>常见医学场景：年龄性别匹配的病例-对照研究（吸烟与心梗、某药物暴露与畸形）；同一患者治疗前后配对的二元反应。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>条件 Logistic 回归的核心是：既然不同匹配组天生就不一样，那就不要硬比较组与组之间，而只比较同一匹配组内部谁暴露、谁结局发生。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>想象你要比较「暴露是否致病」，但担心年龄、性别等混杂。于是给每个病例配一个同龄同性别的对照，组成一对。<strong>既然一对内部年龄性别已经一样，组间的差异就无关紧要——只需看每对内部「谁暴露了、谁发病了」</strong>。如果一对里两人暴露状态相同（都吸烟或都不吸烟），这对告诉你不了任何「暴露 vs 结局」的信息（concordant，被自动忽略）；只有暴露状态<strong>不同</strong>的对（discordant）才有发言权。条件 Logistic 就是把「组内截距」这个碍事的东西条件化掉，专心数 discordant 对的方向。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>匹配设计里每个匹配组有自己的基线风险（组特异截距 $\alpha_i$）。若用普通 <a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a> 硬把每组截距当参数估：$N$ 个匹配组就有 $N$ 个截距参数，随样本增长而增长——这类<strong>冗余参数（nuisance parameters）</strong> 会让最大似然估计<strong>不一致</strong>（Neyman-Scott 问题），暴露效应 OR 被系统性高估（1:1 匹配时偏差可达 2 倍）。根本困难是：<strong>如何在不估这一大堆组截距的前提下，干净地估出暴露效应？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p><strong>条件化</strong>：在每个匹配组内，固定「这组一共有几个病例」，去问「在这个条件下，偏偏是这些人成为病例的概率」。这个条件概率里，组特异截距 $\alpha_i$ 分子分母同时出现、被<strong>约掉</strong>了——正如 <a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a> 的偏似然约掉基线风险 $h_0(t)$（两者数学同构，R 里 <code>clogit</code> 正是调 Cox 例程实现的）。约掉 $\alpha_i$ 后，似然只剩暴露效应 $\beta$，且只有<strong>组内暴露不一致</strong>的匹配组才对似然有贡献——一致组的条件概率恒为常数，不含 $\beta$。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
+<ul>
+<li>相对<strong>普通 Logistic（把组截距当固定参数）</strong>：条件化避免 Neyman-Scott 不一致，OR 无偏。</li>
+<li>相对<strong>普通 Logistic（忽略匹配、直接合并）</strong>：破坏匹配、残留混杂，OR 有偏。</li>
+<li>相对 <a class="xlink" href="m-mcnemar-test.html" data-cn="McNemar检验" data-en="McNemar Test" data-def="McNemar 检验用于配对的二分类数据：它只看发生了改变的那些对（前阳后阴、前阴后阳），忽略两次结果一致的对，判断「改变」是否偏向某一方向。">McNemar检验（McNemar Test）</a>：McNemar 是「1:1 匹配、单个二元暴露、无协变量」时条件 Logistic 的特例——其检验等价，条件 Logistic 还能加连续/多个协变量。</li>
+<li>相对 <a class="xlink" href="m-generalized-linear-mixed-effects-model-glmm.html" data-cn="广义线性混合效应模型" data-en="Generalized Linear Mixed-Effects Model, GLMM" data-def="GLMM = [[广义线性模型（Generalized Linear Model, GLM）]] + 随机效应：给每个受试者一条自己的 Logistic/Poisson 曲线（随机截距/斜率），在连接函数尺度上围绕总体结构波动，从而对相关的">广义线性混合效应模型（Generalized Linear Mixed-Effects Model, GLMM）</a>（随机截距）：GLMM 把组截距设为<strong>随机</strong>（正态分布、可外推、用上全部组）；条件 Logistic 把组截距当<strong>固定</strong>并条件掉（只用 discordant 组、不外推组效应）。匹配病例-对照的经典选择是条件 Logistic。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>组特异截距模型与其条件似然：</p>
 <p>$$
 \begin{aligned}
 \operatorname{logit} P(Y_{it}=1) &amp;= \alpha_i + \beta X_{it} \\
-CL(\beta) &amp;= \prod_{i:(Y_{i1}+Y_{i2}=1)} \frac{\exp(\beta)^{Y_{i2}}}{1+\exp(\beta)}
+CL(\beta) &amp;= \prod_{i:\,(Y_{i1}+Y_{i2}=1)} \frac{\exp(\beta X_{i,\text{case}})}{\exp(\beta X_{i1})+\exp(\beta X_{i2})}
 \end{aligned}
 $$</p>
-<p>对于 matched-pair 数据，</p>
+<p>这个式子在说：每个匹配组有自己的截距 $\alpha_i$；条件似然只在「组内恰有一个病例」的不一致组上连乘，每项是「病例偏偏落在实际那个人身上」的条件概率——$\alpha_i$ 已被约掉。对 1:1 匹配、二元暴露，可闭式解出：</p>
 <p>$$
-\hat\beta = \log\frac{n_{12}}{n_{21}},
-\qquad
+\hat\beta=\log\frac{n_{12}}{n_{21}},\qquad
 SE(\hat\beta)=\sqrt{\frac{1}{n_{12}}+\frac{1}{n_{21}}}
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
+<h3>3.2 推导脉络</h3>
+<ol>
+<li>匹配组内写 $\text{logit}\,P(Y=1)=\alpha_i+\beta X$，$\alpha_i$ 吸收匹配变量带来的组间差异。</li>
+<li>以「组内病例总数」为条件，$\alpha_i$ 在条件概率的分子分母抵消——得到只含 $\beta$ 的条件似然。</li>
+<li>一致组（组内暴露全同）的条件概率不依赖 $\beta$，对似然无贡献；仅 discordant 组出力。</li>
+<li>1:1 二元暴露时，discordant 对分两类：$n_{12}$（病例暴露/对照未暴露）与 $n_{21}$（病例未暴露/对照暴露），条件似然对 $\beta$ 求极值给出 $\hat\beta=\log(n_{12}/n_{21})$。</li>
+</ol>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>$\alpha_i$：第 $i$ 个匹配组的组特异截距。</li>
-<li>$\beta$：组内暴露效应。</li>
-<li>$n_{12}, n_{21}$：discordant pairs 的两种方向计数。</li>
+<li>$\alpha_i$：第 $i$ 匹配组的组特异截距（冗余参数，被条件掉）。</li>
+<li>$\beta$：组内暴露效应；$e^\beta$ 为条件 odds ratio。</li>
+<li>$n_{12},n_{21}$：两种方向的 discordant 对计数。</li>
+<li>concordant 对：组内暴露一致，不贡献信息（但仍要正确纳入数据）。</li>
 </ul>
-<h3>2.3 关键假设</h3>
+<h3>3.4 关键假设（含违反后果）</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>数据来自匹配设计</td>
+<td>有明确匹配组/配对结构</td>
+<td>无匹配却用它则损失效率、误导</td>
+<td>核对 strata/pair 定义</td>
+</tr>
+<tr>
+<td>匹配组内可比</td>
+<td>组内差异仅剩暴露与结局</td>
+<td>残留混杂</td>
+<td>审查匹配变量是否充分</td>
+</tr>
+<tr>
+<td>暴露效应组间同质</td>
+<td>$\beta$ 对各组相同</td>
+<td>效应异质被掩盖</td>
+<td>分层/交互项检验</td>
+</tr>
+<tr>
+<td>有足够 discordant 对</td>
+<td>信息来自不一致对</td>
+<td>discordant 太少则 SE 巨大/不可估</td>
+<td>数 $n_{12},n_{21}$</td>
+</tr>
+<tr>
+<td>无完美分离</td>
+<td>某方向 discordant 为 0</td>
+<td>$\hat\beta$ 发散</td>
+<td>检查 $n_{12}$ 或 $n_{21}=0$</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>匹配病例-对照研究是条件 Logistic 少见的<strong>能闭式手算</strong>的模型，正好把「只有 discordant 对出力」看个透彻。</p>
+<p><strong>设定：</strong> 100 对 1:1 匹配（每对 = 1 病例 + 1 同龄同性别对照），暴露 = 是否吸烟。把 100 对按「病例/对照的暴露状态」归入 2×2：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>对照吸烟</th>
+<th>对照不吸烟</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>病例吸烟</strong></td>
+<td>30（一致）</td>
+<td>$n_{12}=20$</td>
+</tr>
+<tr>
+<td><strong>病例不吸烟</strong></td>
+<td>$n_{21}=8$</td>
+<td>42（一致）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Step 1：认出谁出力。</strong> 对角线的 30 对（两人都吸烟）和 42 对（两人都不吸烟）是 <strong>concordant</strong>——组内暴露一样，条件似然里这些项不含 $\beta$，<strong>完全不贡献</strong>。真正说话的是两类 discordant 对：$n_{12}=20$（病例吸、对照不吸，指向暴露有害）与 $n_{21}=8$（病例不吸、对照吸，指向反方向）。100 对里只有 28 对在估计。</p>
+<p><strong>Step 2：闭式解 OR。</strong></p>
+<p>$$
+\hat\beta=\log\frac{n_{12}}{n_{21}}=\log\frac{20}{8}=\log 2.5=0.916,\qquad
+OR=e^{0.916}=\mathbf{2.5}
+$$</p>
+<p>直觉：在暴露不一致的对里，「病例吸/对照不吸」是「病例不吸/对照吸」的 $20/8=2.5$ 倍，暴露与发病的组内 OR 就是 2.5。</p>
+<p><strong>Step 3：标准误与区间。</strong></p>
+<p>$$
+SE(\hat\beta)=\sqrt{\tfrac{1}{20}+\tfrac{1}{8}}=\sqrt{0.175}=0.418
+$$</p>
+<p>95% CI（log 尺度）$=0.916\pm1.96\times0.418=[0.096,\,1.736]$，指数化 OR 的 95% CI $=[1.10,\,5.68]$，不含 1，显著。</p>
+<p><strong>Step 4：连到 McNemar。</strong> 同一份 discordant 计数，McNemar 检验：</p>
+<p>$$
+\chi^2=\frac{(n_{12}-n_{21})^2}{n_{12}+n_{21}}=\frac{(20-8)^2}{28}=\frac{144}{28}=5.14,\quad p=0.023
+$$</p>
+<p><strong>结论：</strong> 吸烟与发病的条件 OR = 2.5（95% CI 1.10–5.68，$p=0.023$）。100 对匹配里 72 对一致对被「浪费」——但这正是匹配设计的逻辑：一致对内部混杂和暴露都无对比，条件化后自然出局。若无视匹配把 200 人合并做普通 Logistic，会残留匹配变量的混杂、且 OR 偏大。McNemar 是本例「无协变量」时的等价检验；条件 Logistic 的额外价值在于还能纳入未匹配的协变量（如连续的暴露剂量）。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
-<li>数据来自匹配对或匹配组。</li>
-<li>组内比较有意义，组间异质性通过条件化消除。</li>
-<li>主要信息来自 discordant pairs。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：暴露变量，可为二元或连续。</li>
+<li>自变量类型：暴露变量，二元或连续均可（及其他未匹配协变量）。</li>
 <li>因变量类型：二分类。</li>
-<li>数据结构：每个匹配组多行记录，需有 <code>strata / pair_id</code>。</li>
-<li>是否适合高维数据：不适合作为高维默认方法。</li>
-<li>是否适合缺失较多数据：匹配数据缺失会直接损失有效对。</li>
-<li>是否适合删失数据：不适合；尽管 <code>clogit</code> 在 R 中是通过 Cox 例程实现的，但问题本身不是生存分析。</li>
-<li>是否适合重复测量数据：仅在成组逻辑建模意义下适用。</li>
+<li>数据结构：每个匹配组多行，需 <code>strata</code>/<code>pair_id</code> 标识组。</li>
+<li>是否适合高维数据：非高维默认方法。</li>
+<li>是否适合缺失较多数据：匹配数据缺失会直接损失整对/整组。</li>
+<li>是否适合删失数据：不适合；虽 R 里 <code>clogit</code> 借 Cox 例程，但问题本质是匹配二元数据而非生存。</li>
+<li>是否适合重复测量数据：仅在「成组固定效应」意义下适用（如个体作为 strata 的前后配对）。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>条件 Logistic 回归最适合“每个匹配组多行记录”的格式，例如：</p>
+<h3>5.2 示例表格</h3>
+<p>条件 Logistic 要「每个匹配组多行」的长表：</p>
 <table>
 <thead>
 <tr>
 <th>pair_id</th>
-<th>time_or_member</th>
-<th>X</th>
-<th>Y</th>
+<th>member</th>
+<th>X（暴露）</th>
+<th>Y（结局）</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>1</td>
+<td>病例</td>
 <td>1</td>
-<td>0</td>
 <td>1</td>
 </tr>
 <tr>
 <td>1</td>
-<td>2</td>
-<td>1</td>
-<td>0</td>
-</tr>
-<tr>
-<td>2</td>
-<td>1</td>
+<td>对照</td>
 <td>0</td>
 <td>0</td>
 </tr>
 <tr>
 <td>2</td>
+<td>病例</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
 <td>2</td>
+<td>对照</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>病例</td>
 <td>1</td>
 <td>1</td>
 </tr>
 <tr>
 <td>3</td>
+<td>对照</td>
 <td>1</td>
 <td>0</td>
-<td>1</td>
 </tr>
 </tbody>
 </table>
-<p>一个典型的 matched-pair 2x2 汇总表如下：</p>
-<table>
-<thead>
-<tr>
-<th>2004 Election</th>
-<th>2008 Democratic</th>
-<th>2008 Republican</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Democratic</td>
-<td>175</td>
-<td>16</td>
-</tr>
-<tr>
-<td>Republican</td>
-<td>54</td>
-<td>188</td>
-</tr>
-</tbody>
-</table>
-<h3>3.3 输入与产出</h3>
+<p>其中 pair 1（暴露 1 vs 0）与 pair 2（0 vs 1）是 discordant，pair 3（都暴露）是 concordant、不贡献。汇总即得 §4 的 2×2 表。</p>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：匹配组 ID、暴露变量、二元结局。</li>
-<li>关键变量：<code>pair_id / strata</code>、暴露、结局。</li>
-<li>需要预处理的内容：长表整理、匹配组核对、稀疏组检查。</li>
+<li>输入数据：匹配组 ID、暴露变量、二元结局、未匹配协变量。</li>
+<li>关键变量：<code>pair_id/strata</code>、暴露、结局。</li>
+<li>需要预处理的内容：长表整理、匹配组核对、数 discordant 对、检查完美分离。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：条件似然估计、系数、OR、Wald / LR 检验。</li>
+<li>模型对象/统计结果：条件似然估计、系数、OR、Wald/LR 检验。</li>
 <li>参数估计：组内 OR。</li>
-<li>预测结果：通常不强调个体预测，更强调效应估计。</li>
-<li>不确定性指标：标准误、区间估计。</li>
+<li>预测结果：通常不做个体预测（组截距被条件掉），重在效应估计。</li>
+<li>不确定性指标：SE、OR 置信区间。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：1:1 匹配病例-对照研究，配对二元设计。</li>
-<li>不适合：独立样本、无匹配结构的数据。</li>
-<li>使用前需要特别检查的点：匹配变量、discordant pairs 数量、是否真的需要条件化。</li>
+<li>适合：1:1 或 1:M 匹配病例-对照、配对二元设计、需消组特异截距的成组二元数据。</li>
+<li>不适合：独立无匹配样本（用普通 Logistic）；关心组基线水平本身（被条件掉了）。</li>
+<li>使用前需要特别检查的点：匹配结构、discordant 对数量、是否完美分离、暴露效应是否组间同质。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="conditional-logistic-regression" data-i="0">Python</button><button class="codetab" data-uid="conditional-logistic-regression" data-i="1">R</button></div><div class="codepanel active" data-uid="conditional-logistic-regression" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>statsmodels</code></li>
 </ul>
 <pre><code class="language-python">from statsmodels.discrete.conditional_models import ConditionalLogit
 
+# endog=结局 y, exog=暴露及协变量 X, groups=匹配组 id
 mod = ConditionalLogit(endog=y, exog=X, groups=pair_id)
 res = mod.fit()
 print(res.summary())
+import numpy as np
+print(np.exp(res.params))       # 条件 OR
 </code></pre></div><div class="codepanel" data-uid="conditional-logistic-regression" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>survival</code></li>
 </ul>
 <pre><code class="language-r">library(survival)
 
-fit &lt;- clogit(y ~ x + strata(pair_id), data = df)
+# strata() 指定匹配组; clogit 内部借 Cox 偏似然实现条件化
+fit &lt;- clogit(Y ~ X + strata(pair_id), data = df)
 summary(fit)
-exp(coef(fit))
+exp(coef(fit))                  # 条件 OR
+# 1:1 二元暴露时, coef(X) 应等于 log(n12/n21)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：匹配组内部的 OR。</li>
-<li>每个主要参数如何解释：$\exp(\beta)$ 表示在同一匹配组内，暴露组相对未暴露组的 odds ratio。</li>
-<li>临床或医学意义如何表达：适合强调“在年龄、性别等已匹配条件下”的暴露效应。</li>
-<li>常见误读：条件 Logistic 回归不利用 concordant pairs 的暴露信息来估计效应。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>匹配对 2x2 热图。</li>
-<li>discordant pairs 条形图。</li>
-<li>匹配组 OR 森林图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图展示条件 Logistic 回归最常见的 2x2 配对表结构，强调 discordant pairs 在估计中的核心作用。</p>
-<p><img alt="" src="img/clogit_matched_pair_votes.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：匹配组内暴露的 OR、置信区间、discordant 对数量（信息量来源）。</li>
+<li>每个主要参数如何解读：$e^\beta=2.5$ 表示在同一匹配组内，暴露相对未暴露的发病 odds 为 2.5 倍。</li>
+<li>临床或医学意义如何表达：强调「在年龄、性别等已匹配的条件下」的暴露效应，混杂已由设计控制。</li>
+<li>常见误读：以为 concordant 对也参与估计（不参与）；把它当能估组基线（组截距已被条件掉）；discordant 太少仍强解读窄结论。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>discordant 对数量：$n_{12},n_{21}$ 太小则 SE 巨大——报告时列出 discordant 对数。</li>
+<li>完美分离：若某方向 discordant=0，$\hat\beta$ 发散，用精确条件 Logistic 或 Firth 惩罚。</li>
+<li>效应异质：加暴露 × 分层变量交互项检验各组 $\beta$ 是否一致。</li>
+<li>匹配充分性：审查匹配变量是否覆盖主要混杂；未匹配的混杂需作为协变量纳入。</li>
+<li>稳健性：1:M 匹配比 1:1 更有效率；小样本用精确方法而非渐近。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>匹配对 2×2 热图：直观显示 concordant/discordant 分布。</li>
+<li>discordant 对方向条形图（$n_{12}$ vs $n_{21}$）：展示信息来源与效应方向。</li>
+<li>多协变量时的条件 OR 森林图。</li>
+</ul>
+<h3>10.1 图像示例</h3>
+<p>下图展示条件 Logistic 回归最常见的 2×2 配对表结构，强调 discordant pairs 在估计中的核心作用。</p>
+<p><img alt="" src="img/clogit_matched_pair_votes.png" /></p></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>能自然控制匹配组层面的固定差异。</li>
-<li>是匹配病例-对照研究的经典模型。</li>
-<li>解释聚焦于组内比较，往往更有因果设计意义。</li>
+<li>条件化干净消除匹配组固定差异，OR 无偏（避开 Neyman-Scott）。</li>
+<li>匹配病例-对照研究的经典标准模型。</li>
+<li>组内比较更贴合因果设计意图，且可纳入未匹配协变量。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>严重依赖 discordant pairs。</li>
-<li>无匹配结构时不适合。</li>
-<li>对数据整理要求高。</li>
+<li>信息全靠 discordant 对，一致对被「浪费」。</li>
+<li>无匹配结构时不适用。</li>
+<li>不估、也不外推组基线水平。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>把独立样本数据错用条件 Logistic 回归。</li>
+<li>把独立样本数据错用条件 Logistic。</li>
 <li>匹配组 ID 错误或重复。</li>
-<li>只看 pair 数量，不看 discordant pair 数量。</li>
+<li>只看总对数、不看 discordant 对数（后者才决定精度）。</li>
+<li>出现完美分离仍用渐近估计。</li>
 </ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和普通 Logistic 回归的区别：普通 Logistic 不控制匹配组截距。</li>
-<li>和 McNemar 检验的区别：McNemar 更像最简单的 matched-pair 检验；条件 Logistic 回归可扩展到协变量建模。</li>
-<li>和 Cox 回归的关系：R 中 <code>clogit</code> 是通过 Cox 例程实现的，但问题本质是匹配二元数据建模。</li>
+<li>和 <a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a>：普通 Logistic 不控制匹配组截距；忽略匹配会有偏，把组截距当固定参数估又不一致——条件化是正解。</li>
+<li>和 <a class="xlink" href="m-mcnemar-test.html" data-cn="McNemar检验" data-en="McNemar Test" data-def="McNemar 检验用于配对的二分类数据：它只看发生了改变的那些对（前阳后阴、前阴后阳），忽略两次结果一致的对，判断「改变」是否偏向某一方向。">McNemar检验（McNemar Test）</a>：McNemar 是「1:1、单二元暴露、无协变量」时条件 Logistic 的特例，检验等价；条件 Logistic 可扩展协变量。</li>
+<li>和 <a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a>：数学同构——<code>clogit</code> 借 Cox 偏似然实现，匹配组 ↔ 事件时点风险集。</li>
+<li>和 <a class="xlink" href="m-generalized-linear-mixed-effects-model-glmm.html" data-cn="广义线性混合效应模型" data-en="Generalized Linear Mixed-Effects Model, GLMM" data-def="GLMM = [[广义线性模型（Generalized Linear Model, GLM）]] + 随机效应：给每个受试者一条自己的 Logistic/Poisson 曲线（随机截距/斜率），在连接函数尺度上围绕总体结构波动，从而对相关的">广义线性混合效应模型（Generalized Linear Mixed-Effects Model, GLMM）</a>：GLMM 把组截距设随机（用全部组、可外推）；条件 Logistic 设固定并条件掉（只用 discordant、不外推）。匹配病例-对照经典用后者。</li>
+<li>如何选择：<strong>匹配病例-对照/配对二元 → 条件 Logistic；1:1 单暴露只要检验 → McNemar；把组视为随机样本、要外推组效应 → 随机截距 GLMM</strong>。</li>
 </ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
       <div class="sec-body"><ul>
-<li>匹配病例-对照研究中的暴露效应估计。</li>
-<li>前后配对二元结局的条件建模。</li>
+<li>匹配病例-对照研究中的暴露效应估计（吸烟-心梗、用药-畸形等）。</li>
+<li>同一患者治疗前后配对二元结局的条件建模。</li>
 <li>成组二元观察资料中剔除组特异截距的分析。</li>
 </ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>匹配设计（Matched design）</strong>：把病例与对照按混杂变量配成组以控制混杂的设计。</li>
+<li><strong>条件似然（Conditional likelihood）</strong>：以组内病例数为条件构造、约掉组截距的似然。</li>
+<li><strong>组特异截距 / 冗余参数（Nuisance parameter）</strong>：每个匹配组的基线 $\alpha_i$，被条件掉。</li>
+<li><strong>不一致对（Discordant pair）</strong>：组内病例与对照暴露状态不同的对，唯一贡献信息者。</li>
+<li><strong>一致对（Concordant pair）</strong>：组内暴露相同的对，不贡献效应估计。</li>
+<li><strong>Neyman-Scott 问题</strong>：冗余参数随样本增长导致最大似然不一致的现象。</li>
+<li><strong>完美分离（Complete separation）</strong>：某方向 discordant 为 0，使 $\hat\beta$ 发散。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
       <div class="sec-body"><ul>
 <li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
 <li><a class="xlink" href="m-mcnemar-test.html" data-cn="McNemar检验" data-en="McNemar Test" data-def="McNemar 检验用于配对的二分类数据：它只看发生了改变的那些对（前阳后阴、前阴后阳），忽略两次结果一致的对，判断「改变」是否偏向某一方向。">McNemar检验（McNemar Test）</a></li>
-<li><a class="xlink" href="m-generalized-linear-mixed-effects-model-glmm.html" data-cn="广义线性混合效应模型" data-en="Generalized Linear Mixed-Effects Model, GLMM" data-def="GLMM 是把混合效应思想与广义线性模型结合起来的方法，适用于重复测量或层级数据中的二元、计数等非高斯结局。">广义线性混合效应模型（Generalized Linear Mixed-Effects Model, GLMM）</a></li>
+<li><a class="xlink" href="m-generalized-linear-mixed-effects-model-glmm.html" data-cn="广义线性混合效应模型" data-en="Generalized Linear Mixed-Effects Model, GLMM" data-def="GLMM = [[广义线性模型（Generalized Linear Model, GLM）]] + 随机效应：给每个受试者一条自己的 Logistic/Poisson 曲线（随机截距/斜率），在连接函数尺度上围绕总体结构波动，从而对相关的">广义线性混合效应模型（Generalized Linear Mixed-Effects Model, GLMM）</a></li>
+<li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
 </ul></div>
-    </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Breslow NE, Day NE. <em>Statistical Methods in Cancer Research, Volume I: The Analysis of Case-Control Studies</em>. IARC; 1980.</li>
+<li>Hosmer DW, Lemeshow S, Sturdivant RX. <em>Applied Logistic Regression</em>. 3rd ed. Wiley; 2013.</li>
 <li>statsmodels Developers. <code>statsmodels.discrete.conditional_models.ConditionalLogit</code>. statsmodels API Reference. <a href="https://www.statsmodels.org/stable/generated/statsmodels.discrete.conditional_models.ConditionalLogit.html">https://www.statsmodels.org/stable/generated/statsmodels.discrete.conditional_models.ConditionalLogit.html</a> （访问日期：2026-07-02）</li>
 <li>R Core Team / survival package. <code>clogit</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/survival/html/clogit.html">https://stat.ethz.ch/R-manual/R-devel/library/survival/html/clogit.html</a> （访问日期：2026-07-02）</li>
 </ul></div>

@@ -332,7 +332,7 @@ glm(count ~ x, family = poisson(link = &quot;log&quot;), data = df)  # Poisson
 <li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a></li>
 <li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
 <li><a class="xlink" href="m-poisson-regression.html" data-cn="Poisson回归" data-en="Poisson Regression" data-def="Poisson 回归对「事件发生的次数」建模：用 log 连接把「平均计数」连到协变量的线性组合，系数取指数后就是率比（某因素让事件发生率变为几倍）。">Poisson回归（Poisson Regression）</a></li>
-<li><a class="xlink" href="m-generalized-estimating-equations-gee.html" data-cn="广义估计方程" data-en="Generalized Estimating Equations, GEE" data-def="GEE 是把 quasi-likelihood 思想扩展到相关数据的一类边际模型，重点估计总体平均效应，并通过工作相关结构和 sandwich 方差来处理重复测量相关性。">广义估计方程（Generalized Estimating Equations, GEE）</a></li>
+<li><a class="xlink" href="m-generalized-estimating-equations-gee.html" data-cn="广义估计方程" data-en="Generalized Estimating Equations, GEE" data-def="GEE 不给每个人建模，只盯人群平均：先用一个「工作相关结构」大致猜同人测量怎么相关（猜错也没关系），再用三明治（sandwich）稳健方差兜底——只要均值模型写对，标准误在大样本下就可信。">广义估计方程（Generalized Estimating Equations, GEE）</a></li>
 </ul></div>
     </section><section id="sec-16" data-sec="16" class="sec">
       <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>

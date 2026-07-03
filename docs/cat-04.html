@@ -46,7 +46,7 @@
           <span class="entry-cn">线性混合效应模型</span>
           <span class="entry-en">Linear Mixed-Effects Model, LMM</span>
         </div>
-        <p class="entry-def">线性混合效应模型用于分析重复测量或层级数据中的连续结局，在固定效应之外加入随机效应来刻画个体间异质性和组内相关性。</p>
+        <p class="entry-def">LMM 在普通回归的「一条总体平均线」之外，给每个受试者配一个随机偏移（随机截距/斜率），从而把「同一个人多次测量必然相似」这件事显式建进方差结构——既估出总体趋势，又不把相关的重</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -59,7 +59,7 @@
           <span class="entry-cn">广义线性混合效应模型</span>
           <span class="entry-en">Generalized Linear Mixed-Effects Model, GLMM</span>
         </div>
-        <p class="entry-def">GLMM 是把混合效应思想与广义线性模型结合起来的方法，适用于重复测量或层级数据中的二元、计数等非高斯结局。</p>
+        <p class="entry-def">GLMM = [[广义线性模型（Generalized Linear Model, GLM）]] + 随机效应：给每个受试者一条自己的 Logistic/Poisson 曲线（随机</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -72,7 +72,7 @@
           <span class="entry-cn">广义估计方程</span>
           <span class="entry-en">Generalized Estimating Equations, GEE</span>
         </div>
-        <p class="entry-def">GEE 是把 quasi-likelihood 思想扩展到相关数据的一类边际模型，重点估计总体平均效应，并通过工作相关结构和 sandwich 方差来处理重复测量相关性。</p>
+        <p class="entry-def">GEE 不给每个人建模，只盯人群平均：先用一个「工作相关结构」大致猜同人测量怎么相关（猜错也没关系），再用三明治（sandwich）稳健方差兜底——只要均值模型写对，标准误在大样本</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -85,7 +85,7 @@
           <span class="entry-cn">条件Logistic回归</span>
           <span class="entry-en">Conditional Logistic Regression</span>
         </div>
-        <p class="entry-def">条件 Logistic 回归用于分析匹配设计中的二元结局，通过对匹配组进行条件化来消去组特异截距，从而估计暴露效应。</p>
+        <p class="entry-def">匹配设计里每个匹配组天生就不一样，硬估各组的截距既费参数又估不准；条件 Logistic 回归在匹配组内部条件化，把组特异截距 $\alpha_i$ 从似然里彻底约掉——只用「同组</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
