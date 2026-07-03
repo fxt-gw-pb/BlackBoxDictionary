@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,52 +54,121 @@
     <div class="intro-note"><h1>加速失效时间模型（Accelerated Failure Time, AFT, Model）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>AFT 模型直接在生存时间尺度上建模，强调协变量如何“拉长”或“缩短”事件发生时间。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>AFT 不动风险率、直接对<strong>生存时间本身</strong>建模：$\log T=X^\top\beta+\epsilon$，协变量的作用是把每个人的「生命时钟」整体拨快或拨慢——系数指数化就是<strong>时间比（time ratio）</strong>，回答「事件时间被拉长/压缩了几倍」。</p>
+<h3>1.2 定义</h3>
+<p>加速失效时间模型是参数生存回归：假设 $\log(\text{生存时间})$ 等于协变量线性组合加一个服从特定分布的误差项。常用误差分布对应 Weibull、log-normal、log-logistic 等生存时间分布。它与 <a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a> 是生存回归的两大范式，只是解释尺度不同（时间 vs 风险）。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：某些因素会让事件更早发生，还是更晚发生。</li>
-<li>适用任务：参数生存回归、时间比解释、生存时间加速 / 减速效应分析。</li>
-<li>常见医学场景：治疗是否延长生存时间，危险因素是否缩短无事件时间。</li>
+<li>研究问题：某因素让事件<strong>更早</strong>还是<strong>更晚</strong>发生？把生存时间延长/缩短了多少比例？</li>
+<li>适用任务：参数生存回归、时间比解释、需要外推绝对生存时间/分位数时的建模。</li>
+<li>常见医学场景：治疗是否延长中位生存时间、危险因素是否加速无事件时间的到来、工程/器械的寿命加速试验。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>AFT 模型把协变量的作用理解为“时间轴的伸缩”。如果一个变量的 time ratio 大于 1，意味着在该变量较高时，事件时间整体被拉长；小于 1 则意味着事件时间被压缩。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>想象每个人有一块「衰老时钟」，事件在时钟走到某刻度时发生。AFT 说：协变量的作用是<strong>调节时钟的走速</strong>。时间比 TR=1.5 意味着治疗组的时钟走得慢 1.5 倍——同样的衰老进程，他们要多花 50% 的现实时间才走到，于是各个分位数的生存时间都乘以 1.5。这和汽车「里程加速试验」同理：想知道正常使用能撑多久，就让它高速运转（加速时钟），再把时间换算回去。TR\&lt;1 则相反：时钟走得快，事件提前到来。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-\log(T)=X^\top\beta+\epsilon
-$$</p>
-<p>因此</p>
-<p>$$
-T=e^{X^\top\beta}e^\epsilon
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>Cox 模型极其成功，但它的产出 HR 是「风险率的倍数」，对很多人（尤其临床沟通、卫生经济）不够直观——病人想问的是「这个治疗能让我多活多久」，而不是「我的瞬时风险是别人的几倍」。而且 Cox 只用事件排序、不预测绝对生存时间。根本困难是：<strong>如何得到一个直接讲『时间延长多少』、并能外推绝对生存时间的生存回归？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>把回归直接架在 $\log T$ 上，就像普通线性回归架在结果变量上一样——只不过误差项换成能配合删失的生存分布，用（含删失的）最大似然估计。这样系数天然活在「时间尺度」：$e^{\beta_j}$ 直接是「$X_j$ 增 1 单位使生存时间乘的倍数」。关键洞察是<strong>换一个建模尺度</strong>（时间而非风险），把生存问题转化为一个「带删失的对数线性回归」，从而得到时间比这种更贴近生活的效应量，并顺带获得完整的参数生存分布用于预测。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$\beta_j$：协变量在 log survival time 尺度上的效应。</li>
-<li>$\exp(\beta_j)$：time ratio，表示事件时间被放大或缩小的倍数。</li>
-<li>常见分布：Weibull、log-normal、log-logistic。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>生存时间在某个参数分布族下可被合理近似。</li>
-<li>删失独立 / 非信息性。</li>
-<li>模型形式正确。</li>
+<li>相对 <a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a>：AFT 参数化、在时间尺度解释、能外推绝对生存；Cox 半参数、更稳健、无需选分布。分布选对时 AFT 更有效率，选错则有偏。</li>
+<li>相对<strong>直接对 $\log T$ 做 OLS</strong>：删失数据里 $T$ 常观测不全，OLS 会有偏；AFT 用删失似然正确处理。</li>
+<li>相对 <a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 把「活过时刻 $t$」拆成一串「活过每个事件时点」的条件概率连乘——删失者在退出前为每个分母出力、退出后安静离场，删失携带的信息被用尽而不被误用。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a>：KM 非参数、无协变量；AFT 是参数回归。</li>
+<li>特例关系：<strong>Weibull（含指数）分布同时满足 AFT 和 PH</strong>，是唯一常用的「两栖」分布；log-normal、log-logistic 只是 AFT、不是 PH。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>$$
+\log T = X^\top\beta + \sigma\,\epsilon
+\quad\Longleftrightarrow\quad
+T = e^{X^\top\beta}\cdot e^{\sigma\epsilon}
+$$</p>
+<p>这个式子在说：对数生存时间是协变量的线性函数加随机扰动；等价地，生存时间等于一个「由协变量决定的时间缩放因子 $e^{X^\top\beta}$」乘上一个随机基线时间。协变量 $X_j$ 增 1 单位，把整条时间轴乘以 $e^{\beta_j}$（时间比 TR）。</p>
+<h3>3.2 推导脉络</h3>
+<ol>
+<li>设 $\log T=X^\top\beta+\sigma\epsilon$，$\epsilon$ 服从标准分布（极值分布→Weibull、正态→log-normal、logistic→log-logistic）。</li>
+<li>加速性质：生存函数满足 $S(t\mid X)=S_0\!\bigl(t\cdot e^{-X^\top\beta}\bigr)$——协变量把基线生存函数在<strong>时间轴上伸缩</strong>，故所有分位数生存时间同比缩放。</li>
+<li>参数用删失最大似然估计：事件贡献密度 $f(t)$，删失贡献生存 $S(t)$，最大化 $\prod f(t_i)^{\delta_i}S(t_i)^{1-\delta_i}$。</li>
+<li>Weibull 的两栖性：若 $\epsilon$ 为极值分布、shape $=1/\sigma$，则同一模型既可写成 AFT（时间比 $e^{\beta}$），又可写成 PH（风险比 $HR=e^{-\beta/\sigma}$），二者换算 $\log HR=-\log TR/\sigma$。</li>
+</ol>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：连续、二分类、多分类都可。</li>
-<li>因变量类型：时间到事件结局。</li>
-<li>数据结构：每行一个个体，含 <code>time</code>、<code>event</code> 和协变量。</li>
-<li>是否适合高维数据：不是默认首选。</li>
-<li>是否适合缺失较多数据：可用，但需先处理缺失。</li>
-<li>是否适合删失数据：适合。</li>
-<li>是否适合重复测量数据：不适合 time-varying covariate 直接分析。</li>
+<li>$\beta_j$：$X_j$ 在 log 生存时间尺度的效应。</li>
+<li>$\exp(\beta_j)=\text{TR}$：时间比。TR&gt;1 延长事件时间（保护），TR\&lt;1 缩短（有害），TR=1 无关。</li>
+<li>$\sigma$（scale）：误差尺度；决定分布形状（Weibull 的 shape $=1/\sigma$：$\sigma\lt1$ 风险递增，$\sigma\gt1$ 递减，$\sigma=1$ 恒定即指数）。</li>
+<li>分布选择：Weibull / log-normal / log-logistic，用 AIC 与残差诊断挑选。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>下面是适合 AFT 模型的基本数据结构：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>分布设定正确</td>
+<td>生存时间近似所选分布</td>
+<td>系数与预测有偏</td>
+<td>AIC 比较、QQ 图、KM 与拟合曲线叠合</td>
+</tr>
+<tr>
+<td>加速性（时间伸缩）</td>
+<td>协变量效应是时间尺度的常数缩放</td>
+<td>TR 解释失真</td>
+<td>分组 $\log$ 时间的 QQ 图是否平行</td>
+</tr>
+<tr>
+<td>非信息性删失</td>
+<td>删失与预后无关</td>
+<td>估计有偏</td>
+<td>比较删失者与在随访者特征</td>
+</tr>
+<tr>
+<td>log-线性</td>
+<td>log T 与连续协变量线性</td>
+<td>效应形状扭曲</td>
+<td>残差图、加样条</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>难以像 Cox 那样只用几行数据手推最大似然，这里用一个<strong>能手算的换算与解释例子</strong>（Weibull/指数 AFT），把「时间比」的含义算清楚。</p>
+<p><strong>设定：</strong> 单个二分类协变量 $x$（1=治疗，0=对照）。数据近似<strong>指数分布</strong>（Weibull 的 $\sigma=1$，shape $p=1$，风险恒定）。观察到：对照组中位生存 $m_0=10$ 个月，治疗组中位生存 $m_1=15$ 个月。</p>
+<p><strong>Step 1：算时间比。</strong> 指数分布下中位数 $=\text{scale}\times\ln 2$，而 scale $=e^{\beta_0+\beta_1 x}$。故</p>
+<p>$$
+\text{TR}=\frac{m_1}{m_0}=\frac{15}{10}=1.5,\qquad \beta_1=\log(1.5)=0.405
+$$</p>
+<p>治疗组的<strong>所有</strong>生存分位数都乘 1.5：25% 分位、中位、90% 分位一律延长 50%——这就是「加速性」的含义（整条时间轴伸缩，而非某一点）。</p>
+<p><strong>Step 2：换算成 HR，与 Cox 对照。</strong> 指数/Weibull 两栖，$\log HR=-\beta_1/\sigma$：</p>
+<p>$$
+HR=\text{TR}^{-1/\sigma}=1.5^{-1/1}=\frac{1}{1.5}=0.667
+$$</p>
+<p>读作：治疗把生存时间延长到 1.5 倍，<strong>等价于</strong>把死亡风险率降到 0.667 倍。若换一个 shape（$\sigma=0.5$，风险递增），同样 TR=1.5 会对应 $HR=1.5^{-2}=0.444$——<strong>同一个时间比，风险比取决于形状参数</strong>，这正是 TR 与 HR 不可混为一谈的原因。</p>
+<p><strong>Step 3：读结论。</strong> TR=1.5（95% CI 若不含 1 则显著）读作「治疗预计把生存时间延长约 50%」；若面向临床沟通，这比「HR=0.67」更贴近病人关心的「能多活多久」。</p>
+<p><strong>结论：</strong> AFT 把治疗效应说成「时间轴拉长 1.5 倍」，指数/Weibull 情形下可无缝换算成 HR=0.67；换算依赖形状参数 $\sigma$，非 Weibull 分布（log-normal/log-logistic）则根本没有恒定 HR，只能用 TR 解释。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续、二分类、多分类均可。</li>
+<li>因变量类型：时间到事件（time + event）。</li>
+<li>数据结构：每行一个个体。</li>
+<li>是否适合高维数据：非默认首选；高维需正则化。</li>
+<li>是否适合缺失较多数据：需先处理缺失。</li>
+<li>是否适合删失数据：适合右删失，并天然支持<strong>区间删失/左删失</strong>（AFT 相对 Cox 的一个优势）。</li>
+<li>是否适合重复测量数据：时间依赖协变量不易纳入（不如 Cox 灵活）。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<p>Framingham 风格生存数据：</p>
 <table>
 <thead>
 <tr>
@@ -121,22 +190,6 @@ $$</p>
 <td>1</td>
 </tr>
 <tr>
-<td>6238</td>
-<td>8766</td>
-<td>0</td>
-<td>1</td>
-<td>28.73</td>
-<td>1</td>
-</tr>
-<tr>
-<td>9428</td>
-<td>8766</td>
-<td>0</td>
-<td>0</td>
-<td>25.34</td>
-<td>1</td>
-</tr>
-<tr>
 <td>10552</td>
 <td>2956</td>
 <td>1</td>
@@ -154,7 +207,7 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<p>一个 Weibull AFT 示例模型的时间比（time ratio）可整理为：</p>
+<p>一个 Weibull AFT 模型的时间比可整理为：</p>
 <table>
 <thead>
 <tr>
@@ -165,59 +218,66 @@ $$</p>
 </thead>
 <tbody>
 <tr>
-<td>BMI</td>
+<td>BMI（每 +1）</td>
 <td>0.988</td>
-<td>0.981 - 0.995</td>
+<td>0.981 – 0.995</td>
 </tr>
 <tr>
 <td>Female vs Male</td>
 <td>1.350</td>
-<td>1.269 - 1.435</td>
+<td>1.269 – 1.435</td>
 </tr>
 <tr>
 <td>AGE_group 2 vs 1</td>
 <td>0.513</td>
-<td>0.479 - 0.550</td>
+<td>0.479 – 0.550</td>
 </tr>
 <tr>
 <td>AGE_group 3 vs 1</td>
 <td>0.308</td>
-<td>0.271 - 0.351</td>
+<td>0.271 – 0.351</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<p>（TR\&lt;1 的 BMI/高龄组缩短生存时间，TR&gt;1 的女性延长生存时间——与 Cox 卡里 HR 的方向恰好相反：延长时间⇔降低风险。）</p>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：时间、事件、协变量。</li>
-<li>关键变量：<code>time</code>、<code>event</code>、分布假设。</li>
-<li>需要预处理的内容：删失编码、时间单位、分布选择。</li>
+<li>输入数据：时间、事件指示、协变量。</li>
+<li>关键变量：<code>time</code>、<code>event</code>、分布假设、scale 参数。</li>
+<li>需要预处理的内容：删失编码、时间单位、分布选择（AIC/残差）。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：系数、time ratio、分布参数。</li>
-<li>参数估计：$\boldsymbol{\beta}$ 及其 time ratio。</li>
-<li>预测结果：条件生存时间分布、分位数生存时间。</li>
-<li>不确定性指标：标准误、区间估计。</li>
+<li>模型对象/统计结果：系数、时间比、分布参数（shape/scale）、AIC。</li>
+<li>参数估计：$\beta$ 与 TR。</li>
+<li>预测结果：条件生存曲线、任意分位数生存时间、中位生存时间预测。</li>
+<li>不确定性指标：标准误、TR 置信区间。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：希望直接从时间尺度解释效应时。</li>
-<li>不适合：难以假设生存时间分布时。</li>
-<li>使用前需要特别检查的点：分布拟合、删失模式、与 PH 解释的差异。</li>
+<li>适合：希望以「延长/缩短多少时间」解释效应；需要外推绝对生存时间或分位数；存在区间删失。</li>
+<li>不适合：不愿承担分布假设；有大量时间依赖协变量；只需相对风险（Cox 更省事）。</li>
+<li>使用前需要特别检查的点：分布拟合优度、加速性、删失机制、与 PH 解释的差异。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="accelerated-failure-time-aft-model" data-i="0">Python</button><button class="codetab" data-uid="accelerated-failure-time-aft-model" data-i="1">R</button></div><div class="codepanel active" data-uid="accelerated-failure-time-aft-model" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>lifelines</code></li>
 </ul>
-<pre><code class="language-python">from lifelines import WeibullAFTFitter
+<pre><code class="language-python">from lifelines import WeibullAFTFitter, LogNormalAFTFitter
 
 aft = WeibullAFTFitter()
-aft.fit(df, duration_col=&quot;TIMEDTH&quot;, event_col=&quot;DEATH&quot;)
-aft.print_summary()
+aft.fit(df, duration_col=&quot;TIMEDTH&quot;, event_col=&quot;DEATH&quot;,
+        formula=&quot;BMI + C(SEX) + C(AGE_group)&quot;)
+aft.print_summary()                       # 时间比 = exp(coef)
+print(aft.median_survival_times(df.head()))   # 预测个体中位生存时间
+
+# 选分布:比 AIC
+ln = LogNormalAFTFitter().fit(df, &quot;TIMEDTH&quot;, &quot;DEATH&quot;)
+print(aft.AIC_, ln.AIC_)
 </code></pre></div><div class="codepanel" data-uid="accelerated-failure-time-aft-model" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>survival</code></li>
@@ -227,70 +287,96 @@ aft.print_summary()
 fit &lt;- survreg(Surv(TIMEDTH, DEATH) ~ BMI + sex_label + factor(AGE_group),
                data = df, dist = &quot;weibull&quot;)
 summary(fit)
-exp(coef(fit))  # time ratios
+exp(coef(fit))            # 时间比 time ratios
+1 / fit$scale             # Weibull shape = 1/sigma; 换算 HR = TR^(-shape)
+predict(fit, type = &quot;quantile&quot;, p = 0.5)   # 预测中位生存时间
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：time ratio 方向和大小。</li>
-<li>每个主要参数如何解释：例如 time ratio = 1.35 可理解为该组的事件时间大约延长 35%。</li>
-<li>临床或医学意义如何表达：AFT 的时间尺度往往更贴近“延长多久”这类问题。</li>
-<li>常见误读：AFT 的 time ratio 与 Cox 的 hazard ratio 不是一回事。</li>
+<li>核心结果看什么：TR 的方向与大小、95% CI 是否含 1、分布拟合（AIC/QQ）。</li>
+<li>每个主要参数如何解读：TR=1.35（女 vs 男）读作「女性事件时间约延长 35%」；TR=0.31（高龄）读作「高龄组事件时间压缩到约 31%」。</li>
+<li>临床或医学意义如何表达：TR 直接回答「延长/缩短多久」，可再由模型算出各组中位生存时间做绝对对比。</li>
+<li>常见误读：把 TR 当 HR（方向相反、数值不等）；不检查分布就信预测；只看系数显著忽略拟合质量。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
       <div class="sec-body"><ul>
-<li>time ratio 森林图。</li>
-<li>分组预测生存曲线。</li>
-<li>parametric fit 与 KM 曲线对照图。</li>
+<li>分布选择：多分布拟合比 AIC；画 KM 曲线与参数拟合曲线叠合看贴合度；残差（Cox-Snell）应近似标准指数。</li>
+<li>加速性检查：分组画 $\log t$ 的分位数-分位数图，平行支持时间尺度的常数缩放。</li>
+<li>Weibull 双重解释：若既想要 TR 又想要 HR，只有 Weibull/指数能同时给（$HR=TR^{-1/\sigma}$）；换 log-normal/log-logistic 则无恒定 HR。</li>
+<li>稳健性：小样本或删失重时分布参数不稳；比较不同分布下结论是否一致。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>时间比森林图：各协变量对生存时间的伸缩效应。</li>
+<li>参数拟合曲线 vs KM 曲线叠合图：直观检验分布假设。</li>
+<li>分组预测生存曲线：把 TR 翻译成绝对生存差。</li>
 </ul>
-<h3>7.1 图像示例</h3>
+<h3>10.1 图像示例</h3>
 <p>下图用区间图展示 Weibull AFT 模型中各协变量对应的时间比及其 95% 区间。</p>
 <p><img alt="" src="img/aft_time_ratio_forest.png" /></p></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>直接在时间尺度解释效应。</li>
-<li>适合回答“时间延长 / 缩短多少”的问题。</li>
-<li>在某些数据上比 PH 解释更自然。</li>
+<li>时间尺度解释直观，直接回答「延长/缩短多久」。</li>
+<li>参数化，能外推绝对生存时间与任意分位数。</li>
+<li>天然支持区间删失/左删失。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>需要指定分布形式。</li>
-<li>对分布设定敏感。</li>
-<li>在实践中使用频率低于 Cox。</li>
+<li>需指定并依赖分布假设，选错则有偏。</li>
+<li>时间依赖协变量不易纳入。</li>
+<li>实践使用频率低于 Cox，读者熟悉度较低。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>把 time ratio 当成 hazard ratio。</li>
-<li>不检查所选分布是否合理。</li>
-<li>只因系数显著就忽略模型拟合质量。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 Cox 模型的区别：AFT 在时间尺度解释，Cox 在 hazard 尺度解释。</li>
-<li>和 Kaplan-Meier 的区别：AFT 是参数回归模型，KM 是非参数描述工具。</li>
-<li>和 Weibull PH 的关系：Weibull 是少数同时兼容 AFT 和 PH 解释的分布族。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>治疗是否延长生存时间。</li>
-<li>某风险因素是否加速事件发生。</li>
-<li>作为 Cox 模型之外的参数化补充分析。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 比例风险模型是最常用的生存回归模型，在不指定基线风险函数具体形式的情况下，估计协变量对危险率的相对影响。">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
-<li><a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 生存曲线是生存分析中最经典的非参数估计方法，用于在存在删失时估计生存函数 $S(t)=P(T&gt;t)$。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a></li>
+<li>把 time ratio 当 hazard ratio 解读（方向相反）。</li>
+<li>不做分布拟合优度检查就报预测。</li>
+<li>只因系数显著而忽略模型对数据的贴合程度。</li>
+<li>忘记 Weibull 才两栖，对 log-normal 硬求 HR。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a>：AFT 时间尺度、参数化、给 TR、能外推绝对时间；Cox 风险尺度、半参数、给 HR、更稳健。想讲「多活多久」用 AFT，想讲「风险几倍」且不愿设分布用 Cox。</li>
+<li>和 <a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 把「活过时刻 $t$」拆成一串「活过每个事件时点」的条件概率连乘——删失者在退出前为每个分母出力、退出后安静离场，删失携带的信息被用尽而不被误用。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a>：KM 非参数描述、无协变量；AFT 参数回归。</li>
+<li>和 Weibull PH 参数模型：同一 Weibull 拟合既可作 AFT 也可作 PH，报告哪种取决于想要 TR 还是 HR。</li>
+<li>如何选择：<strong>分布能拟合好、需绝对时间预测或区间删失→AFT；不愿设分布、要相对风险、有时间依赖协变量→Cox</strong>。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>评估治疗是否延长中位生存/无进展生存时间（以 TR 报告）。</li>
+<li>加速寿命/退化试验中危险因素对失效时间的加速效应。</li>
+<li>作为 Cox 分析的参数化敏感性分析与绝对生存时间预测补充。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>时间比（Time ratio, TR）</strong>：$e^{\beta}$，协变量每增 1 单位生存时间乘的倍数，AFT 的核心产出。</li>
+<li><strong>加速失效时间（Accelerated failure time）</strong>：协变量把基线生存函数在时间轴上按常数比例伸缩的模型结构。</li>
+<li><strong>shape / scale 参数</strong>：Weibull 分布的形状与尺度；shape $=1/\sigma$ 决定风险随时间递增/递减。</li>
+<li><strong>两栖分布（Weibull/指数）</strong>：唯一常用的同时满足 AFT 与 PH 的分布族，$HR=TR^{-1/\sigma}$。</li>
+<li><strong>区间删失（Interval censoring）</strong>：只知事件发生在某时间段内，AFT 相对 Cox 更易处理。</li>
+<li><strong>Cox-Snell 残差</strong>：参数生存模型的拟合诊断残差，正确时近似标准指数分布。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
+<li><a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 把「活过时刻 $t$」拆成一串「活过每个事件时点」的条件概率连乘——删失者在退出前为每个分母出力、退出后安静离场，删失携带的信息被用尽而不被误用。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a></li>
+<li><a class="xlink" href="m-competing-risks-and-fine-gray-model.html" data-cn="竞争风险模型" data-en="Competing Risks and Fine-Gray Model" data-def="当「死于别的原因」会永久阻止目标事件发生时，把竞争事件当普通删失会系统性高估目标事件的发生概率；竞争风险方法改用累积发生率函数（CIF）如实计数，并用 cause-specific Cox（问机制）或 Fine-Gray（问负担）两条路做回">竞争风险模型（Competing Risks and Fine-Gray Model）</a></li>
+<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Kalbfleisch JD, Prentice RL. <em>The Statistical Analysis of Failure Time Data</em>. 2nd ed. Wiley; 2002.</li>
 <li>Klein JP, Moeschberger ML. <em>Survival Analysis: Techniques for Censored and Truncated Data</em>. 2nd ed. Springer; 2003.</li>
+<li>Collett D. <em>Modelling Survival Data in Medical Research</em>. 3rd ed. Chapman &amp; Hall/CRC; 2015.</li>
 <li>R Core Team / survival package. <code>survreg</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/survival/html/survreg.html">https://stat.ethz.ch/R-manual/R-devel/library/survival/html/survreg.html</a> （访问日期：2026-07-02）</li>
 </ul></div>
     </section>

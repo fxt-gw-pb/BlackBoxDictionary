@@ -228,7 +228,7 @@ concordance(Surv(time, event) ~ risk_score, data = df)
       <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
       <div class="sec-body"><ul>
 <li><a class="xlink" href="m-receiver-operating-characteristic-and-auc.html" data-cn="ROC曲线与AUC" data-en="Receiver Operating Characteristic and AUC" data-def="ROC 曲线（受试者工作特征曲线）把一个连续评分或预测概率在所有可能阈值下的敏感度与（1−特异度）连成一条曲线；AUC 是曲线下面积，用一个 0–1 的数概括模型的整体区分能力。">ROC曲线与AUC（Receiver Operating Characteristic and AUC）</a></li>
-<li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 比例风险模型是最常用的生存回归模型，在不指定基线风险函数具体形式的情况下，估计协变量对危险率的相对影响。">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
+<li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
 <li><a class="xlink" href="m-calibration-curve.html" data-cn="校准曲线" data-en="Calibration Curve" data-def="校准曲线（可靠性图）比较模型的预测概率与实际观察到的事件发生频率，用来判断“模型说的 20% 风险，是不是真的大约 20% 的人发生了事件”。">校准曲线（Calibration Curve）</a></li>
 <li><a class="xlink" href="m-decision-curve-analysis-dca.html" data-cn="决策曲线分析" data-en="Decision Curve Analysis, DCA" data-def="决策曲线分析通过“净获益”指标，评估一个预测模型或诊断策略在不同决策阈值下相对于“全部干预”和“全部不干预”两个极端策略的临床价值。">决策曲线分析（Decision Curve Analysis, DCA）</a></li>
 </ul></div>

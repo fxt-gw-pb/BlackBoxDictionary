@@ -98,7 +98,7 @@
           <span class="entry-cn">Kaplan-Meier生存曲线</span>
           <span class="entry-en">Kaplan-Meier Estimator</span>
         </div>
-        <p class="entry-def">Kaplan-Meier 生存曲线是生存分析中最经典的非参数估计方法，用于在存在删失时估计生存函数 $S(t)=P(T&gt;t)$。</p>
+        <p class="entry-def">Kaplan-Meier 把「活过时刻 $t$」拆成一串「活过每个事件时点」的条件概率连乘——删失者在退出前为每个分母出力、退出后安静离场，删失携带的信息被用尽而不被误用。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -111,7 +111,7 @@
           <span class="entry-cn">Nelson-Aalen累积风险估计</span>
           <span class="entry-en">Nelson-Aalen Estimator</span>
         </div>
-        <p class="entry-def">Nelson-Aalen 估计是生存分析中对累积风险函数 $H(t)$ 的经典非参数估计方法。</p>
+        <p class="entry-def">Nelson-Aalen 把每个事件时点的「即刻死亡率」$d_i/n_i$ 逐项累加成累积风险 $\hat H(t)$——它和 Kaplan-Meier 看同一份数据，只是把「连乘</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -124,7 +124,7 @@
           <span class="entry-cn">Log-rank检验</span>
           <span class="entry-en">Log-rank Test</span>
         </div>
-        <p class="entry-def">Log-rank 检验是比较两组或多组生存曲线是否存在统计学差异的最常用非参数检验。</p>
+        <p class="entry-def">Log-rank 检验在每个事件时点摆出一张 2×2 列联表，问「若两组生存真的相同，这组该死几个」，把「实际死的 − 期望死的」沿时间累加——总差距显著偏离 0，就说明两组生存曲</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -137,7 +137,7 @@
           <span class="entry-cn">Cox比例风险模型</span>
           <span class="entry-en">Cox Proportional Hazards Model</span>
         </div>
-        <p class="entry-def">Cox 比例风险模型是最常用的生存回归模型，在不指定基线风险函数具体形式的情况下，估计协变量对危险率的相对影响。</p>
+        <p class="entry-def">Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -150,7 +150,7 @@
           <span class="entry-cn">加速失效时间模型</span>
           <span class="entry-en">Accelerated Failure Time, AFT, Model</span>
         </div>
-        <p class="entry-def">AFT 模型直接在生存时间尺度上建模，强调协变量如何“拉长”或“缩短”事件发生时间。</p>
+        <p class="entry-def">AFT 不动风险率、直接对生存时间本身建模：$\log T=X^\top\beta+\epsilon$，协变量的作用是把每个人的「生命时钟」整体拨快或拨慢——系数指数化就是时间比（</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -163,7 +163,7 @@
           <span class="entry-cn">竞争风险模型</span>
           <span class="entry-en">Competing Risks and Fine-Gray Model</span>
         </div>
-        <p class="entry-def">竞争风险分析处理“存在多种互斥结局、某一事件的发生会阻止其他事件发生”的生存数据。它用累积发生率函数（CIF）描述各事件的发生，并用 cause-specific Cox 或 Fi</p>
+        <p class="entry-def">当「死于别的原因」会永久阻止目标事件发生时，把竞争事件当普通删失会系统性高估目标事件的发生概率；竞争风险方法改用累积发生率函数（CIF）如实计数，并用 cause-specific</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>

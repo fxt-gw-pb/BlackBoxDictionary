@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,58 +54,207 @@
     <div class="intro-note"><h1>Log-rank检验（Log-rank Test）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>Log-rank 检验是比较两组或多组生存曲线是否存在统计学差异的最常用非参数检验。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>Log-rank 检验在每个事件时点摆出一张 2×2 列联表，问「若两组生存真的相同，这组该死几个」，把「实际死的 − 期望死的」沿时间累加——总差距显著偏离 0，就说明两组生存曲线不同。</p>
+<h3>1.2 定义</h3>
+<p>Log-rank 检验（又称 Mantel-Cox 检验）是比较两组或多组生存曲线是否存在整体差异的非参数检验。它是把每个事件时点的超几何分布信息（观察数 vs 期望数）在时间上累加的分层检验，能自然处理右删失，对<strong>比例风险型</strong>差异最敏感。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：不同组的生存时间分布是否相同。</li>
-<li>适用任务：两组或多组 Kaplan-Meier 曲线比较。</li>
-<li>常见医学场景：治疗组和对照组的生存时间比较；不同性别或风险组之间的死亡时间比较。</li>
+<li>研究问题：不同组的生存时间分布是否相同？</li>
+<li>适用任务：两组或多组 Kaplan-Meier 曲线的显著性比较；随机对照试验中主要生存终点的组间检验。</li>
+<li>常见医学场景：治疗组 vs 对照组的总生存比较、不同风险分层间的死亡时间比较、不同肿瘤分期的复发时间比较。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>Log-rank 检验的核心是：在每个事件时点，比较各组“观察到的事件数”和“如果各组真实生存相同，应该观察到的事件数”之间的差距，再把这些差距加总。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>设想两支队伍在同一条时间线上不断有人「出局」。你不能只比总出局人数——因为两组人数、随访长短、删失都不同。公平的裁判方式是：<strong>每当有人出局</strong>，就冻结画面清点「此刻两组各还有几人在场」，据此算「按在场人数比例，这次出局本该落在 A 组几个」。把每一幕的「A 组实际出局 − 期望出局」累加起来：若两组命运相同，正负相消、总和接近 0；若 A 组总是「超额出局」，累加值会明显为正。Log-rank 就是把这份「累积超额」标准化成卡方统计量。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-U_0=\sum_{i=1}^{D}(d_{0i}-e_{0i}),
-\qquad
-V_0=\sum_{i=1}^{D}v_{0i},
-\qquad
-\frac{U_0}{\sqrt{V_0}} \approx N(0,1)
-$$</p>
-<p>其中</p>
-<p>$$
-e_{0i}=\frac{n_{0i}d_i}{n_i}
-$$</p>
-<p>为第 $i$ 个事件时点在零假设下第 0 组的期望事件数。</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>想比较两组「谁活得久」，朴素做法处处碰壁：比平均生存时间——删失者的时间根本没观测完；比某个固定时点的生存率——选哪个时点主观且浪费其他时点的信息；比总死亡数——不同组人数和随访时长不可比。根本困难是：<strong>如何在删失、组间基础人数不同、且要综合全时段信息的前提下，给出一个公平的组间比较？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>把整个随访切成一串「事件时点」，在每个时点上构造一张 2×2 表（组别 × 生死），<strong>在零假设「两组瞬时风险相同」下，该时点组内死亡数服从超几何分布</strong>——期望和方差都能算出来，且与删失无关（删失只改变下一时点的在场人数）。于是每个时点提供一份「观察 − 期望」及其方差，把它们<strong>跨时点累加</strong>（这正是 Mantel-Haenszel 分层思想），就得到一个综合全时段、正确处理删失的检验统计量。关键在于：<strong>每个时点条件化在「当前在场人数」上，把不可比的原始计数变成了可比的超几何偏差</strong>。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$n_{ki}$：时点 $t_i$ 第 $k$ 组 at risk 的人数。</li>
-<li>$d_{ki}$：时点 $t_i$ 第 $k$ 组发生事件的人数。</li>
-<li>$U_0$：观察事件数与期望事件数差异的加总。</li>
-<li>$V_0$：对应方差。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>删失是独立 / 非信息性的。</li>
-<li>个体之间独立。</li>
-<li>该检验对比例风险备择最敏感。</li>
+<li>相对<strong>比较中位生存时间/固定时点生存率</strong>：log-rank 用上全部事件时点，不必主观选时点，检验力通常更高。</li>
+<li>相对 <a class="xlink" href="m-mantel-haenszel-test.html" data-cn="Mantel-Haenszel检验" data-en="Mantel-Haenszel Test" data-def="Mantel-Haenszel 把数据按一个混杂因素（如年龄）分层，在每一层里干净地看暴露与结局的关联，再把各层的关联加权合并成一个「已调整」的比值比——从而在不建回归模型的情况下控制混杂。">Mantel-Haenszel检验（Mantel-Haenszel Test）</a>：log-rank 本质就是「按事件时点分层」的 Mantel-Haenszel，二者同源。</li>
+<li>相对<strong>加权 log-rank（Wilcoxon-Breslow、Fleming-Harrington）</strong>：标准 log-rank 对各时点等权（对晚期差异更敏感）；加权版可强调早期或晚期差异。</li>
+<li>相对 <a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a>：log-rank 只给 p 值不给效应量；Cox 给出风险比 HR 并能调整协变量。仅一个二分类组时，log-rank 的 score 检验与 Cox 完全一致。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>对第 0 组，在每个事件时点 $t_i$ 计算观察减期望，跨时点累加：</p>
+<p>$$
+U_0=\sum_{i=1}^{D}\bigl(d_{0i}-e_{0i}\bigr),\qquad
+e_{0i}=\frac{n_{0i}\,d_i}{n_i},\qquad
+v_i=\frac{n_{0i}\,n_{1i}\,d_i\,(n_i-d_i)}{n_i^2\,(n_i-1)}
+$$</p>
+<p>检验统计量：</p>
+<p>$$
+\chi^2=\frac{U_0^2}{\sum_i v_i}\ \sim\ \chi^2_{(1)}\quad(\text{两组})
+$$</p>
+<p>这个式子在说：$e_{0i}$ 是「若两组风险相同、按在场人数比例第 0 组该死的人数」，$U_0$ 是实际与期望之差的累积，$v_i$ 是超几何分布的方差；标准化平方后服从 1 自由度卡方。</p>
+<h3>3.2 推导脉络</h3>
+<ol>
+<li>在时点 $t_i$，固定「共 $d_i$ 人出事、第 0 组 $n_{0i}$ 人在场、共 $n_i$ 人在场」，则第 0 组死亡数 $d_{0i}$ 服从<strong>超几何分布</strong>，均值 $e_{0i}=n_{0i}d_i/n_i$、方差 $v_i$（上式）。</li>
+<li>各时点独立（条件于风险集），故 $U_0=\sum(d_{0i}-e_{0i})$ 均值 0、方差 $\sum v_i$。</li>
+<li>由中心极限定理 $U_0/\sqrt{\sum v_i}\approx N(0,1)$，平方即 $\chi^2_{(1)}$。</li>
+<li>$K$ 组推广：构造 $(K-1)$ 维向量 $\mathbf U$ 与协方差阵 $\mathbf V$，统计量 $\mathbf U^\top\mathbf V^{-}\mathbf U\sim\chi^2_{(K-1)}$。</li>
+</ol>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：分组变量。</li>
-<li>因变量类型：时间到事件结局。</li>
-<li>数据结构：每行一个个体，含 <code>time</code>、<code>event</code>、<code>group</code>。</li>
-<li>是否适合高维数据：不适合。</li>
-<li>是否适合缺失较多数据：需先处理时间 / 事件缺失。</li>
-<li>是否适合删失数据：适合。</li>
-<li>是否适合重复测量数据：不适用。</li>
+<li>$n_{ki}$：时点 $t_i$ 第 $k$ 组在场（at risk）人数。</li>
+<li>$d_{ki}$、$d_i$：时点 $t_i$ 第 $k$ 组、以及合计的事件数。</li>
+<li>$e_{0i}$：零假设下第 0 组的期望事件数。</li>
+<li>$U_0$：观察减期望的累积；符号指示哪组「超额死亡」。</li>
+<li>$O/E$ 比：常报告各组 $\sum d_{ki}/\sum e_{ki}$，直观显示哪组死得比预期多。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>Log-rank 检验直接作用在分组生存数据上，例如：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>非信息性删失</td>
+<td>删失与预后无关</td>
+<td>检验有偏，p 值不可信</td>
+<td>比较删失者与在随访者特征</td>
+</tr>
+<tr>
+<td>比例风险（隐含最优性）</td>
+<td>组间风险比大致恒定</td>
+<td>曲线交叉时检验力骤降</td>
+<td>看 KM 曲线是否交叉</td>
+</tr>
+<tr>
+<td>个体独立</td>
+<td>事件时间互不影响</td>
+<td>方差低估、p 值偏小</td>
+<td>看设计（配对/聚集需分层或分层 log-rank）</td>
+</tr>
+<tr>
+<td>事件时点定义清晰</td>
+<td>时间与事件编码一致</td>
+<td>列联表构造错误</td>
+<td>核对 time/event 编码</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>沿用生存分析卡的同一份数据，分两组（月，<code>+</code> 为删失）：</p>
+<ul>
+<li><strong>对照组 C</strong>：2, 4, 6+, 8, 10+</li>
+<li><strong>治疗组 T</strong>：5, 7+, 9, 12+, 14+</li>
+</ul>
+<p>对<strong>对照组（第 0 组）</strong>在每个事件时点建表，计算观察减期望：</p>
+<table>
+<thead>
+<tr>
+<th>事件时点 $t_i$</th>
+<th>$n_{Ci}$</th>
+<th>$n_{Ti}$</th>
+<th>$n_i$</th>
+<th>死者在哪组</th>
+<th>$d_i$</th>
+<th>$d_{Ci}$</th>
+<th>期望 $e_{Ci}=n_{Ci}d_i/n_i$</th>
+<th>$d_{Ci}-e_{Ci}$</th>
+<th>方差 $v_i$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>5</td>
+<td>5</td>
+<td>10</td>
+<td>C</td>
+<td>1</td>
+<td>1</td>
+<td>5×1/10 = 0.500</td>
+<td>+0.500</td>
+<td>0.2500</td>
+</tr>
+<tr>
+<td>4</td>
+<td>4</td>
+<td>5</td>
+<td>9</td>
+<td>C</td>
+<td>1</td>
+<td>1</td>
+<td>4×1/9 = 0.444</td>
+<td>+0.556</td>
+<td>0.2469</td>
+</tr>
+<tr>
+<td>5</td>
+<td>3</td>
+<td>5</td>
+<td>8</td>
+<td>T</td>
+<td>1</td>
+<td>0</td>
+<td>3×1/8 = 0.375</td>
+<td>−0.375</td>
+<td>0.2344</td>
+</tr>
+<tr>
+<td>8</td>
+<td>2</td>
+<td>3</td>
+<td>5</td>
+<td>C</td>
+<td>1</td>
+<td>1</td>
+<td>2×1/5 = 0.400</td>
+<td>+0.600</td>
+<td>0.2400</td>
+</tr>
+<tr>
+<td>9</td>
+<td>1</td>
+<td>3</td>
+<td>4</td>
+<td>T</td>
+<td>1</td>
+<td>0</td>
+<td>1×1/4 = 0.250</td>
+<td>−0.250</td>
+<td>0.1875</td>
+</tr>
+</tbody>
+</table>
+<p>（删失时点 6+、7+、10+、12+、14+ 不建表，只让下一时点的在场人数相应减少。）</p>
+<p><strong>累加：</strong></p>
+<ul>
+<li>对照组观察事件数 $O_C=3$，期望 $E_C=0.500+0.444+0.375+0.400+0.250=1.969$。</li>
+<li>$U_C=O_C-E_C=3-1.969=1.031$。</li>
+<li>$V=\sum v_i=0.2500+0.2469+0.2344+0.2400+0.1875=1.159$。</li>
+<li>卡方 $\chi^2=U_C^2/V=1.031^2/1.159=\mathbf{0.917}$，df=1。</li>
+<li>查表 $p\approx 0.34$（$z=U_C/\sqrt V=0.957$）。</li>
+</ul>
+<p><strong>结论：</strong> 对照组实际死了 3 人，而「若两组生存相同」只期望死约 2.0 人——对照组略有超额死亡，方向上治疗组更好，但 $p=0.34\gt 0.05$，差异不显著。这正是小样本（各 5 人、共 5 个事件）的典型结局：即使方向对，证据也不足以下结论。（注：本例数据在 <a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a> 卡中拟合出 HR≈0.42，其 score 检验的卡方恰等于这里的 0.917——log-rank 与 Cox 同源的直接印证。）</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：一个分组变量（两类或多类）。</li>
+<li>因变量类型：时间到事件（time + event）。</li>
+<li>数据结构：每行一个个体，含 <code>time</code>、<code>event</code>、<code>group</code>。</li>
+<li>是否适合高维数据：不适合（只比较分组）。</li>
+<li>是否适合缺失较多数据：time/event 缺失需先处理。</li>
+<li>是否适合删失数据：适合右删失。</li>
+<li>是否适合重复测量数据：不适用；聚集数据用分层或稳健版本。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<p>Log-rank 直接作用于带分组的生存数据：</p>
 <table>
 <thead>
 <tr>
@@ -127,22 +276,6 @@ $$</p>
 <td>1</td>
 </tr>
 <tr>
-<td>6238</td>
-<td>8766</td>
-<td>0</td>
-<td>1</td>
-<td>28.73</td>
-<td>1</td>
-</tr>
-<tr>
-<td>9428</td>
-<td>8766</td>
-<td>0</td>
-<td>0</td>
-<td>25.34</td>
-<td>1</td>
-</tr>
-<tr>
 <td>10552</td>
 <td>2956</td>
 <td>1</td>
@@ -160,118 +293,145 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<p>在按性别分组比较时，检验结果可写作：</p>
-<ul>
-<li>$\chi^2 = 78.9$</li>
-<li>df = 1</li>
-<li>$p &lt; 2\times 10^{-16}$</li>
-</ul>
-<h3>3.3 输入与产出</h3>
+<p>按性别分组的典型输出：$\chi^2=78.9$，df=1，$p\lt 2\times10^{-16}$。</p>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：事件时间、事件指示变量、分组变量。</li>
+<li>输入数据：事件时间、事件指示、分组变量。</li>
 <li>关键变量：<code>time</code>、<code>event</code>、<code>group</code>。</li>
-<li>需要预处理的内容：删失编码、分组变量清洗、风险集核对。</li>
+<li>需要预处理的内容：删失编码、分组变量清洗、必要时确定分层变量。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：检验统计量、自由度、p 值。</li>
-<li>参数估计：无回归系数。</li>
+<li>模型对象/统计结果：卡方统计量、自由度、p 值。</li>
+<li>参数估计：无回归系数（可报各组 O/E 比作效应方向参考）。</li>
 <li>预测结果：无。</li>
-<li>不确定性指标：主要是检验统计量和 p 值。</li>
+<li>不确定性指标：主要是 p 值；效应量需配 KM 曲线或 Cox 的 HR。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：比较两组或多组生存曲线。</li>
-<li>不适合：需要同时调整多个协变量；生存曲线严重交叉时。</li>
-<li>使用前需要特别检查的点：删失模式、曲线交叉、是否更适合加权 log-rank。</li>
+<li>适合：比较两组或多组整体生存差异，尤其风险比大致恒定时。</li>
+<li>不适合：生存曲线明显交叉（早晚期效应反向）；需要调整混杂协变量；想要效应量。</li>
+<li>使用前需要特别检查的点：先画 KM 看曲线是否交叉；删失模式；是否需要分层 log-rank（控制中心/分期等）。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="log-rank-test" data-i="0">Python</button><button class="codetab" data-uid="log-rank-test" data-i="1">R</button></div><div class="codepanel active" data-uid="log-rank-test" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>lifelines</code></li>
 </ul>
-<pre><code class="language-python">from lifelines.statistics import logrank_test
+<pre><code class="language-python">from lifelines.statistics import logrank_test, multivariate_logrank_test
 
-res = logrank_test(
-    durations_A=df_A[&quot;TIMEDTH&quot;],
-    durations_B=df_B[&quot;TIMEDTH&quot;],
-    event_observed_A=df_A[&quot;DEATH&quot;],
-    event_observed_B=df_B[&quot;DEATH&quot;]
-)
+# 两组
+res = logrank_test(df_A[&quot;time&quot;], df_B[&quot;time&quot;],
+                   event_observed_A=df_A[&quot;event&quot;],
+                   event_observed_B=df_B[&quot;event&quot;])
 print(res.test_statistic, res.p_value)
+
+# 多组:一行完成
+res_k = multivariate_logrank_test(df[&quot;time&quot;], df[&quot;group&quot;], df[&quot;event&quot;])
+res_k.print_summary()
 </code></pre></div><div class="codepanel" data-uid="log-rank-test" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>survival</code></li>
 </ul>
 <pre><code class="language-r">library(survival)
 
-res &lt;- survdiff(Surv(TIMEDTH, DEATH) ~ sex_label, data = df)
-res
+# rho=0 为标准 log-rank; rho=1 为 Peto-Peto(Wilcoxon 型,强调早期)
+res &lt;- survdiff(Surv(TIMEDTH, DEATH) ~ sex_label, data = df, rho = 0)
+res                       # 输出 N / Observed / Expected / chisq / p
+
+# 分层 log-rank:在 strata() 内控制协变量(如研究中心)
+survdiff(Surv(TIMEDTH, DEATH) ~ sex_label + strata(center), data = df)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：p 值和组间生存曲线分离方向。</li>
-<li>每个主要参数如何解释：若 p 值很小，说明至少两组生存分布存在显著差异。</li>
-<li>临床或医学意义如何表达：通常需要和 Kaplan-Meier 曲线一起呈现。</li>
-<li>常见误读：显著差异不等于已调整混杂；曲线交叉时检验力会下降。</li>
+<li>核心结果看什么：p 值 + 各组 Observed vs Expected（哪组超额死亡）+ KM 曲线的分离方向。</li>
+<li>每个主要参数如何解读：$p\lt 0.05$ 说明至少两组生存分布不同；$O_C/E_C\gt 1$ 说明该组死得比预期多（预后差）。</li>
+<li>临床或医学意义如何表达：必须与 KM 曲线一起呈现，并补充效应量（HR 或某时点生存率差），单独一个 p 值信息量不足。</li>
+<li>常见误读：显著≠已调整混杂；不显著≠两组相同（可能只是样本小，如本例）；曲线交叉时 p 值大不代表无差异，而是 log-rank 失灵。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
       <div class="sec-body"><ul>
-<li>分组 Kaplan-Meier 曲线。</li>
-<li>加权 log-rank 对比示意。</li>
-<li>不同组的风险表。</li>
+<li>曲线交叉：先看 KM。若交叉，标准 log-rank 检验力骤降，改用加权 log-rank（Fleming-Harrington $\rho,\gamma$）或考虑限制平均生存时间（RMST）差异检验。</li>
+<li>早期/晚期差异：若关心早期差异用 Wilcoxon-Breslow/Peto 加权（给早期事件更大权重）；标准 log-rank 对晚期更敏感。</li>
+<li>混杂：log-rank 不能调整协变量——用分层 log-rank 控制少数分类混杂，或改用 Cox 回归。</li>
+<li>聚集/配对数据：独立性被破坏，用分层或稳健方差版本。</li>
+<li>多重比较：多组两两 log-rank 需校正（如 Bonferroni）。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>分组 KM 曲线 + 风险集人数表 + log-rank p 值：生存比较的标准配图。</li>
+<li>各组 O/E 条形或表：直观显示哪组超额死亡。</li>
+<li>标准 vs 加权 log-rank 对照：当曲线形态复杂时展示结论稳健性。</li>
 </ul>
-<h3>7.1 图像示例</h3>
+<h3>10.1 图像示例</h3>
 <p>下图给出两组生存曲线对比，是 Log-rank 检验最常见的可视化背景。</p>
 <p><img alt="" src="img/km_survival_by_sex.png" /></p></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>非参数、标准、实现简单。</li>
-<li>能自然处理删失。</li>
-<li>与 Kaplan-Meier 曲线组合非常常见。</li>
+<li>非参数、标准、实现简单，是生存组间比较的默认检验。</li>
+<li>正确处理右删失，综合利用全部事件时点。</li>
+<li>比例风险差异下检验力最优。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>不能调整多个协变量。</li>
-<li>对曲线交叉不敏感或检验力下降。</li>
-<li>主要对 PH 型差异最有力。</li>
+<li>只给 p 值，不给效应量。</li>
+<li>不能调整协变量。</li>
+<li>曲线交叉时检验力大幅下降。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>把 Log-rank 当作任意生存差异的万能检验。</li>
-<li>不画曲线只报 p 值。</li>
-<li>在强混杂场景下不进一步做 Cox 模型。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 Kaplan-Meier 的区别：KM 用于估计曲线，Log-rank 用于比较曲线。</li>
-<li>和 Cox 模型的区别：Cox 可调整协变量；Log-rank 主要用于分组比较。</li>
-<li>和加权 Log-rank 的区别：后者在早期 / 晚期差异上可更有针对性。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>比较不同治疗方案的整体生存差异。</li>
-<li>比较高低风险组的时间到事件分布。</li>
-<li>生存分析报告中的初步组间检验。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 生存曲线是生存分析中最经典的非参数估计方法，用于在存在删失时估计生存函数 $S(t)=P(T&gt;t)$。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a></li>
-<li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 比例风险模型是最常用的生存回归模型，在不指定基线风险函数具体形式的情况下，估计协变量对危险率的相对影响。">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
+<li>只报 p 值不画 KM 曲线。</li>
+<li>把它当作「任意生存差异」的万能检验（交叉时会漏检）。</li>
+<li>强混杂场景下不进一步做 Cox。</li>
+<li>多组两两比较不做多重比较校正。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 把「活过时刻 $t$」拆成一串「活过每个事件时点」的条件概率连乘——删失者在退出前为每个分母出力、退出后安静离场，删失携带的信息被用尽而不被误用。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a>：KM 估计并画出曲线，log-rank 检验曲线是否不同——一画一验，配套使用。</li>
+<li>和 <a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a>：单二分类协变量时 log-rank ≈ Cox 的 score 检验；Cox 额外给 HR 和调整能力。需要效应量或调整混杂时用 Cox。</li>
+<li>和 <a class="xlink" href="m-mantel-haenszel-test.html" data-cn="Mantel-Haenszel检验" data-en="Mantel-Haenszel Test" data-def="Mantel-Haenszel 把数据按一个混杂因素（如年龄）分层，在每一层里干净地看暴露与结局的关联，再把各层的关联加权合并成一个「已调整」的比值比——从而在不建回归模型的情况下控制混杂。">Mantel-Haenszel检验（Mantel-Haenszel Test）</a>：log-rank 是按事件时点分层的 Mantel-Haenszel。</li>
+<li>和加权 log-rank：曲线交叉或关心特定时段时选加权版。</li>
+<li>如何选择：<strong>先 KM 看形状；不交叉、只需 p 值用标准 log-rank；需效应量或调混杂转 Cox；曲线交叉转加权 log-rank 或 RMST</strong>。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>随机对照试验主要生存终点的组间检验（配 KM 主图）。</li>
+<li>不同风险分层/分期人群时间到事件分布的比较。</li>
+<li>观察性研究中暴露组与非暴露组生存差异的初步筛查。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>超几何分布（Hypergeometric distribution）</strong>：从固定「成功/失败」总体中不放回抽样的分布，log-rank 每个时点期望与方差的来源。</li>
+<li><strong>观察减期望（Observed − Expected, O−E）</strong>：某组实际事件数减去零假设下期望事件数，log-rank 统计量的核心。</li>
+<li><strong>风险集（Risk set）</strong>：某时点仍在场（未事件未删失）的个体集合。</li>
+<li><strong>分层 log-rank（Stratified log-rank）</strong>：在层内计算 O−E 再合并，用于控制分类混杂。</li>
+<li><strong>加权 log-rank（Weighted log-rank）</strong>：给不同时点事件不同权重（如 Peto-Peto 重早期），应对曲线交叉或特定时段关注。</li>
+<li><strong>限制平均生存时间（RMST）</strong>：生存曲线在 $[0,\tau]$ 下的面积，其组间差异是曲线交叉时的稳健替代量。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 把「活过时刻 $t$」拆成一串「活过每个事件时点」的条件概率连乘——删失者在退出前为每个分母出力、退出后安静离场，删失携带的信息被用尽而不被误用。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a></li>
+<li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
+<li><a class="xlink" href="m-nelson-aalen-estimator.html" data-cn="Nelson-Aalen累积风险估计" data-en="Nelson-Aalen Estimator" data-def="Nelson-Aalen 把每个事件时点的「即刻死亡率」$d_i/n_i$ 逐项累加成累积风险 $\hat H(t)$——它和 Kaplan-Meier 看同一份数据，只是把「连乘存活率」换成了「累加风险」，加法尺度让它成为估计风险率、比较">Nelson-Aalen累积风险估计（Nelson-Aalen Estimator）</a></li>
+<li><a class="xlink" href="m-mantel-haenszel-test.html" data-cn="Mantel-Haenszel检验" data-en="Mantel-Haenszel Test" data-def="Mantel-Haenszel 把数据按一个混杂因素（如年龄）分层，在每一层里干净地看暴露与结局的关联，再把各层的关联加权合并成一个「已调整」的比值比——从而在不建回归模型的情况下控制混杂。">Mantel-Haenszel检验（Mantel-Haenszel Test）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Peto R, Peto J. Asymptotically efficient rank invariant test procedures. <em>J R Stat Soc Ser A</em>. 1972;135(2):185-207.</li>
+<li>Mantel N. Evaluation of survival data and two new rank order statistics arising in its consideration. <em>Cancer Chemother Rep</em>. 1966;50(3):163-170.</li>
 <li>Klein JP, Moeschberger ML. <em>Survival Analysis: Techniques for Censored and Truncated Data</em>. 2nd ed. Springer; 2003.</li>
 <li>R Core Team / survival package. <code>survdiff</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/survival/html/survdiff.html">https://stat.ethz.ch/R-manual/R-devel/library/survival/html/survdiff.html</a> （访问日期：2026-07-02）</li>
 </ul></div>

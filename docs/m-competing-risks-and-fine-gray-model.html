@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,55 +54,198 @@
     <div class="intro-note"><h1>竞争风险模型（Competing Risks and Fine-Gray Model）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>竞争风险分析处理“存在多种互斥结局、某一事件的发生会阻止其他事件发生”的生存数据。它用累积发生率函数（CIF）描述各事件的发生，并用 cause-specific Cox 或 Fine-Gray 亚分布风险模型做回归。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>当「死于别的原因」会永久阻止目标事件发生时，把竞争事件当普通删失会系统性高估目标事件的发生概率；竞争风险方法改用<strong>累积发生率函数（CIF）</strong>如实计数，并用 cause-specific Cox（问机制）或 Fine-Gray（问负担）两条路做回归。</p>
+<h3>1.2 定义</h3>
+<p>竞争风险分析处理「存在多种互斥结局、一种事件发生后其他事件不再可能」的时间到事件数据。它用 CIF 描述每类事件的累积发生概率，用<strong>病因别风险（cause-specific hazard）</strong>回归探究机制、用 <strong>Fine-Gray 亚分布风险</strong>回归直接建模 CIF，产出亚分布风险比（sHR）。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：当患者可能死于多种原因（或先发生别的事件）时，如何正确估计某一特定事件的发生概率与其影响因素。</li>
-<li>适用任务：竞争事件下的发生率估计、亚分布/病因别风险回归、预测特定事件累积概率。</li>
-<li>常见医学场景：肿瘤特异性死亡 vs 其他原因死亡、移植后复发 vs 非复发死亡、心血管事件 vs 全因死亡。</li>
+<li>研究问题：当患者可能先死于别的原因时，如何正确估计某一特定事件的真实发生概率及其影响因素？</li>
+<li>适用任务：竞争事件下的累积发生率估计、亚分布/病因别风险回归、特定事件累积概率预测。</li>
+<li>常见医学场景：肿瘤特异性死亡 vs 其他原因死亡、骨髓移植后复发 vs 非复发死亡、心血管事件 vs 全因死亡（尤其老年、多病共存人群竞争事件不可忽视）。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>若把竞争事件（如“其他原因死亡”）当作普通删失，用 1−KM 估某事件概率会系统性高估——因为已死于其他原因的人根本不可能再发生目标事件。竞争风险方法把这些人正确地留在风险集合的分母逻辑里，给出真实世界中的累积发生率。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>想象一个房间有两扇出口门：「目标门」（目标事件）和「竞争门」（如其他原因死亡）。每个人最终只从一扇门离开。若想估「从目标门出去」的概率，却把「从竞争门出去」的人当成「暂时离开、以后还会回来」（普通删失），就会高估目标门——因为这些人其实<strong>永远不会</strong>再从目标门出去了。竞争风险方法承认「从竞争门走的人已经出局」，只让还在房间里的人有机会走目标门，给出真实世界的累积发生率。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>事件 $k$ 的病因别风险与累积发生率函数（CIF）：</p>
-<p>$$
-\lambda_k(t)=\lim_{\Delta t\to 0}\frac{P(t\le T&lt;t+\Delta t,\,\varepsilon=k\mid T\ge t)}{\Delta t},\qquad
-F_k(t)=\int_0^t S(u^-)\,\lambda_k(u)\,du
-$$</p>
-<p>Fine-Gray 模型对亚分布风险建比例模型：</p>
-<p>$$
-\lambda_k^{\mathrm{sd}}(t\mid X)=\lambda_{k0}^{\mathrm{sd}}(t)\exp(X^\top\boldsymbol{\beta})
-$$</p>
-<p>其系数 $\exp(\beta)$ 为亚分布风险比（sHR），直接关联到 CIF。</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>标准生存分析（KM、Cox）背后有个隐含假设：被删失的人「以后仍可能发生事件」，只是我们没观测到。竞争事件违反了这个假设——死于其他原因的人<strong>根本不可能</strong>再发生目标事件。若强行把竞争事件当删失：</p>
 <ul>
-<li>$\lambda_k(t)$：病因别风险（cause-specific hazard），关注病因机制。</li>
-<li>$F_k(t)$：CIF，事件 $k$ 到时刻 $t$ 的累积发生概率。</li>
-<li>亚分布风险比 sHR：Fine-Gray 系数，反映协变量对 CIF 的作用。</li>
-<li>病因别 HR：对某一事件用 cause-specific Cox 得到的风险比。</li>
+<li>用 $1-\text{KM}$ 估目标事件发生率会<strong>高估</strong>（把已出局者当成「还会出事」）；</li>
+<li>各事件的 $1-\text{KM}$ 之和甚至可能<strong>超过 100%</strong>（逻辑上荒谬）。</li>
 </ul>
-<h3>2.3 关键假设</h3>
+<p>根本困难是：<strong>当一种事件会排除另一种事件时，如何给出加起来不超过 1、且反映真实世界的发生概率？</strong></p>
+<h3>2.2 关键洞察</h3>
+<p>引入<strong>累积发生率函数</strong> $F_k(t)=\int_0^t S(u^-)\lambda_k(u)\,du$：在时点 $u$ 增加的目标事件概率，必须先乘上「活到 $u$（还没被任何事件带走）」的总生存 $S(u^-)$。这个 $S(u^-)$ 因子把竞争事件的影响正确地扣了进来——它随任何一类事件发生而下降，因此已死于竞争事件的人自动不再贡献目标事件概率。于是各事件 CIF 之和恰好等于 $1-S(t)$（总发生概率），永不越界。回归有两条路：</p>
 <ul>
-<li>竞争事件互斥且定义清晰；每个个体最多观察到一种事件或删失。</li>
-<li>相应比例风险假设（cause-specific 或 subdistribution）成立。</li>
-<li>删失（真正的删失，非竞争事件）独立、非信息性。</li>
+<li><strong>cause-specific hazard</strong>：只在「还在场」的人里问某类事件的瞬时风险——回答<strong>机制/病因</strong>问题（这个因素是否加快该病因的风险）。</li>
+<li><strong>Fine-Gray 亚分布风险</strong>：巧妙地把「已发生竞争事件的人」保留在风险集里（当作「永不发生目标事件」），使模型系数直接连到 CIF——回答<strong>预测/负担</strong>问题（这个因素是否提高目标事件的累积发生率）。</li>
+</ul>
+<h3>2.3 与朴素/相邻做法的对比</h3>
+<ul>
+<li>相对 $1-$ <a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 把「活过时刻 $t$」拆成一串「活过每个事件时点」的条件概率连乘——删失者在退出前为每个分母出力、退出后安静离场，删失携带的信息被用尽而不被误用。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a>：KM 补法高估竞争风险下的发生率，CIF 是正确替代。</li>
+<li>相对标准 <a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a>：标准 Cox 把竞争事件删失，估的是 cause-specific hazard（机制），不能直接读成累积发生率；Fine-Gray 直接对 CIF 建模。</li>
+<li>相对 <a class="xlink" href="m-nelson-aalen-estimator.html" data-cn="Nelson-Aalen累积风险估计" data-en="Nelson-Aalen Estimator" data-def="Nelson-Aalen 把每个事件时点的「即刻死亡率」$d_i/n_i$ 逐项累加成累积风险 $\hat H(t)$——它和 Kaplan-Meier 看同一份数据，只是把「连乘存活率」换成了「累加风险」，加法尺度让它成为估计风险率、比较">Nelson-Aalen累积风险估计（Nelson-Aalen Estimator）</a>：NA 估累积风险，竞争风险聚焦累积发生率（概率）。</li>
+<li>cause-specific 与 Fine-Gray 不是二选一的对错，而是<strong>回答不同问题</strong>：机制用前者，预测/负担用后者，常需同时报告。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>事件 $k$ 的病因别风险与累积发生率函数（CIF）：</p>
+<p>$$
+\lambda_k(t)=\lim_{\Delta t\to 0}\frac{P(t\le T\lt t+\Delta t,\ \varepsilon=k\mid T\ge t)}{\Delta t},\qquad
+F_k(t)=\int_0^t S(u^-)\,\lambda_k(u)\,du
+$$</p>
+<p>这个式子在说：$\lambda_k$ 是「还在场的人里」发生第 $k$ 类事件的瞬时率；$F_k(t)$ 把每一刻新增的第 $k$ 类事件概率累加，但每一刻都要先乘「活到此刻」的总生存 $S(u^-)$，从而把竞争事件扣除。Fine-Gray 对<strong>亚分布风险</strong>建比例模型：</p>
+<p>$$
+\lambda_k^{\mathrm{sd}}(t\mid X)=\lambda_{k0}^{\mathrm{sd}}(t)\exp\!\bigl(X^\top\boldsymbol{\beta}\bigr)
+$$</p>
+<p>其系数 $\exp(\beta)$ 为<strong>亚分布风险比（sHR）</strong>，直接关联 CIF。</p>
+<h3>3.2 推导脉络</h3>
+<ol>
+<li>总生存 $S(t)=\exp\!\bigl(-\sum_k \int_0^t\lambda_k\bigr)$ 随<strong>任何</strong>事件下降。</li>
+<li>CIF 由 $S(u^-)\lambda_k(u)$ 累加，保证 $\sum_k F_k(t)=1-S(t)\le 1$。</li>
+<li>非参数估计：Aalen-Johansen 估计（KM 的多状态推广）给出 CIF。</li>
+<li>cause-specific Cox：把其他事件当删失，对 $\lambda_k$ 直接套 Cox。</li>
+<li>Fine-Gray：定义「亚分布风险集」——发生竞争事件的人<strong>不移出</strong>风险集（并赋随时间衰减的删失权重），使 $\beta$ 与 CIF 单调对应；对亚分布风险套比例模型。</li>
+</ol>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$\lambda_k(t)$：病因别风险（cause-specific hazard），机制导向。</li>
+<li>$F_k(t)$：CIF，事件 $k$ 到时刻 $t$ 的累积发生概率（真实世界口径）。</li>
+<li><strong>亚分布风险比 sHR</strong>：Fine-Gray 系数 $e^\beta$，反映协变量对 CIF 的作用（负担/预测）。</li>
+<li><strong>病因别 HR</strong>：cause-specific Cox 的 $e^\beta$，反映对瞬时病因风险的作用（机制）。</li>
+<li>二者可方向不一致：某因素可提高目标事件的病因风险，却因更强地提高竞争事件而使目标 CIF 反而下降。</li>
+</ul>
+<h3>3.4 关键假设（含违反后果）</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>事件互斥、编码清晰</td>
+<td>每人至多观察到一种事件或删失</td>
+<td>CIF/回归错乱</td>
+<td>核对 status 编码（0/1/2…）</td>
+</tr>
+<tr>
+<td>相应比例风险</td>
+<td>cause-specific 或 subdistribution 的 PH 成立</td>
+<td>HR/sHR 变时间平均、误导</td>
+<td>Schoenfeld 类残差、分时段</td>
+</tr>
+<tr>
+<td>真删失非信息性</td>
+<td>真正的删失（非竞争事件）与预后无关</td>
+<td>估计有偏</td>
+<td>比较删失者特征</td>
+</tr>
+<tr>
+<td>目标与分析问题匹配</td>
+<td>机制问题用 cause-specific、负担用 Fine-Gray</td>
+<td>误用模型误导结论</td>
+<td>明确研究问题再选模型</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>5 名患者，时间（月）与结局类型（1=目标事件，2=竞争事件，0=删失）：
+<strong>(1, 竞争), (2, 目标), (3, 竞争), (4, 目标), (5, 删失)</strong>。</p>
+<p><strong>先算总生存 $S(t)$（任何事件都让它下降），再累加 CIF。</strong></p>
+<table>
+<thead>
+<tr>
+<th>时点 $t$</th>
+<th>在场 $n$</th>
+<th>事件类型</th>
+<th>$S(t^-)$</th>
+<th>本步增量 $\Delta F=S(t^-)\cdot\frac1n$</th>
+<th>$F_1$（目标）</th>
+<th>$F_2$（竞争）</th>
+<th>更新 $S(t)$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>5</td>
+<td>竞争</td>
+<td>1.00</td>
+<td>1.00×1/5 = 0.20</td>
+<td>0.00</td>
+<td>0.20</td>
+<td>0.80</td>
+</tr>
+<tr>
+<td>2</td>
+<td>4</td>
+<td>目标</td>
+<td>0.80</td>
+<td>0.80×1/4 = 0.20</td>
+<td>0.20</td>
+<td>0.20</td>
+<td>0.60</td>
+</tr>
+<tr>
+<td>3</td>
+<td>3</td>
+<td>竞争</td>
+<td>0.60</td>
+<td>0.60×1/3 = 0.20</td>
+<td>0.20</td>
+<td>0.40</td>
+<td>0.40</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2</td>
+<td>目标</td>
+<td>0.40</td>
+<td>0.40×1/2 = 0.20</td>
+<td>0.40</td>
+<td>0.40</td>
+<td>0.20</td>
+</tr>
+<tr>
+<td>5</td>
+<td>1</td>
+<td>删失</td>
+<td>—</td>
+<td>—</td>
+<td>0.40</td>
+<td>0.40</td>
+<td>0.20</td>
+</tr>
+</tbody>
+</table>
+<p><strong>验算：</strong> $F_1(4)+F_2(4)=0.40+0.40=0.80=1-S(4)=1-0.20$ ✓ ——两条 CIF 之和恰好等于总发生概率，不越界。<strong>目标事件的正确累积发生率 = 0.40。</strong></p>
+<p><strong>对比错误做法（把竞争事件当删失，用 $1-\text{KM}$）：</strong></p>
+<ul>
+<li>目标事件 $1-\text{KM}$：事件时点 $t=2$（$n=4$）、$t=4$（$n=2$），$1-\tfrac{3}{4}\cdot\tfrac{1}{2}=1-0.375=\mathbf{0.625}$。</li>
+<li>竞争事件 $1-\text{KM}$：$t=1$（$n=5$）、$t=3$（$n=3$），$1-\tfrac{4}{5}\cdot\tfrac{2}{3}=1-0.533=\mathbf{0.467}$。</li>
+<li>两者相加 $0.625+0.467=\mathbf{1.09}\gt 1$ ——<strong>逻辑上不可能</strong>！</li>
+</ul>
+<p><strong>结论：</strong> 正确的目标事件累积发生率是 CIF 给的 <strong>0.40</strong>，而把竞争事件当删失的 $1-\text{KM}$ 报出 <strong>0.625</strong>，高估了逾一半，且两事件之和超过 100% 暴露了方法错误。竞争事件越常见，这种高估越严重——这正是竞争风险方法不可或缺的原因。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
 <li>自变量类型：连续、二分类、多分类。</li>
 <li>因变量类型：时间 + 多状态事件指示（0=删失，1=目标事件，2=竞争事件…）。</li>
-<li>数据结构：每行一个个体，含 time 与 event 编码（可含竞争事件编码）。</li>
+<li>数据结构：每行一个个体，含 time 与多类别 status。</li>
 <li>是否适合高维数据：可扩展，需谨慎与正则化。</li>
 <li>是否适合缺失较多数据：需先处理缺失。</li>
-<li>是否适合删失数据：专为“删失 + 竞争事件”设计。</li>
+<li>是否适合删失数据：专为「真删失 + 竞争事件」设计。</li>
 <li>是否适合重复测量数据：多事件/复发需多状态或频率模型扩展。</li>
 </ul>
-<h3>3.2 示例表格</h3>
+<h3>5.2 示例表格</h3>
 <table>
 <thead>
 <tr>
@@ -144,29 +287,29 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
 <li>输入数据：time、多类别 status、协变量。</li>
-<li>关键变量：目标事件编码、竞争事件编码、删失编码。</li>
-<li>需要预处理的内容：正确区分删失与竞争事件、选定目标事件。</li>
+<li>关键变量：目标事件编码、竞争事件编码、真删失编码。</li>
+<li>需要预处理的内容：正确区分真删失与竞争事件、选定目标事件、明确分析问题（机制/负担）。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：CIF 估计、cause-specific HR 或 sHR。</li>
-<li>参数估计：$\boldsymbol{\beta}$、sHR。</li>
-<li>预测结果：给定协变量的特定事件累积发生概率。</li>
-<li>不确定性指标：CIF 置信带、HR/sHR 区间、Gray 检验。</li>
+<li>模型对象/统计结果：各事件 CIF、cause-specific HR 或 sHR、Gray 检验。</li>
+<li>参数估计：$\boldsymbol\beta$、sHR / cause-specific HR。</li>
+<li>预测结果：给定协变量的特定事件累积发生概率曲线。</li>
+<li>不确定性指标：CIF 置信带、HR/sHR 区间、Gray 检验 p 值。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：存在不可忽视竞争事件的生存数据、需要真实累积发生概率或其影响因素。</li>
-<li>不适合：无竞争事件（普通生存分析即可）、竞争事件极罕见可忽略时。</li>
-<li>使用前需要特别检查的点：分析目标是病因机制还是预测、相应比例风险假设、事件编码是否正确。</li>
+<li>适合：存在不可忽视竞争事件的生存数据，需真实累积发生概率或其影响因素。</li>
+<li>不适合：无竞争事件（普通生存分析即可）；竞争事件极罕见可忽略。</li>
+<li>使用前需要特别检查的点：分析目标是机制还是预测、相应 PH 假设、事件编码是否正确区分删失与竞争。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="competing-risks-and-fine-gray-model" data-i="0">Python</button><button class="codetab" data-uid="competing-risks-and-fine-gray-model" data-i="1">R</button></div><div class="codepanel active" data-uid="competing-risks-and-fine-gray-model" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>lifelines</code></li>
@@ -175,9 +318,14 @@ $$</p>
 
 # T: 时间; E: 事件类型(0删失,1目标,2竞争)
 ajf = AalenJohansenFitter()
-ajf.fit(T, E, event_of_interest=1)   # 目标事件的 CIF
+ajf.fit(T, E, event_of_interest=1)     # 目标事件的 CIF(正确, 非 1-KM)
 ajf.plot()
 print(ajf.cumulative_density_.tail())
+
+# 病因别 Cox: 把竞争事件当删失, 对 λ_1 建模(机制)
+from lifelines import CoxPHFitter
+df_cs = df.assign(event1=(df[&quot;E&quot;] == 1).astype(int))
+CoxPHFitter().fit(df_cs, &quot;T&quot;, &quot;event1&quot;).print_summary()
 </code></pre></div><div class="codepanel" data-uid="competing-risks-and-fine-gray-model" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>cmprsk</code></li>
@@ -185,73 +333,97 @@ print(ajf.cumulative_density_.tail())
 <pre><code class="language-r">library(cmprsk)
 
 # ftime: 时间; fstatus: 0删失/1目标/2竞争
-ci &lt;- cuminc(ftime = df$ftime, fstatus = df$fstatus)  # CIF 与 Gray 检验
+ci &lt;- cuminc(ftime = df$ftime, fstatus = df$fstatus)   # CIF + Gray 检验
 plot(ci)
 
-# Fine-Gray 亚分布风险回归(目标事件=1)
+# Fine-Gray 亚分布风险回归(目标事件=1) -&gt; sHR(负担/预测)
 cov &lt;- model.matrix(~ treat + age, df)[, -1]
-fg &lt;- crr(df$ftime, df$fstatus, cov1 = cov, failcode = 1, cencode = 0)
-summary(fg)   # 亚分布风险比 sHR
+fg  &lt;- crr(df$ftime, df$fstatus, cov1 = cov, failcode = 1, cencode = 0)
+summary(fg)               # exp(coef) = 亚分布风险比 sHR
+
+# 机制路径: survival::coxph 把竞争事件当删失得 cause-specific HR
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：各事件 CIF 曲线、目标事件的 sHR 或 cause-specific HR、Gray 检验。</li>
-<li>每个主要参数如何解释：sHR&gt;1 表示该因素提高目标事件的累积发生率；cause-specific HR 反映对瞬时病因风险的作用。</li>
-<li>临床或医学意义如何表达：区分“机制问题用 cause-specific、预测/负担问题用 Fine-Gray”，并说明所报的是哪种。</li>
-<li>常见误读：用 1−KM 报竞争风险下的发生率（高估）；把 sHR 当成 cause-specific HR；忽视竞争事件直接删失。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>各事件的累积发生率函数（CIF）叠加图。</li>
-<li>按组别的 CIF 对比（配 Gray 检验）。</li>
-<li>sHR 森林图。</li>
-</ul></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：各事件 CIF 曲线、目标事件的 sHR（负担）或 cause-specific HR（机制）、Gray 检验。</li>
+<li>每个主要参数如何解读：sHR&gt;1 表示该因素提高目标事件的累积发生率；cause-specific HR&gt;1 表示提高目标事件的瞬时病因风险。二者可方向相反。</li>
+<li>临床或医学意义如何表达：明确区分「机制问题→cause-specific」「预测/负担问题→Fine-Gray」，并说明报的是哪种、CIF 是真实世界口径。</li>
+<li>常见误读：用 $1-\text{KM}$ 报竞争风险下发生率（高估）；把 sHR 当 cause-specific HR；把竞争事件直接删失。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>亚分布/病因别 PH：类 Schoenfeld 残差检验；违反时分时段或加时间交互。</li>
+<li>模型选择与问题匹配：先明确是机制还是预测，再选 cause-specific 或 Fine-Gray——这是最常见的「用错模型」根源。</li>
+<li>敏感性：同时报两类模型，看结论是否稳健、方向是否一致（不一致本身是重要发现）。</li>
+<li>竞争事件占比：占比越高，忽视竞争风险的偏差越大，越需 CIF/Fine-Gray。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>各事件 CIF 叠加图：一图看全目标与竞争事件的累积发生。</li>
+<li>按组别的 CIF 对比（配 Gray 检验）：展示协变量对累积发生率的影响。</li>
+<li>sHR 森林图：Fine-Gray 各协变量的亚分布效应。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>正确估计竞争事件下的真实累积发生概率。</li>
-<li>提供机制导向（cause-specific）与预测导向（Fine-Gray）两条路径。</li>
-<li>有配套的组间检验（Gray）与回归框架。</li>
+<li>正确估计竞争事件下的真实累积发生概率（各事件 CIF 之和 $=1-S$，不越界）。</li>
+<li>提供机制导向（cause-specific）与预测导向（Fine-Gray）两条互补路径。</li>
+<li>配套组间检验（Gray）与回归框架完整。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>两类模型解释不同，误用会误导结论。</li>
-<li>Fine-Gray 的“风险集合”定义不直观，机制解释受限。</li>
-<li>比例（亚分布）风险假设可能不成立。</li>
+<li>两类模型解释不同，误用易误导。</li>
+<li>Fine-Gray 的「亚分布风险集」保留已发生竞争事件者，机制解释不直观。</li>
+<li>相应比例（亚分布）风险假设可能不成立。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>把竞争事件当普通删失、用 KM/标准 Cox。</li>
+<li>把竞争事件当普通删失、用 KM/标准 Cox 报累积发生率。</li>
 <li>混淆 sHR 与 cause-specific HR。</li>
 <li>只报一种模型而不说明分析目标。</li>
 </ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 生存曲线是生存分析中最经典的非参数估计方法，用于在存在删失时估计生存函数 $S(t)=P(T&gt;t)$。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a> 的区别：KM 在竞争风险下会高估单事件累积发生率，应改用 CIF。</li>
-<li>和 <a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 比例风险模型是最常用的生存回归模型，在不指定基线风险函数具体形式的情况下，估计协变量对危险率的相对影响。">Cox比例风险模型（Cox Proportional Hazards Model）</a> 的区别：标准 Cox 把竞争事件删失，Fine-Gray 直接对 CIF 建模；cause-specific Cox 用于病因机制。</li>
-<li>和 <a class="xlink" href="m-nelson-aalen-estimator.html" data-cn="Nelson-Aalen累积风险估计" data-en="Nelson-Aalen Estimator" data-def="Nelson-Aalen 估计是生存分析中对累积风险函数 $H(t)$ 的经典非参数估计方法。">Nelson-Aalen累积风险估计（Nelson-Aalen Estimator）</a> 的区别：Nelson-Aalen 估累积风险，竞争风险聚焦累积发生率 CIF。</li>
+<li>和 <a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 把「活过时刻 $t$」拆成一串「活过每个事件时点」的条件概率连乘——删失者在退出前为每个分母出力、退出后安静离场，删失携带的信息被用尽而不被误用。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a>：竞争风险下 KM 的 $1-\text{KM}$ 高估单事件累积发生率，应改用 CIF（Aalen-Johansen）。</li>
+<li>和 <a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a>：标准 Cox 把竞争事件删失得 cause-specific HR（机制）；Fine-Gray 直接对 CIF 建模得 sHR（负担）。</li>
+<li>和 <a class="xlink" href="m-nelson-aalen-estimator.html" data-cn="Nelson-Aalen累积风险估计" data-en="Nelson-Aalen Estimator" data-def="Nelson-Aalen 把每个事件时点的「即刻死亡率」$d_i/n_i$ 逐项累加成累积风险 $\hat H(t)$——它和 Kaplan-Meier 看同一份数据，只是把「连乘存活率」换成了「累加风险」，加法尺度让它成为估计风险率、比较">Nelson-Aalen累积风险估计（Nelson-Aalen Estimator）</a>：NA 估累积风险，竞争风险聚焦累积发生率 CIF（概率）。</li>
+<li>和 <a class="xlink" href="m-log-rank-test.html" data-cn="Log-rank检验" data-en="Log-rank Test" data-def="Log-rank 检验在每个事件时点摆出一张 2×2 列联表，问「若两组生存真的相同，这组该死几个」，把「实际死的 − 期望死的」沿时间累加——总差距显著偏离 0，就说明两组生存曲线不同。">Log-rank检验（Log-rank Test）</a>：组间 CIF 比较用 Gray 检验（log-rank 的竞争风险版）。</li>
+<li>如何选择：<strong>先判断有无不可忽视的竞争事件；有则机制问题用 cause-specific Cox、负担/预测问题用 Fine-Gray，并用 CIF 而非 1−KM 报发生率</strong>。</li>
 </ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
       <div class="sec-body"><ul>
-<li>肿瘤研究中肿瘤特异性死亡与其他死因的区分分析。</li>
-<li>移植/血液病中复发与非复发死亡的竞争风险评估。</li>
+<li>肿瘤研究中肿瘤特异性死亡 vs 其他死因的区分分析。</li>
+<li>移植/血液病中复发 vs 非复发死亡的竞争风险评估。</li>
 <li>老年或多病共存人群中特定事件累积发生率的估计。</li>
 </ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 生存曲线是生存分析中最经典的非参数估计方法，用于在存在删失时估计生存函数 $S(t)=P(T&gt;t)$。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a></li>
-<li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 比例风险模型是最常用的生存回归模型，在不指定基线风险函数具体形式的情况下，估计协变量对危险率的相对影响。">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
-<li><a class="xlink" href="m-nelson-aalen-estimator.html" data-cn="Nelson-Aalen累积风险估计" data-en="Nelson-Aalen Estimator" data-def="Nelson-Aalen 估计是生存分析中对累积风险函数 $H(t)$ 的经典非参数估计方法。">Nelson-Aalen累积风险估计（Nelson-Aalen Estimator）</a></li>
-<li><a class="xlink" href="m-accelerated-failure-time-aft-model.html" data-cn="加速失效时间模型" data-en="Accelerated Failure Time, AFT, Model" data-def="AFT 模型直接在生存时间尺度上建模，强调协变量如何“拉长”或“缩短”事件发生时间。">加速失效时间模型（Accelerated Failure Time, AFT, Model）</a></li>
+<li><strong>竞争事件（Competing event）</strong>：其发生会永久阻止目标事件发生的事件（如其他原因死亡）。</li>
+<li><strong>累积发生率函数（Cumulative incidence function, CIF）</strong>：$F_k(t)$，竞争风险下事件 $k$ 到 $t$ 的真实累积发生概率，各事件之和 $=1-S(t)$。</li>
+<li><strong>病因别风险（Cause-specific hazard）</strong>：在场者中某类事件的瞬时率，机制导向。</li>
+<li><strong>亚分布风险（Subdistribution hazard）</strong>：Fine-Gray 定义的、保留已发生竞争事件者于风险集的风险，直接连接 CIF。</li>
+<li><strong>亚分布风险比（sHR）</strong>：Fine-Gray 系数指数，反映对累积发生率的作用。</li>
+<li><strong>Aalen-Johansen 估计</strong>：CIF 的非参数估计，KM 的多状态推广。</li>
+<li><strong>Gray 检验（Gray's test）</strong>：竞争风险下比较组间 CIF 的检验，log-rank 的对应物。</li>
 </ul></div>
-    </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 把「活过时刻 $t$」拆成一串「活过每个事件时点」的条件概率连乘——删失者在退出前为每个分母出力、退出后安静离场，删失携带的信息被用尽而不被误用。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a></li>
+<li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
+<li><a class="xlink" href="m-nelson-aalen-estimator.html" data-cn="Nelson-Aalen累积风险估计" data-en="Nelson-Aalen Estimator" data-def="Nelson-Aalen 把每个事件时点的「即刻死亡率」$d_i/n_i$ 逐项累加成累积风险 $\hat H(t)$——它和 Kaplan-Meier 看同一份数据，只是把「连乘存活率」换成了「累加风险」，加法尺度让它成为估计风险率、比较">Nelson-Aalen累积风险估计（Nelson-Aalen Estimator）</a></li>
+<li><a class="xlink" href="m-accelerated-failure-time-aft-model.html" data-cn="加速失效时间模型" data-en="Accelerated Failure Time, AFT, Model" data-def="AFT 不动风险率、直接对生存时间本身建模：$\log T=X^\top\beta+\epsilon$，协变量的作用是把每个人的「生命时钟」整体拨快或拨慢——系数指数化就是时间比（time ratio），回答「事件时间被拉长/压缩了几倍」。">加速失效时间模型（Accelerated Failure Time, AFT, Model）</a></li>
+<li><a class="xlink" href="m-log-rank-test.html" data-cn="Log-rank检验" data-en="Log-rank Test" data-def="Log-rank 检验在每个事件时点摆出一张 2×2 列联表，问「若两组生存真的相同，这组该死几个」，把「实际死的 − 期望死的」沿时间累加——总差距显著偏离 0，就说明两组生存曲线不同。">Log-rank检验（Log-rank Test）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Fine JP, Gray RJ. A proportional hazards model for the subdistribution of a competing risk. <em>J Am Stat Assoc</em>. 1999;94(446):496-509.</li>
 <li>Austin PC, Lee DS, Fine JP. Introduction to the analysis of survival data in the presence of competing risks. <em>Circulation</em>. 2016;133(6):601-609.</li>

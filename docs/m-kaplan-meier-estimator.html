@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,53 +54,174 @@
     <div class="intro-note"><h1>Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>Kaplan-Meier 生存曲线是生存分析中最经典的非参数估计方法，用于在存在删失时估计生存函数 $S(t)=P(T&gt;t)$。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>Kaplan-Meier 把「活过时刻 $t$」拆成一串「活过每个事件时点」的条件概率<strong>连乘</strong>——删失者在退出前为每个分母出力、退出后安静离场，删失携带的信息被用尽而不被误用。</p>
+<h3>1.2 定义</h3>
+<p>Kaplan-Meier 估计（又称乘积极限估计，product-limit estimator）是在存在右删失时估计生存函数 $S(t)=P(T\gt t)$ 的经典非参数方法。它不假设生存时间服从任何分布，只在每个观察到事件的时点上更新估计，输出一条阶梯状下降的生存曲线。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：在不同时间点上，个体“仍未发生事件”的概率是多少。</li>
-<li>适用任务：描述时间到事件结局、给出生存概率曲线、中位生存时间。</li>
-<li>常见医学场景：全因死亡、生存率、复发前时间、装置失效时间。</li>
+<li>研究问题：随访到某个时间点，个体「仍未发生事件」的概率是多少？中位生存时间是多久？</li>
+<li>适用任务：时间到事件结局的描述性估计——生存曲线、任意时点生存率、中位生存时间；配合 <a class="xlink" href="m-log-rank-test.html" data-cn="Log-rank检验" data-en="Log-rank Test" data-def="Log-rank 检验在每个事件时点摆出一张 2×2 列联表，问「若两组生存真的相同，这组该死几个」，把「实际死的 − 期望死的」沿时间累加——总差距显著偏离 0，就说明两组生存曲线不同。">Log-rank检验（Log-rank Test）</a> 做组间比较。</li>
+<li>常见医学场景：肿瘤患者的总生存（OS）与无进展生存（PFS）曲线、术后复发前时间、植入装置失效时间。结局须为「时间 + 事件指示」形式的时间到事件数据，且几乎必然带右删失。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>Kaplan-Meier 曲线可以理解为“每发生一次事件就往下掉一格”，每次下降的幅度由该时点的事件数和风险集人数共同决定。删失不会让曲线下降，但会减少后续时点的风险集人数。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>想象一场跨年马拉松：想知道「跑满 8 小时仍在跑」的比例，但有些人中途被家人接走了（删失）——他们退出时还在跑，只是之后你看不到了。合理的算法是：每当有人<strong>倒下</strong>（事件），就问「此刻还在场的人里，倒下的占几分之几」，把「挺过这一关」的比例记下来；被接走的人在被接走之前算「在场」，之后不再进入任何分母。最后把每一关的「挺过率」连乘，就是「跑满 8 小时」的概率。KM 曲线因此长成阶梯形：每次事件掉一格，删失只做个小标记、不掉格。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>$$
-\hat S(t)
-=
-\prod_{t_i \le t}
-\left(1-\frac{d_i}{n_i}\right)
-$$</p>
-<p>其中 $n_i$ 为时点 $t_i$ 前仍在风险集中的人数，$d_i$ 为该时点发生事件的人数。</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>没有删失时，估计 $S(t)$ 很简单：数一数活过 $t$ 的人占几成。<strong>删失把这个简单比例毁掉了</strong>——对被删失者，我们只知道「至少活过删失时刻」，不知道之后如何。朴素补救全都有偏：</p>
 <ul>
-<li>$S(t)$：生存函数，表示事件时间超过 $t$ 的概率。</li>
-<li>$n_i$：时点 $t_i$ 前 at risk 的人数。</li>
-<li>$d_i$：时点 $t_i$ 发生事件的数目。</li>
-<li>Greenwood 公式：常用于估计 $\hat S(t)$ 的方差和区间。</li>
+<li><strong>丢掉删失者</strong>：留下的多是发生了事件的人，系统性<strong>低估</strong>生存；</li>
+<li><strong>把删失当事件</strong>：让「还活着的人」提前死亡，也<strong>低估</strong>生存；</li>
+<li><strong>把删失当活到天荒地老</strong>：又<strong>高估</strong>生存。</li>
 </ul>
-<h3>2.3 关键假设</h3>
+<p>根本困难是：如何让「他至少活过了 $c$」这条<strong>不完整但真实</strong>的信息，不多不少恰好贡献它该贡献的份额？</p>
+<h3>2.2 关键洞察</h3>
+<p>把无条件概率拆成条件概率的连乘：</p>
+<p>$$
+P(T\gt t_2)=P(T\gt t_1)\times P(T\gt t_2\mid T\gt t_1)
+$$</p>
+<p>每个条件概率 $P(T\gt t_i\mid T\gt t_{i-1})$ 只依赖「该时点还在风险集里的人中有几个出事」——这恰好是删失数据也能提供的信息：删失者在删失前对每个风险集分母都有效，删失后自然退出，不需要对他的未来做任何假设。<strong>「拆成条件概率」让删失从麻烦变成了可用信息</strong>。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>删失是独立 / 非信息性的。</li>
-<li>同一时间点定义清晰，事件状态编码正确。</li>
-<li>个体之间相互独立。</li>
+<li>相对<strong>简单比例（经验生存函数 / ECDF 的补）</strong>：无删失时 KM 与 $1-\text{ECDF}$ 完全相同；KM 是 ECDF 在删失数据上的推广。</li>
+<li>相对<strong>寿命表法（actuarial method）</strong>：寿命表把时间切成固定区间（如每年），KM 在每个精确事件时点更新，更充分利用连续随访数据。</li>
+<li>相对 <a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a>：KM 是无协变量的描述工具，只能按组画曲线；要调整多个协变量需上回归模型。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>$$
+\hat S(t)=\prod_{t_i \le t}\left(1-\frac{d_i}{n_i}\right)
+$$</p>
+<p>这个式子在说：把 $t$ 之前每个事件时点 $t_i$ 的「即刻死亡率」$d_i/n_i$ 换成「即刻存活率」$1-d_i/n_i$，然后全部连乘——「活到 $t$」就是「每一关都挺过去」。</p>
+<h3>3.2 推导脉络</h3>
+<ol>
+<li>只在观察到事件的时点 $t_1\lt t_2\lt\cdots$ 上考虑离散风险 $h_i=P(T=t_i\mid T\ge t_i)$。</li>
+<li>每个 $h_i$ 的自然估计是 $\hat h_i=d_i/n_i$（风险集中出事的比例）——这一步删失者已按「删失前在分母、删失后退出」正确计入。</li>
+<li>由条件概率连乘 $S(t)=\prod_{t_i\le t}(1-h_i)$ 代入 $\hat h_i$ 即得 KM 公式。可以证明它同时是删失数据下生存函数的非参数最大似然估计。</li>
+<li>方差用 <strong>Greenwood 公式</strong>：</li>
+</ol>
+<p>$$
+\widehat{\mathrm{Var}}[\hat S(t)]=\hat S(t)^2\sum_{t_i\le t}\frac{d_i}{n_i(n_i-d_i)}
+$$</p>
+<p>置信区间实践中常在 $\log(-\log S)$ 尺度上构造（R 的 <code>conf.type = &quot;log-log&quot;</code>），保证区间落在 $[0,1]$ 内。</p>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：可以无分组，也可加分组变量做分层曲线。</li>
-<li>因变量类型：时间到事件结局。</li>
-<li>数据结构：每行一个个体，至少有 <code>time</code> 和 <code>event</code> 两列。</li>
-<li>是否适合高维数据：不适合作为高维默认工具。</li>
-<li>是否适合缺失较多数据：可用，但时间或事件缺失需要单独处理。</li>
-<li>是否适合删失数据：非常适合。</li>
-<li>是否适合重复测量数据：不适合直接分析 time-varying covariates。</li>
+<li>$t_i$：第 $i$ 个<strong>观察到事件</strong>的时点（删失时点不引起更新）。</li>
+<li>$n_i$：$t_i$ 时刻前一瞬还在风险集（at risk）的人数——尚未发生事件、也尚未被删失。</li>
+<li>$d_i$：$t_i$ 时刻发生事件的人数。</li>
+<li>$\hat S(t)$：生存函数估计；<strong>中位生存时间</strong>是 $\hat S(t)$ 首次降到 0.5 及以下的时刻。</li>
+<li>无回归系数——KM 是纯描述性估计。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>下面是一个典型的生存数据结构示例：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>非信息性删失</td>
+<td>删失与预后无关（不是「病重才失访」）</td>
+<td>病重者先失访→高估生存；反之低估</td>
+<td>比较删失者与在随访者的基线特征</td>
+</tr>
+<tr>
+<td>个体独立</td>
+<td>各人的事件时间互不影响</td>
+<td>方差估计失真</td>
+<td>看设计（家系/中心聚集需谨慎）</td>
+</tr>
+<tr>
+<td>事件与时间定义清晰</td>
+<td>起点、终点、事件编码一致</td>
+<td>曲线整体错位</td>
+<td>核对 time 单位与 event 编码</td>
+</tr>
+<tr>
+<td>无竞争风险混入</td>
+<td>「其他原因死亡」未被当普通删失</td>
+<td>高估目标事件发生率</td>
+<td>若存在竞争事件改用 CIF（见 <a class="xlink" href="m-competing-risks-and-fine-gray-model.html" data-cn="竞争风险模型" data-en="Competing Risks and Fine-Gray Model" data-def="当「死于别的原因」会永久阻止目标事件发生时，把竞争事件当普通删失会系统性高估目标事件的发生概率；竞争风险方法改用累积发生率函数（CIF）如实计数，并用 cause-specific Cox（问机制）或 Fine-Gray（问负担）两条路做回">竞争风险模型（Competing Risks and Fine-Gray Model）</a>）</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>5 名对照组患者随访（单位：月），<code>+</code> 表示右删失：<strong>2, 4, 6+, 8, 10+</strong>。</p>
+<p>（本卡与 <a class="xlink" href="m-nelson-aalen-estimator.html" data-cn="Nelson-Aalen累积风险估计" data-en="Nelson-Aalen Estimator" data-def="Nelson-Aalen 把每个事件时点的「即刻死亡率」$d_i/n_i$ 逐项累加成累积风险 $\hat H(t)$——它和 Kaplan-Meier 看同一份数据，只是把「连乘存活率」换成了「累加风险」，加法尺度让它成为估计风险率、比较">Nelson-Aalen累积风险估计（Nelson-Aalen Estimator）</a>、<a class="xlink" href="m-log-rank-test.html" data-cn="Log-rank检验" data-en="Log-rank Test" data-def="Log-rank 检验在每个事件时点摆出一张 2×2 列联表，问「若两组生存真的相同，这组该死几个」，把「实际死的 − 期望死的」沿时间累加——总差距显著偏离 0，就说明两组生存曲线不同。">Log-rank检验（Log-rank Test）</a>、<a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a> 共用这套数据，可对照阅读。）</p>
+<p><strong>一步步计算：</strong></p>
+<table>
+<thead>
+<tr>
+<th>时点 $t_i$</th>
+<th>在场 $n_i$</th>
+<th>事件 $d_i$</th>
+<th>本关存活率 $1-d_i/n_i$</th>
+<th>$\hat S(t_i)$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>5</td>
+<td>1</td>
+<td>4/5 = 0.80</td>
+<td>0.80</td>
+</tr>
+<tr>
+<td>4</td>
+<td>4</td>
+<td>1</td>
+<td>3/4 = 0.75</td>
+<td>0.80×0.75 = <strong>0.60</strong></td>
+</tr>
+<tr>
+<td>6+</td>
+<td>（删失：$n$ 由 3 减为 2，曲线不掉）</td>
+<td>—</td>
+<td>—</td>
+<td>0.60</td>
+</tr>
+<tr>
+<td>8</td>
+<td>2</td>
+<td>1</td>
+<td>1/2 = 0.50</td>
+<td>0.60×0.50 = <strong>0.30</strong></td>
+</tr>
+<tr>
+<td>10+</td>
+<td>（删失，随访结束）</td>
+<td>—</td>
+<td>—</td>
+<td>0.30</td>
+</tr>
+</tbody>
+</table>
+<p>注意第 6 个月删失的那位：他为 $t=2$ 和 $t=4$ 的分母各出了一次力（我们确知他活过了这两关），但 $t=8$ 那关他不在分母里——我们不知道他第 8 个月的死活，KM 也不假装知道。</p>
+<p><strong>中位生存时间</strong>：$\hat S(t)$ 首次不超过 0.5 发生在 $t=8$（0.30），故中位生存时间 = 8 个月。</p>
+<p><strong>对比朴素做法</strong>：丢掉 2 名删失者只剩 3 人全部死亡，会得出「10 个月时生存率 0%」；把删失当事件同样在 10 个月归零。KM 给出的 30% 才正确使用了「删失者至少活到了 6 和 10 个月」的信息。</p>
+<p><strong>结论：</strong> 该组 4 个月生存率约 60%，8 个月生存率约 30%，中位生存 8 个月。曲线尾部只剩 1–2 人，末端的 0.30 不宜过度解读。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：可无分组；或加一个分组变量画分层曲线。</li>
+<li>因变量类型：时间到事件（time + event 两列）。</li>
+<li>数据结构：每行一个个体。</li>
+<li>是否适合高维数据：不涉及协变量建模，谈不上高维。</li>
+<li>是否适合缺失较多数据：time/event 缺失需先处理。</li>
+<li>是否适合删失数据：为右删失而生；左截断需扩展（延迟进入）。</li>
+<li>是否适合重复测量数据：不适合，时间依赖协变量需其他方法。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<p>Framingham 队列风格的生存数据（TIMEDTH=随访天数，DEATH=1 死亡/0 删失）：</p>
 <table>
 <thead>
 <tr>
@@ -130,14 +251,6 @@ $$</p>
 <td>1</td>
 </tr>
 <tr>
-<td>9428</td>
-<td>8766</td>
-<td>0</td>
-<td>0</td>
-<td>25.34</td>
-<td>1</td>
-</tr>
-<tr>
 <td>10552</td>
 <td>2956</td>
 <td>1</td>
@@ -153,39 +266,31 @@ $$</p>
 <td>23.10</td>
 <td>1</td>
 </tr>
-<tr>
-<td>11263</td>
-<td>8766</td>
-<td>0</td>
-<td>1</td>
-<td>30.30</td>
-<td>1</td>
-</tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：事件时间、事件指示变量、可选分组变量。</li>
+<li>输入数据：事件时间、事件指示（1 事件 / 0 删失）、可选分组变量。</li>
 <li>关键变量：<code>time</code>、<code>event</code>、<code>group</code>。</li>
-<li>需要预处理的内容：确认删失编码、时间单位、随访窗口。</li>
+<li>需要预处理的内容：确认删失编码方向、时间单位、随访起点定义一致。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：生存曲线、中位生存时间、任意时点的生存概率。</li>
-<li>参数估计：非参数估计，无回归系数。</li>
-<li>预测结果：生存概率曲线。</li>
-<li>不确定性指标：点位区间、置信带、Greenwood 标准误。</li>
+<li>模型对象/统计结果：阶梯状生存曲线、风险集人数表。</li>
+<li>参数估计：非参数，无回归系数。</li>
+<li>预测结果：任意时点生存率、中位生存时间及其区间。</li>
+<li>不确定性指标：Greenwood 标准误、log-log 置信区间/置信带。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：描述性生存分析、不同组的初步生存比较。</li>
-<li>不适合：需要调整多个协变量时；比例风险回归问题。</li>
-<li>使用前需要特别检查的点：删失比例、事件编码、时间单位、是否需要分层。</li>
+<li>适合：描述性生存分析、试验报告的主图、组间生存的初步比较（配 log-rank）。</li>
+<li>不适合：需要调整多个协变量（用 Cox）；存在竞争风险（用 CIF）；想要平滑的风险率曲线。</li>
+<li>使用前需要特别检查的点：删失比例与模式、事件编码、时间零点（入组？确诊？手术？）是否统一。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="kaplan-meier-estimator" data-i="0">Python</button><button class="codetab" data-uid="kaplan-meier-estimator" data-i="1">R</button></div><div class="codepanel active" data-uid="kaplan-meier-estimator" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>lifelines</code></li>
@@ -194,81 +299,117 @@ $$</p>
 
 km = KaplanMeierFitter()
 km.fit(durations=df[&quot;TIMEDTH&quot;], event_observed=df[&quot;DEATH&quot;])
-km.plot_survival_function()
-print(km.median_survival_time_)
+km.plot_survival_function()            # 阶梯曲线 + 置信带
+print(km.median_survival_time_)        # 中位生存时间
+print(km.survival_function_at_times([1825, 3650]))  # 5 年 / 10 年生存率
+
+# 分组曲线:按性别分别 fit 后画在同一坐标轴
+for sex, sub in df.groupby(&quot;SEX&quot;):
+    KaplanMeierFitter().fit(sub[&quot;TIMEDTH&quot;], sub[&quot;DEATH&quot;],
+                            label=f&quot;SEX={sex}&quot;).plot_survival_function()
 </code></pre></div><div class="codepanel" data-uid="kaplan-meier-estimator" data-i="1"><p>常用包：</p>
 <ul>
 <li><code>survival</code></li>
 </ul>
 <pre><code class="language-r">library(survival)
 
-fit &lt;- survfit(Surv(TIMEDTH, DEATH) ~ sex_label, data = df, conf.type = &quot;log-log&quot;)
-summary(fit)
-plot(fit)
+fit &lt;- survfit(Surv(TIMEDTH, DEATH) ~ sex_label, data = df,
+               conf.type = &quot;log-log&quot;)   # log-log 区间保证落在 [0,1]
+summary(fit, times = c(1825, 3650))     # 5 年 / 10 年生存率
+print(fit)                              # 各组中位生存时间
+plot(fit, mark.time = TRUE)             # mark.time 标出删失点
+# 更美观:survminer::ggsurvplot(fit, risk.table = TRUE)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：生存曲线形状、中位生存时间、分组曲线分离程度。</li>
-<li>每个主要参数如何解释：例如某时点 $S(t)=0.80$ 表示约 80% 个体在该时间点尚未发生事件。</li>
-<li>临床或医学意义如何表达：适合表达某治疗组或某人群的“保留事件自由状态”的概率。</li>
-<li>常见误读：Kaplan-Meier 曲线是生存概率，不是危险率；删失点不代表事件发生。</li>
+<li>核心结果看什么：曲线整体形状与下降速度、特定时点生存率、中位生存时间、组间曲线是否分离及何时分离。</li>
+<li>每个主要参数如何解读：$\hat S(1825)=0.80$ 读作「估计 80% 的个体在 5 年时尚未发生事件」；中位生存 8 年读作「估计一半个体在 8 年内发生事件」。</li>
+<li>临床或医学意义如何表达：报告「x 年生存率 xx%（95% CI …）」与中位生存时间；曲线须配各时点风险集人数表（number at risk）。</li>
+<li>常见误读：删失记号不是事件；曲线是<strong>生存概率</strong>不是危险率；尾部只剩几个人时的骤降常是假象；两组曲线分离不等于因果差异（未调整混杂）。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
       <div class="sec-body"><ul>
-<li>单组 Kaplan-Meier 曲线。</li>
-<li>分组 Kaplan-Meier 曲线。</li>
-<li>Kaplan-Meier 曲线加删失标记。</li>
+<li>非信息性删失无法用数据直接检验：比较删失者与继续随访者的基线特征、按删失原因做敏感性分析（极端情形：删失者全当事件/全当长期存活，看结论翻不翻转）。</li>
+<li>尾部不稳定：报告曲线时标注风险集人数，风险集低于 10–15 人的区段慎读；必要时截断展示时间轴。</li>
+<li>竞争风险检查：若「其他原因死亡」占比不小，用 1−KM 会高估目标事件累积发生率，应改用 Aalen-Johansen/CIF。</li>
+<li>组间比较不要只靠肉眼：配 <a class="xlink" href="m-log-rank-test.html" data-cn="Log-rank检验" data-en="Log-rank Test" data-def="Log-rank 检验在每个事件时点摆出一张 2×2 列联表，问「若两组生存真的相同，这组该死几个」，把「实际死的 − 期望死的」沿时间累加——总差距显著偏离 0，就说明两组生存曲线不同。">Log-rank检验（Log-rank Test）</a> 或 Cox 模型。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>分组 KM 曲线 + 删失记号 + 风险集人数表：一图看全生存差异与数据支撑。</li>
+<li>单组 KM 曲线 + 置信带：报告某人群的生存概况。</li>
+<li>KM 与拟合的参数模型曲线叠加：检查参数分布（如 Weibull）拟合是否贴合。</li>
 </ul>
-<h3>7.1 图像示例</h3>
+<h3>10.1 图像示例</h3>
 <p>下图展示按性别分层后的 Kaplan-Meier 生存曲线，可直接用于比较不同组的整体生存模式。</p>
 <p><img alt="" src="img/km_survival_by_sex.png" /></p></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>非参数、直观、解释强。</li>
-<li>能自然处理右删失。</li>
-<li>是生存分析最常用的入口工具。</li>
+<li>非参数：不需要假设生存时间的分布形状。</li>
+<li>正确、充分地利用右删失信息。</li>
+<li>直观、标准，是几乎所有生存分析报告的入口图。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>不能同时调整多个协变量。</li>
-<li>主要用于描述和分组比较。</li>
-<li>高删失或尾部风险集过小时不稳定。</li>
+<li>不能调整协变量，只能按组分层，组一多每组样本就薄。</li>
+<li>只给概率曲线，不直接给效应量（组间差异要靠 log-rank/Cox 补充）。</li>
+<li>尾部风险集小时估计极不稳定。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>误把删失当事件。</li>
-<li>忽略时间单位和随访窗口差异。</li>
-<li>尾部样本过少时仍对曲线末端过度解读。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 Nelson-Aalen 的区别：Kaplan-Meier 直接估计生存函数，Nelson-Aalen 先估计累积风险。</li>
-<li>和 Log-rank 的区别：KM 是估计方法，Log-rank 是组间比较检验。</li>
-<li>和 Cox 模型的区别：Cox 可以调整协变量，KM 主要做描述。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>不同性别人群的长期死亡风险描述。</li>
-<li>随访研究中的无事件生存概率估计。</li>
-<li>临床研究报告里的中位生存时间和生存率曲线。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-nelson-aalen-estimator.html" data-cn="Nelson-Aalen累积风险估计" data-en="Nelson-Aalen Estimator" data-def="Nelson-Aalen 估计是生存分析中对累积风险函数 $H(t)$ 的经典非参数估计方法。">Nelson-Aalen累积风险估计（Nelson-Aalen Estimator）</a></li>
-<li><a class="xlink" href="m-log-rank-test.html" data-cn="Log-rank检验" data-en="Log-rank Test" data-def="Log-rank 检验是比较两组或多组生存曲线是否存在统计学差异的最常用非参数检验。">Log-rank检验（Log-rank Test）</a></li>
-<li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 比例风险模型是最常用的生存回归模型，在不指定基线风险函数具体形式的情况下，估计协变量对危险率的相对影响。">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
+<li>删失编码写反（0/1 颠倒），曲线含义完全错误。</li>
+<li>存在竞争风险仍用 1−KM 报「发生率」，系统性高估。</li>
+<li>对着尾部只剩 2 人的曲线末端解读「长期生存率」。</li>
+<li>不同组随访起点不一致（永生时间偏倚，immortal time bias）。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-nelson-aalen-estimator.html" data-cn="Nelson-Aalen累积风险估计" data-en="Nelson-Aalen Estimator" data-def="Nelson-Aalen 把每个事件时点的「即刻死亡率」$d_i/n_i$ 逐项累加成累积风险 $\hat H(t)$——它和 Kaplan-Meier 看同一份数据，只是把「连乘存活率」换成了「累加风险」，加法尺度让它成为估计风险率、比较">Nelson-Aalen累积风险估计（Nelson-Aalen Estimator）</a>：KM 连乘估计生存概率 $S(t)$，Nelson-Aalen 累加估计累积风险 $H(t)$；二者经 $S=\exp(-H)$ 渐近互通。</li>
+<li>和 <a class="xlink" href="m-log-rank-test.html" data-cn="Log-rank检验" data-en="Log-rank Test" data-def="Log-rank 检验在每个事件时点摆出一张 2×2 列联表，问「若两组生存真的相同，这组该死几个」，把「实际死的 − 期望死的」沿时间累加——总差距显著偏离 0，就说明两组生存曲线不同。">Log-rank检验（Log-rank Test）</a>：KM 负责「画出来」，log-rank 负责「组间差异显不显著」。</li>
+<li>和 <a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a>：Cox 调整协变量、给出风险比；KM 无协变量、给出概率曲线。</li>
+<li>和寿命表法：寿命表按固定区间汇总（适合大规模登记数据），KM 按精确事件时点更新。</li>
+<li>如何选择：<strong>先画 KM 看形状，再用 log-rank 检验组间差异，需要调整混杂时上 Cox</strong>——这是生存分析的标准三步曲。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>肿瘤临床试验主分析图：两臂 OS/PFS 的 KM 曲线 + 风险集表 + log-rank p 值。</li>
+<li>队列研究描述不同暴露组的长期死亡/发病概率。</li>
+<li>器械研究中植入物的无失效生存曲线。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>生存函数（Survival function）</strong>：$S(t)=P(T\gt t)$，事件时间超过 $t$ 的概率。</li>
+<li><strong>右删失（Right censoring）</strong>：只知道事件时间大于某时刻（失访、研究结束仍未发生事件）。</li>
+<li><strong>风险集（Risk set）</strong>：某时点尚未发生事件也未被删失、仍「有资格出事」的个体集合。</li>
+<li><strong>乘积极限估计（Product-limit estimator）</strong>：KM 的学名，由各事件时点条件存活率连乘而得。</li>
+<li><strong>中位生存时间（Median survival time）</strong>：生存曲线首次降到 0.5 及以下的时刻。</li>
+<li><strong>Greenwood 公式（Greenwood's formula）</strong>：KM 估计方差的经典公式。</li>
+<li><strong>非信息性删失（Non-informative censoring）</strong>：删失机制与预后无关，是 KM 无偏的关键前提。</li>
+<li><strong>风险集人数表（Number at risk table）</strong>：曲线下方标注各时点在场人数的表，用来判断曲线哪段可信。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-nelson-aalen-estimator.html" data-cn="Nelson-Aalen累积风险估计" data-en="Nelson-Aalen Estimator" data-def="Nelson-Aalen 把每个事件时点的「即刻死亡率」$d_i/n_i$ 逐项累加成累积风险 $\hat H(t)$——它和 Kaplan-Meier 看同一份数据，只是把「连乘存活率」换成了「累加风险」，加法尺度让它成为估计风险率、比较">Nelson-Aalen累积风险估计（Nelson-Aalen Estimator）</a></li>
+<li><a class="xlink" href="m-log-rank-test.html" data-cn="Log-rank检验" data-en="Log-rank Test" data-def="Log-rank 检验在每个事件时点摆出一张 2×2 列联表，问「若两组生存真的相同，这组该死几个」，把「实际死的 − 期望死的」沿时间累加——总差距显著偏离 0，就说明两组生存曲线不同。">Log-rank检验（Log-rank Test）</a></li>
+<li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
+<li><a class="xlink" href="m-competing-risks-and-fine-gray-model.html" data-cn="竞争风险模型" data-en="Competing Risks and Fine-Gray Model" data-def="当「死于别的原因」会永久阻止目标事件发生时，把竞争事件当普通删失会系统性高估目标事件的发生概率；竞争风险方法改用累积发生率函数（CIF）如实计数，并用 cause-specific Cox（问机制）或 Fine-Gray（问负担）两条路做回">竞争风险模型（Competing Risks and Fine-Gray Model）</a></li>
+<li><a class="xlink" href="m-empirical-cumulative-distribution-function-ecdf.html" data-cn="经验分布函数" data-en="Empirical Cumulative Distribution Function, ECDF" data-def="经验分布函数是「用数据本身当作分布」：在每个观测值处向上跳一小步 $1/n$，画出「有多大比例的数据不超过 $x$」这条阶梯曲线，它是真实累积分布函数（CDF）最诚实的估计。">经验分布函数（Empirical Cumulative Distribution Function, ECDF）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Kaplan EL, Meier P. Nonparametric estimation from incomplete observations. <em>J Am Stat Assoc</em>. 1958;53(282):457-481.</li>
 <li>Klein JP, Moeschberger ML. <em>Survival Analysis: Techniques for Censored and Truncated Data</em>. 2nd ed. Springer; 2003.</li>
+<li>Bland JM, Altman DG. Survival probabilities (the Kaplan-Meier method). <em>BMJ</em>. 1998;317(7172):1572.</li>
 <li>R Core Team / survival package. <code>survfit</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/survival/html/survfit.html">https://stat.ethz.ch/R-manual/R-devel/library/survival/html/survfit.html</a> （访问日期：2026-07-02）</li>
 </ul></div>
     </section>
