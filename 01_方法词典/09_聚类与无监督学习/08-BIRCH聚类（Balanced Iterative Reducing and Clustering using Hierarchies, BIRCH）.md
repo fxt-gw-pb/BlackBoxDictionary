@@ -19,211 +19,253 @@ r_packages: [stream]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-BIRCH 是一种面向大规模数据的聚类算法。它通过簇特征树（CF tree）把大量样本压缩成可管理的微簇摘要，再对这些摘要进行聚类。
+BIRCH 把相近样本在线压缩为可相加的 CF 微簇，再在微簇中心上做全局聚类，从而避免反复保存和比较全部原始点。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：样本量很大时，如何在有限内存下进行快速聚类。
-- 适用任务：大规模表格数据聚类、流式或批量数据摘要、预聚类后再精细聚类。
-- 常见医学场景：大规模 EHR 患者表型预聚类，长期监测数据压缩，海量影像 patch 特征预分组。
+BIRCH 是面向大规模数值数据的增量聚类算法。它构建平衡 CF 树，每个叶微簇只保存样本数、线性和与平方和；阈值决定新点被吸收还是生成新微簇。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-BIRCH 不把每个样本都长期保存在内存里，而是把相近样本概括成一个“微簇”。这些微簇记录样本数、线性和、平方和，足以计算中心和半径，再用树结构组织起来。
+- 全样本距离矩阵无法存储。
+- 需要单遍或分批压缩海量样本。
+- 希望先形成局部微簇，再用层次聚类等方法得到最终簇。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+不保存每一张病历，而把相近患者装进摘要盒：盒上记录人数、指标总和和平方和。新患者沿树找到最近盒，若加入后盒仍够紧就吸收，否则新开一个盒。
 
-一个簇特征（Cluster Feature, CF）定义为三元组：
+## 2. 核心思想与原理
+
+### 2.1 可加的充分摘要
+
+CF 三元组足以恢复微簇中心和半径，两个微簇可直接相加。算法因此能增量更新而不访问所有历史点。
+
+### 2.2 CF 树控制内存
+
+每个节点只能容纳有限子簇，超出 branching factor 时节点分裂。threshold 控制叶微簇紧密程度，二者共同决定树大小。
+
+### 2.3 两阶段聚类
+
+第一阶段压缩为微簇；第二阶段可对微簇中心做层次聚类或其他全局聚类。CF 树是计算结构，不等于最终医学层级。
+
+## 3. 数学形式
+
+### 3.1 CF 三元组
+
+对 $N$ 个 $p$ 维样本：
 
 $$
-CF=(N, LS, SS)
+CF=(N,LS,SS)
 $$
 
-其中：
-
 $$
-LS=\sum_{i=1}^{N}x_i,\quad SS=\sum_{i=1}^{N}x_i^\top x_i
+LS=\sum_{i=1}^{N}x_i,\qquad
+SS=\sum_{i=1}^{N}x_i^\top x_i
 $$
 
-簇中心为：
+### 3.2 中心与半径
 
 $$
 \mu=\frac{LS}{N}
 $$
 
-簇半径可写为：
-
 $$
-R=\sqrt{\frac{SS}{N}-\left\|\frac{LS}{N}\right\|^2}
-$$
-
-两个 CF 可直接相加：
-
-$$
-CF_1+CF_2=(N_1+N_2,\ LS_1+LS_2,\ SS_1+SS_2)
+R=
+\sqrt{\frac{SS}{N}-\left\|\frac{LS}{N}\right\|^2}
 $$
 
-### 2.2 参数或统计量含义
+### 3.3 可加性
 
-- CF：微簇摘要，包含样本数、线性和、平方和。
-- CF tree：层次化组织微簇的平衡树。
-- `threshold`：叶节点微簇允许的最大半径或直径。
-- `branching_factor`：每个非叶节点最多包含的子节点数。
-- `n_clusters`：最终全局聚类的目标簇数；也可不指定，只输出子簇。
+$$
+CF_1+CF_2=
+(N_1+N_2,\ LS_1+LS_2,\ SS_1+SS_2)
+$$
 
-### 2.3 关键假设
+### 3.4 关键条件
 
-- 数据可由大量局部紧凑微簇近似。
-- 欧氏空间中的中心和半径能表达局部结构。
-- 阈值设置能在压缩率和信息保留之间取得平衡。
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 局部结构可由球形微簇近似 | 非凸结构被压坏 | 与原数据子样本对照 |
+| threshold 合理 | 过度合并或微簇爆炸 | 阈值-微簇数曲线 |
+| 特征尺度一致 | 半径由大量纲变量决定 | 固定标准化 |
+| 数据顺序影响可接受 | 在线树结构波动 | 多顺序重放 |
 
-## 3. 数据形式与输入输出
+## 4. 手把手算例
 
-### 3.1 适合的数据形式
+一维微簇 A 含样本 $(1,2,3)$：
 
-- 自变量类型：连续型数值特征。
-- 因变量类型：无监督方法，不需要结局变量。
-- 数据结构：大样本特征矩阵。
-- 是否适合高维数据：可用，但高维距离和半径解释会变弱。
-- 是否适合缺失较多数据：需先处理缺失。
-- 是否适合删失数据：不直接处理删失结局。
-- 是否适合重复测量数据：需先构造样本级输入或窗口级特征。
+$$
+N_A=3,\quad LS_A=6,\quad SS_A=1^2+2^2+3^2=14
+$$
 
-### 3.2 示例表格
+其中心和半径：
 
-以大规模随访摘要特征为例：
+$$
+\mu_A=6/3=2
+$$
 
-| VisitCount | MeanSBP | MeanBMI | LabAbnormalCount | MedicationCount |
-| --- | --- | --- | --- | --- |
-| 18 | 146 | 31.2 | 6 | 8 |
-| 4 | 118 | 23.6 | 1 | 2 |
-| 12 | 139 | 28.8 | 4 | 5 |
-| 3 | 112 | 22.4 | 0 | 1 |
+$$
+R_A=\sqrt{14/3-2^2}
+=\sqrt{2/3}\approx0.816
+$$
 
-### 3.3 输入与产出
+微簇 B 含 $(8,9)$：
 
-#### 输入
+$$
+CF_B=(2,17,145),\quad
+\mu_B=8.5,\quad R_B=0.5
+$$
 
-- 输入数据：大规模数值型特征矩阵。
-- 关键变量：阈值、分支因子、最终簇数。
-- 需要预处理的内容：缺失处理、标准化、异常值处理、变量选择。
+**尝试合并。**
 
-#### 产出
+$$
+CF_{A+B}=(5,23,159)
+$$
 
-- 模型对象/统计结果：微簇、CF 树、最终簇标签。
-- 参数估计：微簇中心、半径和样本数。
-- 预测结果：可把新样本分配到最近子簇或最终簇。
-- 不确定性指标：阈值敏感性、簇稳定性、与 K-means 等方法的一致性。
+$$
+\mu_{A+B}=23/5=4.6
+$$
 
-## 4. 适用场景
+$$
+R_{A+B}
+=\sqrt{159/5-4.6^2}
+=\sqrt{10.64}
+\approx3.262
+$$
 
-- 适合：样本量很大、需要先压缩再聚类、数据可由局部紧凑微簇描述的场景。
-- 不适合：簇形状非常复杂、离群点很多、特征主要为类别变量的场景。
-- 使用前需要特别检查的点：threshold 是否导致过度合并或过度碎片化，微簇数量是否可解释。
+若 threshold 为 1，A 和 B 各自可作为紧凑微簇，但合并半径 3.262 超过阈值，因此必须分开保存。
 
-## 5. 实现
+## 5. 数据形式与输入输出
 
-### 5.1 Python
+### 5.1 数据要求
 
-常用包：
+- 大规模连续数值特征或稀疏数值向量。
+- 缺失需预处理，标准化规则必须在所有批次一致。
+- 高维距离仍可能失效，BIRCH 不自动解决维度灾难。
 
-- `scikit-learn`
+### 5.2 输入与产出
+
+输入为 threshold、branching factor、最终聚类器和数据批次。输出为 CF 树、微簇中心、微簇标签与最终样本标签。
+
+## 6. 适用场景
+
+- 大规模、流式或内存受限的数值数据。
+- 原始点可由局部紧凑微簇近似。
+- 不适合复杂非凸簇、类别特征为主或对极小罕见簇要求很高的任务。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import pandas as pd
 from sklearn.cluster import Birch
-from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv("ehr_summary_features.csv")
-X = df[["VisitCount", "MeanSBP", "MeanBMI", "LabAbnormalCount", "MedicationCount"]]
+scaler = StandardScaler().fit(X)
+X_s = scaler.transform(X)
 
-model = make_pipeline(
-    StandardScaler(),
-    Birch(threshold=0.6, branching_factor=50, n_clusters=4)
+model = Birch(
+    threshold=0.6,
+    branching_factor=50,
+    n_clusters=4,
 )
-cluster = model.fit_predict(X)
 
-print(pd.Series(cluster).value_counts().sort_index())
+for batch in range(0, len(X_s), 2000):
+    model.partial_fit(X_s[batch:batch + 2000])
+model.partial_fit()  # 完成全局聚类步骤
+
+cluster = model.predict(X_s)
+micro_centers = model.subcluster_centers_
+print(len(micro_centers))
 ```
 
-### 5.2 R
-
-常用包：
-
-- `stream`
+### 7.2 R
 
 ```r
 library(stream)
 
-x <- scale(df[, c("VisitCount", "MeanSBP", "MeanBMI", "LabAbnormalCount", "MedicationCount")])
-stream <- DSD_Memory(x)
-birch <- DSC_BIRCH(threshold = 0.6, branching = 50)
-update(birch, stream, n = nrow(x))
+x <- scale(df[, c(
+  "VisitCount", "MeanSBP", "MeanBMI",
+  "LabAbnormalCount", "MedicationCount"
+)])
 
-micro <- get_centers(birch)
-head(micro)
+source <- DSD_Memory(x)
+model <- DSC_BIRCH(
+  threshold = 0.6,
+  branching = 50,
+  maxLeaf = 100
+)
+update(model, source, n = nrow(x))
+
+micro_centers <- get_centers(model)
+head(micro_centers)
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：微簇数量、最终簇中心、各簇样本量、不同阈值下结果变化。
-- 每个主要参数如何解释：`threshold` 越小，微簇越细；越大，压缩越强但可能合并不同结构。
-- 临床或医学意义如何表达：BIRCH 更常作为大规模聚类的预处理或快速分群工具，最终簇仍需用临床特征画像解释。
-- 常见误读：CF 树是计算摘要结构，不等同于医学上的层级病程结构。
+- 微簇是压缩单元，不一定是最终临床簇。
+- threshold 越小，微簇越多、保真更高、内存更大。
+- 最终 `n_clusters` 在微簇中心上运行，不等于 CF 树叶数。
+- 数据顺序可影响树，需报告流式顺序和随机化策略。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
 
-- 阈值与微簇数量关系图。
-- 最终簇在 PCA/UMAP 空间中的分布。
-- 各簇特征中心热图。
-- 微簇大小分布图。
+1. 画 threshold 与微簇数、内存和下游指标的关系。
+2. 随机打乱数据顺序并重复建树。
+3. 在可承受子样本上与全量 K-means 或层次聚类比较。
+4. 检查微簇半径、大小和极小簇。
+5. 监控流式特征漂移与树增长。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
 
-### 优势
+- threshold-微簇数量曲线。
+- 微簇大小和半径分布。
+- 微簇中心及最终簇的二维投影。
+- CF 树深度、节点数和内存随批次变化图。
 
-- 适合大规模数据和有限内存场景。
-- 可增量构建局部数据摘要。
-- 可与其他聚类算法组合使用。
+## 11. 优势、局限与常见坑
 
-### 局限
+**优势：** 内存高效、可增量、CF 可加，适合先压缩再聚类。
 
-- 对阈值敏感。
-- 对非球形、复杂形状簇不如密度或图方法灵活。
-- 高维空间中半径和距离解释变弱。
+**局限：** threshold 和顺序敏感，偏好紧凑微簇，高维与非凸结构仍困难。
 
-### 常见坑
+**常见坑：** 把 CF 树当临床层级；忽略 `maxLeaf` 等结构参数；预处理跨批次变化；直接把微簇当最终亚型。
 
-- 阈值不调参，直接接受默认微簇结构。
-- 忽略离群点对 CF 树的影响。
-- 把预聚类结果当作最终临床亚型。
+## 12. 与相近方法的区别
 
-## 9. 与相近方法的区别
+- [[层次聚类（Hierarchical Clustering）]]：直接基于样本距离合并，BIRCH 先用 CF 树压缩。
+- [[Mini-Batch K-means聚类（Mini-Batch K-means Clustering）]]：直接随机更新 $K$ 个质心；BIRCH 维护许多微簇摘要。
+- [[K-means聚类（K-means Clustering）]]：可作为 BIRCH 压缩后的全局聚类器。
+- 选择经验：需要可加摘要和流式压缩时选 BIRCH，仅需快速固定 $K$ 质心时选 Mini-Batch。
 
-- 和 [[层次聚类（Hierarchical Clustering）]] 的区别：BIRCH 用 CF 树做大规模数据压缩，传统层次聚类通常直接基于样本距离合并。
-- 和 [[Mini-Batch K-means聚类（Mini-Batch K-means Clustering）]] 的区别：Mini-Batch K-means 用小批量更新质心，BIRCH 先生成微簇摘要。
-- 和 [[K-means聚类（K-means Clustering）]] 的区别：BIRCH 可作为 K-means 前的压缩步骤，也可直接输出聚类。
+## 13. 医学研究中的典型应用
 
-## 10. 医学研究中的典型应用
+- 海量 EHR 患者画像预聚类。
+- 医学影像 patch 与可穿戴时间窗口特征压缩。
+- 数据流中的在线模式摘要和后续精细聚类。
 
-- 大规模 EHR 患者表型预聚类。
-- 海量医学影像 patch 特征摘要。
-- 可穿戴设备长期监测数据的模式压缩。
+## 14. 术语表
 
-## 11. 相关方法
+| 术语 | 含义 |
+| --- | --- |
+| CF | 保存样本数、线性和、平方和的簇摘要 |
+| micro-cluster | CF 树叶部的局部紧凑摘要 |
+| threshold | 新点并入微簇后允许的最大半径 |
+| branching factor | 每个非叶节点最多的子簇数 |
+| global clustering | 在微簇中心上执行的最终聚类 |
+
+## 15. 相关方法
 
 - [[层次聚类（Hierarchical Clustering）]]
 - [[Mini-Batch K-means聚类（Mini-Batch K-means Clustering）]]
 - [[K-means聚类（K-means Clustering）]]
 - [[主成分分析（Principal Component Analysis, PCA）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
 - Zhang T, Ramakrishnan R, Livny M. BIRCH: an efficient data clustering method for very large databases. *SIGMOD*. 1996:103-114.
-- scikit-learn Developers. `sklearn.cluster.Birch`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.cluster.Birch.html](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.Birch.html) （访问日期：2026-07-02）
-- Hahsler M, Piekenbrock M, Doran D. `stream`: An extensible framework for data stream clustering research with R. *Journal of Statistical Software*. 2019;76(14):1-50.
+- scikit-learn Developers. `Birch` API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.cluster.Birch.html](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.Birch.html) （访问日期：2026-07-09）
+- Hahsler M, Piekenbrock M, Doran D. `stream`: An extensible framework for data stream clustering research with R. *J Stat Softw*. 2019;76(14):1-50.

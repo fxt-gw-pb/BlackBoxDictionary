@@ -19,140 +19,167 @@ r_packages: [stats, cluster]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-层次聚类是一类把样本组织成树状层次结构的无监督方法。最常见的是凝聚式层次聚类：先把每个样本看作一个簇，再按相似性逐步合并，最终形成一棵树状图。
+层次聚类按距离逐步合并或拆分样本，把从细到粗的分群过程保存为一棵树，而不是只给单一分组。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：样本之间是否存在从细到粗的层级分群结构。
-- 适用任务：探索性分群、样本相似性可视化、基因或患者层次结构展示。
-- 常见医学场景：热图行列聚类，组学样本分层，症状或表型相似性结构分析。
+层次聚类构造嵌套簇结构。最常见的凝聚式方法从每个样本各自成簇开始，每轮合并距离最近的两簇，直到只剩一个簇；在树状图某一高度剪切即可得到平面标签。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-层次聚类像是在不断把最相似的对象归并成更大的组。树状图的低处分叉表示样本很相似，高处分叉表示只有在较粗层次下才被合并。
+- 样本是否存在多尺度、嵌套的相似性结构。
+- 不想在建树前固定唯一簇数。
+- 需要将聚类与热图结合展示患者或基因模式。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+像整理家谱：先合并最相似的个体，再把相似的小组并成更大的家族。分叉越低表示越相似，分叉越高表示只有在更粗尺度下才归在一起。
 
-设两个簇为 $A$ 和 $B$，层次聚类需要定义簇间距离。常见 linkage 包括：
+## 2. 核心思想与原理
+
+### 2.1 两个选择决定结果
+
+样本距离定义“谁像谁”，linkage 定义“两个簇如何比较”。相同数据改用相关距离、欧氏距离或不同 linkage，树可能明显变化。
+
+### 2.2 合并不可撤销
+
+凝聚算法一旦合并两簇，后续不会拆开。因此早期局部决定会影响整个树，这也是对噪声和距离选择敏感的原因。
+
+### 2.3 树不是天然真相
+
+任何距离矩阵都能生成一棵树。树状图存在不等于生物学上真有层级亚型，仍需稳定性和外部解释。
+
+## 3. 数学形式
+
+### 3.1 常见 linkage
 
 单链接：
 
 $$
-d(A,B)=\min_{x_i\in A,x_j\in B} d(x_i,x_j)
+d_{\mathrm{single}}(A,B)=
+\min_{x\in A,z\in B}d(x,z)
 $$
 
 完全链接：
 
 $$
-d(A,B)=\max_{x_i\in A,x_j\in B} d(x_i,x_j)
+d_{\mathrm{complete}}(A,B)=
+\max_{x\in A,z\in B}d(x,z)
 $$
 
 平均链接：
 
 $$
-d(A,B)=\frac{1}{|A||B|}\sum_{x_i\in A}\sum_{x_j\in B}d(x_i,x_j)
+d_{\mathrm{average}}(A,B)=
+\frac{1}{|A||B|}
+\sum_{x\in A}\sum_{z\in B}d(x,z)
 $$
 
-Ward 方法每次合并使簇内平方和增加最小：
+### 3.2 Ward 合并代价
 
 $$
-\Delta(A,B)=\sum_{x_i\in A\cup B}\|x_i-\mu_{A\cup B}\|^2
--\sum_{x_i\in A}\|x_i-\mu_A\|^2
--\sum_{x_i\in B}\|x_i-\mu_B\|^2
+\Delta(A,B)=
+\operatorname{SSE}(A\cup B)
+-\operatorname{SSE}(A)
+-\operatorname{SSE}(B)
 $$
 
-### 2.2 参数或统计量含义
+Ward 每轮选择使簇内平方和增加最小的合并，通常与欧氏距离配合。
 
-- 距离度量：样本之间的距离，如欧氏距离、曼哈顿距离、相关距离。
-- linkage：簇间距离定义，如 single、complete、average、ward。
-- cut height：树状图剪切高度，用于得到最终簇标签。
-- cophenetic correlation：树状图距离与原始距离的一致性指标。
+### 3.3 树的剪切
 
-### 2.3 关键假设
+给定剪切高度 $h$，高度低于 $h$ 已连接的叶子归为同簇。也可直接指定最终簇数 $K$。
 
-- 所选距离能表达研究问题中的相似性。
-- 层级结构对数据有意义。
-- 合并策略与簇形状相匹配。
-- 样本数不宜过大，否则树状图和距离矩阵都会变得沉重。
+### 3.4 关键条件
 
-## 3. 数据形式与输入输出
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 距离符合研究含义 | 树反映错误相似性 | 比较距离定义 |
+| 尺度处理合理 | 大量纲变量主导 | 标准化敏感性 |
+| 层次结构相对稳定 | 分支随重采样改变 | bootstrap 共识 |
+| 样本量可承受距离矩阵 | 内存和图形不可用 | 记录复杂度、先压缩 |
 
-### 3.1 适合的数据形式
+## 4. 手把手算例
 
-- 自变量类型：连续特征、标准化特征或预先计算的距离矩阵。
-- 因变量类型：无监督方法，不需要结局变量。
-- 数据结构：样本乘以特征矩阵，或样本乘以样本距离矩阵。
-- 是否适合高维数据：可用，组学热图常见，但需注意距离稳定性。
-- 是否适合缺失较多数据：需先处理缺失，或选择能处理缺失的距离。
-- 是否适合删失数据：不直接处理删失结局。
-- 是否适合重复测量数据：需先定义样本单位或构造个体级特征。
+一维有 4 个样本：
 
-### 3.2 示例表格
+$$
+A=1,\quad B=2,\quad C=8,\quad D=9
+$$
 
-以基因表达模块探索为例：
+使用欧氏距离。
 
-| GeneA | GeneB | GeneC | GeneD | Group |
-| --- | --- | --- | --- | --- |
-| 1.2 | 0.4 | -0.3 | 0.8 | Case |
-| 1.0 | 0.5 | -0.2 | 0.7 | Case |
-| -0.6 | 1.5 | 0.9 | -0.4 | Control |
-| -0.4 | 1.2 | 0.8 | -0.5 | Control |
+**Step 1：计算最近样本。** $d(A,B)=1$，$d(C,D)=1$，其余距离至少为 6。先合并 $AB$，再合并 $CD$，两次高度均为 1。
 
-### 3.3 输入与产出
+**Step 2：比较两个大簇。**
 
-#### 输入
+单链接取最近点：
 
-- 输入数据：特征矩阵或距离矩阵。
-- 关键变量：距离度量、linkage、剪切高度或簇数。
-- 需要预处理的内容：缺失处理、标准化、异常值检查、变量筛选。
+$$
+d_{\mathrm{single}}(AB,CD)=d(B,C)=6
+$$
 
-#### 产出
+完全链接取最远点：
 
-- 模型对象/统计结果：树状图、合并矩阵、剪切后的簇标签。
-- 参数估计：每一步合并的簇和距离。
-- 预测结果：普通层次聚类不自然支持新样本快速预测。
-- 不确定性指标：bootstrap 稳定性、cophenetic correlation、不同 linkage 对比。
+$$
+d_{\mathrm{complete}}(AB,CD)=d(A,D)=8
+$$
 
-## 4. 适用场景
+平均链接取四个跨簇距离平均：
 
-- 适合：样本量中小、希望观察层级结构、需要树状图或热图展示的场景。
-- 不适合：超大样本、需要在线更新、簇边界明显非层级或噪声点很多的场景。
-- 使用前需要特别检查的点：距离度量、linkage 选择、标准化策略、树状图剪切是否稳定。
+$$
+d_{\mathrm{average}}
+=\frac{7+8+6+7}{4}=7
+$$
 
-## 5. 实现
+**Step 3：读树状图。** 三种 linkage 都先得到 $\{A,B\}$ 和 $\{C,D\}$，但最终合并高度分别为 6、8、7。
 
-### 5.1 Python
+**结论：** linkage 不改变这组数据的两个明显小簇，却改变“两个簇相距多远”的定义；复杂数据中甚至可能改变整个合并顺序。
 
-常用包：
+## 5. 数据形式与输入输出
 
-- `scipy`
-- `scikit-learn`
+### 5.1 数据要求
+
+- 可输入样本-特征矩阵或预计算距离矩阵。
+- 连续特征常需标准化；组学中可按问题使用相关距离。
+- 缺失需在距离计算前处理。
+
+### 5.2 输入与产出
+
+输入为距离、linkage 和剪切规则。输出为 linkage 矩阵、树状图、合并高度与剪切标签。传统方法不自然支持新样本在线分配。
+
+## 6. 适用场景
+
+- 中小样本，希望观察多层次结构或绘制聚类热图。
+- 对样本或变量的相似关系比在线预测更重要。
+- 不适合超大样本、噪声很多或必须快速给新样本标签的场景。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import pandas as pd
-from scipy.cluster.hierarchy import linkage, fcluster
+from scipy.cluster.hierarchy import dendrogram, fcluster, linkage
 from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
 
-df = pd.read_csv("omics_profiles.csv")
-X = df[["GeneA", "GeneB", "GeneC", "GeneD"]]
-X_scaled = StandardScaler().fit_transform(X)
-
-Z = linkage(X_scaled, method="ward")
+X_s = StandardScaler().fit_transform(X)
+Z = linkage(
+    X_s,
+    method="ward",
+    metric="euclidean",
+    optimal_ordering=True,
+)
 cluster = fcluster(Z, t=3, criterion="maxclust")
 
-df["cluster"] = cluster
-print(df["cluster"].value_counts().sort_index())
+dendrogram(Z, labels=sample_ids)
+plt.ylabel("merge distance")
+plt.show()
 ```
 
-### 5.2 R
-
-常用包：
-
-- `stats`
+### 7.2 R
 
 ```r
 x <- scale(df[, c("GeneA", "GeneB", "GeneC", "GeneD")])
@@ -160,64 +187,72 @@ d <- dist(x, method = "euclidean")
 fit <- hclust(d, method = "ward.D2")
 
 cluster <- cutree(fit, k = 3)
-table(cluster)
+plot(fit, labels = rownames(df), hang = -1)
+rect.hclust(fit, k = 3, border = 2:4)
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：树状图分叉高度、主要分支、剪切后簇的特征模式。
-- 每个主要参数如何解释：Ward 方法倾向得到相对紧凑、方差较小的簇。
-- 临床或医学意义如何表达：可描述为“在所选特征和距离度量下，样本呈现若干层级相似性结构”。
-- 常见误读：树状图分支不等同于系统发育关系或因果演化关系。
+- 合并高度表示所选 linkage 下的差异尺度，不一定是原始两点距离。
+- 叶子左右顺序并非唯一，邻近显示不一定意味着直接合并。
+- 剪切高度或 $K$ 是分析选择，应结合稳定性与临床可解释性。
+- 树状图不是演化树，也不代表时间或因果方向。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
 
-- 树状图。
-- 带行列聚类的热图。
-- 不同剪切高度下的簇数变化图。
-- PCA/UMAP 上叠加层次聚类标签。
+1. 比较 Euclidean、Manhattan 或相关距离。
+2. 比较 single、complete、average 与 Ward。
+3. 计算 cophenetic correlation 评估树对原距离的保真。
+4. bootstrap 样本或特征，评估分支复现率。
+5. 检查离群点是否在高处单独合并并扭曲树。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
 
-### 优势
+- 标注合并高度的树状图。
+- 行列双向聚类热图。
+- 不同 linkage 的树状图并排对照。
+- bootstrap 共识矩阵或分支稳定性图。
 
-- 不必先固定簇数，可以事后剪切树状图。
-- 树状图直观展示层级关系。
-- 适合与热图结合用于组学和临床特征展示。
+## 11. 优势、局限与常见坑
 
-### 局限
+**优势：** 不必建树前固定簇数，完整展示多尺度层次，适合热图。
 
-- 对距离和 linkage 选择敏感。
-- 早期合并一旦发生通常不会被撤销。
-- 大样本计算和可视化都较困难。
+**局限：** 距离与 linkage 敏感，合并不可撤销，计算和存储通常近二次增长。
 
-### 常见坑
+**常见坑：** 混用不同尺度；把叶序当距离；随意剪树；只展示漂亮热图不做稳定性；将树解释为生物演化。
 
-- 混用不同尺度变量而不标准化。
-- 只看树状图视觉效果，不评估稳定性。
-- 随意剪切树状图并赋予过强医学意义。
+## 12. 与相近方法的区别
 
-## 9. 与相近方法的区别
+- [[K-means聚类（K-means Clustering）]]：直接优化固定 $K$ 的平面分组。
+- [[BIRCH聚类（Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH）]]：用 CF 树压缩大数据，更适合扩展。
+- [[谱聚类（Spectral Clustering）]]：基于图拉普拉斯嵌入处理非凸结构。
+- 选择经验：需要树状层级且样本量中小时使用传统层次聚类。
 
-- 和 [[K-means聚类（K-means Clustering）]] 的区别：K-means 直接给定 $K$ 个互斥簇，层次聚类提供从细到粗的树状结构。
-- 和 [[BIRCH聚类（Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH）]] 的区别：BIRCH 用 CF 树压缩数据，更适合大规模数据；传统层次聚类更适合中小样本解释。
-- 和 [[谱聚类（Spectral Clustering）]] 的区别：谱聚类通过图拉普拉斯嵌入处理复杂形状簇，层次聚类主要依赖距离和合并策略。
+## 13. 医学研究中的典型应用
 
-## 10. 医学研究中的典型应用
+- 基因表达、蛋白组和代谢组热图。
+- 患者表型或症状模式的层次探索。
+- 基因、细胞或特征模块的相似性组织。
 
-- 基因表达热图中的样本和基因聚类。
-- 患者临床表型层级相似性展示。
-- 多组学特征模块或样本分支结构探索。
+## 14. 术语表
 
-## 11. 相关方法
+| 术语 | 含义 |
+| --- | --- |
+| dendrogram | 记录逐步合并关系和高度的树状图 |
+| linkage | 定义两个簇之间距离的规则 |
+| cut height | 将树转换为平面簇的剪切高度 |
+| Ward method | 最小化簇内平方和增量的合并法 |
+| cophenetic distance | 两个叶子首次合并时的树高度 |
+
+## 15. 相关方法
 
 - [[K-means聚类（K-means Clustering）]]
 - [[BIRCH聚类（Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH）]]
 - [[谱聚类（Spectral Clustering）]]
 - [[多维尺度分析（Multidimensional Scaling, MDS）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
-- Murtagh F, Contreras P. Algorithms for hierarchical clustering: an overview. *WIREs Data Mining and Knowledge Discovery*. 2012;2(1):86-97.
-- Ward JH Jr. Hierarchical grouping to optimize an objective function. *Journal of the American Statistical Association*. 1963;58(301):236-244.
-- SciPy Developers. Hierarchical clustering documentation. [https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html](https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html) （访问日期：2026-07-02）
+- Ward JH Jr. Hierarchical grouping to optimize an objective function. *J Am Stat Assoc*. 1963;58(301):236-244.
+- Murtagh F, Contreras P. Algorithms for hierarchical clustering: an overview. *WIREs Data Min Knowl Discov*. 2012;2(1):86-97.
+- SciPy Developers. Hierarchical clustering documentation. [https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html](https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html) （访问日期：2026-07-09）

@@ -369,7 +369,7 @@ exp(cbind(OR = coef(fit), confint(fit)))   # OR 及其 95% CI
 <li><a class="xlink" href="m-multinomial-logistic-regression.html" data-cn="多项Logistic回归" data-en="Multinomial Logistic Regression" data-def="多项 Logistic 把二分类 Logistic 推广到三类以上无序结局：选一类作参照，对其余每一类各建一条「该类 vs 参照类」的 logit，用 softmax 保证所有类别概率之和为 1。">多项Logistic回归（Multinomial Logistic Regression）</a></li>
 <li><a class="xlink" href="m-ordinal-logistic-regression.html" data-cn="有序Logistic回归" data-en="Ordinal Logistic Regression" data-def="有序 Logistic 回归（比例优势模型）对「累积概率」建 logit，并让所有切点共享同一组斜率——于是一个比值比就能概括「协变量把个体推向更高等级」的整体倾向。">有序Logistic回归（Ordinal Logistic Regression）</a></li>
 <li><a class="xlink" href="m-poisson-regression.html" data-cn="Poisson回归" data-en="Poisson Regression" data-def="Poisson 回归对「事件发生的次数」建模：用 log 连接把「平均计数」连到协变量的线性组合，系数取指数后就是率比（某因素让事件发生率变为几倍）。">Poisson回归（Poisson Regression）</a></li>
-<li><a class="xlink" href="m-receiver-operating-characteristic-and-auc.html" data-cn="ROC曲线与AUC" data-en="Receiver Operating Characteristic and AUC" data-def="ROC 曲线（受试者工作特征曲线）把一个连续评分或预测概率在所有可能阈值下的敏感度与（1−特异度）连成一条曲线；AUC 是曲线下面积，用一个 0–1 的数概括模型的整体区分能力。">ROC曲线与AUC（Receiver Operating Characteristic and AUC）</a></li>
+<li><a class="xlink" href="m-receiver-operating-characteristic-and-auc.html" data-cn="ROC曲线与AUC" data-en="Receiver Operating Characteristic and AUC" data-def="ROC 扫描所有阈值观察灵敏度—假阳性权衡，AUC 则等于随机一名阳性得分高于随机一名阴性的概率。">ROC曲线与AUC（Receiver Operating Characteristic and AUC）</a></li>
 </ul></div>
     </section><section id="sec-16" data-sec="16" class="sec">
       <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>

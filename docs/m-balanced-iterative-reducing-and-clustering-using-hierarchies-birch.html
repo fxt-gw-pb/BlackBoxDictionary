@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">术语表</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,228 +54,262 @@
     <div class="intro-note"><h1>BIRCH聚类（Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>BIRCH 是一种面向大规模数据的聚类算法。它通过簇特征树（CF tree）把大量样本压缩成可管理的微簇摘要，再对这些摘要进行聚类。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>BIRCH 把相近样本在线压缩为可相加的 CF 微簇，再在微簇中心上做全局聚类，从而避免反复保存和比较全部原始点。</p>
+<h3>1.2 定义</h3>
+<p>BIRCH 是面向大规模数值数据的增量聚类算法。它构建平衡 CF 树，每个叶微簇只保存样本数、线性和与平方和；阈值决定新点被吸收还是生成新微簇。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：样本量很大时，如何在有限内存下进行快速聚类。</li>
-<li>适用任务：大规模表格数据聚类、流式或批量数据摘要、预聚类后再精细聚类。</li>
-<li>常见医学场景：大规模 EHR 患者表型预聚类，长期监测数据压缩，海量影像 patch 特征预分组。</li>
+<li>全样本距离矩阵无法存储。</li>
+<li>需要单遍或分批压缩海量样本。</li>
+<li>希望先形成局部微簇，再用层次聚类等方法得到最终簇。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>BIRCH 不把每个样本都长期保存在内存里，而是把相近样本概括成一个“微簇”。这些微簇记录样本数、线性和、平方和，足以计算中心和半径，再用树结构组织起来。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>不保存每一张病历，而把相近患者装进摘要盒：盒上记录人数、指标总和和平方和。新患者沿树找到最近盒，若加入后盒仍够紧就吸收，否则新开一个盒。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>一个簇特征（Cluster Feature, CF）定义为三元组：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 可加的充分摘要</h3>
+<p>CF 三元组足以恢复微簇中心和半径，两个微簇可直接相加。算法因此能增量更新而不访问所有历史点。</p>
+<h3>2.2 CF 树控制内存</h3>
+<p>每个节点只能容纳有限子簇，超出 branching factor 时节点分裂。threshold 控制叶微簇紧密程度，二者共同决定树大小。</p>
+<h3>2.3 两阶段聚类</h3>
+<p>第一阶段压缩为微簇；第二阶段可对微簇中心做层次聚类或其他全局聚类。CF 树是计算结构，不等于最终医学层级。</p></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 CF 三元组</h3>
+<p>对 $N$ 个 $p$ 维样本：</p>
 <p>$$
-CF=(N, LS, SS)
+CF=(N,LS,SS)
 $$</p>
-<p>其中：</p>
 <p>$$
-LS=\sum_{i=1}^{N}x_i,\quad SS=\sum_{i=1}^{N}x_i^\top x_i
+LS=\sum_{i=1}^{N}x_i,\qquad
+SS=\sum_{i=1}^{N}x_i^\top x_i
 $$</p>
-<p>簇中心为：</p>
+<h3>3.2 中心与半径</h3>
 <p>$$
 \mu=\frac{LS}{N}
 $$</p>
-<p>簇半径可写为：</p>
 <p>$$
-R=\sqrt{\frac{SS}{N}-\left\|\frac{LS}{N}\right\|^2}
+R=
+\sqrt{\frac{SS}{N}-\left\|\frac{LS}{N}\right\|^2}
 $$</p>
-<p>两个 CF 可直接相加：</p>
+<h3>3.3 可加性</h3>
 <p>$$
-CF_1+CF_2=(N_1+N_2,\ LS_1+LS_2,\ SS_1+SS_2)
+CF_1+CF_2=
+(N_1+N_2,\ LS_1+LS_2,\ SS_1+SS_2)
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
-<ul>
-<li>CF：微簇摘要，包含样本数、线性和、平方和。</li>
-<li>CF tree：层次化组织微簇的平衡树。</li>
-<li><code>threshold</code>：叶节点微簇允许的最大半径或直径。</li>
-<li><code>branching_factor</code>：每个非叶节点最多包含的子节点数。</li>
-<li><code>n_clusters</code>：最终全局聚类的目标簇数；也可不指定，只输出子簇。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>数据可由大量局部紧凑微簇近似。</li>
-<li>欧氏空间中的中心和半径能表达局部结构。</li>
-<li>阈值设置能在压缩率和信息保留之间取得平衡。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：连续型数值特征。</li>
-<li>因变量类型：无监督方法，不需要结局变量。</li>
-<li>数据结构：大样本特征矩阵。</li>
-<li>是否适合高维数据：可用，但高维距离和半径解释会变弱。</li>
-<li>是否适合缺失较多数据：需先处理缺失。</li>
-<li>是否适合删失数据：不直接处理删失结局。</li>
-<li>是否适合重复测量数据：需先构造样本级输入或窗口级特征。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>以大规模随访摘要特征为例：</p>
+<h3>3.4 关键条件</h3>
 <table>
 <thead>
 <tr>
-<th>VisitCount</th>
-<th>MeanSBP</th>
-<th>MeanBMI</th>
-<th>LabAbnormalCount</th>
-<th>MedicationCount</th>
+<th>条件</th>
+<th>违反后果</th>
+<th>检查方式</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>18</td>
-<td>146</td>
-<td>31.2</td>
-<td>6</td>
-<td>8</td>
+<td>局部结构可由球形微簇近似</td>
+<td>非凸结构被压坏</td>
+<td>与原数据子样本对照</td>
 </tr>
 <tr>
-<td>4</td>
-<td>118</td>
-<td>23.6</td>
-<td>1</td>
-<td>2</td>
+<td>threshold 合理</td>
+<td>过度合并或微簇爆炸</td>
+<td>阈值-微簇数曲线</td>
 </tr>
 <tr>
-<td>12</td>
-<td>139</td>
-<td>28.8</td>
-<td>4</td>
-<td>5</td>
+<td>特征尺度一致</td>
+<td>半径由大量纲变量决定</td>
+<td>固定标准化</td>
 </tr>
 <tr>
-<td>3</td>
-<td>112</td>
-<td>22.4</td>
-<td>0</td>
-<td>1</td>
+<td>数据顺序影响可接受</td>
+<td>在线树结构波动</td>
+<td>多顺序重放</td>
 </tr>
 </tbody>
-</table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：大规模数值型特征矩阵。</li>
-<li>关键变量：阈值、分支因子、最终簇数。</li>
-<li>需要预处理的内容：缺失处理、标准化、异常值处理、变量选择。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：微簇、CF 树、最终簇标签。</li>
-<li>参数估计：微簇中心、半径和样本数。</li>
-<li>预测结果：可把新样本分配到最近子簇或最终簇。</li>
-<li>不确定性指标：阈值敏感性、簇稳定性、与 K-means 等方法的一致性。</li>
-</ul></div>
+</table></div>
     </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：样本量很大、需要先压缩再聚类、数据可由局部紧凑微簇描述的场景。</li>
-<li>不适合：簇形状非常复杂、离群点很多、特征主要为类别变量的场景。</li>
-<li>使用前需要特别检查的点：threshold 是否导致过度合并或过度碎片化，微簇数量是否可解释。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>一维微簇 A 含样本 $(1,2,3)$：</p>
+<p>$$
+N_A=3,\quad LS_A=6,\quad SS_A=1^2+2^2+3^2=14
+$$</p>
+<p>其中心和半径：</p>
+<p>$$
+\mu_A=6/3=2
+$$</p>
+<p>$$
+R_A=\sqrt{14/3-2^2}
+=\sqrt{2/3}\approx0.816
+$$</p>
+<p>微簇 B 含 $(8,9)$：</p>
+<p>$$
+CF_B=(2,17,145),\quad
+\mu_B=8.5,\quad R_B=0.5
+$$</p>
+<p><strong>尝试合并。</strong></p>
+<p>$$
+CF_{A+B}=(5,23,159)
+$$</p>
+<p>$$
+\mu_{A+B}=23/5=4.6
+$$</p>
+<p>$$
+R_{A+B}
+=\sqrt{159/5-4.6^2}
+=\sqrt{10.64}
+\approx3.262
+$$</p>
+<p>若 threshold 为 1，A 和 B 各自可作为紧凑微簇，但合并半径 3.262 超过阈值，因此必须分开保存。</p></div>
     </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="balanced-iterative-reducing-and-clustering-using-hierarchies-birch" data-i="0">Python</button><button class="codetab" data-uid="balanced-iterative-reducing-and-clustering-using-hierarchies-birch" data-i="1">R</button></div><div class="codepanel active" data-uid="balanced-iterative-reducing-and-clustering-using-hierarchies-birch" data-i="0"><p>常用包：</p>
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 数据要求</h3>
 <ul>
-<li><code>scikit-learn</code></li>
+<li>大规模连续数值特征或稀疏数值向量。</li>
+<li>缺失需预处理，标准化规则必须在所有批次一致。</li>
+<li>高维距离仍可能失效，BIRCH 不自动解决维度灾难。</li>
 </ul>
-<pre><code class="language-python">import pandas as pd
-from sklearn.cluster import Birch
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
-
-df = pd.read_csv(&quot;ehr_summary_features.csv&quot;)
-X = df[[&quot;VisitCount&quot;, &quot;MeanSBP&quot;, &quot;MeanBMI&quot;, &quot;LabAbnormalCount&quot;, &quot;MedicationCount&quot;]]
-
-model = make_pipeline(
-    StandardScaler(),
-    Birch(threshold=0.6, branching_factor=50, n_clusters=4)
-)
-cluster = model.fit_predict(X)
-
-print(pd.Series(cluster).value_counts().sort_index())
-</code></pre></div><div class="codepanel" data-uid="balanced-iterative-reducing-and-clustering-using-hierarchies-birch" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>stream</code></li>
-</ul>
-<pre><code class="language-r">library(stream)
-
-x &lt;- scale(df[, c(&quot;VisitCount&quot;, &quot;MeanSBP&quot;, &quot;MeanBMI&quot;, &quot;LabAbnormalCount&quot;, &quot;MedicationCount&quot;)])
-stream &lt;- DSD_Memory(x)
-birch &lt;- DSC_BIRCH(threshold = 0.6, branching = 50)
-update(birch, stream, n = nrow(x))
-
-micro &lt;- get_centers(birch)
-head(micro)
-</code></pre></div></div></div>
+<h3>5.2 输入与产出</h3>
+<p>输入为 threshold、branching factor、最终聚类器和数据批次。输出为 CF 树、微簇中心、微簇标签与最终样本标签。</p></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：微簇数量、最终簇中心、各簇样本量、不同阈值下结果变化。</li>
-<li>每个主要参数如何解释：<code>threshold</code> 越小，微簇越细；越大，压缩越强但可能合并不同结构。</li>
-<li>临床或医学意义如何表达：BIRCH 更常作为大规模聚类的预处理或快速分群工具，最终簇仍需用临床特征画像解释。</li>
-<li>常见误读：CF 树是计算摘要结构，不等同于医学上的层级病程结构。</li>
+<li>大规模、流式或内存受限的数值数据。</li>
+<li>原始点可由局部紧凑微簇近似。</li>
+<li>不适合复杂非凸簇、类别特征为主或对极小罕见簇要求很高的任务。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>阈值与微簇数量关系图。</li>
-<li>最终簇在 PCA/UMAP 空间中的分布。</li>
-<li>各簇特征中心热图。</li>
-<li>微簇大小分布图。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="balanced-iterative-reducing-and-clustering-using-hierarchies-birch" data-i="0">Python</button><button class="codetab" data-uid="balanced-iterative-reducing-and-clustering-using-hierarchies-birch" data-i="1">R</button></div><div class="codepanel active" data-uid="balanced-iterative-reducing-and-clustering-using-hierarchies-birch" data-i="0"><pre><code class="language-python">from sklearn.cluster import Birch
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler().fit(X)
+X_s = scaler.transform(X)
+
+model = Birch(
+    threshold=0.6,
+    branching_factor=50,
+    n_clusters=4,
+)
+
+for batch in range(0, len(X_s), 2000):
+    model.partial_fit(X_s[batch:batch + 2000])
+model.partial_fit()  # 完成全局聚类步骤
+
+cluster = model.predict(X_s)
+micro_centers = model.subcluster_centers_
+print(len(micro_centers))
+</code></pre></div><div class="codepanel" data-uid="balanced-iterative-reducing-and-clustering-using-hierarchies-birch" data-i="1"><pre><code class="language-r">library(stream)
+
+x &lt;- scale(df[, c(
+  &quot;VisitCount&quot;, &quot;MeanSBP&quot;, &quot;MeanBMI&quot;,
+  &quot;LabAbnormalCount&quot;, &quot;MedicationCount&quot;
+)])
+
+source &lt;- DSD_Memory(x)
+model &lt;- DSC_BIRCH(
+  threshold = 0.6,
+  branching = 50,
+  maxLeaf = 100
+)
+update(model, source, n = nrow(x))
+
+micro_centers &lt;- get_centers(model)
+head(micro_centers)
+</code></pre></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>适合大规模数据和有限内存场景。</li>
-<li>可增量构建局部数据摘要。</li>
-<li>可与其他聚类算法组合使用。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>对阈值敏感。</li>
-<li>对非球形、复杂形状簇不如密度或图方法灵活。</li>
-<li>高维空间中半径和距离解释变弱。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>阈值不调参，直接接受默认微簇结构。</li>
-<li>忽略离群点对 CF 树的影响。</li>
-<li>把预聚类结果当作最终临床亚型。</li>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>微簇是压缩单元，不一定是最终临床簇。</li>
+<li>threshold 越小，微簇越多、保真更高、内存更大。</li>
+<li>最终 <code>n_clusters</code> 在微簇中心上运行，不等于 CF 树叶数。</li>
+<li>数据顺序可影响树，需报告流式顺序和随机化策略。</li>
 </ul></div>
     </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-hierarchical-clustering.html" data-cn="层次聚类" data-en="Hierarchical Clustering" data-def="层次聚类是一类把样本组织成树状层次结构的无监督方法。最常见的是凝聚式层次聚类：先把每个样本看作一个簇，再按相似性逐步合并，最终形成一棵树状图。">层次聚类（Hierarchical Clustering）</a> 的区别：BIRCH 用 CF 树做大规模数据压缩，传统层次聚类通常直接基于样本距离合并。</li>
-<li>和 <a class="xlink" href="m-mini-batch-k-means-clustering.html" data-cn="Mini-Batch K-means聚类" data-en="Mini-Batch K-means Clustering" data-def="Mini-Batch K-means 是 [[K-means聚类（K-means Clustering）]] 的大规模近似版本。它每次只用一小批样本更新质心，从而显著降低计算成本。">Mini-Batch K-means聚类（Mini-Batch K-means Clustering）</a> 的区别：Mini-Batch K-means 用小批量更新质心，BIRCH 先生成微簇摘要。</li>
-<li>和 <a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a> 的区别：BIRCH 可作为 K-means 前的压缩步骤，也可直接输出聚类。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">诊断与稳健性</h2></div>
+      <div class="sec-body"><ol>
+<li>画 threshold 与微簇数、内存和下游指标的关系。</li>
+<li>随机打乱数据顺序并重复建树。</li>
+<li>在可承受子样本上与全量 K-means 或层次聚类比较。</li>
+<li>检查微簇半径、大小和极小簇。</li>
+<li>监控流式特征漂移与树增长。</li>
+</ol></div>
     </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
-<li>大规模 EHR 患者表型预聚类。</li>
-<li>海量医学影像 patch 特征摘要。</li>
-<li>可穿戴设备长期监测数据的模式压缩。</li>
+<li>threshold-微簇数量曲线。</li>
+<li>微簇大小和半径分布。</li>
+<li>微簇中心及最终簇的二维投影。</li>
+<li>CF 树深度、节点数和内存随批次变化图。</li>
 </ul></div>
     </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-hierarchical-clustering.html" data-cn="层次聚类" data-en="Hierarchical Clustering" data-def="层次聚类是一类把样本组织成树状层次结构的无监督方法。最常见的是凝聚式层次聚类：先把每个样本看作一个簇，再按相似性逐步合并，最终形成一棵树状图。">层次聚类（Hierarchical Clustering）</a></li>
-<li><a class="xlink" href="m-mini-batch-k-means-clustering.html" data-cn="Mini-Batch K-means聚类" data-en="Mini-Batch K-means Clustering" data-def="Mini-Batch K-means 是 [[K-means聚类（K-means Clustering）]] 的大规模近似版本。它每次只用一小批样本更新质心，从而显著降低计算成本。">Mini-Batch K-means聚类（Mini-Batch K-means Clustering）</a></li>
-<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a></li>
-<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p><strong>优势：</strong> 内存高效、可增量、CF 可加，适合先压缩再聚类。</p>
+<p><strong>局限：</strong> threshold 和顺序敏感，偏好紧凑微簇，高维与非凸结构仍困难。</p>
+<p><strong>常见坑：</strong> 把 CF 树当临床层级；忽略 <code>maxLeaf</code> 等结构参数；预处理跨批次变化；直接把微簇当最终亚型。</p></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-hierarchical-clustering.html" data-cn="层次聚类" data-en="Hierarchical Clustering" data-def="层次聚类按距离逐步合并或拆分样本，把从细到粗的分群过程保存为一棵树，而不是只给单一分组。">层次聚类（Hierarchical Clustering）</a>：直接基于样本距离合并，BIRCH 先用 CF 树压缩。</li>
+<li><a class="xlink" href="m-mini-batch-k-means-clustering.html" data-cn="Mini-Batch K-means聚类" data-en="Mini-Batch K-means Clustering" data-def="Mini-Batch K-means 每次只抽一小批样本近似更新质心，以少量精度和随机波动换取速度、低内存与增量处理能力。">Mini-Batch K-means聚类（Mini-Batch K-means Clustering）</a>：直接随机更新 $K$ 个质心；BIRCH 维护许多微簇摘要。</li>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a>：可作为 BIRCH 压缩后的全局聚类器。</li>
+<li>选择经验：需要可加摘要和流式压缩时选 BIRCH，仅需快速固定 $K$ 质心时选 Mini-Batch。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>海量 EHR 患者画像预聚类。</li>
+<li>医学影像 patch 与可穿戴时间窗口特征压缩。</li>
+<li>数据流中的在线模式摘要和后续精细聚类。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">术语表</h2></div>
+      <div class="sec-body"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CF</td>
+<td>保存样本数、线性和、平方和的簇摘要</td>
+</tr>
+<tr>
+<td>micro-cluster</td>
+<td>CF 树叶部的局部紧凑摘要</td>
+</tr>
+<tr>
+<td>threshold</td>
+<td>新点并入微簇后允许的最大半径</td>
+</tr>
+<tr>
+<td>branching factor</td>
+<td>每个非叶节点最多的子簇数</td>
+</tr>
+<tr>
+<td>global clustering</td>
+<td>在微簇中心上执行的最终聚类</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-hierarchical-clustering.html" data-cn="层次聚类" data-en="Hierarchical Clustering" data-def="层次聚类按距离逐步合并或拆分样本，把从细到粗的分群过程保存为一棵树，而不是只给单一分组。">层次聚类（Hierarchical Clustering）</a></li>
+<li><a class="xlink" href="m-mini-batch-k-means-clustering.html" data-cn="Mini-Batch K-means聚类" data-en="Mini-Batch K-means Clustering" data-def="Mini-Batch K-means 每次只抽一小批样本近似更新质心，以少量精度和随机波动换取速度、低内存与增量处理能力。">Mini-Batch K-means聚类（Mini-Batch K-means Clustering）</a></li>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a></li>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="PCA 旋转坐标轴，依次寻找样本投影方差最大的正交方向，用少数线性组合保留主要总变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Zhang T, Ramakrishnan R, Livny M. BIRCH: an efficient data clustering method for very large databases. <em>SIGMOD</em>. 1996:103-114.</li>
-<li>scikit-learn Developers. <code>sklearn.cluster.Birch</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.Birch.html">https://scikit-learn.org/stable/modules/generated/sklearn.cluster.Birch.html</a> （访问日期：2026-07-02）</li>
-<li>Hahsler M, Piekenbrock M, Doran D. <code>stream</code>: An extensible framework for data stream clustering research with R. <em>Journal of Statistical Software</em>. 2019;76(14):1-50.</li>
+<li>scikit-learn Developers. <code>Birch</code> API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.Birch.html">https://scikit-learn.org/stable/modules/generated/sklearn.cluster.Birch.html</a> （访问日期：2026-07-09）</li>
+<li>Hahsler M, Piekenbrock M, Doran D. <code>stream</code>: An extensible framework for data stream clustering research with R. <em>J Stat Softw</em>. 2019;76(14):1-50.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-mini-batch-k-means-clustering.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">Mini-Batch K-means聚类</div></a><a class="pg pg-next" href="m-fuzzy-c-means-clustering-fcm.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">模糊C均值聚类</div></a></div>

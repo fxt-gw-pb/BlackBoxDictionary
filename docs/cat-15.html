@@ -46,7 +46,7 @@
           <span class="entry-cn">多重检验与错误率控制</span>
           <span class="entry-en">Multiple Testing and Error Rate Control</span>
         </div>
-        <p class="entry-def">多重检验与错误率控制关注的是：当同时进行很多次假设检验时，如何控制整体假阳性风险或错误发现比例。</p>
+        <p class="entry-def">多重检验校正不是“让 P 值更难显著”，而是把单次检验的错误承诺升级为对整组发现的错误承诺。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -59,7 +59,7 @@
           <span class="entry-cn">Bonferroni校正</span>
           <span class="entry-en">Bonferroni Correction</span>
         </div>
-        <p class="entry-def">Bonferroni 校正是控制 FWER 的最经典单步方法，把显著性水平 $\alpha$ 平均分配到每个检验上。</p>
+        <p class="entry-def">Bonferroni 把总的第一类错误预算 $\alpha$ 平分给 $m$ 个检验，以最简单、最稳健的方式控制 FWER。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -72,7 +72,7 @@
           <span class="entry-cn">Holm程序</span>
           <span class="entry-en">Holm Procedure</span>
         </div>
-        <p class="entry-def">Holm 程序是控制 FWER 的逐步法（step-down procedure），通常比 Bonferroni 更有力。</p>
+        <p class="entry-def">Holm 先审最小 P 值，再逐步放宽阈值；它与 Bonferroni 同样控制 FWER，却从不更差。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -85,7 +85,7 @@
           <span class="entry-cn">Benjamini-Hochberg程序</span>
           <span class="entry-en">Benjamini-Hochberg Procedure</span>
         </div>
-        <p class="entry-def">Benjamini-Hochberg（BH）程序是控制 FDR 的经典方法，特别适合高维发现型研究。</p>
+        <p class="entry-def">BH 不要求“一个假阳性都不能有”，而是控制发现集合中假发现比例的期望，从而在探索性高维研究中换取更高发现能力。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -98,7 +98,7 @@
           <span class="entry-cn">ROC曲线与AUC</span>
           <span class="entry-en">Receiver Operating Characteristic and AUC</span>
         </div>
-        <p class="entry-def">ROC 曲线（受试者工作特征曲线）把一个连续评分或预测概率在所有可能阈值下的敏感度与（1−特异度）连成一条曲线；AUC 是曲线下面积，用一个 0–1 的数概括模型的整体区分能力。</p>
+        <p class="entry-def">ROC 扫描所有阈值观察灵敏度—假阳性权衡，AUC 则等于随机一名阳性得分高于随机一名阴性的概率。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -111,7 +111,7 @@
           <span class="entry-cn">校准曲线</span>
           <span class="entry-en">Calibration Curve</span>
         </div>
-        <p class="entry-def">校准曲线（可靠性图）比较模型的预测概率与实际观察到的事件发生频率，用来判断“模型说的 20% 风险，是不是真的大约 20% 的人发生了事件”。</p>
+        <p class="entry-def">校准回答“预测 20% 风险的人是否约有 20% 发病”，关注概率的绝对可信度，而不是排序。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -124,7 +124,7 @@
           <span class="entry-cn">决策曲线分析</span>
           <span class="entry-en">Decision Curve Analysis, DCA</span>
         </div>
-        <p class="entry-def">决策曲线分析通过“净获益”指标，评估一个预测模型或诊断策略在不同决策阈值下相对于“全部干预”和“全部不干预”两个极端策略的临床价值。</p>
+        <p class="entry-def">DCA 用阈值概率把漏诊与误治代价换成同一尺度，比较模型、全治和全不治谁带来更高净获益。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -137,7 +137,7 @@
           <span class="entry-cn">交叉验证</span>
           <span class="entry-en">Cross-Validation</span>
         </div>
-        <p class="entry-def">交叉验证是一类重采样方法，通过反复把数据切成训练与验证子集来估计模型在新数据上的表现，也常用于超参数选择。</p>
+        <p class="entry-def">交叉验证轮流把每部分样本当作未见数据，用多次“训练—验证”近似模型对新样本的泛化表现。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -150,7 +150,7 @@
           <span class="entry-cn">SHAP</span>
           <span class="entry-en">Shapley Additive Explanations, SHAP</span>
         </div>
-        <p class="entry-def">SHAP 是一种基于博弈论 Shapley 值的特征归因方法，把某次预测相对基线的偏移，公平地分配到各个特征上，给出统一的局部与全局解释。</p>
+        <p class="entry-def">SHAP 把一次预测与参考基线之间的差额，按特征在所有可能加入顺序中的平均边际贡献进行分账。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -163,7 +163,7 @@
           <span class="entry-cn">一致性指数</span>
           <span class="entry-en">Concordance Index, C-index</span>
         </div>
-        <p class="entry-def">一致性指数衡量预测模型的区分度：随机取一对可比较个体，模型给「更早发生事件者」更高风险的概率。它是 ROC 曲线下面积在生存数据上的推广。</p>
+        <p class="entry-def">C-index 从所有能够判断结局先后的个体对中，计算模型把更早发生事件者排在更高风险位置的比例。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>

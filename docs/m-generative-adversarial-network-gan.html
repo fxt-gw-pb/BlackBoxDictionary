@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,197 +54,418 @@
     <div class="intro-note"><h1>生成对抗网络（Generative Adversarial Network, GAN）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>GAN 是由生成器和判别器组成的生成模型。生成器尝试生成逼真的伪样本，判别器尝试区分真实样本和伪样本，两者在对抗训练中共同逼近真实数据分布。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>GAN 让生成器与判别器进行一场可微博弈：判别器学习识别真假，生成器借判别器的反馈把随机噪声逐步推成类似真实数据的样本。</p>
+<h3>1.2 定义</h3>
+<p>生成对抗网络是一类隐式生成模型，由生成器 $G$ 和判别器 $D$ 组成。生成器把潜在噪声 $z$ 映射成合成样本，判别器输出输入来自真实数据而非生成器的概率。两者交替优化，使生成分布逼近真实数据分布，但通常不给出可直接计算的概率密度。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：如何在没有显式概率密度公式的情况下学习复杂高维数据分布并生成新样本。</li>
-<li>适用任务：图像生成、数据增强、缺失模态补全、域适配、隐私保护合成数据。</li>
-<li>常见医学场景：小样本医学影像增强、病理图像风格迁移、罕见病例合成。</li>
+<li>研究问题：复杂高维分布没有易写出的似然时，如何学习并生成新样本。</li>
+<li>适用任务：图像合成、域转换、超分辨率、缺失模态生成、条件生成和数据增强。</li>
+<li>常见医学场景：医学影像合成、病理染色风格转换、低剂量影像增强、稀有类别辅助增强。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>可以把 GAN 理解成“造假者”和“审稿人”的博弈。造假者不断改进伪造样本，审稿人不断提高识别能力，直到伪样本足够像真样本。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>生成器像“仿制者”，判别器像“鉴定师”。鉴定师越能指出伪品破绽，仿制者得到的改进信号越清楚；仿制者进步后，鉴定师也必须升级。理想平衡时，生成样本和真实样本分布一致，鉴定师对任何样本都只能猜 50%。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>经典 GAN 的目标函数为：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>传统概率生成模型往往要指定似然并计算归一化常数，高维影像分布很难显式表达。直接最小化“每个生成样本与哪个真实样本的距离”也不合理，因为生成并没有一一配对真值。GAN 把“分布是否相似”转化为一个分类问题：若判别器仍能区分真假，说明分布还有可利用差异。</p>
+<h3>2.2 关键洞察</h3>
+<p>对固定生成器，最优判别器为</p>
 <p>$$
-\min_G \max_D \; V(D,G)
-= \mathbb{E}_{x \sim p_{\text{data}}}[\log D(x)]
-+ \mathbb{E}_{z \sim p_z}[\log(1 - D(G(z)))]
+D^*(x)=\frac{p_{\text{data}}(x)}
+{p_{\text{data}}(x)+p_g(x)}
 $$</p>
-<p>其中 $G(z)$ 为生成样本，$D(x)$ 为样本来自真实分布的概率。</p>
-<h3>2.2 参数或统计量含义</h3>
+<p>把它代回极小极大目标后，生成器实际在缩小真实分布与生成分布之间的 Jensen–Shannon 散度。也就是说，判别器不是最终产品，而是一个可学习的“分布差异测量器”，把高维分布差异转成生成器可反传的梯度。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$G$：生成器，将随机噪声映射为伪样本。</li>
-<li>$D$：判别器，区分真实与生成样本。</li>
-<li>$z$：潜在噪声向量。</li>
-<li>对抗损失：衡量生成器和判别器的博弈过程。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>训练数据足以代表目标分布。</li>
-<li>生成器和判别器容量相对平衡。</li>
-<li>训练过程能在不稳定对抗中维持可接受收敛。</li>
+<li>相比自编码器：GAN 直接约束生成分布的真实性，自编码器主要优化逐样本重构。</li>
+<li>相比变分自编码器：VAE 有显式概率目标、潜空间较规整，但样本可能更平滑；GAN 常更锐利但训练更不稳定。</li>
+<li>相比扩散模型：扩散模型训练通常更稳定、覆盖更好，但采样往往需要多步；GAN 可一次前向快速采样。</li>
+<li>相比简单过采样：GAN 能产生新组合，但也可能复制训练样本或放大偏倚。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>原始 GAN 的极小极大目标是</p>
+<p>$$
+\min_G\max_D V(D,G)
+=
+\mathbb E_{\mathbf x\sim p_{\text{data}}}
+[\log D(\mathbf x)]
++
+\mathbb E_{\mathbf z\sim p_z}
+[\log(1-D(G(\mathbf z)))]
+$$</p>
+<p>这个式子在说：判别器希望真实样本得分高、生成样本得分低；生成器希望让第二项变小，从而使生成样本被判为真实。</p>
+<p>实践中常用非饱和生成器损失：</p>
+<p>$$
+\mathcal L_G
+=-\mathbb E_{\mathbf z\sim p_z}
+[\log D(G(\mathbf z))]
+$$</p>
+<p>判别器损失为</p>
+<p>$$
+\mathcal L_D
+=-\mathbb E_{\mathbf x\sim p_{\text{data}}}\log D(\mathbf x)
+-\mathbb E_{\mathbf z\sim p_z}\log(1-D(G(\mathbf z)))
+$$</p>
+<h3>3.2 推导脉络</h3>
+<ol>
+<li>从易采样的先验 $p_z$ 抽取噪声。</li>
+<li>生成器用 $G_\theta(z)$ 把噪声推到数据空间，诱导出 $p_g$。</li>
+<li>判别器把真假识别写成二分类交叉熵。</li>
+<li>固定 $G$ 更新 $D$，再固定 $D$ 更新 $G$，形成交替优化。</li>
+<li>理论平衡是 $p_g=p_{\text{data}}$、$D(x)=1/2$。</li>
+</ol>
+<p>非饱和损失不改变理想平衡，但在生成样本很差、$D(G(z))$ 接近 0 时提供更强梯度。WGAN 则用 Wasserstein 距离及 Lipschitz 约束改善分布支撑不重叠时的训练信号。</p>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：图像、表征向量、序列等高维样本。</li>
-<li>因变量类型：通常是无监督生成目标，也可扩展到条件标签。</li>
-<li>数据结构：真实样本张量加潜在噪声分布。</li>
-<li>是否适合高维数据：设计初衷就是高维生成，但训练难度也随之上升。</li>
-<li>是否适合缺失较多数据：不直接针对缺失机制，需专门设计。</li>
-<li>是否适合删失数据：不适合直接做删失分析。</li>
-<li>是否适合重复测量数据：可扩展到序列 GAN，但需专门结构。</li>
+<li>$\mathbf z$：潜在噪声，常来自标准正态或均匀分布。</li>
+<li>$G(\mathbf z)$：生成样本。</li>
+<li>$D(\mathbf x)$：判别器估计“来自真实数据”的概率。</li>
+<li>$p_{\text{data}}$：未知的真实数据分布。</li>
+<li>$p_g$：生成器诱导的分布，通常没有显式密度。</li>
+<li>$\mathcal L_G,\mathcal L_D$：两个网络各自的训练损失，不能单独作为生成质量结论。</li>
+<li>条件 GAN 还输入标签或协变量 $y$，学习 $G(z,y)$。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>以病理图像增强为例：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>SampleID</th>
-<th>ImagePatch</th>
-<th>TissueType</th>
-<th>RarePattern</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>S001</td>
-<td>patch_001.png</td>
-<td>breast</td>
-<td>1</td>
+<td>训练数据代表目标分布</td>
+<td>样本覆盖真实变异和亚组</td>
+<td>生成器复制偏倚、遗漏人群</td>
+<td>分层覆盖与外部专家审查</td>
 </tr>
 <tr>
-<td>S002</td>
-<td>patch_002.png</td>
-<td>breast</td>
-<td>0</td>
+<td>生成器与判别器能力平衡</td>
+<td>双方都能持续提供学习信号</td>
+<td>一方碾压导致无梯度或伪收敛</td>
+<td>联合看损失、样本与多样性</td>
 </tr>
 <tr>
-<td>S003</td>
-<td>patch_003.png</td>
-<td>colon</td>
-<td>1</td>
+<td>潜在维度和架构足够</td>
+<td>能表达目标分布主要模式</td>
+<td>欠拟合或模式遗漏</td>
+<td>多指标、潜空间插值</td>
 </tr>
 <tr>
-<td>S004</td>
-<td>patch_004.png</td>
-<td>colon</td>
-<td>0</td>
+<td>训练样本隐私可控</td>
+<td>模型不记忆可识别病例</td>
+<td>成员推断或近复制风险</td>
+<td>最近邻、攻击与去标识审计</td>
+</tr>
+<tr>
+<td>评价指标覆盖真实性与多样性</td>
+<td>单一分数不会掩盖失败</td>
+<td>只生成少数逼真模式</td>
+<td>质量、覆盖、临床效用并评</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>考虑最小离散世界 $x\in\{0,1\}$。真实分布为</p>
+<p>$$
+p_{\text{data}}(0)=0.8,\qquad p_{\text{data}}(1)=0.2
+$$</p>
+<p>当前生成器还不准确：</p>
+<p>$$
+p_g(0)=0.5,\qquad p_g(1)=0.5
+$$</p>
+<p><strong>第 1 步：求当前生成器下的最优判别器。</strong></p>
+<p>$$
+D^*(0)=\frac{0.8}{0.8+0.5}=0.615
+$$</p>
+<p>$$
+D^*(1)=\frac{0.2}{0.2+0.5}=0.286
+$$</p>
+<p>因为 0 在真实数据中更常见，见到 0 时判别器更倾向判真；1 被生成器过度生成，因此判真概率更低。</p>
+<p><strong>第 2 步：代入极小极大目标。</strong></p>
+<p>$$
+\begin{aligned}
+V(D^*,G)
+&amp;=0.8\log(0.615)+0.2\log(0.286)\\
+&amp;\quad+0.5\log(1-0.615)+0.5\log(1-0.286)\\
+&amp;=-0.388-0.251-0.478-0.168\\
+&amp;=-1.285
+\end{aligned}
+$$</p>
+<p><strong>第 3 步：看理想平衡。</strong> 若生成器学到真实比例 $(0.8,0.2)$，则两个取值上都有 $D^*=0.5$：</p>
+<p>$$
+V(D^*,G) = \log(0.5)+\log(0.5)=-\log 4=-1.386
+$$</p>
+<p>在判别器最优的前提下，生成器要把目标从 $-1.285$ 降到 $-1.386$，也就是让真假越来越不可分。这个例子还说明：判别器准确率降到 50% 只有在双方都充分训练且样本覆盖良好时才可能是好事；若判别器太弱，也会“瞎猜 50%”。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：图像、波形、表格向量、序列或条件标签。</li>
+<li>因变量类型：无监督生成，或条件标签/配对域作为条件。</li>
+<li>数据结构：与生成器输出形状一致的张量。</li>
+<li>是否适合高维数据：适合，但训练和评价难度随维度上升。</li>
+<li>是否适合缺失较多数据：可专门设计用于插补，普通 GAN 不自动识别缺失机制。</li>
+<li>是否适合删失数据：普通 GAN 不处理删失，需把时间到事件机制写入目标。</li>
+<li>是否适合重复测量数据：需序列生成结构并以患者为单位切分。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>patient_id</th>
+<th>image_path</th>
+<th>modality</th>
+<th>site</th>
+<th>diagnosis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P01</td>
+<td>img_001.png</td>
+<td>CT</td>
+<td>A</td>
+<td>benign</td>
+</tr>
+<tr>
+<td>P02</td>
+<td>img_002.png</td>
+<td>CT</td>
+<td>B</td>
+<td>malignant</td>
+</tr>
+<tr>
+<td>P03</td>
+<td>img_003.png</td>
+<td>CT</td>
+<td>A</td>
+<td>malignant</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<p>训练条件 GAN 时可把 diagnosis、site 等作为条件，但敏感属性和中心伪影也可能被原样复制。</p>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：真实样本和随机噪声向量。</li>
-<li>关键变量：潜在维度、生成器/判别器结构、学习率、判别器训练步数。</li>
-<li>需要预处理的内容：标准化、类别平衡、生成目标定义、稳定训练策略。</li>
+<li>真实样本、潜在噪声和可选条件标签。</li>
+<li>生成器/判别器架构、学习率、更新比例和正则化。</li>
+<li>患者级切分以及明确的隐私与用途边界。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：训练好的生成器和判别器。</li>
-<li>参数估计：两个网络的权重。</li>
-<li>预测结果：生成样本、潜在表示或条件生成结果。</li>
-<li>不确定性指标：生成质量评估、下游任务提升效果、人工或专家质控。</li>
+<li>可采样的生成器与训练用判别器。</li>
+<li>合成样本和潜在空间。</li>
+<li>训练轨迹、质量/多样性指标与下游效用。</li>
+<li>不直接产出真实样本的似然或隐私保证。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：需要生成逼真样本或做数据增强的任务，尤其是图像领域。</li>
-<li>不适合：样本极少、对稳定概率估计要求高、需要严格可解释机制的任务。</li>
-<li>使用前需要特别检查的点：模式崩溃、隐私泄露风险、生成样本是否引入伪特征。</li>
-</ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="generative-adversarial-network-gan" data-i="0">Python</button><button class="codetab" data-uid="generative-adversarial-network-gan" data-i="1">R</button></div><div class="codepanel active" data-uid="generative-adversarial-network-gan" data-i="0"><p>常用包：</p>
-<ul>
-<li><code>torch</code></li>
-</ul>
-<pre><code class="language-python">import torch.nn as nn
-
-generator = nn.Sequential(
-    nn.Linear(100, 256), nn.ReLU(),
-    nn.Linear(256, 784), nn.Tanh()
-)
-
-discriminator = nn.Sequential(
-    nn.Linear(784, 256), nn.LeakyReLU(0.2),
-    nn.Linear(256, 1), nn.Sigmoid()
-)
-</code></pre></div><div class="codepanel" data-uid="generative-adversarial-network-gan" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>keras</code></li>
-</ul>
-<pre><code class="language-r"># R 中通常通过 keras 自定义 generator 和 discriminator，
-# 再手工编写交替训练循环来实现 GAN。
-</code></pre></div></div></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：生成样本质量、多样性、下游任务增益、是否出现模式崩溃。</li>
-<li>每个主要参数如何解释：潜在维度控制生成自由度，判别器强弱影响训练平衡。</li>
-<li>临床或医学意义如何表达：生成样本只能作为增强或研究工具，不能替代真实临床证据。</li>
-<li>常见误读：生成图像“看起来真”不等于包含真实生物学机制，也不代表适合直接用于诊断。</li>
+<li>适合：需要高保真快速生成、成像域转换、条件合成，且有足够数据和严格评价。</li>
+<li>不适合：小数据却要求隐私安全、训练不稳定不可接受、需要精确似然，或合成数据将直接用于高风险临床决策。</li>
+<li>使用前检查：模式崩塌、训练样本近复制、亚组覆盖、伪影、隐私攻击和下游真实数据验证。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>不同训练轮次的生成样本网格。</li>
-<li>生成器和判别器损失曲线。</li>
-<li>真实样本与生成样本的特征嵌入图。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="generative-adversarial-network-gan" data-i="0">Python</button><button class="codetab" data-uid="generative-adversarial-network-gan" data-i="1">R</button></div><div class="codepanel active" data-uid="generative-adversarial-network-gan" data-i="0"><p>常用包：TensorFlow/Keras。下面生成二维高斯点，仅用于展示交替训练。</p>
+<pre><code class="language-python">import numpy as np
+import tensorflow as tf
+
+tf.keras.utils.set_random_seed(42)
+rng = np.random.default_rng(42)
+latent_dim = 4
+batch_size = 64
+
+generator = tf.keras.Sequential([
+    tf.keras.Input(shape=(latent_dim,)),
+    tf.keras.layers.Dense(16, activation=&quot;relu&quot;),
+    tf.keras.layers.Dense(2),
+])
+discriminator = tf.keras.Sequential([
+    tf.keras.Input(shape=(2,)),
+    tf.keras.layers.Dense(16, activation=&quot;relu&quot;),
+    tf.keras.layers.Dense(1, activation=&quot;sigmoid&quot;),
+])
+discriminator.compile(
+    optimizer=tf.keras.optimizers.Adam(2e-4),
+    loss=&quot;binary_crossentropy&quot;,
+)
+
+discriminator.trainable = False
+z_input = tf.keras.Input(shape=(latent_dim,))
+gan = tf.keras.Model(z_input, discriminator(generator(z_input)))
+gan.compile(
+    optimizer=tf.keras.optimizers.Adam(2e-4),
+    loss=&quot;binary_crossentropy&quot;,
+)
+
+for step in range(1000):
+    real = rng.normal(2.0, 0.5, size=(batch_size, 2)).astype(&quot;float32&quot;)
+    z = rng.normal(size=(batch_size, latent_dim)).astype(&quot;float32&quot;)
+    fake = generator.predict(z, verbose=0)
+    x_batch = np.vstack([real, fake])
+    y_batch = np.vstack([
+        np.ones((batch_size, 1)),
+        np.zeros((batch_size, 1)),
+    ])
+    discriminator.train_on_batch(x_batch, y_batch)
+
+    z = rng.normal(size=(batch_size, latent_dim)).astype(&quot;float32&quot;)
+    gan.train_on_batch(z, np.ones((batch_size, 1)))
+
+samples = generator.predict(
+    rng.normal(size=(1000, latent_dim)), verbose=0
+)
+print(samples.mean(axis=0), samples.std(axis=0))
+</code></pre></div><div class="codepanel" data-uid="generative-adversarial-network-gan" data-i="1"><p>常用包：keras3。</p>
+<pre><code class="language-r">library(keras3)
+
+set_random_seed(42)
+latent_dim &lt;- 4
+batch_size &lt;- 64
+
+generator &lt;- keras_model_sequential() |&gt;
+  layer_dense(16, activation = &quot;relu&quot;, input_shape = c(latent_dim)) |&gt;
+  layer_dense(2)
+
+discriminator &lt;- keras_model_sequential() |&gt;
+  layer_dense(16, activation = &quot;relu&quot;, input_shape = c(2)) |&gt;
+  layer_dense(1, activation = &quot;sigmoid&quot;)
+
+discriminator |&gt; compile(
+  optimizer = optimizer_adam(2e-4),
+  loss = &quot;binary_crossentropy&quot;
+)
+
+discriminator$trainable &lt;- FALSE
+z_input &lt;- layer_input(shape = c(latent_dim))
+gan &lt;- keras_model(z_input, discriminator(generator(z_input)))
+gan |&gt; compile(
+  optimizer = optimizer_adam(2e-4),
+  loss = &quot;binary_crossentropy&quot;
+)
+
+for (step in seq_len(1000)) {
+  real &lt;- matrix(rnorm(batch_size * 2, 2, 0.5), ncol = 2)
+  z &lt;- matrix(rnorm(batch_size * latent_dim), ncol = latent_dim)
+  fake &lt;- generator |&gt; predict(z, verbose = 0)
+  x_batch &lt;- rbind(real, fake)
+  y_batch &lt;- rbind(
+    matrix(1, batch_size, 1),
+    matrix(0, batch_size, 1)
+  )
+  discriminator |&gt; train_on_batch(x_batch, y_batch)
+
+  z &lt;- matrix(rnorm(batch_size * latent_dim), ncol = latent_dim)
+  gan |&gt; train_on_batch(z, matrix(1, batch_size, 1))
+}
+</code></pre></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>不能只看生成器/判别器损失：对抗损失不是单调的，双方此消彼长。</li>
+<li>图像“看起来逼真”只覆盖保真度，不代表疾病谱、亚组比例和临床变量关系正确。</li>
+<li>FID 等指标衡量特征空间分布差异，但依赖特征提取器；通用图像网络未必适合医学影像。</li>
+<li>下游效用应以“真实训练/真实测试”为基准，合成数据增强后仍必须在独立真实患者上验证。</li>
+<li>合成不等于匿名；近复制、成员推断和属性推断都可能泄露训练信息。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>模式崩塌：检查不同噪声是否只生成少数模板；比较类内/类间多样性与最近邻。</li>
+<li>训练平衡：联合观察两方损失、梯度范数、判别输出和固定噪声样本序列。</li>
+<li>真实性：由领域专家盲评病理解剖合理性和伪影，而非只看视觉锐度。</li>
+<li>覆盖性：按年龄、性别、中心、设备、疾病亚型比较真实与合成分布。</li>
+<li>隐私：做训练集最近邻、重复检测、成员推断与属性泄露测试。</li>
+<li>稳健性：多随机种子、不同架构和 WGAN-GP 等目标做敏感性分析。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>固定潜在噪声随 epoch 的生成样本网格。</li>
+<li>真实样本与生成样本的最近邻并排图。</li>
+<li>潜空间插值序列，观察变化是否连续且医学合理。</li>
+<li>特征空间真实/生成分布图和亚组覆盖图。</li>
+<li>质量—多样性、隐私—效用双轴图。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>擅长生成视觉质量较高的样本。</li>
-<li>可用于数据增强和域适配。</li>
-<li>不需要显式写出高维分布形式。</li>
+<li>可学习复杂高维分布并一次前向快速采样。</li>
+<li>常能产生清晰样本，支持条件生成和域转换。</li>
+<li>判别器提供数据驱动的分布差异信号。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>训练不稳定。</li>
-<li>缺少统一、可靠的生成质量评估标准。</li>
-<li>存在模式崩溃和隐私泄露风险。</li>
+<li>极小极大优化不稳定，容易模式崩塌。</li>
+<li>缺少易解释的显式似然，评价困难。</li>
+<li>可能复制训练样本、放大偏倚或产生医学不可能结构。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>只看生成样本好不好看，不检验下游价值。</li>
-<li>用生成样本替代真实外部验证数据。</li>
-<li>忽略 rare class 是否真的被有效增强。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-autoencoder.html" data-cn="自编码器" data-en="Autoencoder" data-def="自编码器是一类无监督或自监督神经网络。它通过编码器把输入压缩为低维潜在表示，再通过解码器尽量重构原始输入，从而学习有信息量的表征。">自编码器（Autoencoder）</a> 的区别：自编码器强调重构和压缩，GAN 强调逼真生成。</li>
-<li>和 <a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="卷积神经网络是一类专门处理图像或局部空间结构数据的神经网络。它通过卷积核、激活函数和池化层，从原始像素中自动提取边缘、纹理和高级语义特征。">卷积神经网络（Convolutional Neural Network, CNN）</a> 的区别：CNN 是网络结构家族，GAN 是一种生成式训练框架。</li>
-<li>和 <a class="xlink" href="m-transformer.html" data-cn="Transformer" data-en="Transformer" data-def="Transformer 是以多头注意力为核心的序列建模架构。它不依赖传统递归结构，而是通过自注意力和位置编码并行建模序列中的全局依赖。">Transformer（Transformer）</a> 的区别：Transformer 更常作为序列建模骨架，GAN 是对抗式生成机制。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>医学影像稀有类别增强。</li>
-<li>病理图像风格迁移与域对齐。</li>
-<li>合成样本用于算法预训练或隐私保护研究。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-autoencoder.html" data-cn="自编码器" data-en="Autoencoder" data-def="自编码器是一类无监督或自监督神经网络。它通过编码器把输入压缩为低维潜在表示，再通过解码器尽量重构原始输入，从而学习有信息量的表征。">自编码器（Autoencoder）</a></li>
-<li><a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="卷积神经网络是一类专门处理图像或局部空间结构数据的神经网络。它通过卷积核、激活函数和池化层，从原始像素中自动提取边缘、纹理和高级语义特征。">卷积神经网络（Convolutional Neural Network, CNN）</a></li>
-<li><a class="xlink" href="m-transformer.html" data-cn="Transformer" data-en="Transformer" data-def="Transformer 是以多头注意力为核心的序列建模架构。它不依赖传统递归结构，而是通过自注意力和位置编码并行建模序列中的全局依赖。">Transformer（Transformer）</a></li>
-<li><a class="xlink" href="m-artificial-neural-network-ann.html" data-cn="人工神经网络" data-en="Artificial Neural Network, ANN" data-def="人工神经网络是由多层神经元节点组成的一类函数逼近模型。它通过权重、偏置和非线性激活函数，把输入数据映射到分类、回归或表征学习目标上。">人工神经网络（Artificial Neural Network, ANN）</a></li>
+<li>只挑最好看的样本展示。</li>
+<li>把判别器 50% 准确率自动解释为收敛。</li>
+<li>用合成样本同时进入训练和测试。</li>
+<li>将合成数据称为“天然匿名”。</li>
+<li>仅用通用 FID 宣称医学有效性。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Goodfellow I, Pouget-Abadie J, Mirza M, et al. Generative adversarial nets. <em>Advances in Neural Information Processing Systems</em>. 2014;27.</li>
-<li>Goodfellow I, Bengio Y, Courville A. <em>Deep Learning</em>. MIT Press; 2016.</li>
-<li>Creswell A, White T, Dumoulin V, et al. Generative adversarial networks: an overview. <em>IEEE Signal Processing Magazine</em>. 2018;35(1):53-65.</li>
+<li>与自编码器：自编码器按样本重构，GAN 通过判别博弈匹配整体分布。</li>
+<li>与 VAE：VAE 优化变分下界并有显式潜变量概率结构；GAN 不需显式似然。</li>
+<li>与扩散模型：扩散训练更稳定、覆盖常更好；GAN 采样更快。</li>
+<li>与 SMOTE：SMOTE 在局部线性插值，GAN 可学复杂分布但风险更高。</li>
+<li>如何选择：若首要是稳定覆盖与可审计性，先试简单增强/VAE/扩散；需要低延迟高保真生成并能承担严格评价时再考虑 GAN。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>合成胸片、CT、MRI、病理或皮肤镜图像用于算法开发。</li>
+<li>跨设备/染色风格的图像到图像转换。</li>
+<li>低剂量到常规剂量、低分辨率到高分辨率的重建。</li>
+<li>稀有病变类别的辅助数据增强。</li>
+</ul>
+<p>医学应用必须评估解剖与病理真实性、亚组覆盖、设备伪影、训练样本近复制、类别不平衡和隐私风险。若涉及时间到事件或缺失数据，生成目标还需尊重删失与缺失机制，不能直接套用普通 GAN。</p></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>生成器（Generator）</strong>：把潜在噪声映射成合成样本的网络。</li>
+<li><strong>判别器（Discriminator）</strong>：估计输入来自真实数据概率的网络。</li>
+<li><strong>潜在空间（Latent space）</strong>：生成器输入噪声所在的低维空间。</li>
+<li><strong>隐式分布（Implicit distribution）</strong>：可以采样但通常不能直接计算密度的分布。</li>
+<li><strong>纳什均衡（Nash equilibrium）</strong>：双方单独改变策略都不能改善目标的博弈状态。</li>
+<li><strong>模式崩塌（Mode collapse）</strong>：生成器只覆盖少数模式，缺乏多样性。</li>
+<li><strong>非饱和损失（Non-saturating loss）</strong>：实践中为生成器提供更强早期梯度的替代损失。</li>
+<li><strong>Jensen–Shannon 散度</strong>：衡量两个概率分布差异的对称量。</li>
+<li><strong>成员推断（Membership inference）</strong>：判断某个样本是否参与模型训练的隐私攻击。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-autoencoder.html" data-cn="自编码器" data-en="Autoencoder" data-def="自编码器强迫网络把输入经过受限的潜在表示再还原；若仍能重构，瓶颈中就必须保留数据的主要结构而舍弃部分冗余或噪声。">自编码器（Autoencoder）</a></li>
+<li><a class="xlink" href="m-artificial-neural-network-ann.html" data-cn="人工神经网络" data-en="Artificial Neural Network, ANN" data-def="人工神经网络把复杂函数拆成许多可学习的小变换，并通过组合、非线性和梯度优化，从数据中共同学出“如何表示”与“如何预测”。">人工神经网络（Artificial Neural Network, ANN）</a></li>
+<li><a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="CNN 用同一个小型滤波器在整幅图像上滑动，把“局部模式可重复出现”写进网络结构，从而用远少于全连接层的参数学习空间特征。">卷积神经网络（Convolutional Neural Network, CNN）</a></li>
+<li><a class="xlink" href="m-uniform-manifold-approximation-and-projection.html" data-cn="UMAP" data-en="Uniform Manifold Approximation and Projection" data-def="UMAP 把高维近邻关系做成带置信度的模糊图，再优化低维点的位置，使高置信边靠近、缺失边保持分离。">UMAP（Uniform Manifold Approximation and Projection）</a></li>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="PCA 旋转坐标轴，依次寻找样本投影方差最大的正交方向，用少数线性组合保留主要总变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Goodfellow I, et al. Generative adversarial nets. <em>NeurIPS</em>. 2014;27:2672-2680. https://papers.nips.cc/paper/5423-generative-adversarial-nets</li>
+<li>Arjovsky M, Chintala S, Bottou L. Wasserstein generative adversarial networks. <em>ICML</em>. 2017:214-223. https://proceedings.mlr.press/v70/arjovsky17a.html</li>
+<li>Gulrajani I, et al. Improved training of Wasserstein GANs. <em>NeurIPS</em>. 2017;30. https://papers.nips.cc/paper/7159-improved-training-of-wasserstein-gans</li>
+<li>Yi X, Walia E, Babyn P. Generative adversarial network in medical imaging: A review. <em>Medical Image Analysis</em>. 2019;58:101552. https://doi.org/10.1016/j.media.2019.101552</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-gated-recurrent-unit-gru.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">门控循环单元</div></a><a class="pg pg-next" href="m-autoencoder.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">自编码器</div></a></div>

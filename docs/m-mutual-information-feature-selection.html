@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,241 +54,280 @@
     <div class="intro-note"><h1>互信息特征选择（Mutual Information Feature Selection）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>互信息特征选择用互信息衡量每个特征与目标变量之间共享的信息量，并据此筛选特征。它可以捕捉非线性依赖，不局限于线性相关。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>互信息衡量知道一个特征后，结局的不确定性平均减少多少，因此能发现不限于线性或均值差异的边际依赖。</p>
+<h3>1.2 定义</h3>
+<p>互信息（MI）是两个随机变量共享的信息量。特征选择时逐列估计 $I(X_j;Y)$，按得分保留前 $k$ 个。离散分类中它等于信息增益；连续变量常用分箱、核密度或 k 近邻估计。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：哪些特征与结局之间存在较强的信息依赖。</li>
-<li>适用任务：分类或回归任务中的过滤式特征筛选。</li>
-<li>常见医学场景：非线性生物标志物筛选、影像组学特征排序、临床表格数据初筛。</li>
+<li>发现 U 形、阈值、单调或离散的非线性边际关系。</li>
+<li>对分类和连续结局建立模型无关的初筛排名。</li>
+<li>医学场景：组学、影像组学、多类型生物标志物筛选。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>互信息衡量“知道这个特征以后，关于结局能少多少不确定”。如果一个特征与结局共享的信息多，它就更可能帮助预测。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>相关问“两者是否沿直线一起升降”，互信息问“知道 X 能否让我更少猜 Y”。即使高低两端都危险、直线相关接近 0，只要 X 能缩小 Y 的可能范围，MI 仍可大于 0。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>互信息定义为：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>Pearson/F 检验依赖特定函数形状。真实生物关系常有阈值、饱和或多峰，预先枚举变换困难。MI 直接比较联合分布与边际分布乘积，不预设线性。</p>
+<h3>2.2 关键洞察</h3>
+<p>若 $X,Y$ 独立，则 $p(x,y)=p(x)p(y)$，观察 X 不改变 Y 的分布，MI 为 0；偏离独立越大，MI 越高。MI 对可逆变换理论上不变，但有限样本估计会受尺度、邻居数和分箱影响。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
+<ul>
+<li>比相关更一般，但不提供方向和简单效应大小。</li>
+<li>比模型内选择更快，却忽略特征冗余与交互。</li>
+<li>mRMR 等方法在高相关候选中同时奖励结局信息、惩罚特征间 MI。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>离散变量：</p>
 <p>$$
-I(X;Y)=\sum_x\sum_y p(x,y)\log\frac{p(x,y)}{p(x)p(y)}
+I(X;Y)=\sum_x\sum_y p(x,y)
+\log_2\frac{p(x,y)}{p(x)p(y)}
 $$</p>
-<p>也可写成熵的形式：</p>
-<p>$$
-I(X;Y)=H(X)+H(Y)-H(X,Y)
-$$</p>
-<p>或：</p>
+<p>等价形式：</p>
 <p>$$
 I(X;Y)=H(Y)-H(Y\mid X)
 $$</p>
-<p>特征选择时，常按每个特征 $X_j$ 与目标 $Y$ 的互信息得分排序：</p>
+<p>这个式子在说：观察 X 前后的不确定性差，就是 X 提供的关于 Y 的信息。</p>
+<p>连续变量将求和换成积分：</p>
 <p>$$
-\mathrm{score}(X_j)=I(X_j;Y)
+I(X;Y)=\iint p(x,y)\log
+\frac{p(x,y)}{p(x)p(y)}\,dx\,dy
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
+<h3>3.2 推导脉络</h3>
+<p>MI 是联合分布与“独立情况下的分布”之间的 KL 散度，因此非负，且独立时为 0。有限样本需估计分布；分箱太细或邻居数太小会高方差，太粗或邻居数太大会抹平关系。</p>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>$I(X;Y)$：两个变量共享的信息量。</li>
-<li>$H(Y)$：目标变量的不确定性。</li>
-<li>$H(Y\mid X)$：已知特征后的剩余不确定性。</li>
-<li><code>n_neighbors</code>：连续变量互信息估计中常见的近邻参数。</li>
-<li><code>discrete_features</code>：指定哪些特征按离散变量处理。</li>
+<li>$H(Y)$：结局原始熵。</li>
+<li>$H(Y\mid X)$：知道特征后剩余熵。</li>
+<li>$k$：kNN 估计器邻居数，不是保留特征数。</li>
+<li>$I(X_j;Y)$：边际信息量，不含控制其他变量后的增量信息。</li>
 </ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>有足够样本估计变量分布或局部密度。</li>
-<li>每个特征单独评分，不自动处理特征冗余。</li>
-<li>连续变量的互信息估计会受样本量、噪声和参数影响。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：连续变量、离散变量、编码后的分类变量。</li>
-<li>因变量类型：二分类、多分类或连续型。</li>
-<li>数据结构：监督学习特征矩阵。</li>
-<li>是否适合高维数据：适合初筛，但需注意估计稳定性和多重比较。</li>
-<li>是否适合缺失较多数据：需先处理缺失。</li>
-<li>是否适合删失数据：普通实现不直接适合删失结局。</li>
-<li>是否适合重复测量数据：需按独立分析单位处理。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>以疾病风险预测为例：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>Age</th>
-<th>BMI</th>
-<th>CRP</th>
-<th>ExerciseScore</th>
-<th>DietScore</th>
-<th>Disease</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后果</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>71</td>
-<td>29.4</td>
-<td>4.1</td>
-<td>1</td>
-<td>2</td>
-<td>1</td>
+<td>样本近似独立同分布</td>
+<td>经验分布可估计目标分布</td>
+<td>重复患者使 MI 虚高</td>
 </tr>
 <tr>
-<td>52</td>
-<td>23.8</td>
-<td>1.2</td>
-<td>4</td>
-<td>4</td>
-<td>0</td>
+<td>样本量支持密度估计</td>
+<td>稀疏区域有足够邻居</td>
+<td>得分偏差/波动</td>
 </tr>
 <tr>
-<td>63</td>
-<td>31.2</td>
-<td>2.8</td>
-<td>2</td>
-<td>3</td>
-<td>1</td>
+<td>离散/连续类型正确</td>
+<td>估计器与变量匹配</td>
+<td>得分失真</td>
 </tr>
 <tr>
-<td>44</td>
-<td>22.1</td>
-<td>0.9</td>
-<td>5</td>
-<td>5</td>
-<td>0</td>
+<td>筛选只在训练折</td>
+<td>测试标签不可见</td>
+<td>泄漏</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>8 人二元特征与结局列联表：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th style="text-align: right;">$Y=0$</th>
+<th style="text-align: right;">$Y=1$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$X=0$</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">1</td>
 </tr>
 <tr>
-<td>68</td>
-<td>28.7</td>
-<td>3.6</td>
-<td>2</td>
-<td>2</td>
-<td>1</td>
+<td>$X=1$</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：特征矩阵和目标变量。</li>
-<li>关键变量：互信息估计方法、近邻数、选择数量或阈值。</li>
-<li>需要预处理的内容：缺失处理、类别编码、连续/离散变量标记、训练测试划分。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：每个特征的互信息得分。</li>
-<li>参数估计：无传统模型参数。</li>
-<li>预测结果：无，输出筛选后特征矩阵。</li>
-<li>不确定性指标：可用 bootstrap 或交叉验证评估得分稳定性。</li>
-</ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：非线性关系可能存在、特征数量较多、需要模型无关初筛的场景。</li>
-<li>不适合：样本量很小、连续变量分布估计不稳、强交互但单变量依赖弱的场景。</li>
-<li>使用前需要特别检查的点：互信息估计是否稳定、是否存在冗余特征、是否在训练集内完成筛选。</li>
-</ul></div>
+<p>Y 两类各半，故 $H(Y)=1$ bit。每个 X 组内类别比例为 $3/4,1/4$：</p>
+<p>$$
+H(Y\mid X=0)=H(Y\mid X=1)
+=-0.75\log_2 0.75-0.25\log_2 0.25
+=0.811
+$$</p>
+<p>两组等大：</p>
+<p>$$
+H(Y\mid X)=0.5(0.811)+0.5(0.811)=0.811
+$$</p>
+<p>$$
+I(X;Y)=1-0.811=0.189\text{ bit}
+$$</p>
+<p>观察 X 后，结局不确定性减少 0.189 bit。它有依赖，但并非完美预测；MI 不告诉我们“X=1 增加还是降低风险”，方向需看条件概率。</p></div>
     </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="mutual-information-feature-selection" data-i="0">Python</button><button class="codetab" data-uid="mutual-information-feature-selection" data-i="1">R</button></div><div class="codepanel active" data-uid="mutual-information-feature-selection" data-i="0"><p>常用包：</p>
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
-<li><code>scikit-learn</code></li>
+<li>离散/连续特征，分类或连续结局。</li>
+<li>时间到事件需专门生存互信息；普通 MI 忽略删失。</li>
+<li>重复测量需患者级抽样或专门依赖处理。</li>
+<li>缺失作为一类可能捕捉诊疗流程而非生物信号。</li>
 </ul>
-<pre><code class="language-python">import pandas as pd
-from sklearn.feature_selection import mutual_info_classif, SelectKBest
-from sklearn.model_selection import train_test_split
-
-df = pd.read_csv(&quot;disease_features.csv&quot;)
-X = df[[&quot;Age&quot;, &quot;BMI&quot;, &quot;CRP&quot;, &quot;ExerciseScore&quot;, &quot;DietScore&quot;]]
-y = df[&quot;Disease&quot;].astype(int)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
-
-selector = SelectKBest(
-    score_func=lambda X, y: mutual_info_classif(X, y, random_state=42),
-    k=3
-)
-X_train_sel = selector.fit_transform(X_train, y_train)
-X_test_sel = selector.transform(X_test)
-
-scores = pd.Series(selector.scores_, index=X.columns).sort_values(ascending=False)
-print(scores)
-</code></pre></div><div class="codepanel" data-uid="mutual-information-feature-selection" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>FSelectorRcpp</code></li>
-</ul>
-<pre><code class="language-r">library(FSelectorRcpp)
-
-scores &lt;- information_gain(
-  Disease ~ Age + BMI + CRP + ExerciseScore + DietScore,
-  data = df_train
-)
-
-scores[order(scores$importance, decreasing = TRUE), ]
-</code></pre></div></div></div>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>patient_id</th>
+<th style="text-align: right;">marker_binary</th>
+<th style="text-align: right;">nonlinear_marker</th>
+<th style="text-align: right;">outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P01</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">-2.1</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>P02</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>P03</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2.0</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+<h3>5.3 输入与产出</h3>
+<p>输入训练 $X,y$、变量类型、估计器参数与保留数；产出 MI 得分、排名、支持掩码和稳定性结果。</p></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：互信息得分排序、筛选后模型性能、得分稳定性。</li>
-<li>每个主要参数如何解释：得分越高，特征与结局共享的信息越多；近邻数会影响连续变量估计平滑程度。</li>
-<li>临床或医学意义如何表达：可说特征与结局有较强统计依赖，但不能说是独立效应或因果效应。</li>
-<li>常见误读：互信息高不代表模型一定会使用该特征，也不代表该变量不可替代。</li>
+<li>适合：怀疑非线性边际关系、候选很多、最终模型尚未确定。</li>
+<li>不适合：样本很小、交互才是唯一信号、需要方向/因果解释。</li>
+<li>与冗余控制和嵌套验证结合使用。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>互信息得分条形图。</li>
-<li>Top-K 特征稳定性热图。</li>
-<li>特征值与目标的非线性关系图。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="mutual-information-feature-selection" data-i="0">Python</button><button class="codetab" data-uid="mutual-information-feature-selection" data-i="1">R</button></div><div class="codepanel active" data-uid="mutual-information-feature-selection" data-i="0"><pre><code class="language-python">import pandas as pd
+from sklearn.feature_selection import mutual_info_classif
+
+X = pd.DataFrame({
+    &quot;informative&quot;: [0, 0, 0, 0, 1, 1, 1, 1],
+    &quot;noise&quot;: [0, 1, 0, 1, 0, 1, 0, 1],
+})
+y = [0, 0, 0, 1, 0, 1, 1, 1]
+mi = mutual_info_classif(
+    X, y, discrete_features=True, random_state=42
+)
+print(pd.Series(mi, index=X.columns).sort_values(ascending=False))
+</code></pre></div><div class="codepanel" data-uid="mutual-information-feature-selection" data-i="1"><pre><code class="language-r">library(infotheo)
+
+dat &lt;- data.frame(
+  informative = c(0, 0, 0, 0, 1, 1, 1, 1),
+  noise = c(0, 1, 0, 1, 0, 1, 0, 1),
+  y = c(0, 0, 0, 1, 0, 1, 1, 1)
+)
+sapply(dat[1:2], function(x) mutinformation(x, dat$y))
+</code></pre></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><p>得分越高，边际依赖越强；0 不证明总体独立，只表示当前估计器和样本未发现信息。不同估计器的绝对值不宜直接比较，排名也需报告稳定性。</p></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>多随机种子/邻居数/分箱重复估计。</li>
+<li>bootstrap 或交叉验证记录入选频率。</li>
+<li>与 Pearson、Spearman 和单变量 F 排名对照。</li>
+<li>置换 y 建立零信息基线。</li>
+<li>去除批次、中心、ID 和未来信息后重算。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>MI 排序图与置换阈值。</li>
+<li>特征—结局散点/条件分布图。</li>
+<li>邻居数或分箱数敏感性曲线。</li>
+<li>各折入选频率热图。</li>
+<li>MI 冗余网络图。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>能捕捉非线性依赖。</li>
-<li>不要求正态分布或线性关系。</li>
-<li>可作为模型无关初筛方法。</li>
+<li>捕捉一般非线性依赖。</li>
+<li>不依赖最终预测模型。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>连续变量互信息估计可能不稳定。</li>
-<li>不自动去除冗余特征。</li>
-<li>得分没有像相关系数那样直观的方向。</li>
+<li>连续 MI 估计困难且无方向。</li>
+<li>边际筛选忽略冗余与纯交互。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>不区分连续和离散特征的处理方式。</li>
-<li>在全数据上算互信息再做外部测试。</li>
-<li>把互信息得分解释成风险比、回归系数或因果效应。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-information-gain.html" data-cn="信息增益" data-en="Information Gain" data-def="信息增益是基于信息熵的特征评价指标，用来衡量使用某个特征划分数据后，类别不确定性减少了多少。它是 ID3 决策树和许多过滤式分类特征选择方法的核心思想。">信息增益（Information Gain）</a> 的区别：信息增益多用于分类树语境；互信息是更一般的变量依赖度量。</li>
-<li>和 <a class="xlink" href="m-correlation-based-feature-selection.html" data-cn="相关系数特征选择" data-en="Correlation-based Feature Selection" data-def="相关系数特征选择是一种基于变量间相关性的过滤方法。它通过计算特征之间，或特征与结局之间的相关系数，删除冗余特征或保留与结局关系更强的特征。">相关系数特征选择（Correlation-based Feature Selection）</a> 的区别：相关系数主要捕捉线性或单调关系；互信息可捕捉更一般的依赖。</li>
-<li>和 <a class="xlink" href="m-univariate-feature-selection.html" data-cn="单变量特征选择" data-en="Univariate Feature Selection" data-def="单变量特征选择是一类过滤式方法。它逐个评估每个特征与目标变量之间的关系，根据统计量、P 值或信息量得分选择排名靠前或达到阈值的特征。">单变量特征选择（Univariate Feature Selection）</a> 的区别：互信息是单变量特征选择的一种得分函数。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>从非线性生物标志物候选集中筛选疾病相关变量。</li>
-<li>影像组学特征初筛。</li>
-<li>表格数据中寻找可能存在阈值效应的预测变量。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-information-gain.html" data-cn="信息增益" data-en="Information Gain" data-def="信息增益是基于信息熵的特征评价指标，用来衡量使用某个特征划分数据后，类别不确定性减少了多少。它是 ID3 决策树和许多过滤式分类特征选择方法的核心思想。">信息增益（Information Gain）</a></li>
-<li><a class="xlink" href="m-correlation-based-feature-selection.html" data-cn="相关系数特征选择" data-en="Correlation-based Feature Selection" data-def="相关系数特征选择是一种基于变量间相关性的过滤方法。它通过计算特征之间，或特征与结局之间的相关系数，删除冗余特征或保留与结局关系更强的特征。">相关系数特征选择（Correlation-based Feature Selection）</a></li>
-<li><a class="xlink" href="m-univariate-feature-selection.html" data-cn="单变量特征选择" data-en="Univariate Feature Selection" data-def="单变量特征选择是一类过滤式方法。它逐个评估每个特征与目标变量之间的关系，根据统计量、P 值或信息量得分选择排名靠前或达到阈值的特征。">单变量特征选择（Univariate Feature Selection）</a></li>
-<li><a class="xlink" href="m-k-nearest-neighbors-knn.html" data-cn="K近邻算法" data-en="K-Nearest Neighbors, KNN" data-def="K 近邻算法是一类基于实例的非参数方法。它不显式拟合一个全局模型，而是在预测时直接寻找距离目标样本最近的 $K$ 个训练样本，并用这些近邻的标签做多数投票或平均。">K近邻算法（K-Nearest Neighbors, KNN）</a></li>
+<li>在全数据上筛选。</li>
+<li>把连续编码误标为离散或反之。</li>
+<li>只看单次随机估计。</li>
+<li>把 MI 当因果效应大小。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Cover TM, Thomas JA. <em>Elements of Information Theory</em>. 2nd ed. Wiley; 2006.</li>
-<li>Kraskov A, Stogbauer H, Grassberger P. Estimating mutual information. <em>Phys Rev E</em>. 2004;69(6):066138.</li>
-<li>scikit-learn Developers. <code>mutual_info_classif</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.mutual_info_classif.html">https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.mutual_info_classif.html</a> （访问日期：2026-07-02）</li>
+<li>信息增益是离散分类场景中的 MI。</li>
+<li>相关描述线性/单调方向，MI 更一般但无符号。</li>
+<li>嵌入式选择考虑模型内联合贡献。</li>
+<li>如何选择：非线性初筛用 MI，随后用冗余控制和联合模型验证。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>非线性生物标志物、组学和影像组学筛选。</li>
+<li>症状/基因型与诊断类别信息量评估。</li>
+<li>多模态候选变量初筛。</li>
+</ul>
+<p>需报告估计方法、缺失、批次、类别不平衡、患者级切分和选择稳定性。</p></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>互信息（Mutual information）</strong>：两个变量共享的信息量。</li>
+<li><strong>联合分布（Joint distribution）</strong>：变量组合取值的概率。</li>
+<li><strong>KL 散度</strong>：一个分布相对另一个分布的差异。</li>
+<li><strong>kNN 估计器</strong>：用近邻距离估计连续 MI。</li>
+<li><strong>mRMR</strong>：最大相关、最小冗余选择。</li>
+<li><strong>置换基线（Permutation baseline）</strong>：打乱结局得到的偶然得分分布。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-information-gain.html" data-cn="信息增益" data-en="Information Gain" data-def="信息增益衡量知道某特征后，类别的不确定性平均减少了多少；减少越多，特征越能把不同类别分开。">信息增益（Information Gain）</a></li>
+<li><a class="xlink" href="m-univariate-feature-selection.html" data-cn="单变量特征选择" data-en="Univariate Feature Selection" data-def="单变量特征选择让每个特征单独参加一次“与结局的考试”，再按得分或校正后的显著性筛选，但看不到联合效应和交互。">单变量特征选择（Univariate Feature Selection）</a></li>
+<li><a class="xlink" href="m-pearson-correlation.html" data-cn="Pearson相关" data-en="Pearson Correlation" data-def="Pearson 相关系数 $r$ 是「标准化的协方差」：把两个变量各自的单位除掉，得到一个 $-1$ 到 $1$ 之间、无量纲的数，衡量它们线性关系的方向与强度。">Pearson相关（Pearson Correlation）</a></li>
+<li><a class="xlink" href="m-spearman-rank-correlation.html" data-cn="Spearman秩相关" data-en="Spearman Rank Correlation" data-def="Spearman 相关就是「把数据换成名次后再算 Pearson 相关」：它衡量两个变量是否同增同减（单调关系），不要求关系是直线，且对异常值稳健。">Spearman秩相关（Spearman Rank Correlation）</a></li>
+<li><a class="xlink" href="m-embedded-feature-selection.html" data-cn="嵌入式特征选择" data-en="Embedded Feature Selection" data-def="嵌入式选择把“哪些变量留下”写进模型训练目标或结构，让预测拟合与特征取舍同时完成。">嵌入式特征选择（Embedded Feature Selection）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Cover TM, Thomas JA. <em>Elements of Information Theory</em>. Wiley; 2006.</li>
+<li>Kraskov A, Stögbauer H, Grassberger P. Estimating mutual information. <em>Physical Review E</em>. 2004;69:066138.</li>
+<li>scikit-learn developers. Mutual information. https://scikit-learn.org/stable/modules/feature_selection.html</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-information-gain.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">信息增益</div></a><a class="pg pg-next" href="m-embedded-feature-selection.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">嵌入式特征选择</div></a></div>

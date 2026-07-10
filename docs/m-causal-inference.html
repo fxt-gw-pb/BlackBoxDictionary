@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,77 +54,184 @@
     <div class="intro-note"><h1>因果推断（Causal Inference）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>因果推断是一组用于估计干预或暴露对结局影响的方法框架。它关注的是“如果我们改变处理状态，结局会怎样变化”，而不是单纯描述变量之间是否相关。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>因果推断不是问「谁和谁相关」，而是问：如果把同一批人放进另一个干预世界，结局会不会改变、会改变多少。</p>
+<h3>1.2 定义</h3>
+<p>因果推断是一套用于定义、识别、估计和检验干预效应的方法框架。它把治疗、暴露、政策或行为看作可被设定的处理状态，用潜在结果、因果图、随机化、匹配、加权或建模方法来构造可比的反事实比较。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：治疗、暴露或政策是否导致结局变化，以及影响大小是多少。</li>
-<li>适用任务：平均处理效应、条件平均处理效应、异质性效应、混杂调整。</li>
-<li>常见医学场景：药物真实世界效果评估、生活方式干预、筛查策略、治疗方案比较。</li>
+<li>研究问题：治疗、暴露或政策是否导致结局变化，平均影响是多少，哪些人受益更多。</li>
+<li>适用任务：ATE、ATT、CATE、混杂调整、敏感性分析、机制分析。</li>
+<li>常见医学场景：真实世界药物疗效比较、手术方式选择、筛查策略评估、生活方式干预、公共卫生政策评价。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>因果推断试图构造一个合理的反事实比较：同一个患者不可能同时接受和不接受治疗，因此需要用随机化、匹配、加权或建模方法，让处理组和对照组尽可能像“可比较的两组人”。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>因果推断像是在给每位患者补一段「未发生的人生录像」。同一个患者不能既吃药又不吃药，所以我们永远只能看见一个结果；另一个结果是反事实。随机试验用随机分配让两组人在平均意义上可比，观察性研究则要用设计和统计方法努力重建这种可比性。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>在潜在结果框架中，每个个体 $i$ 有两个潜在结果：</p>
-<p>$$
-Y_i(1),\quad Y_i(0)
-$$</p>
-<p>个体处理效应为：</p>
-<p>$$
-\tau_i=Y_i(1)-Y_i(0)
-$$</p>
-<p>平均处理效应为：</p>
-<p>$$
-\mathrm{ATE}=E[Y(1)-Y(0)]
-$$</p>
-<p>条件平均处理效应为：</p>
-<p>$$
-\mathrm{CATE}(x)=E[Y(1)-Y(0)\mid X=x]
-$$</p>
-<p>在条件可交换性假设下：</p>
-<p>$$
-\{Y(1),Y(0)\}\perp T\mid X
-$$</p>
-<p>倾向评分为：</p>
-<p>$$
-e(X)=P(T=1\mid X)
-$$</p>
-<p>逆概率加权估计 ATE 的形式为：</p>
-<p>$$
-E\left[\frac{TY}{e(X)}-\frac{(1-T)Y}{1-e(X)}\right]
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>根本困难是<strong>反事实缺失</strong>：个体处理效应 $\tau_i=Y_i(1)-Y_i(0)$ 中，总有一个潜在结果看不见。更麻烦的是，观察性研究里接受治疗的人往往本来就更重、更轻、更富有或更愿意就医；直接比较两组结局，会把「治疗效应」和「组间原本不同」混在一起。</p>
+<h3>2.2 关键洞察</h3>
+<p>因果推断的关键洞察是：不能先盯着回归系数，要先说明<strong>目标试验</strong>和<strong>可交换性来源</strong>。也就是先问「如果能随机化，我们会怎样设计？」再问「现有数据能否模拟这个随机试验？」。常见做法包括随机化、按混杂分层、倾向评分匹配、逆概率加权、标准化、工具变量、断点回归和双重稳健估计。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$T$：处理或暴露变量。</li>
-<li>$Y$：结局变量。</li>
-<li>$X$：需要调整的协变量或混杂变量。</li>
-<li>$Y(1),Y(0)$：处理和未处理状态下的潜在结果。</li>
-<li>ATE：总体平均处理效应。</li>
-<li>CATE：特定协变量水平下的条件平均处理效应。</li>
-<li>倾向评分：个体接受处理的条件概率。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>一致性：观测到的结局等于实际接受处理状态下的潜在结果。</li>
-<li>可交换性：给定已测协变量后，处理分配与潜在结果独立。</li>
-<li>正值性：每个协变量组合下都存在接受和不接受处理的可能。</li>
-<li>SUTVA：个体之间没有干预相互干扰，处理版本定义清晰。</li>
+<li>相对朴素组间均值差：因果推断先处理混杂和时间顺序，再估计效应。</li>
+<li>相对普通预测模型：预测模型关心 $\hat Y$ 准不准；因果推断关心改变 $T$ 后 $Y$ 会不会变。</li>
+<li>相对单个方法：因果推断是一整套框架，<a class="xlink" href="m-propensity-score-matching.html" data-cn="倾向评分匹配" data-en="Propensity Score Matching" data-def="倾向评分匹配把一堆混杂变量压缩成「接受处理的概率」这一维分数，再在分数相近的人之间比较结局。">倾向评分匹配（Propensity Score Matching）</a>、<a class="xlink" href="m-inverse-probability-of-treatment-weighting-iptw.html" data-cn="逆概率处理加权" data-en="Inverse Probability of Treatment Weighting, IPTW" data-def="IPTW 给「在自身条件下不太可能接受实际处理」的人更大权重，让加权后的数据看起来像处理被随机分配过。">逆概率处理加权（Inverse Probability of Treatment Weighting, IPTW）</a> 和 <a class="xlink" href="m-mediation-analysis.html" data-cn="中介分析" data-en="Mediation Analysis" data-def="中介分析把「暴露是否影响结局」进一步拆成「有多少影响是通过某个机制变量传过去的」。">中介分析（Mediation Analysis）</a> 都是其中的具体工具。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>潜在结果框架为每个个体定义两个世界：</p>
+<p>$$
+Y_i(1),\quad Y_i(0),\qquad \tau_i=Y_i(1)-Y_i(0)
+$$</p>
+<p>总体平均处理效应为：</p>
+<p>$$
+\mathrm{ATE}=E\{Y(1)-Y(0)\}
+$$</p>
+<p>在条件可交换性、正值性和一致性成立时：</p>
+<p>$$
+\{Y(1),Y(0)\}\perp T\mid X,\qquad 0\lt P(T=1\mid X)\lt 1
+$$</p>
+<p>可以用标准化公式识别 ATE：</p>
+<p>$$
+\mathrm{ATE}=\sum_x \left[E(Y\mid T=1,X=x)-E(Y\mid T=0,X=x)\right]P(X=x)
+$$</p>
+<p>这个式子在说：先在每个可比的协变量层内比较处理和对照，再按目标人群中各层比例加权平均。</p>
+<h3>3.2 推导脉络</h3>
+<ol>
+<li>个体层面最想知道 $Y_i(1)-Y_i(0)$，但只能观察到 $Y_i=T_iY_i(1)+(1-T_i)Y_i(0)$。</li>
+<li>随机化或充分调整后，处理组与对照组在潜在结果上可交换，即处理状态像是在每个 $X$ 层内随机分配。</li>
+<li>因为一致性，接受处理者的观测均值可代表 $E\{Y(1)\mid X\}$，未处理者的观测均值可代表 $E\{Y(0)\mid X\}$。</li>
+<li>最后把各层效应按目标人群比例合成，得到 ATE；换权重或目标人群，可得到 ATT、ATC 或 CATE。</li>
+</ol>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：处理变量、结局变量、混杂变量、效应修饰变量。</li>
-<li>因变量类型：连续型、二分类、计数型或时间到事件。</li>
-<li>数据结构：随机试验数据或观察性研究数据。</li>
-<li>是否适合高维数据：可用机器学习辅助，但假设和验证更关键。</li>
-<li>是否适合缺失较多数据：需明确缺失机制并进行合理处理。</li>
-<li>是否适合删失数据：可结合生存分析和 IPCW 等方法。</li>
-<li>是否适合重复测量数据：可扩展到纵向处理和边际结构模型。</li>
+<li>$T$：处理、暴露或干预变量，常为 0/1。</li>
+<li>$Y$：结局，可为连续、二分类、计数或时间到事件。</li>
+<li>$X$：处理前混杂变量或效应修饰变量。</li>
+<li>$Y(1),Y(0)$：同一个体在处理和未处理世界下的潜在结果。</li>
+<li>ATE：目标总体中平均干预效应；ATT 是处理组人群中的平均效应；CATE 是某类人群中的条件效应。</li>
+<li>倾向评分 $e(X)=P(T=1\mid X)$：给定协变量后接受处理的概率。</li>
 </ul>
-<h3>3.2 示例表格</h3>
+<h3>3.4 关键假设(含违反后果)</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一致性</td>
+<td>观测结局等于实际处理状态下的潜在结果</td>
+<td>处理定义含混会让效应不可解释</td>
+<td>明确处理版本、时间零点和随访窗口</td>
+</tr>
+<tr>
+<td>可交换性</td>
+<td>给定 $X$ 后，处理分配与潜在结果独立</td>
+<td>未测混杂导致偏倚</td>
+<td>DAG、基线表、负对照、敏感性分析</td>
+</tr>
+<tr>
+<td>正值性</td>
+<td>每类患者都有接受和不接受处理的可能</td>
+<td>需要外推，权重爆炸或匹配失败</td>
+<td>倾向评分重叠图、极端权重</td>
+</tr>
+<tr>
+<td>SUTVA</td>
+<td>个体之间不相互干扰，处理版本清楚</td>
+<td>他人处理会影响本人的结局</td>
+<td>研究设计，聚集或传染场景需专门模型</td>
+</tr>
+<tr>
+<td>时间顺序</td>
+<td>混杂在处理前，结局在处理后</td>
+<td>调整中介或碰撞变量会引入偏倚</td>
+<td>画时间轴和 DAG</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>用 6 名患者估计某药物对住院天数 $Y$ 的影响，$T=1$ 为用药，$X$ 为病情严重程度。住院天数越少越好。</p>
+<table>
+<thead>
+<tr>
+<th>患者</th>
+<th>严重程度 X</th>
+<th>用药 T</th>
+<th>住院天数 Y</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>重</td>
+<td>1</td>
+<td>9</td>
+</tr>
+<tr>
+<td>B</td>
+<td>重</td>
+<td>1</td>
+<td>11</td>
+</tr>
+<tr>
+<td>C</td>
+<td>重</td>
+<td>0</td>
+<td>12</td>
+</tr>
+<tr>
+<td>D</td>
+<td>轻</td>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>E</td>
+<td>轻</td>
+<td>0</td>
+<td>5</td>
+</tr>
+<tr>
+<td>F</td>
+<td>轻</td>
+<td>0</td>
+<td>7</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Step 1：朴素比较。</strong></p>
+<p>用药组均值为 $(9+11+4)/3=8$，对照组均值为 $(12+5+7)/3=8$，朴素差值为 $8-8=0$。如果只看这一行，会以为药物没有效果。</p>
+<p><strong>Step 2：在可比层内比较。</strong></p>
+<p>重症层：用药均值 $(9+11)/2=10$，对照均值 $12$，层内差值 $10-12=-2$。</p>
+<p>轻症层：用药均值 $4$，对照均值 $(5+7)/2=6$，层内差值 $4-6=-2$。</p>
+<p><strong>Step 3：按目标总体合成。</strong></p>
+<p>样本中重症 3 人、轻症 3 人，所以两层权重都是 $1/2$：</p>
+<p>$$
+\widehat{\mathrm{ATE}}=\frac12(-2)+\frac12(-2)=-2
+$$</p>
+<p><strong>结论：</strong> 朴素比较得到 0，是因为用药组里重症患者更多，遮住了药物效果。分层后可比地比较，估计药物平均减少 2 天住院。这就是因果推断的基本动作：先把「本来就不同」拆出去，再谈干预造成的差异。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：处理变量、处理前混杂变量、效应修饰变量。</li>
+<li>因变量类型：连续、二分类、计数、时间到事件。</li>
+<li>数据结构：随机试验、队列、病例对照、注册登记、电子病历真实世界数据。</li>
+<li>是否适合高维数据：可以用机器学习辅助估计倾向评分或结局模型，但识别假设仍是核心。</li>
+<li>是否适合缺失较多数据：需先定义缺失机制；常结合 <a class="xlink" href="m-multiple-imputation.html" data-cn="多重插补" data-en="Multiple Imputation" data-def="多重插补不假装缺失值有唯一答案，而是生成多份合理完整数据，分别分析，再把“数据内不确定性”和“不同填法之间的不确定性”一起合并。">多重插补（Multiple Imputation）</a> 或逆概率缺失加权。</li>
+<li>是否适合删失数据：可结合 <a class="xlink" href="m-kaplan-meier-estimator.html" data-cn="Kaplan-Meier生存曲线" data-en="Kaplan-Meier Estimator" data-def="Kaplan-Meier 把「活过时刻 $t$」拆成一串「活过每个事件时点」的条件概率连乘——删失者在退出前为每个分母出力、退出后安静离场，删失携带的信息被用尽而不被误用。">Kaplan-Meier生存曲线（Kaplan-Meier Estimator）</a>、<a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a> 或 IPCW。</li>
+<li>是否适合重复测量数据：可扩展到纵向处理、边际结构模型和 g 方法。</li>
+</ul>
+<h3>5.2 示例表格</h3>
 <p>以评估某药物对 30 天再入院风险的影响为例：</p>
 <table>
 <thead>
@@ -174,147 +281,173 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：处理变量、结局变量、混杂变量和可选效应修饰变量。</li>
-<li>关键变量：处理定义、时间零点、随访窗口、调整变量集合。</li>
-<li>需要预处理的内容：缺失处理、极端倾向评分检查、协变量平衡检查、删失处理。</li>
+<li>输入数据：处理、结局、处理前混杂、可选效应修饰变量。</li>
+<li>关键变量：处理定义、时间零点、随访窗口、目标人群、调整变量集合。</li>
+<li>需要预处理的内容：缺失处理、变量时间顺序核对、倾向评分重叠、删失处理。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：ATE、ATT、CATE、权重或匹配结果。</li>
-<li>参数估计：处理效应估计及置信区间。</li>
+<li>模型对象/统计结果：ATE、ATT、CATE、权重、匹配样本或标准化结果。</li>
+<li>参数估计：风险差、均值差、风险比、比值比、HR 或时间差。</li>
 <li>预测结果：潜在结果预测或个体化效应估计。</li>
-<li>不确定性指标：标准误、置信区间、bootstrap 区间、敏感性分析结果。</li>
+<li>不确定性指标：稳健标准误、bootstrap 区间、敏感性分析范围。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：无法随机化但希望尽量估计干预效果的观察性研究。</li>
-<li>不适合：关键混杂变量未测量、处理定义模糊、时间顺序不清、缺乏重叠的场景。</li>
-<li>使用前需要特别检查的点：DAG 或调整变量依据、协变量平衡、正值性、未测混杂敏感性。</li>
+<li>适合：无法随机化但需要估计干预效果的观察性研究；或随机试验中存在依从性、删失、异质性效应等复杂问题。</li>
+<li>不适合：关键混杂无法测量、处理定义模糊、时间顺序不清、处理组和对照组完全不重叠的场景。</li>
+<li>使用前需要特别检查的点：DAG 与目标试验、混杂集合、正值性、协变量平衡、未测混杂敏感性。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="causal-inference" data-i="0">Python</button><button class="codetab" data-uid="causal-inference" data-i="1">R</button></div><div class="codepanel active" data-uid="causal-inference" data-i="0"><p>常用包：</p>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="causal-inference" data-i="0">Python</button><button class="codetab" data-uid="causal-inference" data-i="1">R</button></div><div class="codepanel active" data-uid="causal-inference" data-i="0"><p>常用包:</p>
 <ul>
+<li><code>statsmodels</code></li>
 <li><code>dowhy</code></li>
 <li><code>econml</code></li>
-<li><code>causallib</code></li>
 </ul>
 <pre><code class="language-python">import pandas as pd
-import statsmodels.api as sm
+import statsmodels.formula.api as smf
 
 df = pd.read_csv(&quot;drug_readmission.csv&quot;)
-X = df[[&quot;Age&quot;, &quot;Charlson&quot;, &quot;PriorAdmission&quot;]]
-T = df[&quot;Drug&quot;]
-Y = df[&quot;Readmit30d&quot;]
 
-ps_model = sm.Logit(T, sm.add_constant(X)).fit(disp=False)
-df[&quot;ps&quot;] = ps_model.predict(sm.add_constant(X))
+# 1) 处理模型: 估计每个人接受处理的概率
+ps_fit = smf.logit(
+    &quot;Drug ~ Age + Charlson + PriorAdmission&quot;,
+    data=df
+).fit(disp=False)
+df[&quot;ps&quot;] = ps_fit.predict(df)
 
-treated = T == 1
-df[&quot;ipw&quot;] = T / df[&quot;ps&quot;] + (1 - T) / (1 - df[&quot;ps&quot;])
+# 2) 稳定化 ATE 权重
+p_treated = df[&quot;Drug&quot;].mean()
+df[&quot;sw&quot;] = df[&quot;Drug&quot;] * p_treated / df[&quot;ps&quot;] + (
+    1 - df[&quot;Drug&quot;]
+) * (1 - p_treated) / (1 - df[&quot;ps&quot;])
 
-ate_ipw = (
-    (df.loc[treated, &quot;ipw&quot;] * df.loc[treated, &quot;Readmit30d&quot;]).sum() / df.loc[treated, &quot;ipw&quot;].sum()
-    - (df.loc[~treated, &quot;ipw&quot;] * df.loc[~treated, &quot;Readmit30d&quot;]).sum() / df.loc[~treated, &quot;ipw&quot;].sum()
+# 3) 加权结局模型: 这里用线性概率模型估计风险差
+ate_fit = smf.wls(&quot;Readmit30d ~ Drug&quot;, data=df, weights=df[&quot;sw&quot;]).fit(
+    cov_type=&quot;HC1&quot;
 )
-
-print(&quot;IPW risk difference:&quot;, ate_ipw)
-</code></pre></div><div class="codepanel" data-uid="causal-inference" data-i="1"><p>常用包：</p>
+print(ate_fit.params[&quot;Drug&quot;])
+print(ate_fit.conf_int().loc[&quot;Drug&quot;])
+</code></pre></div><div class="codepanel" data-uid="causal-inference" data-i="1"><p>常用包:</p>
 <ul>
 <li><code>WeightIt</code></li>
 <li><code>cobalt</code></li>
+<li><code>survey</code></li>
 </ul>
 <pre><code class="language-r">library(WeightIt)
 library(cobalt)
+library(survey)
 
 w &lt;- weightit(
   Drug ~ Age + Charlson + PriorAdmission,
   data = df,
   method = &quot;ps&quot;,
-  estimand = &quot;ATE&quot;
+  estimand = &quot;ATE&quot;,
+  stabilize = TRUE
 )
 
-bal.tab(w)
-
-fit &lt;- glm(
-  Readmit30d ~ Drug,
-  data = df,
-  weights = w$weights,
-  family = binomial()
-)
-
+bal.tab(w)  # 加权前后协变量平衡
+des &lt;- svydesign(ids = ~1, weights = ~w$weights, data = df)
+fit &lt;- svyglm(Readmit30d ~ Drug, design = des, family = quasibinomial())
 summary(fit)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：处理效应估计、置信区间、协变量平衡、重叠情况和敏感性分析。</li>
-<li>每个主要参数如何解释：ATE 是总体平均效应；ATT 是处理组人群中的平均效应；CATE 反映异质性。</li>
-<li>临床或医学意义如何表达：应明确“在给定假设成立时”的效应估计，避免写成无条件因果定论。</li>
-<li>常见误读：调整了很多变量不等于消除了混杂；预测性能高不等于因果效应估计可靠。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>DAG 因果图。</li>
-<li>倾向评分重叠图。</li>
-<li>加权或匹配前后的协变量平衡 Love plot。</li>
-<li>CATE 分布图或亚组效应森林图。</li>
-</ul></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：目标效应类型、点估计、置信区间、协变量平衡、重叠情况和敏感性分析。</li>
+<li>每个主要参数如何解读：ATE 是目标总体中平均效应；ATT 是处理组患者的平均效应；CATE 是特定协变量水平下的效应。</li>
+<li>临床或医学意义如何表达：应写成「在一致性、可交换性和正值性等假设成立时，药物使 30 天再入院风险平均降低多少」。</li>
+<li>常见误读：调整变量多不等于因果可靠；预测 AUC 高不等于效应估计准；统计显著不等于临床可干预。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>可交换性：用 DAG 判断该调哪些变量；做负对照、定量偏倚分析或 E-value 等未测混杂敏感性分析。</li>
+<li>正值性：画倾向评分重叠图，看极端权重和缺乏重叠的人群；必要时限制目标人群或截断权重。</li>
+<li>平衡性：匹配或加权后检查标准化均差，通常希望绝对值小于 0.1，而不是看组间检验的 p 值。</li>
+<li>结局模型稳健性：比较标准化、匹配、IPTW、AIPW 等估计是否方向一致。</li>
+<li>缺失和删失：区分 MCAR、MAR、MNAR；随访删失可用 IPCW 或联合敏感性分析。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>DAG 因果图：展示暴露、结局、混杂、中介和碰撞变量，帮助决定调整集合。</li>
+<li>倾向评分重叠图：显示处理组和对照组是否有可比区域。</li>
+<li>Love plot：展示匹配或加权前后的协变量标准化均差。</li>
+<li>亚组效应森林图：展示 CATE 或预先指定亚组的效应异质性。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>能明确区分相关性和干预效应。</li>
-<li>可用于真实世界数据中的治疗效果评估。</li>
-<li>支持总体效应和异质性效应分析。</li>
+<li>明确区分相关性、预测和干预效应。</li>
+<li>能把研究问题拆成目标试验、识别假设、估计方法和敏感性分析。</li>
+<li>适合真实世界数据中的疗效、安全性和政策评估。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>强依赖不可完全验证的识别假设。</li>
-<li>未测混杂会导致偏倚。</li>
-<li>复杂机器学习方法可能提升灵活性，但也增加解释和验证难度。</li>
+<li>关键假设常不可完全验证，尤其是无未测混杂。</li>
+<li>复杂方法不能弥补错误的研究设计和时间顺序。</li>
+<li>对数据质量、处理定义、缺失和删失机制非常敏感。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>根据统计显著性而非因果结构选择调整变量。</li>
+<li>用统计显著性选择混杂变量，而不是用因果结构选择。</li>
 <li>调整中介变量或碰撞变量，反而引入偏倚。</li>
-<li>不检查倾向评分重叠和加权后平衡。</li>
-<li>把 CATE 结果当成已证实的个体化治疗规则。</li>
+<li>不报告重叠、平衡和敏感性分析。</li>
+<li>把观察性研究结果写成无条件因果定论。</li>
 </ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a> 的区别：Logistic 回归可用于结局建模或倾向评分估计，但因果推断还需要识别假设和可比性检查。</li>
-<li>和 <a class="xlink" href="m-conditional-logistic-regression.html" data-cn="条件Logistic回归" data-en="Conditional Logistic Regression" data-def="匹配设计里每个匹配组天生就不一样，硬估各组的截距既费参数又估不准；条件 Logistic 回归在匹配组内部条件化，把组特异截距 $\alpha_i$ 从似然里彻底约掉——只用「同组内谁暴露、谁发病」的对比来估暴露效应。">条件Logistic回归（Conditional Logistic Regression）</a> 的区别：条件 Logistic 回归处理匹配数据关联分析，因果推断关注处理效应识别与估计。</li>
-<li>和 <a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a> 的区别：Cox 模型用于时间到事件结局建模，因果问题还需处理混杂、删失和目标效应。</li>
+<li>和 <a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a> 的区别：Logistic 回归是结局或处理模型工具；因果推断还要定义目标效应和识别假设。</li>
+<li>和 <a class="xlink" href="m-propensity-score-matching.html" data-cn="倾向评分匹配" data-en="Propensity Score Matching" data-def="倾向评分匹配把一堆混杂变量压缩成「接受处理的概率」这一维分数，再在分数相近的人之间比较结局。">倾向评分匹配（Propensity Score Matching）</a> 的区别：PSM 是一种构造可比样本的具体估计策略；因果推断是上位框架。</li>
+<li>和 <a class="xlink" href="m-inverse-probability-of-treatment-weighting-iptw.html" data-cn="逆概率处理加权" data-en="Inverse Probability of Treatment Weighting, IPTW" data-def="IPTW 给「在自身条件下不太可能接受实际处理」的人更大权重，让加权后的数据看起来像处理被随机分配过。">逆概率处理加权（Inverse Probability of Treatment Weighting, IPTW）</a> 的区别：IPTW 用权重构造伪人群；因果推断决定何时该用、估计什么、如何诊断。</li>
+<li>如何选择：先写清目标试验和 estimand，再根据重叠、样本量、结局类型和诊断结果选择匹配、加权、标准化或双重稳健方法。</li>
 </ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
       <div class="sec-body"><ul>
-<li>观察性队列中比较两种治疗方案的真实世界效果。</li>
-<li>评估筛查、药物、手术或康复干预对结局的影响。</li>
-<li>分析不同患者亚群中的异质性治疗效应。</li>
+<li>观察性队列中比较两种药物、术式或诊疗路径的真实世界效果。</li>
+<li>评估筛查、疫苗、康复、公共卫生政策对结局的影响。</li>
+<li>分析治疗效应异质性，寻找高获益或高风险亚群。</li>
+<li>机制研究中把总效应分解为直接效应与中介效应。</li>
 </ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-propensity-score-matching.html" data-cn="倾向评分匹配" data-en="Propensity Score Matching" data-def="倾向评分匹配先估计每个个体接受处理的条件概率（倾向评分），再把处理组个体与倾向评分相近的对照组个体配对，从而在已测混杂上构造可比的两组，估计处理效应。">倾向评分匹配（Propensity Score Matching）</a></li>
+<li><strong>潜在结果（Potential Outcome）</strong>：同一个体在某个处理状态下本会出现的结局。</li>
+<li><strong>反事实（Counterfactual）</strong>：与实际观察到的处理状态不同、因此看不见的潜在结果。</li>
+<li><strong>平均处理效应（Average Treatment Effect, ATE）</strong>：目标总体中 $Y(1)-Y(0)$ 的平均值。</li>
+<li><strong>可交换性（Exchangeability）</strong>：在调整变量后，处理组和对照组像随机分配一样可比。</li>
+<li><strong>正值性（Positivity）</strong>：每类患者都有机会接受每种处理。</li>
+<li><strong>一致性（Consistency）</strong>：实际接受某处理时，观测结局等于该处理下的潜在结果。</li>
+<li><strong>混杂（Confounding）</strong>：影响处理分配也影响结局的因素造成的偏倚。</li>
+<li><strong>目标试验（Target Trial）</strong>：把观察性问题翻译成一个理想随机试验的设计蓝图。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-propensity-score-matching.html" data-cn="倾向评分匹配" data-en="Propensity Score Matching" data-def="倾向评分匹配把一堆混杂变量压缩成「接受处理的概率」这一维分数，再在分数相近的人之间比较结局。">倾向评分匹配（Propensity Score Matching）</a></li>
+<li><a class="xlink" href="m-inverse-probability-of-treatment-weighting-iptw.html" data-cn="逆概率处理加权" data-en="Inverse Probability of Treatment Weighting, IPTW" data-def="IPTW 给「在自身条件下不太可能接受实际处理」的人更大权重，让加权后的数据看起来像处理被随机分配过。">逆概率处理加权（Inverse Probability of Treatment Weighting, IPTW）</a></li>
+<li><a class="xlink" href="m-mediation-analysis.html" data-cn="中介分析" data-en="Mediation Analysis" data-def="中介分析把「暴露是否影响结局」进一步拆成「有多少影响是通过某个机制变量传过去的」。">中介分析（Mediation Analysis）</a></li>
 <li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
 <li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
 <li><a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 用「从手上的样本里有放回地反复重抽」来模拟「把整个研究重做很多遍」，从而不靠任何公式，就能估计任意统计量的抽样波动、标准误和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a></li>
 </ul></div>
-    </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
-<li>Rubin DB. Estimating causal effects of treatments in randomized and nonrandomized studies. <em>J Educ Psychol</em>. 1974;66(5):688-701.</li>
-<li>Rosenbaum PR, Rubin DB. The central role of the propensity score in observational studies for causal effects. <em>Biometrika</em>. 1983;70(1):41-55.</li>
+<li>Hernán MA, Robins JM. <em>Causal Inference: What If</em>. Chapman and Hall/CRC; 2020.</li>
+<li>Imbens GW, Rubin DB. <em>Causal Inference for Statistics, Social, and Biomedical Sciences</em>. Cambridge University Press; 2015.</li>
 <li>Pearl J. <em>Causality: Models, Reasoning, and Inference</em>. 2nd ed. Cambridge University Press; 2009.</li>
-<li>Hernan MA, Robins JM. <em>Causal Inference: What If</em>. Chapman and Hall/CRC; 2020.</li>
+<li>Rubin DB. Estimating causal effects of treatments in randomized and nonrandomized studies. <em>J Educ Psychol</em>. 1974;66(5):688-701.</li>
 </ul></div>
     </section>
     <div class="pager"><span></span><a class="pg pg-next" href="m-propensity-score-matching.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">倾向评分匹配</div></a></div>

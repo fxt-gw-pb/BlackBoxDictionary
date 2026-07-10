@@ -46,7 +46,7 @@
           <span class="entry-cn">多层感知机分类器</span>
           <span class="entry-en">Multilayer Perceptron Classifier, MLP</span>
         </div>
-        <p class="entry-def">多层感知机分类器是一类前馈神经网络模型。它通过若干隐藏层和非线性激活函数，把输入特征映射到输出类别概率，适合学习复杂的非线性判别边界。</p>
+        <p class="entry-def">MLP 把多次“线性组合 + 非线性激活”串起来，将原本不能用一条直线分开的类别，在逐层变换后的表示空间中分开。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -59,7 +59,7 @@
           <span class="entry-cn">人工神经网络</span>
           <span class="entry-en">Artificial Neural Network, ANN</span>
         </div>
-        <p class="entry-def">人工神经网络是由多层神经元节点组成的一类函数逼近模型。它通过权重、偏置和非线性激活函数，把输入数据映射到分类、回归或表征学习目标上。</p>
+        <p class="entry-def">人工神经网络把复杂函数拆成许多可学习的小变换，并通过组合、非线性和梯度优化，从数据中共同学出“如何表示”与“如何预测”。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -72,7 +72,7 @@
           <span class="entry-cn">卷积神经网络</span>
           <span class="entry-en">Convolutional Neural Network, CNN</span>
         </div>
-        <p class="entry-def">卷积神经网络是一类专门处理图像或局部空间结构数据的神经网络。它通过卷积核、激活函数和池化层，从原始像素中自动提取边缘、纹理和高级语义特征。</p>
+        <p class="entry-def">CNN 用同一个小型滤波器在整幅图像上滑动，把“局部模式可重复出现”写进网络结构，从而用远少于全连接层的参数学习空间特征。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -85,7 +85,7 @@
           <span class="entry-cn">循环神经网络</span>
           <span class="entry-en">Recurrent Neural Network, RNN</span>
         </div>
-        <p class="entry-def">循环神经网络是一类面向序列数据的神经网络。它在每个时间步共享同一组参数，并把前一时刻的隐藏状态传递到当前时刻，从而建模顺序依赖关系。</p>
+        <p class="entry-def">RNN 用一个随时间递推的隐藏状态充当“压缩记忆”，让当前预测同时依赖当前输入和此前序列。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -98,7 +98,7 @@
           <span class="entry-cn">长短期记忆网络</span>
           <span class="entry-en">Long Short-Term Memory, LSTM</span>
         </div>
-        <p class="entry-def">LSTM 是循环神经网络的重要变体，通过遗忘门、输入门和输出门控制信息流动，专门用于缓解普通 RNN 难以学习长程依赖的问题。</p>
+        <p class="entry-def">LSTM 在普通 RNN 之外增加一条近似加性的细胞状态，并用门控制“忘什么、写什么、读什么”，让有用信息和梯度能跨越更长时间。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -111,7 +111,7 @@
           <span class="entry-cn">门控循环单元</span>
           <span class="entry-en">Gated Recurrent Unit, GRU</span>
         </div>
-        <p class="entry-def">GRU 是一种门控循环神经网络结构。它将 LSTM 的门控机制做了更紧凑的简化，通过更新门和重置门控制历史信息保留与新信息写入。</p>
+        <p class="entry-def">GRU 用更新门在“保留旧状态”和“写入新候选”之间做逐维插值，再用重置门决定生成候选时要参考多少历史，以更紧凑的结构缓解普通 RNN 的长程梯度问题。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -124,7 +124,7 @@
           <span class="entry-cn">生成对抗网络</span>
           <span class="entry-en">Generative Adversarial Network, GAN</span>
         </div>
-        <p class="entry-def">GAN 是由生成器和判别器组成的生成模型。生成器尝试生成逼真的伪样本，判别器尝试区分真实样本和伪样本，两者在对抗训练中共同逼近真实数据分布。</p>
+        <p class="entry-def">GAN 让生成器与判别器进行一场可微博弈：判别器学习识别真假，生成器借判别器的反馈把随机噪声逐步推成类似真实数据的样本。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -137,7 +137,7 @@
           <span class="entry-cn">自编码器</span>
           <span class="entry-en">Autoencoder</span>
         </div>
-        <p class="entry-def">自编码器是一类无监督或自监督神经网络。它通过编码器把输入压缩为低维潜在表示，再通过解码器尽量重构原始输入，从而学习有信息量的表征。</p>
+        <p class="entry-def">自编码器强迫网络把输入经过受限的潜在表示再还原；若仍能重构，瓶颈中就必须保留数据的主要结构而舍弃部分冗余或噪声。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -150,7 +150,7 @@
           <span class="entry-cn">注意力机制</span>
           <span class="entry-en">Attention Mechanism</span>
         </div>
-        <p class="entry-def">注意力机制是一类根据“相关性权重”聚合信息的计算方式。它允许模型在处理当前目标时，对输入中的不同位置分配不同关注程度。</p>
+        <p class="entry-def">注意力机制先计算“当前查询与每条信息有多相关”，再把相关性归一化成权重，对各条信息做数据依赖的加权汇总。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -163,7 +163,7 @@
           <span class="entry-cn">Transformer</span>
           <span class="entry-en">Transformer</span>
         </div>
-        <p class="entry-def">Transformer 是以多头注意力为核心的序列建模架构。它不依赖传统递归结构，而是通过自注意力和位置编码并行建模序列中的全局依赖。</p>
+        <p class="entry-def">Transformer 让序列中每个位置用自注意力直接汇总其他位置，再通过残差、归一化和逐位置前馈网络反复加工，从而不依赖递归也能建模全局上下文。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -176,7 +176,7 @@
           <span class="entry-cn">残差网络</span>
           <span class="entry-en">Residual Network, ResNet</span>
         </div>
-        <p class="entry-def">ResNet 是在深层 CNN 中引入残差连接的网络架构。它通过快捷连接把输入直接加到后续层输出上，从而缓解深层网络训练中的退化与梯度传播困难。</p>
+        <p class="entry-def">ResNet 不要求每组层从头学习完整映射，而是学习“在输入基础上还要改多少”，并用快捷连接给信息和梯度提供一条直接通路。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -189,7 +189,7 @@
           <span class="entry-cn">DenseNet</span>
           <span class="entry-en">Densely Connected Convolutional Network, DenseNet</span>
         </div>
-        <p class="entry-def">DenseNet 是一种密集连接卷积网络。它让每一层都接收所有前面层的特征图作为输入，从而强化特征复用并改善梯度传播。</p>
+        <p class="entry-def">DenseNet 让每一层直接看到并保留所有前层特征，通过通道拼接实现特征复用和短梯度路径，而不是反复覆盖旧表示。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -202,7 +202,7 @@
           <span class="entry-cn">AlexNet</span>
           <span class="entry-en">AlexNet</span>
         </div>
-        <p class="entry-def">AlexNet 是深度学习图像识别史上的经典卷积神经网络架构。它通过较深的卷积层堆叠、ReLU、dropout 和大规模 GPU 训练，推动了现代深度视觉模型的发展。</p>
+        <p class="entry-def">AlexNet 用五层卷积逐步提取视觉特征，再用三层全连接分类，并以 ReLU、GPU 训练、数据增强和 dropout 证明深层 CNN 可在大规模图像任务上显著超越传统特征。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>

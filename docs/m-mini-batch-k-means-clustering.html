@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">术语表</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,224 +54,257 @@
     <div class="intro-note"><h1>Mini-Batch K-means聚类（Mini-Batch K-means Clustering）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>Mini-Batch K-means 是 <a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a> 的大规模近似版本。它每次只用一小批样本更新质心，从而显著降低计算成本。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>Mini-Batch K-means 每次只抽一小批样本近似更新质心，以少量精度和随机波动换取速度、低内存与增量处理能力。</p>
+<h3>1.2 定义</h3>
+<p>Mini-Batch K-means 是 <a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a> 的随机近似版本。它保留最近质心分配和均值原型，但不在每轮扫描全部数据，而用小批量递推质心。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：样本量很大时，如何更快地近似 K-means 聚类结果。</li>
-<li>适用任务：大规模患者分群、图像颜色量化、在线或近在线聚类、快速原型学习。</li>
-<li>常见医学场景：大规模影像像素压缩，海量监测记录分组，大样本 EHR 表型聚类初筛。</li>
+<li>完整 K-means 每轮扫描海量数据成本过高。</li>
+<li>数据无法一次装入内存或持续到达。</li>
+<li>需要快速原型、压缩或初步分群。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>标准 K-means 每一轮都看完整数据，Mini-Batch K-means 则每次抽一小批数据来微调质心。它牺牲一点精确度，换取更快速度和更低内存占用。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>标准 K-means 每次重算全班平均；Mini-Batch 每次只看一小组新样本，按累计人数微调平均。看得足够多后，质心通常接近完整数据结果。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>标准 K-means 目标仍是最小化：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 随机近似</h3>
+<p>小批量若近似代表总体，其更新方向平均而言接近完整 K-means。单次更新噪声更大，但计算远少于全量扫描。</p>
+<h3>2.2 递推均值</h3>
+<p>对某簇已累计 $n_k$ 个样本，收到新样本 $x$ 后：</p>
+<p>$$
+\mu_k^{new}=
+\mu_k+\frac{1}{n_k+1}(x-\mu_k)
+$$</p>
+<p>无需保存该簇所有历史样本。</p>
+<h3>2.3 继承 K-means 偏好</h3>
+<p>它改变的是优化方式，不是聚类目标。因此仍偏好球形、相近尺度簇，仍受标准化、$K$ 和离群点影响。</p></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 目标函数</h3>
+<p>目标仍近似最小化：</p>
 <p>$$
 \sum_{i=1}^{n}\|x_i-\mu_{c_i}\|_2^2
 $$</p>
-<p>Mini-batch 版本在第 $t$ 次迭代抽取小批量 $B_t$，对 $x_i\in B_t$ 分配最近质心：</p>
+<h3>3.2 小批量分配</h3>
+<p>对 $x_i\in B_t$：</p>
 <p>$$
-c_i=\arg\min_k\|x_i-\mu_k^{(t)}\|_2^2
+c_i=
+\operatorname*{arg\,min}_{k}
+\|x_i-\mu_k^{(t)}\|_2^2
 $$</p>
-<p>若样本 $x_i$ 分给簇 $k$，质心可用递推均值更新：</p>
+<h3>3.3 随机更新</h3>
 <p>$$
-\mu_k^{(t+1)}=(1-\eta_{k,t})\mu_k^{(t)}+\eta_{k,t}x_i
+\mu_k^{(t+1)}
+=(1-\eta_{kt})\mu_k^{(t)}
++\eta_{kt}\bar x_{k,B_t}
 $$</p>
-<p>其中 $\eta_{k,t}$ 通常与该簇已经接收的样本数有关。</p>
-<h3>2.2 参数或统计量含义</h3>
-<ul>
-<li><code>n_clusters</code>：簇数。</li>
-<li><code>batch_size</code>：每次用于更新的小批量样本数。</li>
-<li><code>n_init</code>：不同初始化重复次数。</li>
-<li><code>max_iter</code>：最大迭代轮数。</li>
-<li>inertia：近似簇内平方和。</li>
-<li>reassignment ratio：控制低计数簇中心是否被重新分配。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>与 K-means 相同，簇大致紧凑且接近球形。</li>
-<li>小批量样本能代表整体数据分布。</li>
-<li>随机更新带来的近似误差在任务中可接受。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：连续型数值特征或像素/向量特征。</li>
-<li>因变量类型：无监督方法，不需要结局变量。</li>
-<li>数据结构：大样本特征矩阵。</li>
-<li>是否适合高维数据：可用于稀疏或高维数据，但需注意距离稳定性。</li>
-<li>是否适合缺失较多数据：需先处理缺失。</li>
-<li>是否适合删失数据：不直接处理删失结局。</li>
-<li>是否适合重复测量数据：需先构造样本级输入。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>以大规模 EHR 表型特征为例：</p>
+<p>$\eta_{kt}$ 通常随该中心累计更新次数下降。</p>
+<h3>3.4 关键条件</h3>
 <table>
 <thead>
 <tr>
-<th>Age</th>
-<th>BMI</th>
-<th>VisitCount</th>
-<th>MedicationCount</th>
-<th>LabAbnormalCount</th>
+<th>条件</th>
+<th>违反后果</th>
+<th>检查方式</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>71</td>
-<td>31.2</td>
-<td>14</td>
-<td>8</td>
-<td>5</td>
+<td>批次近似随机代表总体</td>
+<td>质心随批次顺序漂移</td>
+<td>shuffle 与多随机种子</td>
 </tr>
 <tr>
-<td>54</td>
-<td>24.8</td>
-<td>3</td>
-<td>2</td>
-<td>1</td>
+<td>batch 足够覆盖各簇</td>
+<td>小簇中心被忽略</td>
+<td>批量大小敏感性</td>
 </tr>
 <tr>
-<td>67</td>
-<td>29.5</td>
-<td>10</td>
-<td>6</td>
-<td>4</td>
+<td>K-means 几何合理</td>
+<td>近似得再快也切错结构</td>
+<td>与替代算法对比</td>
 </tr>
 <tr>
-<td>42</td>
-<td>22.9</td>
-<td>2</td>
-<td>1</td>
-<td>0</td>
+<td>预处理一致</td>
+<td>流式批次尺度变化</td>
+<td>固定 scaler 与漂移监控</td>
 </tr>
 </tbody>
-</table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：大规模数值特征矩阵。</li>
-<li>关键变量：簇数、batch size、初始化次数。</li>
-<li>需要预处理的内容：缺失处理、标准化、异常值检查、必要时降维。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：簇标签、近似质心、inertia。</li>
-<li>参数估计：每个簇的质心。</li>
-<li>预测结果：新样本可分配到最近质心。</li>
-<li>不确定性指标：不同 batch size、随机种子和初始化下的稳定性。</li>
-</ul></div>
+</table></div>
     </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：样本量大、需要快速近似 K-means、可接受少量随机误差的场景。</li>
-<li>不适合：样本量较小且需要最稳定的 K-means 结果、簇形状复杂、离群点很多的场景。</li>
-<li>使用前需要特别检查的点：batch size 是否足够、结果是否接近标准 K-means、簇中心是否稳定。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>一维数据分两批到达，初始中心为 $\mu_1=0,\mu_2=10$。</p>
+<p>第一批：</p>
+<p>$$
+B_1=\{1,9\}
+$$</p>
+<p>1 分给中心 1，9 分给中心 2。每个中心第一次接收样本，更新为：</p>
+<p>$$
+\mu_1=1,\qquad\mu_2=9
+$$</p>
+<p>第二批：</p>
+<p>$$
+B_2=\{2,8\}
+$$</p>
+<p>2 分给第一簇。第一簇累计计数从 1 变 2：</p>
+<p>$$
+\mu_1^{new}
+=1+\frac12(2-1)
+=1.5
+$$</p>
+<p>同理：</p>
+<p>$$
+\mu_2^{new}
+=9+\frac12(8-9)
+=8.5
+$$</p>
+<p><strong>结论：</strong> 只看两个小批次就得到完整四点 $\{1,2,8,9\}$ 的质心 1.5 和 8.5。一般数据中批次只提供近似，因此需检查随机波动。</p></div>
     </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="mini-batch-k-means-clustering" data-i="0">Python</button><button class="codetab" data-uid="mini-batch-k-means-clustering" data-i="1">R</button></div><div class="codepanel active" data-uid="mini-batch-k-means-clustering" data-i="0"><p>常用包：</p>
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 数据要求</h3>
 <ul>
-<li><code>scikit-learn</code></li>
+<li>大规模连续数值矩阵、稀疏向量或像素特征。</li>
+<li>缺失需预处理，尺度转换必须跨批次保持一致。</li>
+<li>普通方法不直接建模患者内重复测量。</li>
 </ul>
-<pre><code class="language-python">import pandas as pd
-from sklearn.cluster import MiniBatchKMeans
-from sklearn.pipeline import make_pipeline
+<h3>5.2 输入与产出</h3>
+<p>输入为 $K$、batch size、初始化、停止和低计数中心重分配规则。输出为近似质心、硬标签和 inertia。</p></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>大型 EHR、图像 patch、文本向量或流式数据。</li>
+<li>可接受略低精度，优先考虑速度与内存。</li>
+<li>小样本或非球形簇没有必要使用它。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="mini-batch-k-means-clustering" data-i="0">Python</button><button class="codetab" data-uid="mini-batch-k-means-clustering" data-i="1">R</button></div><div class="codepanel active" data-uid="mini-batch-k-means-clustering" data-i="0"><pre><code class="language-python">from sklearn.cluster import MiniBatchKMeans
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv(&quot;ehr_features_large.csv&quot;)
-X = df[[&quot;Age&quot;, &quot;BMI&quot;, &quot;VisitCount&quot;, &quot;MedicationCount&quot;, &quot;LabAbnormalCount&quot;]]
+scaler = StandardScaler().fit(X)
+X_s = scaler.transform(X)
 
-model = make_pipeline(
-    StandardScaler(),
-    MiniBatchKMeans(
-        n_clusters=4,
-        batch_size=512,
-        n_init=10,
-        random_state=42
-    )
+model = MiniBatchKMeans(
+    n_clusters=4,
+    batch_size=1024,
+    init=&quot;k-means++&quot;,
+    n_init=20,
+    max_no_improvement=20,
+    reassignment_ratio=0.01,
+    random_state=42,
 )
-cluster = model.fit_predict(X)
-print(pd.Series(cluster).value_counts().sort_index())
-</code></pre></div><div class="codepanel" data-uid="mini-batch-k-means-clustering" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>ClusterR</code></li>
-</ul>
-<pre><code class="language-r">library(ClusterR)
+cluster = model.fit_predict(X_s)
+centers = scaler.inverse_transform(model.cluster_centers_)
+print(model.inertia_, model.n_steps_)
+</code></pre></div><div class="codepanel" data-uid="mini-batch-k-means-clustering" data-i="1"><pre><code class="language-r">library(ClusterR)
 
-x &lt;- scale(df[, c(&quot;Age&quot;, &quot;BMI&quot;, &quot;VisitCount&quot;, &quot;MedicationCount&quot;, &quot;LabAbnormalCount&quot;)])
-fit &lt;- MiniBatchKmeans(x, clusters = 4, batch_size = 512, num_init = 10)
+x &lt;- scale(df[, c(
+  &quot;Age&quot;, &quot;BMI&quot;, &quot;VisitCount&quot;, &quot;MedicationCount&quot;, &quot;LabAbnormalCount&quot;
+)])
+
+fit &lt;- MiniBatchKmeans(
+  x,
+  clusters = 4,
+  batch_size = 512,
+  num_init = 20,
+  early_stop_iter = 20
+)
 
 cluster &lt;- predict_MBatchKMeans(x, fit$centroids)
 table(cluster)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：近似质心、各簇样本量、inertia、与标准 K-means 的一致性。</li>
-<li>每个主要参数如何解释：<code>batch_size</code> 越大，更新越接近标准 K-means，但速度优势降低。</li>
-<li>临床或医学意义如何表达：更适合作为大规模数据的快速分群工具，聚类解释仍需回到簇中心和临床变量差异。</li>
-<li>常见误读：速度更快不代表结果更好；它是 K-means 的近似优化策略。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>不同 batch size 下 inertia 和运行时间对比。</li>
-<li>聚类标签在 PCA/UMAP 空间中的分布。</li>
-<li>各簇中心热图。</li>
-<li>Mini-Batch 与标准 K-means 标签一致性矩阵。</li>
-</ul></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>适合大规模数据。</li>
-<li>速度快、内存压力小。</li>
-<li>可作为 K-means 的快速近似替代。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>结果有随机近似误差。</li>
-<li>仍继承 K-means 对球形簇和离群点敏感的局限。</li>
-<li>小批量过小可能导致质心不稳定。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>为追求速度把 batch size 设得过小。</li>
-<li>不设置随机种子和重复初始化。</li>
-<li>用它解决明显非球形或密度不均的聚类问题。</li>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>中心仍是原型，但受抽样顺序和近似更新影响。</li>
+<li><code>batch_size</code> 越大通常越接近全量更新，但速度优势变小。</li>
+<li>inertia 应与相同预处理下的标准 K-means 比较。</li>
+<li>快速分群不增加医学真实性，簇仍需画像与外部复现。</li>
 </ul></div>
     </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a> 的区别：Mini-Batch K-means 用小批量近似更新，更快但略有近似误差。</li>
-<li>和 <a class="xlink" href="m-balanced-iterative-reducing-and-clustering-using-hierarchies-birch.html" data-cn="BIRCH聚类" data-en="Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH" data-def="BIRCH 是一种面向大规模数据的聚类算法。它通过簇特征树（CF tree）把大量样本压缩成可管理的微簇摘要，再对这些摘要进行聚类。">BIRCH聚类（Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH）</a> 的区别：BIRCH 先构建 CF 树压缩数据，Mini-Batch K-means 直接随机小批量更新质心。</li>
-<li>和 <a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="高斯混合模型是假设观测数据由多个高斯分布按一定权重混合而成的概率模型。它既可以做密度估计，也可以用于软聚类，即给每个样本分配“属于各个簇的概率”。">高斯混合模型（Gaussian Mixture Model, GMM）</a> 的区别：GMM 给概率归属，Mini-Batch K-means 给硬标签和质心。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">诊断与稳健性</h2></div>
+      <div class="sec-body"><ol>
+<li>比较不同 batch size 的运行时间、inertia 和标签一致性。</li>
+<li>使用多个随机种子评估质心波动。</li>
+<li>在可承受子样本上与完整 K-means 对照。</li>
+<li>检查小簇是否被重分配或消失。</li>
+<li>流式环境监控特征分布与中心漂移。</li>
+</ol></div>
     </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
-<li>大规模 EHR 患者表型初步分群。</li>
-<li>医学影像像素或 patch 特征快速聚类。</li>
-<li>大样本多指标监测数据的原型学习。</li>
+<li>batch size-运行时间-inertia 曲线。</li>
+<li>Mini-Batch 与完整 K-means 的共同聚类矩阵。</li>
+<li>质心随批次更新轨迹。</li>
+<li>标准化簇中心热图。</li>
 </ul></div>
     </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a></li>
-<li><a class="xlink" href="m-balanced-iterative-reducing-and-clustering-using-hierarchies-birch.html" data-cn="BIRCH聚类" data-en="Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH" data-def="BIRCH 是一种面向大规模数据的聚类算法。它通过簇特征树（CF tree）把大量样本压缩成可管理的微簇摘要，再对这些摘要进行聚类。">BIRCH聚类（Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH）</a></li>
-<li><a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="高斯混合模型是假设观测数据由多个高斯分布按一定权重混合而成的概率模型。它既可以做密度估计，也可以用于软聚类，即给每个样本分配“属于各个簇的概率”。">高斯混合模型（Gaussian Mixture Model, GMM）</a></li>
-<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p><strong>优势：</strong> 快、内存低、可增量更新，适合大规模质心学习。</p>
+<p><strong>局限：</strong> 有随机近似误差，小簇可能更新不足，继承 K-means 全部几何限制。</p>
+<p><strong>常见坑：</strong> batch 太小；数据未打乱；预处理跨批次变化；不与全量子样本比较；为大数据速度牺牲后仍过度解释亚型。</p></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a>：全量更新通常更精确，Mini-Batch 更可扩展。</li>
+<li><a class="xlink" href="m-balanced-iterative-reducing-and-clustering-using-hierarchies-birch.html" data-cn="BIRCH聚类" data-en="Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH" data-def="BIRCH 把相近样本在线压缩为可相加的 CF 微簇，再在微簇中心上做全局聚类，从而避免反复保存和比较全部原始点。">BIRCH聚类（Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH）</a>：BIRCH 建 CF 树微簇，Mini-Batch 直接随机更新质心。</li>
+<li><a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="GMM 把总体密度表示为若干高斯成分的加权和，并为每名患者给出属于各成分的后验概率。">高斯混合模型（Gaussian Mixture Model, GMM）</a>：GMM 是概率软聚类。</li>
+<li>选择经验：数据可装入内存时先用 K-means；大规模或增量处理时再用 Mini-Batch。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>百万级患者 EHR 表型初筛。</li>
+<li>医学图像像素、patch 或嵌入向量压缩。</li>
+<li>可穿戴设备与长期监测片段的在线原型学习。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">术语表</h2></div>
+      <div class="sec-body"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mini-batch</td>
+<td>每次参与更新的一小批样本</td>
+</tr>
+<tr>
+<td>stochastic update</td>
+<td>基于随机样本近似全量更新</td>
+</tr>
+<tr>
+<td>running mean</td>
+<td>不保存历史数据的递推均值</td>
+</tr>
+<tr>
+<td>reassignment</td>
+<td>将长期低计数中心重新放置</td>
+</tr>
+<tr>
+<td><code>partial_fit</code></td>
+<td>用新批次增量更新模型的接口</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a></li>
+<li><a class="xlink" href="m-balanced-iterative-reducing-and-clustering-using-hierarchies-birch.html" data-cn="BIRCH聚类" data-en="Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH" data-def="BIRCH 把相近样本在线压缩为可相加的 CF 微簇，再在微簇中心上做全局聚类，从而避免反复保存和比较全部原始点。">BIRCH聚类（Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH）</a></li>
+<li><a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="GMM 把总体密度表示为若干高斯成分的加权和，并为每名患者给出属于各成分的后验概率。">高斯混合模型（Gaussian Mixture Model, GMM）</a></li>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="PCA 旋转坐标轴，依次寻找样本投影方差最大的正交方向，用少数线性组合保留主要总变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Sculley D. Web-scale k-means clustering. <em>WWW</em>. 2010:1177-1178.</li>
-<li>scikit-learn Developers. <code>sklearn.cluster.MiniBatchKMeans</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MiniBatchKMeans.html">https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MiniBatchKMeans.html</a> （访问日期：2026-07-02）</li>
-<li>Lloyd S. Least squares quantization in PCM. <em>IEEE Transactions on Information Theory</em>. 1982;28(2):129-137.</li>
+<li>scikit-learn Developers. <code>MiniBatchKMeans</code> API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MiniBatchKMeans.html">https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MiniBatchKMeans.html</a> （访问日期：2026-07-09）</li>
+<li>CRAN. Package <code>ClusterR</code>. <a href="https://cran.r-project.org/package=ClusterR">https://cran.r-project.org/package=ClusterR</a> （访问日期：2026-07-09）</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-spectral-clustering.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">谱聚类</div></a><a class="pg pg-next" href="m-balanced-iterative-reducing-and-clustering-using-hierarchies-birch.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">BIRCH聚类</div></a></div>

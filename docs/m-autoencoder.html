@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,214 +54,411 @@
     <div class="intro-note"><h1>自编码器（Autoencoder）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>自编码器是一类无监督或自监督神经网络。它通过编码器把输入压缩为低维潜在表示，再通过解码器尽量重构原始输入，从而学习有信息量的表征。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>自编码器强迫网络把输入经过受限的潜在表示再还原；若仍能重构，瓶颈中就必须保留数据的主要结构而舍弃部分冗余或噪声。</p>
+<h3>1.2 定义</h3>
+<p>自编码器是一类以输入本身为学习目标的神经网络，由编码器 $f_\theta$ 和解码器 $g_\phi$ 组成。编码器将输入压成潜在表示，解码器从表示重构输入，训练最小化重构误差。它通常属于自监督表征学习，而非严格意义上“没有目标”的学习，因为目标就是原输入或被破坏前的输入。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：如何在没有人工标签的情况下学习数据表示，并实现降维、去噪、压缩或异常检测。</li>
-<li>适用任务：特征压缩、去噪重构、异常检测、表示学习。</li>
-<li>常见医学场景：病理图像压缩表征、基因表达降维、监测数据异常识别、缺损图像重建。</li>
+<li>研究问题：没有人工标签时，如何学习低维表示、去噪或发现偏离常态的样本。</li>
+<li>适用任务：降维、压缩、去噪、异常检测、预训练和缺失重构。</li>
+<li>常见医学场景：多组学表征、医学影像去噪、监护数据异常检测、病理图像嵌入。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>自编码器像一个先“压缩再解压”的模型。如果压缩后的信息仍能很好还原输入，说明中间的低维表示抓住了数据中的关键结构。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>把编码器想成写“病历摘要”，解码器则只看摘要尝试还原原病历。若摘要字数受限，还能还原主要内容，说明摘要抓住了共性结构。若摘要容量毫无限制，模型可能逐字抄写而没有学到有用规律；所以瓶颈、噪声、稀疏或正则约束是方法的灵魂。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>编码器和解码器可写为：</p>
-<p>$$
-z = f_{\theta}(x)
-$$</p>
-<p>$$
-\hat x = g_{\phi}(z)
-$$</p>
-<p>训练目标常为最小化重构误差：</p>
-<p>$$
-\min_{\theta,\phi} \sum_{i=1}^{n} \mathcal{L}(x_i, \hat x_i)
-$$</p>
-<p>其中 $\mathcal{L}$ 常取均方误差或二元交叉熵。</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>高维观测中常有冗余：相邻像素相关、多个基因共表达、生命体征共同变化。PCA 只能用线性子空间压缩，复杂数据可能位于弯曲流形。自编码器用非线性编码和解码学习“如何压缩、如何展开”，但必须限制信息通道，否则学到恒等映射就失去意义。</p>
+<h3>2.2 关键洞察</h3>
+<p>重构任务本身制造了监督信号。模型不能只记住一个标签，而要保存足以解释输入的结构。三种常见约束分别表达不同思想：</p>
 <ul>
-<li>编码器：把原始输入压缩为潜在变量。</li>
-<li>解码器：从潜在变量重构输入。</li>
-<li>bottleneck 维度：控制压缩强度和表征容量。</li>
-<li>重构误差：衡量模型保留原始信息的程度。</li>
+<li>欠完备自编码器：潜在维度小于输入维度，形成几何瓶颈。</li>
+<li>去噪自编码器：输入人为加噪，目标仍是干净输入，逼迫模型学习稳定结构。</li>
+<li>稀疏/正则自编码器：限制隐藏激活或编码器导数，阻止简单复制。</li>
 </ul>
-<h3>2.3 关键假设</h3>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>数据中存在可压缩的潜在结构。</li>
-<li>重构任务能诱导出对下游任务有用的表示。</li>
-<li>噪声和异常模式与主体分布存在差异。</li>
+<li>相比 PCA：线性自编码器在特定条件下恢复 PCA 子空间；非线性自编码器能表示弯曲结构。</li>
+<li>相比普通 MLP：MLP 用外部标签预测，自编码器用输入自身作为目标。</li>
+<li>相比 VAE：普通自编码器给确定性编码，不保证潜空间连续可采样；VAE 约束潜变量分布。</li>
+<li>相比 GAN：自编码器优化逐样本重构，GAN 用判别器匹配生成分布。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>编码、解码和经验风险为</p>
+<p>$$
+\mathbf z=f_\theta(\mathbf x),\qquad
+\hat{\mathbf x}=g_\phi(\mathbf z)
+$$</p>
+<p>$$
+\min_{\theta,\phi}
+\frac{1}{n}\sum_{i=1}^{n}
+\mathcal L\!\left(
+\mathbf x_i,
+g_\phi(f_\theta(\mathbf x_i))
+\right)
++\lambda\Omega(\theta,\phi)
+$$</p>
+<p>连续型、已标准化输入常用均方误差：</p>
+<p>$$
+\mathcal L(\mathbf x,\hat{\mathbf x})
+=\|\mathbf x-\hat{\mathbf x}\|_2^2
+$$</p>
+<p>这个式子在说：把输入压缩后再还原，训练让重构尽量接近原输入，同时用瓶颈或正则避免无意义复制。</p>
+<p>去噪自编码器改为</p>
+<p>$$
+\min_{\theta,\phi}
+\mathbb E_{\tilde{\mathbf x}\sim q(\tilde{\mathbf x}\mid\mathbf x)}
+\mathcal L\!\left(
+\mathbf x,g_\phi(f_\theta(\tilde{\mathbf x}))
+\right)
+$$</p>
+<h3>3.2 推导脉络</h3>
+<p>若只最小化重构误差且网络容量无限，令 $g(f(x))=x$ 就能得到平凡解。于是必须限制：</p>
+<ol>
+<li>降低潜在维度，让网络选择保留哪些方向。</li>
+<li>或破坏输入，让逐像素复制不再可行。</li>
+<li>或惩罚复杂权重、隐藏激活和局部敏感性。</li>
+</ol>
+<p>异常检测则建立在一个额外逻辑上：只用“正常”样本训练后，正常模式容易重构，未见异常重构误差可能更大。但高容量网络也可能把异常重构得很好，所以这一逻辑必须实证验证。</p>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：连续特征矩阵、图像、信号。</li>
-<li>因变量类型：通常无显式标签。</li>
-<li>数据结构：向量或张量输入。</li>
-<li>是否适合高维数据：适合高维数据压缩和表示学习。</li>
-<li>是否适合缺失较多数据：需专门设计掩码或去噪目标。</li>
-<li>是否适合删失数据：不直接处理删失。</li>
-<li>是否适合重复测量数据：若是序列型数据，需结合时序编码器。</li>
+<li>$\mathbf x$：原始输入，通常需按变量尺度预处理。</li>
+<li>$\mathbf z$：潜在编码或瓶颈表示。</li>
+<li>$\hat{\mathbf x}$：解码器重构。</li>
+<li>$f_\theta,g_\phi$：编码器和解码器。</li>
+<li>$\mathcal L$：按数据类型选择的重构损失；连续用 MSE，二元可用交叉熵。</li>
+<li>$\Omega$：权重、稀疏性或平滑性正则。</li>
+<li>重构误差：可作样本级异常分数，但阈值必须在独立数据上验证。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>以实验室多指标异常检测为例：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>PatientID</th>
-<th>ALT</th>
-<th>AST</th>
-<th>ALB</th>
-<th>Creatinine</th>
-<th>Urea</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>P101</td>
-<td>35</td>
-<td>31</td>
-<td>42</td>
-<td>0.9</td>
-<td>4.7</td>
+<td>数据存在可压缩结构</td>
+<td>低维表示能保留主要信息</td>
+<td>重构差或编码无用</td>
+<td>比较 PCA、不同瓶颈</td>
 </tr>
 <tr>
-<td>P102</td>
-<td>168</td>
-<td>143</td>
-<td>32</td>
-<td>2.1</td>
-<td>13.5</td>
+<td>损失与重要信息一致</td>
+<td>像素/变量误差反映任务价值</td>
+<td>重构好却丢掉临床关键细节</td>
+<td>下游任务与专家检查</td>
 </tr>
 <tr>
-<td>P103</td>
-<td>29</td>
-<td>25</td>
-<td>44</td>
-<td>0.8</td>
-<td>4.3</td>
+<td>正常训练集较纯</td>
+<td>异常检测时训练样本代表正常</td>
+<td>异常被学成正常</td>
+<td>审核训练集、稳健训练</td>
 </tr>
 <tr>
-<td>P104</td>
-<td>41</td>
-<td>39</td>
-<td>40</td>
-<td>1.0</td>
-<td>5.0</td>
+<td>容量受到有效限制</td>
+<td>模型不能轻易复制所有输入</td>
+<td>恒等映射、异常也低误差</td>
+<td>容量/正则消融</td>
+</tr>
+<tr>
+<td>训练与应用预处理一致</td>
+<td>尺度、设备、批次可比</td>
+<td>重构误差反映域差异而非异常</td>
+<td>外部中心和批次分层</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>用一个线性、单维瓶颈自编码器说明“投影—重构—异常误差”。正常数据沿直线 $x_2=0.5x_1$，其单位方向为</p>
+<p>$$
+\mathbf w
+=\frac{1}{\sqrt5}
+\begin{pmatrix}2\\1\end{pmatrix}
+=(0.894,0.447)^\top
+$$</p>
+<p>编码器与解码器设为</p>
+<p>$$
+z=\mathbf w^\top\mathbf x,\qquad
+\hat{\mathbf x}=z\mathbf w
+$$</p>
+<p><strong>正常点 $\mathbf x=(2,1)^\top$。</strong></p>
+<p>$$
+z=\frac{2\times2+1\times1}{\sqrt5}
+=\sqrt5=2.236
+$$</p>
+<p>$$
+\hat{\mathbf x}
+=2.236(0.894,0.447)^\top
+=(2,1)^\top
+$$</p>
+<p>重构平方误差为 0。</p>
+<p><strong>偏离正常方向的点 $\mathbf x=(2,2)^\top$。</strong></p>
+<p>$$
+z=\frac{2\times2+1\times2}{\sqrt5}
+=\frac6{\sqrt5}=2.683
+$$</p>
+<p>$$
+\hat{\mathbf x}
+=2.683(0.894,0.447)^\top
+=(2.4,1.2)^\top
+$$</p>
+<p>$$
+\|\mathbf x-\hat{\mathbf x}\|_2^2
+=(2-2.4)^2+(2-1.2)^2
+=0.16+0.64=0.80
+$$</p>
+<p>若正常验证集误差的 95% 分位数为 0.10，这个点会被标记为异常。这个线性例子等价于投影到主方向；非线性自编码器把直线推广为可弯曲的低维流形。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续/二元表格、高维组学、图像或序列张量。</li>
+<li>因变量类型：输入自身、干净版本或被遮盖部分。</li>
+<li>数据结构：样本 × 特征或结构化张量。</li>
+<li>是否适合高维数据：适合，但样本量和正则必须支撑网络容量。</li>
+<li>是否适合缺失较多数据：可设计掩码重构；普通 MSE 不能直接处理 NA。</li>
+<li>是否适合删失数据：普通自编码器不处理删失。</li>
+<li>是否适合重复测量数据：需序列/层级编码器并按患者切分。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>patient_id</th>
+<th style="text-align: right;">heart_rate_z</th>
+<th style="text-align: right;">spo2_z</th>
+<th style="text-align: right;">lactate_z</th>
+<th>split</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P01</td>
+<td style="text-align: right;">-0.3</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">-0.4</td>
+<td>train-normal</td>
+</tr>
+<tr>
+<td>P02</td>
+<td style="text-align: right;">0.1</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">0.0</td>
+<td>train-normal</td>
+</tr>
+<tr>
+<td>P03</td>
+<td style="text-align: right;">2.8</td>
+<td style="text-align: right;">-2.5</td>
+<td style="text-align: right;">3.1</td>
+<td>test</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<p>异常检测训练集应尽量由正常样本组成；标准化参数只能从训练集估计。</p>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：原始特征矩阵或图像张量。</li>
-<li>关键变量：瓶颈维度、层数、损失函数、正则化方式。</li>
-<li>需要预处理的内容：标准化、归一化、异常值和缺失处理。</li>
+<li>训练数据与可选噪声/掩码机制。</li>
+<li>编码器、瓶颈维度、解码器、损失和正则。</li>
+<li>训练集拟合的缩放及患者级切分。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：编码器、解码器和训练损失。</li>
-<li>参数估计：网络权重与偏置。</li>
-<li>预测结果：低维潜在表示、重构值、重构误差。</li>
-<li>不确定性指标：异常检测阈值稳定性、下游任务验证表现。</li>
+<li>潜在表示 $\mathbf z$ 和重构 $\hat{\mathbf x}$。</li>
+<li>样本级或变量级重构误差。</li>
+<li>可用于下游预测的编码器。</li>
+<li>不自动产出可辨识因子、概率密度或因果表征。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：高维无监督表征学习、数据去噪、输入压缩和异常检测。</li>
-<li>不适合：需要明确概率解释或强因果解释的任务。</li>
-<li>使用前需要特别检查的点：瓶颈是否过窄、重构是否学到无关细节、异常阈值如何定义。</li>
-</ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="autoencoder" data-i="0">Python</button><button class="codetab" data-uid="autoencoder" data-i="1">R</button></div><div class="codepanel active" data-uid="autoencoder" data-i="0"><p>常用包：</p>
-<ul>
-<li><code>tensorflow</code></li>
-<li><code>keras</code></li>
-</ul>
-<pre><code class="language-python">from tensorflow import keras
-
-inputs = keras.Input(shape=(100,))
-encoded = keras.layers.Dense(32, activation=&quot;relu&quot;)(inputs)
-decoded = keras.layers.Dense(100, activation=&quot;linear&quot;)(encoded)
-autoencoder = keras.Model(inputs, decoded)
-autoencoder.compile(optimizer=&quot;adam&quot;, loss=&quot;mse&quot;)
-</code></pre></div><div class="codepanel" data-uid="autoencoder" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>keras</code></li>
-</ul>
-<pre><code class="language-r">library(keras)
-
-inputs &lt;- layer_input(shape = c(100))
-encoded &lt;- inputs |&gt; layer_dense(units = 32, activation = &quot;relu&quot;)
-decoded &lt;- encoded |&gt; layer_dense(units = 100, activation = &quot;linear&quot;)
-autoencoder &lt;- keras_model(inputs = inputs, outputs = decoded)
-autoencoder |&gt; compile(optimizer = &quot;adam&quot;, loss = &quot;mse&quot;)
-</code></pre></div></div></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：重构误差、潜在空间可分性、下游任务效果。</li>
-<li>每个主要参数如何解释：瓶颈维度越小，压缩越强，但可能丢失重要信息。</li>
-<li>临床或医学意义如何表达：潜在表示可作为后续分型或预测输入，但不应直接当作临床机制解释。</li>
-<li>常见误读：重构得好不代表表示一定适合所有下游任务。</li>
+<li>适合：无标签高维数据、存在非线性结构、需要去噪/压缩/预训练。</li>
+<li>不适合：样本太少、临床解释是首要目标、异常与正常可被简单规则区分，或缺失/删失机制未建模。</li>
+<li>使用前检查：容量是否过大、缩放、批次效应、潜在维稳定性、异常阈值和外部验证。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>原始输入与重构输入对比图。</li>
-<li>潜在空间二维投影图。</li>
-<li>重构误差分布图。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="autoencoder" data-i="0">Python</button><button class="codetab" data-uid="autoencoder" data-i="1">R</button></div><div class="codepanel active" data-uid="autoencoder" data-i="0"><p>常用包：TensorFlow/Keras。示例只用正常训练数据拟合，再以重构误差检测异常。</p>
+<pre><code class="language-python">import numpy as np
+import tensorflow as tf
+
+tf.keras.utils.set_random_seed(42)
+rng = np.random.default_rng(42)
+normal = rng.normal(size=(1000, 2)).astype(&quot;float32&quot;)
+normal[:, 1] = 0.5 * normal[:, 0] + rng.normal(
+    0, 0.1, size=1000
+)
+train, valid = normal[:800], normal[800:]
+
+encoder = tf.keras.Sequential([
+    tf.keras.Input(shape=(2,)),
+    tf.keras.layers.Dense(4, activation=&quot;relu&quot;),
+    tf.keras.layers.Dense(1, name=&quot;latent&quot;),
+])
+decoder = tf.keras.Sequential([
+    tf.keras.Input(shape=(1,)),
+    tf.keras.layers.Dense(4, activation=&quot;relu&quot;),
+    tf.keras.layers.Dense(2),
+])
+inputs = tf.keras.Input(shape=(2,))
+autoencoder = tf.keras.Model(inputs, decoder(encoder(inputs)))
+autoencoder.compile(optimizer=&quot;adam&quot;, loss=&quot;mse&quot;)
+autoencoder.fit(
+    train, train, validation_data=(valid, valid),
+    epochs=100, batch_size=32,
+    callbacks=[tf.keras.callbacks.EarlyStopping(
+        patience=8, restore_best_weights=True
+    )],
+    verbose=0,
+)
+
+valid_hat = autoencoder.predict(valid, verbose=0)
+threshold = np.quantile(np.mean((valid - valid_hat) ** 2, axis=1), 0.95)
+test = np.array([[2.0, 2.0]], dtype=&quot;float32&quot;)
+score = np.mean((test - autoencoder.predict(test, verbose=0)) ** 2)
+print(&quot;threshold:&quot;, threshold, &quot;score:&quot;, score, &quot;anomaly:&quot;, score &gt; threshold)
+</code></pre></div><div class="codepanel" data-uid="autoencoder" data-i="1"><p>常用包：keras3。</p>
+<pre><code class="language-r">library(keras3)
+
+set_random_seed(42)
+normal &lt;- matrix(rnorm(1000 * 2), ncol = 2)
+normal[, 2] &lt;- 0.5 * normal[, 1] + rnorm(1000, 0, 0.1)
+train &lt;- normal[1:800, ]
+valid &lt;- normal[801:1000, ]
+
+encoder &lt;- keras_model_sequential() |&gt;
+  layer_dense(4, activation = &quot;relu&quot;, input_shape = c(2)) |&gt;
+  layer_dense(1, name = &quot;latent&quot;)
+decoder &lt;- keras_model_sequential() |&gt;
+  layer_dense(4, activation = &quot;relu&quot;, input_shape = c(1)) |&gt;
+  layer_dense(2)
+
+inputs &lt;- layer_input(shape = c(2))
+autoencoder &lt;- keras_model(inputs, decoder(encoder(inputs)))
+autoencoder |&gt; compile(optimizer = &quot;adam&quot;, loss = &quot;mse&quot;)
+autoencoder |&gt; fit(
+  train, train, validation_data = list(valid, valid),
+  epochs = 100, batch_size = 32,
+  callbacks = callback_early_stopping(
+    patience = 8, restore_best_weights = TRUE
+  ),
+  verbose = 0
+)
+
+valid_hat &lt;- autoencoder |&gt; predict(valid, verbose = 0)
+valid_error &lt;- rowMeans((valid - valid_hat)^2)
+threshold &lt;- unname(quantile(valid_error, 0.95))
+test &lt;- matrix(c(2, 2), nrow = 1)
+score &lt;- mean((test - (autoencoder |&gt; predict(test, verbose = 0)))^2)
+c(threshold = threshold, score = score, anomaly = score &gt; threshold)
+</code></pre></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>重构误差低只表示模型能按训练分布还原输入，不代表编码具有临床意义。</li>
+<li>潜在维不是天然“疾病因子”；旋转、缩放或重新排列潜在坐标仍可能得到同样重构。</li>
+<li>异常分数高可能代表疾病，也可能只是设备、中心、批次、缺失模式或预处理差异。</li>
+<li>阈值应在独立正常验证集上设定，并在有标签测试集报告灵敏度、特异度和阳性预测值。</li>
+<li>下游使用编码时必须在训练折内拟合自编码器，避免把测试分布泄露给表征学习。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>容量诊断：改变瓶颈宽度和层数；若过宽模型连异常也完美重构，需加强约束。</li>
+<li>与 PCA 比较：检查非线性结构是否带来真实增益。</li>
+<li>重构残差：按变量、空间区域、中心和亚组查看，而非只看总 MSE。</li>
+<li>稳定性：多随机种子后比较潜在距离、聚类和下游性能。</li>
+<li>域偏移：外部中心的高误差可能是设备差异；先分层再解释。</li>
+<li>异常评价：使用已知异常的独立集，避免只用漂亮重构图自证。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>原始—重构—残差三联图。</li>
+<li>样本重构误差分布和验证阈值。</li>
+<li>二维潜在空间散点，按已知标签/中心着色。</li>
+<li>瓶颈维度与重构/下游性能曲线。</li>
+<li>去噪任务的含噪输入与清洁重构对照。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>无需人工标签即可学习表示。</li>
-<li>可用于降维、去噪和异常检测。</li>
-<li>易与卷积、时序等结构结合。</li>
+<li>无需人工标签即可学习非线性表示。</li>
+<li>同一框架可做压缩、去噪、异常检测和预训练。</li>
+<li>编码器可迁移到下游任务。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>表示质量高度依赖任务设计。</li>
-<li>可解释性通常弱。</li>
-<li>容易学到“复制输入”的捷径。</li>
+<li>重构目标未必与临床任务一致。</li>
+<li>高容量网络可能学习恒等映射。</li>
+<li>潜空间不保证可解释、连续或适合生成。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>瓶颈太宽，导致压缩约束不足。</li>
-<li>只看重构损失，不验证下游价值。</li>
-<li>用训练集重构误差直接定义异常阈值而不做独立验证。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a> 的区别：PCA 是线性降维，自编码器可学习非线性表征。</li>
-<li>和 <a class="xlink" href="m-generative-adversarial-network-gan.html" data-cn="生成对抗网络" data-en="Generative Adversarial Network, GAN" data-def="GAN 是由生成器和判别器组成的生成模型。生成器尝试生成逼真的伪样本，判别器尝试区分真实样本和伪样本，两者在对抗训练中共同逼近真实数据分布。">生成对抗网络（Generative Adversarial Network, GAN）</a> 的区别：自编码器重在重构与表征，GAN 重在逼真生成。</li>
-<li>和 <a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="卷积神经网络是一类专门处理图像或局部空间结构数据的神经网络。它通过卷积核、激活函数和池化层，从原始像素中自动提取边缘、纹理和高级语义特征。">卷积神经网络（Convolutional Neural Network, CNN）</a> 的区别：CNN 是结构形式，自编码器是一类训练目标和框架。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>基因表达或代谢组学特征压缩。</li>
-<li>医学影像去噪和重建。</li>
-<li>监测数据异常检测和患者亚型表征。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
-<li><a class="xlink" href="m-generative-adversarial-network-gan.html" data-cn="生成对抗网络" data-en="Generative Adversarial Network, GAN" data-def="GAN 是由生成器和判别器组成的生成模型。生成器尝试生成逼真的伪样本，判别器尝试区分真实样本和伪样本，两者在对抗训练中共同逼近真实数据分布。">生成对抗网络（Generative Adversarial Network, GAN）</a></li>
-<li><a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="卷积神经网络是一类专门处理图像或局部空间结构数据的神经网络。它通过卷积核、激活函数和池化层，从原始像素中自动提取边缘、纹理和高级语义特征。">卷积神经网络（Convolutional Neural Network, CNN）</a></li>
-<li><a class="xlink" href="m-artificial-neural-network-ann.html" data-cn="人工神经网络" data-en="Artificial Neural Network, ANN" data-def="人工神经网络是由多层神经元节点组成的一类函数逼近模型。它通过权重、偏置和非线性激活函数，把输入数据映射到分类、回归或表征学习目标上。">人工神经网络（Artificial Neural Network, ANN）</a></li>
+<li>输入未标准化，MSE 被大尺度变量主导。</li>
+<li>在全数据上先训练编码器，再做交叉验证。</li>
+<li>用异常污染严重的数据训练“正常”模型。</li>
+<li>把 UMAP/PCA 后潜在分群直接命名为疾病亚型。</li>
+<li>用训练误差设阈值并报告同一数据性能。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Hinton GE, Salakhutdinov RR. Reducing the dimensionality of data with neural networks. <em>Science</em>. 2006;313(5786):504-507.</li>
-<li>Goodfellow I, Bengio Y, Courville A. <em>Deep Learning</em>. MIT Press; 2016.</li>
-<li>Chollet F. <em>Deep Learning with Python</em>. 2nd ed. Manning; 2021.</li>
+<li>与 PCA：PCA 线性、解唯一性和方差解释更明确；自编码器更灵活但更难审计。</li>
+<li>与 VAE：VAE 学习潜变量分布并加 KL 正则，普通自编码器是确定性映射。</li>
+<li>与 GAN：GAN 关注生成分布逼真，自编码器关注逐样本重构。</li>
+<li>与 UMAP/t-SNE：后两者主要用于低维可视化，不提供解码重构。</li>
+<li>如何选择：线性结构和小样本先用 PCA；确有非线性、数据量足够且需要重构时再用自编码器。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>多组学和高维检验数据的低维表示。</li>
+<li>CT/MRI/病理图像的去噪、压缩与预训练。</li>
+<li>监护波形、设备数据的异常检测。</li>
+<li>缺失模态或遮盖区域的重构。</li>
+</ul>
+<p>必须说明训练集是否仅含正常、输入尺度、批次/中心效应、缺失机制、重复测量和异常阈值。普通自编码器不处理删失，也不能从重构关系推出因果机制。</p></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>编码器（Encoder）</strong>：把输入映射到潜在表示的网络。</li>
+<li><strong>解码器（Decoder）</strong>：从潜在表示重构输入的网络。</li>
+<li><strong>瓶颈（Bottleneck）</strong>：限制信息容量的中间表示。</li>
+<li><strong>潜在表示（Latent representation）</strong>：模型学习的低维或受约束编码。</li>
+<li><strong>重构误差（Reconstruction error）</strong>：输入与重构之间的差异。</li>
+<li><strong>欠完备（Undercomplete）</strong>：潜在维度小于输入维度。</li>
+<li><strong>去噪自编码器（Denoising autoencoder）</strong>：从被破坏输入恢复干净目标的自编码器。</li>
+<li><strong>恒等映射（Identity mapping）</strong>：输入原样复制到输出的平凡解。</li>
+<li><strong>异常分数（Anomaly score）</strong>：用于衡量样本偏离训练常态的数值。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="PCA 旋转坐标轴，依次寻找样本投影方差最大的正交方向，用少数线性组合保留主要总变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
+<li><a class="xlink" href="m-artificial-neural-network-ann.html" data-cn="人工神经网络" data-en="Artificial Neural Network, ANN" data-def="人工神经网络把复杂函数拆成许多可学习的小变换，并通过组合、非线性和梯度优化，从数据中共同学出“如何表示”与“如何预测”。">人工神经网络（Artificial Neural Network, ANN）</a></li>
+<li><a class="xlink" href="m-generative-adversarial-network-gan.html" data-cn="生成对抗网络" data-en="Generative Adversarial Network, GAN" data-def="GAN 让生成器与判别器进行一场可微博弈：判别器学习识别真假，生成器借判别器的反馈把随机噪声逐步推成类似真实数据的样本。">生成对抗网络（Generative Adversarial Network, GAN）</a></li>
+<li><a class="xlink" href="m-uniform-manifold-approximation-and-projection.html" data-cn="UMAP" data-en="Uniform Manifold Approximation and Projection" data-def="UMAP 把高维近邻关系做成带置信度的模糊图，再优化低维点的位置，使高置信边靠近、缺失边保持分离。">UMAP（Uniform Manifold Approximation and Projection）</a></li>
+<li><a class="xlink" href="m-multiple-imputation.html" data-cn="多重插补" data-en="Multiple Imputation" data-def="多重插补不假装缺失值有唯一答案，而是生成多份合理完整数据，分别分析，再把“数据内不确定性”和“不同填法之间的不确定性”一起合并。">多重插补（Multiple Imputation）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Hinton GE, Salakhutdinov RR. Reducing the dimensionality of data with neural networks. <em>Science</em>. 2006;313(5786):504-507. https://doi.org/10.1126/science.1127647</li>
+<li>Vincent P, et al. Stacked denoising autoencoders: Learning useful representations in a deep network with a local denoising criterion. <em>Journal of Machine Learning Research</em>. 2010;11:3371-3408.</li>
+<li>Goodfellow I, Bengio Y, Courville A. <em>Deep Learning</em>. MIT Press; 2016. https://www.deeplearningbook.org/</li>
+<li>TensorFlow developers. Intro to autoencoders. https://www.tensorflow.org/tutorials/generative/autoencoder</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-generative-adversarial-network-gan.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">生成对抗网络</div></a><a class="pg pg-next" href="m-attention-mechanism.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">注意力机制</div></a></div>

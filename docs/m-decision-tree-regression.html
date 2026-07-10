@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,60 +54,194 @@
     <div class="intro-note"><h1>决策树回归（Decision Tree Regression）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>决策树回归是一种通过递归划分特征空间，把连续结局映射到一系列区域均值上的非参数回归方法。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>决策树回归把连续结局分成一块块区域，每个叶节点用该区域的平均值作为预测。</p>
+<h3>1.2 定义</h3>
+<p>决策树回归是一种非参数回归方法，通过递归划分特征空间，把样本分到若干叶节点中。每个叶节点输出一个连续值，通常是该叶节点训练样本结局的均值。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：当连续结局与特征之间存在明显非线性和交互作用时，如何不依赖线性假设来建模。</li>
+<li>研究问题：当连续结局与特征之间存在阈值效应、非线性和交互时，如何不用线性假设来预测。</li>
 <li>适用任务：连续结局预测、规则提取、非线性建模。</li>
-<li>常见医学场景：由多种临床特征预测连续风险评分、费用、住院时长或实验室指标。</li>
+<li>常见医学场景：预测住院天数、医疗费用、连续风险评分、实验室指标变化。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>决策树回归可以理解为不断问“是/否”问题，把样本切成越来越纯的小区域，最后每个叶子节点用该区域样本的平均值做预测。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>回归树像把患者按若干规则分进不同病房，再用每个病房的平均住院天数做预测。它不说「CRP 每升高 1 单位住院天数增加多少」，而是说「CRP 高到某个范围后，进入一个平均住院更久的叶节点」。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>回归树的预测函数可写为分段常数形式：</p>
-<p>$$
-f(x)=\sum_{m=1}^{M} c_m I(x\in R_m)
-$$</p>
-<p>其中 $R_m$ 是树划分出的第 $m$ 个区域，$c_m$ 通常取该区域内目标变量的均值。</p>
-<p>一次划分的目标通常是最小化：</p>
-<p>$$
-\min_{j,s}
-\left[
-\sum_{x_i \in R_{\text{left}}(j,s)} (y_i-\bar y_{\text{left}})^2
-+
-\sum_{x_i \in R_{\text{right}}(j,s)} (y_i-\bar y_{\text{right}})^2
-\right]
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>线性回归用一条直线描述整体关系，但连续医学结局常有阈值和交互：CRP 很低时住院天数变化不大，超过某水平后突然增加；年龄和合并症共同作用时风险才上升。根本困难是：<strong>连续结局的均值函数可能是分段且非线性的，单个线性斜率不够表达</strong>。</p>
+<h3>2.2 关键洞察</h3>
+<p>回归树的关键洞察是用局部均值替代全局公式。它寻找一个分裂，让左右子节点内部的 $y$ 更接近各自均值，也就是平方误差更小。反复这样切分后，复杂曲线被近似成阶梯状函数。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$j$：当前选择用于划分的特征。</li>
-<li>$s$：当前特征上的切分阈值。</li>
-<li>$R_{\text{left}}, R_{\text{right}}$：阈值划分后的左右子区域。</li>
-<li>$c_m$：叶节点预测值，通常为叶节点样本均值。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>对线性关系没有强假设。</li>
-<li>主要依赖递归分割规则。</li>
-<li>若树长得太深，容易过拟合。</li>
+<li>相对 <a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a>：回归树不要求线性关系，能自动捕捉阈值和交互。</li>
+<li>相对分类 <a class="xlink" href="m-decision-tree.html" data-cn="决策树" data-en="Decision Tree" data-def="决策树把复杂分类问题拆成一连串「如果满足某条件，就往左；否则往右」的问题，最后在叶节点用多数类别做预测。">决策树（Decision Tree）</a>：分类树降低类别不纯度，回归树降低连续结局的平方误差。</li>
+<li>相对 <a class="xlink" href="m-random-forest-regression.html" data-cn="随机森林回归" data-en="Random Forest Regression" data-def="随机森林回归训练许多带随机性的回归树，再把它们的连续预测取平均，得到比单棵树更稳定的预测值。">随机森林回归（Random Forest Regression）</a>：单棵回归树可解释性更强，但预测更不稳定。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>回归树的预测函数是分段常数：</p>
+<p>$$
+f(x)=\sum_{m=1}^{M}c_m I(x\in R_m)
+$$</p>
+<p>其中每个叶节点区域 $R_m$ 的预测值通常为：</p>
+<p>$$
+c_m=\frac{1}{|R_m|}\sum_{x_i\in R_m}y_i
+$$</p>
+<p>候选分裂 $(j,s)$ 的目标是最小化左右子节点平方误差：</p>
+<p>$$
+\operatorname*{arg\,min}_{j,s}
+\left[
+\sum_{x_i\in R_L(j,s)}(y_i-\bar y_L)^2+
+\sum_{x_i\in R_R(j,s)}(y_i-\bar y_R)^2
+\right]
+$$</p>
+<p>这个式子在说：选择能让左右两边各自最接近自身均值的特征和阈值。</p>
+<h3>3.2 推导脉络</h3>
+<ol>
+<li>当前节点先用所有样本的均值预测，计算平方误差。</li>
+<li>枚举候选特征和阈值，把样本分成左右子节点。</li>
+<li>每个子节点用自己的均值预测，并计算左右平方误差之和。</li>
+<li>选择平方误差下降最大的分裂。</li>
+<li>重复分裂直到达到深度、叶节点样本数或复杂度限制。</li>
+</ol>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：连续、分类或编码后的离散变量都可。</li>
+<li>$R_m$：第 $m$ 个叶节点对应的特征空间区域。</li>
+<li>$c_m$：叶节点预测值，常为区域内 $y$ 的均值。</li>
+<li>SSE：平方误差和，衡量节点内连续结局的离散程度。</li>
+<li><code>max_depth</code>：树最大深度。</li>
+<li><code>min_samples_leaf</code>：每个叶节点最少样本数。</li>
+<li><code>ccp_alpha</code>：代价复杂度剪枝参数，越大树越简单。</li>
+</ul>
+<h3>3.4 关键假设(含违反后果)</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>分段均值近似合理</td>
+<td>叶节点均值可代表局部结局</td>
+<td>预测呈粗糙阶梯且偏差大</td>
+<td>残差图、部分依赖图</td>
+</tr>
+<tr>
+<td>叶节点样本足够</td>
+<td>每个均值有足够数据支持</td>
+<td>叶节点均值不稳定</td>
+<td>查看叶节点样本数</td>
+</tr>
+<tr>
+<td>训练数据代表目标人群</td>
+<td>学到的阈值可外推到应用人群</td>
+<td>外部性能下降</td>
+<td>外部验证</td>
+</tr>
+<tr>
+<td>噪声不过强</td>
+<td>分裂能识别信号而非噪声</td>
+<td>过拟合训练集</td>
+<td>学习曲线、剪枝</td>
+</tr>
+<tr>
+<td>连续结局适用均方误差</td>
+<td>异常值不会完全主导分裂</td>
+<td>离群值拉动叶均值</td>
+<td>残差和离群点检查</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>用 6 名患者的 CRP 预测住院天数。候选第一刀为「CRP 是否不超过 40」。</p>
+<table>
+<thead>
+<tr>
+<th>患者</th>
+<th>CRP</th>
+<th>住院天数Y</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>10</td>
+<td>3</td>
+</tr>
+<tr>
+<td>2</td>
+<td>15</td>
+<td>4</td>
+</tr>
+<tr>
+<td>3</td>
+<td>20</td>
+<td>5</td>
+</tr>
+<tr>
+<td>4</td>
+<td>60</td>
+<td>9</td>
+</tr>
+<tr>
+<td>5</td>
+<td>70</td>
+<td>10</td>
+</tr>
+<tr>
+<td>6</td>
+<td>80</td>
+<td>12</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Step 1：不分裂时的父节点 SSE。</strong></p>
+<p>总体均值：</p>
+<p>$$
+\bar y=\frac{3+4+5+9+10+12}{6}=7.17
+$$</p>
+<p>平方误差和：</p>
+<p>$$
+\mathrm{SSE}_{root}=(3-7.17)^2+(4-7.17)^2+(5-7.17)^2+(9-7.17)^2+(10-7.17)^2+(12-7.17)^2=66.83
+$$</p>
+<p><strong>Step 2：按 CRP 是否不超过 40 分裂。</strong></p>
+<p>左节点 CRP 不超过 40：$Y=(3,4,5)$，均值为 4：</p>
+<p>$$
+\mathrm{SSE}_L=(3-4)^2+(4-4)^2+(5-4)^2=2
+$$</p>
+<p>右节点 CRP 大于 40：$Y=(9,10,12)$，均值为 10.33：</p>
+<p>$$
+\mathrm{SSE}_R=(9-10.33)^2+(10-10.33)^2+(12-10.33)^2=4.67
+$$</p>
+<p>分裂后总 SSE：</p>
+<p>$$
+\mathrm{SSE}_{children}=2+4.67=6.67
+$$</p>
+<p><strong>Step 3：计算误差下降。</strong></p>
+<p>$$
+\Delta \mathrm{SSE}=66.83-6.67=60.16
+$$</p>
+<p><strong>结论：</strong> 这一刀把住院天数明显较短和较长的患者分开，平方误差大幅下降。回归树选择分裂的逻辑就是：哪一刀能最大幅度降低叶节点内连续结局的波动。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续、二分类、多分类变量均可。</li>
 <li>因变量类型：连续型。</li>
 <li>数据结构：宽表数据，每行一个样本。</li>
-<li>是否适合高维数据：能用，但高维时单棵树不一定稳定。</li>
-<li>是否适合缺失较多数据：需先完成缺失处理。</li>
-<li>是否适合删失数据：不适合。</li>
+<li>是否适合高维数据：能用，但高维时单棵树不稳定。</li>
+<li>是否适合缺失较多数据：需先处理缺失或使用支持缺失的实现。</li>
+<li>是否适合删失数据：普通回归树不适合，生存结局用生存树或随机生存森林。</li>
 <li>是否适合重复测量数据：不直接适合。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>下面是典型的房价预测宽表结构：</p>
+<h3>5.2 示例表格</h3>
 <table>
 <thead>
 <tr>
@@ -162,114 +296,152 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：连续结局和一组特征。</li>
-<li>关键变量：最大深度、最小分裂样本数、最小叶节点样本数。</li>
-<li>需要预处理的内容：缺失值处理、训练测试集划分。</li>
+<li>输入数据：连续结局和候选特征。</li>
+<li>关键变量：最大深度、最小分裂样本数、最小叶节点样本数、剪枝强度。</li>
+<li>需要预处理的内容：缺失值处理、训练测试集划分、异常值检查。</li>
 </ul>
 <h4>产出</h4>
 <ul>
 <li>模型对象/统计结果：树结构、叶节点预测值、特征重要性。</li>
-<li>参数估计：不是传统系数，而是分裂规则与叶节点均值。</li>
+<li>参数估计：分裂规则与叶节点均值，不是传统回归系数。</li>
 <li>预测结果：连续型预测值。</li>
-<li>不确定性指标：常用测试集误差、交叉验证误差。</li>
+<li>不确定性指标：测试集 RMSE、MAE、$R^2$、交叉验证误差。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：非线性关系明显、交互复杂、希望模型规则直观可视化时。</li>
-<li>不适合：噪声较大但样本量很小时，单棵树往往不稳定。</li>
-<li>使用前需要特别检查的点：树深度、过拟合、叶节点大小。</li>
+<li>适合：非线性关系明显、交互复杂、希望得到规则式连续预测。</li>
+<li>不适合：样本量小且噪声大、需要平滑预测曲线、需要稳定可推断系数。</li>
+<li>使用前需要特别检查的点：树深度、过拟合、叶节点大小、离群值影响。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="decision-tree-regression" data-i="0">Python</button><button class="codetab" data-uid="decision-tree-regression" data-i="1">R</button></div><div class="codepanel active" data-uid="decision-tree-regression" data-i="0"><p>常用包：</p>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="decision-tree-regression" data-i="0">Python</button><button class="codetab" data-uid="decision-tree-regression" data-i="1">R</button></div><div class="codepanel active" data-uid="decision-tree-regression" data-i="0"><p>常用包:</p>
 <ul>
 <li><code>scikit-learn</code></li>
 </ul>
 <pre><code class="language-python">from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import mean_absolute_error
 
-fit = DecisionTreeRegressor(max_depth=4, random_state=42)
-fit.fit(X_train, y_train)
-y_pred = fit.predict(X_test)
-</code></pre></div><div class="codepanel" data-uid="decision-tree-regression" data-i="1"><p>常用包：</p>
+model = DecisionTreeRegressor(
+    max_depth=4,
+    min_samples_leaf=20,
+    random_state=42
+)
+
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+print(mean_absolute_error(y_test, y_pred))
+</code></pre></div><div class="codepanel" data-uid="decision-tree-regression" data-i="1"><p>常用包:</p>
 <ul>
 <li><code>rpart</code></li>
 </ul>
 <pre><code class="language-r">library(rpart)
 
-fit &lt;- rpart(SalePrice ~ ., data = df, method = &quot;anova&quot;)
-pred &lt;- predict(fit, newdata = df_test)
+fit &lt;- rpart(
+  SalePrice ~ .,
+  data = train_df,
+  method = &quot;anova&quot;,
+  control = rpart.control(maxdepth = 4, minbucket = 20, cp = 0.01)
+)
+
+pred &lt;- predict(fit, newdata = test_df)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：分裂规则、叶节点均值、测试集误差。</li>
-<li>每个主要参数如何解释：节点分裂条件比“系数”更重要。</li>
-<li>临床或医学意义如何表达：适合用“若满足某些特征条件，则预期值大致落在某个范围”来解释。</li>
-<li>常见误读：树能拟合训练集很好，不代表泛化性能一定好。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>原始散点图 + 阶梯状拟合曲线。</li>
-<li>决策树结构图。</li>
-<li>特征重要性条形图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图展示决策树回归在一组非线性数据上的分段拟合效果，能够直观看到其“阶梯式”近似特征。</p>
-<p><img alt="" src="img/decision_tree_regression_curve.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：高层分裂规则、叶节点均值、测试集 RMSE/MAE。</li>
+<li>每个主要参数如何解读：节点分裂条件比线性系数更重要；叶节点均值就是该区域预测值。</li>
+<li>临床或医学意义如何表达：可写作「CRP 不超过 40 的患者叶节点平均住院约 4 天，CRP 更高者约 10.3 天」。</li>
+<li>常见误读：阶梯状预测不是医学真实阈值，只是模型近似。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>过拟合诊断：比较训练和测试 RMSE，检查树深度是否过大。</li>
+<li>叶节点稳定性：查看叶节点样本数和均值置信程度。</li>
+<li>离群值影响：用 MAE、残差图和异常值分析评估极端结局。</li>
+<li>剪枝：用交叉验证选择 <code>cp</code> 或 <code>ccp_alpha</code>，避免树过深。</li>
+<li>外部验证：在新中心或新时间段检验阈值和预测误差是否稳定。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>原始散点图加阶梯状拟合曲线。</li>
+<li>决策树结构图，标注叶节点均值和样本数。</li>
+<li>真实值 vs 预测值散点图。</li>
+<li>树深度或剪枝强度与验证误差曲线。</li>
+</ul>
+<h3>10.1 图像示例</h3>
+<p>下图展示决策树回归在一组非线性数据上的分段拟合效果，能够直观看到其「阶梯式」近似特征。</p>
+<p><img alt="" src="img/decision_tree_regression_curve.png" /></p></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
 <li>不需要线性假设。</li>
-<li>能自动捕捉交互作用。</li>
-<li>规则形式容易可视化。</li>
+<li>自动捕捉阈值效应和交互作用。</li>
+<li>规则形式容易可视化和解释。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>单棵树不稳定。</li>
-<li>容易过拟合。</li>
-<li>对数据轻微扰动较敏感。</li>
+<li>单棵树不稳定，数据轻微扰动可能改变分裂。</li>
+<li>预测是阶梯状，不够平滑。</li>
+<li>容易过拟合，尤其叶节点太小时。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
 <li>只看训练集拟合效果。</li>
-<li>不限制树深度。</li>
-<li>把单棵树结果当成非常稳健的结论。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和线性回归的区别：树模型做分段拟合，不用假设线性关系。</li>
-<li>和决策树的区别：这里是连续结局版本，分类任务通常看主条目“决策树”。</li>
-<li>和随机森林的区别：随机森林是多棵树集成，通常更稳。</li>
-<li>和梯度提升的区别：梯度提升是序列式集成，更偏 boosting。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>连续风险评分预测。</li>
-<li>成本、住院天数、实验室指标预测。</li>
-<li>需要给出直观规则划分的场景。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-decision-tree.html" data-cn="决策树" data-en="Decision Tree" data-def="决策树是一类通过递归划分特征空间来完成分类或回归的树状模型。对于分类任务，它把样本一步步分到更“纯”的叶节点中，再用叶节点中的多数类别作为预测结果。">决策树（Decision Tree）</a></li>
-<li><a class="xlink" href="m-random-forest-regression.html" data-cn="随机森林回归" data-en="Random Forest Regression" data-def="随机森林回归通过训练多棵带有随机性的回归树，并对它们的预测结果取平均，从而获得更稳定、更鲁棒的连续结局预测模型。">随机森林回归（Random Forest Regression）</a></li>
-<li><a class="xlink" href="m-gradient-boosting-regression.html" data-cn="梯度提升回归" data-en="Gradient Boosting Regression" data-def="梯度提升回归是一类通过逐步叠加弱学习器来逼近目标函数的集成回归方法，常见实现是以浅层回归树作为基学习器。">梯度提升回归（Gradient Boosting Regression）</a></li>
-<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a></li>
-<li><a class="xlink" href="m-k-nearest-neighbors-regression.html" data-cn="K近邻回归" data-en="K-Nearest Neighbors Regression" data-def="K近邻回归是一种非参数回归方法，它通过寻找离目标样本最近的 $K$ 个邻居，并对这些邻居的目标值做平均或加权平均来完成预测。">K近邻回归（K-Nearest Neighbors Regression）</a></li>
+<li>不限制树深度或叶节点大小。</li>
+<li>把单棵树阈值当作可靠临床 cut-off。</li>
+<li>忽略离群值对叶节点均值的影响。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a> 的区别：线性回归拟合平滑直线或平面，回归树拟合分段常数。</li>
+<li>和 <a class="xlink" href="m-decision-tree.html" data-cn="决策树" data-en="Decision Tree" data-def="决策树把复杂分类问题拆成一连串「如果满足某条件，就往左；否则往右」的问题，最后在叶节点用多数类别做预测。">决策树（Decision Tree）</a> 的区别：本卡处理连续结局，分类树处理二分类或多分类结局。</li>
+<li>和 <a class="xlink" href="m-random-forest-regression.html" data-cn="随机森林回归" data-en="Random Forest Regression" data-def="随机森林回归训练许多带随机性的回归树，再把它们的连续预测取平均，得到比单棵树更稳定的预测值。">随机森林回归（Random Forest Regression）</a> 的区别：随机森林回归集成多棵树，预测更稳但解释性下降。</li>
+<li>和 <a class="xlink" href="m-gradient-boosting-regression.html" data-cn="梯度提升回归" data-en="Gradient Boosting Regression" data-def="梯度提升回归用一连串浅回归树逐步拟合当前损失的负梯度，从而不断修正连续结局预测。">梯度提升回归（Gradient Boosting Regression）</a> 的区别：梯度提升按残差逐步加树，通常预测更强。</li>
+<li>如何选择：需要简单规则用单棵回归树；追求稳健预测用随机森林或梯度提升。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>预测住院天数、医疗费用、连续风险评分。</li>
+<li>用实验室指标和生命体征构建非线性连续结局模型。</li>
+<li>生成可解释的分段风险规则，作为后续集成模型的基线。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>回归树（Regression Tree）</strong>：用于连续结局预测的决策树。</li>
+<li><strong>叶节点均值（Leaf Mean）</strong>：叶节点内训练样本结局的平均值，作为预测值。</li>
+<li><strong>平方误差和（Sum of Squared Errors, SSE）</strong>：节点内观测值偏离均值的平方和。</li>
+<li><strong>分段常数函数（Piecewise Constant Function）</strong>：每个区域输出一个固定预测值的函数。</li>
+<li><strong>代价复杂度剪枝（Cost-complexity Pruning）</strong>：在误差和树复杂度之间折中选择子树。</li>
+<li><strong>最小叶节点样本数（Minimum Leaf Size）</strong>：限制叶节点至少包含多少样本。</li>
+<li><strong>阶梯状拟合（Stepwise Fit）</strong>：回归树预测曲线呈台阶形。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-decision-tree.html" data-cn="决策树" data-en="Decision Tree" data-def="决策树把复杂分类问题拆成一连串「如果满足某条件，就往左；否则往右」的问题，最后在叶节点用多数类别做预测。">决策树（Decision Tree）</a></li>
+<li><a class="xlink" href="m-random-forest-regression.html" data-cn="随机森林回归" data-en="Random Forest Regression" data-def="随机森林回归训练许多带随机性的回归树，再把它们的连续预测取平均，得到比单棵树更稳定的预测值。">随机森林回归（Random Forest Regression）</a></li>
+<li><a class="xlink" href="m-gradient-boosting-regression.html" data-cn="梯度提升回归" data-en="Gradient Boosting Regression" data-def="梯度提升回归用一连串浅回归树逐步拟合当前损失的负梯度，从而不断修正连续结局预测。">梯度提升回归（Gradient Boosting Regression）</a></li>
+<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a></li>
+<li><a class="xlink" href="m-k-nearest-neighbors-regression.html" data-cn="K近邻回归" data-en="K-Nearest Neighbors Regression" data-def="K 近邻回归把新样本的连续结局估计为其局部邻域中已观察结局的平均或距离加权平均。">K近邻回归（K-Nearest Neighbors Regression）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Breiman L, Friedman JH, Olshen RA, Stone CJ. <em>Classification and Regression Trees</em>. Wadsworth; 1984.</li>
-<li>scikit-learn Developers. <code>sklearn.tree.DecisionTreeRegressor</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html">https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeRegressor.html</a> （访问日期：2026-07-02）</li>
+<li>Hastie T, Tibshirani R, Friedman J. <em>The Elements of Statistical Learning</em>. 2nd ed. Springer; 2009.</li>
+<li>James G, Witten D, Hastie T, Tibshirani R. <em>An Introduction to Statistical Learning</em>. 2nd ed. Springer; 2021.</li>
+<li>Therneau TM, Atkinson EJ. An introduction to recursive partitioning using the RPART routines. Mayo Foundation; 2023.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-c4-5-decision-tree.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">C4.5决策树</div></a><a class="pg pg-next" href="m-bootstrap-aggregating.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">Bagging算法</div></a></div>

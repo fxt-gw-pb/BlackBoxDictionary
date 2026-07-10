@@ -18,210 +18,112 @@ r_packages: [forecast, stats]
 # 自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）
 
 ## 1. 方法概览
+### 1.1 一句话本质
+ARIMA 先用差分去掉随机趋势，再对差分后的平稳变化量建立 ARMA。
+### 1.2 定义
+ARIMA($p,d,q$) 中 $d$ 是差分次数，$p,q$ 是差分序列的 AR/MA 阶数。
+### 1.3 它主要解决什么问题
+带趋势但可经有限差分平稳化的单变量序列预测。
+### 1.4 直觉与类比
+不预测不断上升的“高度”，先预测每期“增量”，再把增量累加回水平。
 
-### 1.1 定义
+## 2. 核心思想与原理
+### 2.1 根本困难
+非平稳水平会产生伪相关，固定均值的 ARMA 不适用。
+### 2.2 关键洞察
+差分算子 $(1-B)^d$ 可移除单位根型趋势；预测后再积分还原原尺度。
+### 2.3 与朴素做法对比
+线性趋势外推假定确定性趋势；ARIMA 允许随机趋势及相关增量。
 
-ARIMA 是用于单变量时间序列预测的经典模型。它通过差分把非平稳序列转为平稳序列，再用 ARMA 模型刻画差分后序列的自相关结构。
-
-### 1.2 它主要解决什么问题
-
-- 研究问题：带趋势或单位根的单变量序列如何建模和预测。
-- 适用任务：短中期预测、趋势序列建模、监测指标预测、ARMA 的非平稳扩展。
-- 常见医学场景：每日就诊量、住院人数、传染病病例数、药品消耗量、环境暴露指标预测。
-
-### 1.3 直觉理解
-
-如果原始序列一直上升或下降，直接建 ARMA 往往不合适。ARIMA 先看“变化量”而不是原始水平，等变化量稳定后再建模，最后把预测变化量累加回原始尺度。
-
-## 2. 数学形式
-
-### 2.1 核心公式
-
-ARIMA($p,d,q$) 对序列做 $d$ 次差分：
-
-$$
-w_t=(1-B)^d y_t
-$$
-
-再对 $w_t$ 建 ARMA($p,q$)：
-
-$$
-\phi(B)w_t=c+\theta(B)\varepsilon_t
-$$
-
-整体写作：
-
+## 3. 数学形式
+### 3.1 核心公式
 $$
 \phi(B)(1-B)^d y_t=c+\theta(B)\varepsilon_t
 $$
+这个式子在说：对 $y_t$ 做 $d$ 次差分后，剩余序列服从 ARMA($p,q$)。
+### 3.2 推导脉络
+先判断差分需求，再用 ACF/PACF、AIC/BIC 选择 $p,q$，最后检查残差；过度差分会引入额外负相关并放大噪声。
+### 3.3 参数含义
+$d$ 是积分阶数；drift 是差分均值；季节性需扩展为 SARIMA。
+### 3.4 关键假设
+差分后平稳、残差白噪声、参数稳定、等间隔；结构变点和季节性必须另建模。
 
-其中：
-
+## 4. 手把手算例
+水平序列为 $(100,103,107,108,112)$，一阶差分：
 $$
-\phi(B)=1-\phi_1B-\cdots-\phi_pB^p,\quad
-\theta(B)=1+\theta_1B+\cdots+\theta_qB^q
+\Delta y=(3,4,1,4)
 $$
+若采用 ARIMA(0,1,0) with drift，增量均值为
+$$
+\bar\Delta=(3+4+1+4)/4=3
+$$
+于是未来两期：
+$$
+\hat y_6=112+3=115,\qquad
+\hat y_7=115+3=118
+$$
+差分域预测的是 3、3；“积分”就是把它们逐期累加回原尺度。
 
-### 2.2 参数或统计量含义
+## 5. 数据形式与输入输出
+### 5.1 适合的数据形式
+等间隔单变量连续序列；缺失、季节、干预和删失需专门处理。
+### 5.2 示例表格
+| month | visits |
+| --- | ---: |
+| 1 | 100 |
+| 2 | 103 |
+| 3 | 107 |
+### 5.3 输入与产出
+输入序列及 $(p,d,q)$；产出差分模型、原尺度预测和随期数扩大的区间。
 
-- $p$：自回归阶数。
-- $d$：差分阶数。
-- $q$：移动平均阶数。
-- $\phi_i$：AR 系数。
-- $\theta_j$：MA 系数。
-- AIC/BIC：模型阶数比较指标。
-- ADF/KPSS：平稳性检验常用工具。
+## 6. 适用场景
+适合单位根型趋势和短中期预测；复杂季节、多个协变量、非线性或结构突变需扩展。
 
-### 2.3 关键假设
-
-- 差分后序列近似平稳。
-- 残差近似白噪声。
-- 主要时间依赖可由线性 ARMA 结构捕捉。
-- 结构关系在预测期内大致稳定。
-
-## 3. 数据形式与输入输出
-
-### 3.1 适合的数据形式
-
-- 自变量类型：目标变量自身滞后值、差分值和误差滞后项。
-- 因变量类型：连续型单变量时间序列。
-- 数据结构：等间隔时间序列。
-- 是否适合高维数据：不适合直接处理多变量高维。
-- 是否适合缺失较多数据：需处理缺失；状态空间实现可处理部分缺失。
-- 是否适合删失数据：不直接处理删失结局。
-- 是否适合重复测量数据：适合总体级序列，不适合直接处理个体重复测量。
-
-### 3.2 示例表格
-
-以每日住院人数为例：
-
-| Date | Inpatients |
-| --- | --- |
-| 2026-01-01 | 842 |
-| 2026-01-02 | 851 |
-| 2026-01-03 | 865 |
-| 2026-01-04 | 859 |
-
-### 3.3 输入与产出
-
-#### 输入
-
-- 输入数据：按固定频率排列的单变量序列。
-- 关键变量：$p,d,q$ 阶数、是否包含 drift 或截距、预测步长。
-- 需要预处理的内容：缺失处理、异常值标记、变换、平稳性检查、训练测试时间切分。
-
-#### 产出
-
-- 模型对象/统计结果：AR/MA 系数、差分阶数、残差、信息准则。
-- 参数估计：$\phi_i$、$\theta_j$、误差方差和截距/漂移项。
-- 预测结果：未来值预测、预测区间。
-- 不确定性指标：参数标准误、预测区间、残差诊断。
-
-## 4. 适用场景
-
-- 适合：单变量、趋势性明显但差分后平稳、需要可解释短中期预测的序列。
-- 不适合：多重季节性、强外部驱动变量、复杂非线性、频繁结构突变的序列。
-- 使用前需要特别检查的点：是否过度差分、残差是否白噪声、预测区间是否合理、时间切分是否正确。
-
-## 5. 实现
-
-### 5.1 Python
-
-常用包：
-
-- `statsmodels`
-
+## 7. 实现
+### 7.1 Python
 ```python
-import pandas as pd
+import numpy as np
 from statsmodels.tsa.arima.model import ARIMA
-
-df = pd.read_csv("daily_inpatients.csv", parse_dates=["Date"])
-y = df.set_index("Date")["Inpatients"].asfreq("D").interpolate()
-
-train = y.iloc[:-14]
-test = y.iloc[-14:]
-
-fit = ARIMA(train, order=(2, 1, 2)).fit()
-forecast = fit.get_forecast(steps=14).summary_frame()
-
-print(fit.summary())
-print(forecast.head())
+y = np.array([100, 103, 107, 108, 112], dtype=float)
+fit = ARIMA(y, order=(0, 1, 0), trend="t").fit()
+print(fit.forecast(2))
 ```
-
-### 5.2 R
-
-常用包：
-
-- `forecast`
-
+### 7.2 R
 ```r
-library(forecast)
-
-y <- ts(df$Inpatients, frequency = 7)
-fit <- auto.arima(y, seasonal = FALSE)
-
-pred <- forecast(fit, h = 14)
-summary(fit)
-checkresiduals(fit)
-pred
+y <- ts(c(100, 103, 107, 108, 112))
+fit <- arima(y, order = c(0, 1, 0), include.drift = TRUE)
+predict(fit, n.ahead = 2)
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解读
+参数属于差分序列；预测需回到原尺度。远期区间变宽反映增量误差不断累积。
 
-- 核心结果看什么：差分阶数、AR/MA 系数、AIC/BIC、残差诊断、滚动预测误差。
-- 每个主要参数如何解释：$d=1$ 表示对原序列做一阶差分后建模，即建模相邻时间点变化量。
-- 临床或医学意义如何表达：可用于短期资源预测，如未来 1-2 周住院量或门诊量变化。
-- 常见误读：ARIMA 预测延续历史结构，不会自动知道政策变化、节假日或突发事件。
+## 9. 假设诊断与稳健性
+比较 $d=0,1,2$，做 ADF/KPSS、残差 Ljung–Box、滚动起点验证和变点/季节图。
 
-## 7. 推荐可视化
+## 10. 推荐可视化
+原序列与差分序列、ACF/PACF、残差、原尺度预测区间。
 
-- 原始序列与差分后序列图。
-- ACF/PACF 图。
-- 预测曲线和预测区间。
-- 残差诊断图和滚动预测误差图。
+## 11. 优势、局限与常见坑
+优势是经典透明；局限是线性且对结构变化敏感。常见坑：过度差分、随机切分、把 auto-ARIMA 当无需诊断。
 
-## 8. 优势、局限与常见坑
+## 12. 与相近方法的区别
+ARMA 要求原序列平稳；ARIMA 允许差分；SARIMA 加季节差分；指数平滑从状态递推角度建模趋势季节。
 
-### 优势
+## 13. 医学研究中的典型应用
+月度门诊量、药品消耗、疾病监测计数经适当变换后的预测；疫情干预需显式加入干预项。
 
-- 经典、透明、诊断体系成熟。
-- 适合单变量短期预测。
-- 能处理一类差分后平稳的非平稳序列。
+## 14. 关键术语
+- **差分（Differencing）**：$\Delta y_t=y_t-y_{t-1}$。
+- **单位根（Unit root）**：冲击永久进入水平的非平稳结构。
+- **积分（Integrated）**：差分后平稳，预测再累加回水平。
+- **Drift**：一阶差分的非零均值。
 
-### 局限
-
-- 难以处理复杂外部因素和非线性。
-- 多季节性和长周期结构需扩展模型。
-- 预测远期时不确定性快速增大。
-
-### 常见坑
-
-- 过度差分导致序列过度噪声化。
-- 只依赖 auto.arima，不看残差诊断。
-- 随机划分训练测试集。
-
-## 9. 与相近方法的区别
-
-- 和 [[自回归滑动平均模型（Autoregressive Moving Average Model, ARMA）]] 的区别：ARMA 要求序列平稳，ARIMA 通过差分处理非平稳。
-- 和 [[Holt-Winters指数平滑（Holt-Winters Exponential Smoothing）]] 的区别：Holt-Winters 直接分解水平、趋势和季节性，ARIMA 通过差分和自相关结构建模。
-- 和 [[Prophet时间序列模型（Prophet Forecasting Model）]] 的区别：Prophet 更强调趋势变化点、季节性和节假日效应，ARIMA 更强调自相关结构。
-
-## 10. 医学研究中的典型应用
-
-- 医院每日住院量、急诊量、药品需求量预测。
-- 传染病病例数或监测指标短期预测。
-- 环境暴露时间序列趋势建模。
-
-## 11. 相关方法
-
-- [[自回归模型（Autoregressive Model, AR）]]
-- [[移动平均模型（Moving Average Model, MA）]]
+## 15. 相关方法
 - [[自回归滑动平均模型（Autoregressive Moving Average Model, ARMA）]]
 - [[Holt-Winters指数平滑（Holt-Winters Exponential Smoothing）]]
 - [[Prophet时间序列模型（Prophet Forecasting Model）]]
 
-## 12. 参考资料
-
-- Box GEP, Jenkins GM, Reinsel GC, Ljung GM. *Time Series Analysis: Forecasting and Control*. 5th ed. Wiley; 2015.
-- Hyndman RJ, Athanasopoulos G. *Forecasting: Principles and Practice*. 3rd ed. OTexts; 2021. [https://otexts.com/fpp3/](https://otexts.com/fpp3/) （访问日期：2026-07-02）
-- statsmodels Developers. `statsmodels.tsa.arima.model.ARIMA`. [https://www.statsmodels.org/](https://www.statsmodels.org/) （访问日期：2026-07-02）
+## 16. 参考资料
+- Box GEP, et al. *Time Series Analysis*. Wiley; 2015.
+- Hyndman RJ, Athanasopoulos G. *Forecasting: Principles and Practice*. OTexts; 2021.

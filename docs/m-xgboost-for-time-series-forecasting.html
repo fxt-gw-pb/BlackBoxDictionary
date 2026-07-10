@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,19 +54,24 @@
     <div class="intro-note"><h1>XGBoost时间序列预测（XGBoost for Time Series Forecasting）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>XGBoost 时序预测先把时间序列改造成滞后、滚动和日历特征表，再用梯度提升树学习非线性规则。</p>
+<h3>1.2 定义</h3>
 <p>XGBoost 时间序列预测是把时间序列问题转换为监督学习表格问题，再用 XGBoost 建模。核心做法是构造滞后特征、滚动统计量、日历特征和外部变量，用它们预测未来目标值。</p>
-<h3>1.2 它主要解决什么问题</h3>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
 <li>研究问题：时间序列中存在非线性、交互和外部变量影响时，如何做高性能预测。</li>
 <li>适用任务：单步或多步预测、带外部变量的运营预测、非线性时序回归或分类。</li>
 <li>常见医学场景：每日就诊量预测、药品需求预测、患者风险随时间更新、可穿戴设备特征预测。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
+<h3>1.4 直觉理解</h3>
 <p>XGBoost 本身不懂时间顺序，所以我们要把“过去”显式做成特征：昨天的值、过去 7 天均值、星期几、节假日、天气等。模型再从这些特征里学习非线性预测规则。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><p>树模型本身不知道顺序。关键洞察是把“截至预测时点可见的历史”显式编码成监督特征；模型负责非线性和交互，研究者负责阻止未来信息进入特征。</p></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
 <p>先把序列转换为监督学习样本：</p>
 <p>$$
 X_t=[y_{t-1},y_{t-2},\dots,y_{t-p}, r_t, z_t]
@@ -83,7 +88,7 @@ $$</p>
 <p>$$
 \Omega(f)=\gamma T+\frac{1}{2}\lambda\sum_{j=1}^{T}w_j^2
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
+<h3>3.3 参数或统计量含义</h3>
 <ul>
 <li>滞后特征：过去若干期的目标值。</li>
 <li>滚动统计量：过去窗口内均值、最大值、标准差等。</li>
@@ -92,16 +97,23 @@ $$</p>
 <li><code>learning_rate</code>：每棵树的贡献缩放。</li>
 <li><code>subsample</code> 和 <code>colsample_bytree</code>：样本和特征采样比例。</li>
 </ul>
-<h3>2.3 关键假设</h3>
+<h3>3.4 关键假设</h3>
 <ul>
 <li>未来可由历史滞后、日历和外部变量特征预测。</li>
 <li>训练和预测期间的特征生成逻辑一致。</li>
 <li>时间切分严格避免未来信息泄露。</li>
 <li>若做多步预测，需要明确递归预测或直接多步建模策略。</li>
 </ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>某时点前三期为 $(10,12,15)$，则 lag1=15、lag2=12、三期均值 $=12.33$。若一棵树规则为“lag1 大于 14 加 3，否则减 1”，基准预测 12，则
+$$
+\hat y=12+3=15
+$$
+滚动均值必须只用当前时点之前的数据；若包含待预测值就发生泄漏。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
 <li>自变量类型：滞后特征、滚动特征、日历特征、外部变量。</li>
 <li>因变量类型：连续型未来值，也可为未来事件分类标签。</li>
@@ -111,7 +123,7 @@ $$</p>
 <li>是否适合删失数据：不直接处理删失结局。</li>
 <li>是否适合重复测量数据：可用于多实体面板序列，但需按实体构造滞后并设计分组验证。</li>
 </ul>
-<h3>3.2 示例表格</h3>
+<h3>5.2 示例表格</h3>
 <p>以每日急诊量预测为例：</p>
 <table>
 <thead>
@@ -164,7 +176,7 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
 <li>输入数据：带时间索引的序列，以及构造好的监督学习特征表。</li>
@@ -178,15 +190,15 @@ $$</p>
 <li>预测结果：未来值点预测；可用分位数模型或 bootstrap 近似区间。</li>
 <li>不确定性指标：时间序列交叉验证误差、残差分布、分位数预测区间。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
 <li>适合：非线性强、有多种外部变量、特征工程充分、预测表现优先的场景。</li>
 <li>不适合：样本很少、需要参数解释、长期外推趋势、未来外部变量无法获得的场景。</li>
 <li>使用前需要特别检查的点：滞后特征是否泄露未来、验证切分是否按时间、未来外部变量是否可用。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="xgboost-for-time-series-forecasting" data-i="0">Python</button><button class="codetab" data-uid="xgboost-for-time-series-forecasting" data-i="1">R</button></div><div class="codepanel active" data-uid="xgboost-for-time-series-forecasting" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>xgboost</code></li>
@@ -240,24 +252,27 @@ fit &lt;- xgboost(data = dtrain, nrounds = 300, max_depth = 3, eta = 0.05, objec
 pred &lt;- predict(fit, as.matrix(test[, features]))
 mean(abs(test$EDVisits - pred))
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
       <div class="sec-body"><ul>
 <li>核心结果看什么：时间外测试误差、特征重要性、残差随时间变化、不同预测步长表现。</li>
 <li>每个主要参数如何解释：<code>max_depth</code> 控制交互复杂度，过深更容易过拟合时间噪声。</li>
 <li>临床或医学意义如何表达：可用于高性能运营预测，但解释应以特征贡献和误差分析为主。</li>
 <li>常见误读：特征重要性高不代表因果影响，尤其滞后值和外部变量可能共同反映趋势。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><p>使用 walk-forward 验证；审计所有 rolling/target encoding 的时间边界，比较 naive/ARIMA 基线，检查漂移、递归多步误差、特征重要性稳定性和预测区间。</p></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
 <li>实际值与预测值时间曲线。</li>
 <li>残差随时间变化图。</li>
 <li>特征重要性或 SHAP 图。</li>
 <li>不同预测 horizon 的误差曲线。</li>
 </ul></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
 <li>能捕捉非线性和特征交互。</li>
@@ -276,30 +291,38 @@ mean(abs(test$EDVisits - pred))
 <li>随机划分训练测试集。</li>
 <li>未来不可获得的外部变量被用于预测。</li>
 </ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-extreme-gradient-boosting-xgboost.html" data-cn="XGBoost" data-en="Extreme Gradient Boosting, XGBoost" data-def="XGBoost 是一种基于梯度提升树的高性能集成学习方法。它在经典 GBDT 基础上加入了二阶优化、显式正则化、列采样、缺失值处理和工程级并行优化，因此在表格数据预测中非常常用。">XGBoost（Extreme Gradient Boosting, XGBoost）</a> 的区别：通用 XGBoost 条目讲梯度提升树本身，本条目关注如何把时间序列构造成监督学习问题。</li>
-<li>和 <a class="xlink" href="m-autoregressive-integrated-moving-average-model-arima.html" data-cn="自回归积分滑动平均模型" data-en="Autoregressive Integrated Moving Average Model, ARIMA" data-def="ARIMA 是用于单变量时间序列预测的经典模型。它通过差分把非平稳序列转为平稳序列，再用 ARMA 模型刻画差分后序列的自相关结构。">自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）</a> 的区别：ARIMA 是参数化时间序列模型，XGBoost 通过特征工程学习非线性映射。</li>
-<li>和 <a class="xlink" href="m-long-short-term-memory-for-time-series-forecasting.html" data-cn="LSTM时间序列预测" data-en="Long Short-Term Memory for Time Series Forecasting" data-def="LSTM 是循环神经网络的一种改进结构，通过门控机制保存、遗忘和输出序列信息。本条目聚焦 [[长短期记忆网络（Long Short-Term Memory, LSTM）]] 在时间序列预测中的应用型变体，强调窗口构造、时间切分和预测评估。">LSTM时间序列预测（Long Short-Term Memory for Time Series Forecasting）</a> 的区别：LSTM 直接读取序列窗口，XGBoost 读取手工构造的表格特征。</li>
+<li>和 <a class="xlink" href="m-extreme-gradient-boosting-xgboost.html" data-cn="XGBoost" data-en="Extreme Gradient Boosting, XGBoost" data-def="XGBoost 是带二阶近似、显式树复杂度惩罚、采样与高效实现的梯度提升树。">XGBoost（Extreme Gradient Boosting, XGBoost）</a> 的区别：通用 XGBoost 条目讲梯度提升树本身，本条目关注如何把时间序列构造成监督学习问题。</li>
+<li>和 <a class="xlink" href="m-autoregressive-integrated-moving-average-model-arima.html" data-cn="自回归积分滑动平均模型" data-en="Autoregressive Integrated Moving Average Model, ARIMA" data-def="ARIMA 先用差分去掉随机趋势，再对差分后的平稳变化量建立 ARMA。">自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）</a> 的区别：ARIMA 是参数化时间序列模型，XGBoost 通过特征工程学习非线性映射。</li>
+<li>和 <a class="xlink" href="m-long-short-term-memory-for-time-series-forecasting.html" data-cn="LSTM时间序列预测" data-en="Long Short-Term Memory for Time Series Forecasting" data-def="LSTM 预测把过去窗口逐步压入门控记忆，再从最后状态输出未来值；真正关键的是无泄漏窗口构造与时间回测。">LSTM时间序列预测（Long Short-Term Memory for Time Series Forecasting）</a> 的区别：LSTM 直接读取序列窗口，XGBoost 读取手工构造的表格特征。</li>
 </ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
       <div class="sec-body"><ul>
 <li>门急诊量、床位需求和检查量预测。</li>
 <li>药品、耗材和血液制品需求预测。</li>
 <li>多源特征驱动的患者短期风险动态预测。</li>
 </ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-extreme-gradient-boosting-xgboost.html" data-cn="XGBoost" data-en="Extreme Gradient Boosting, XGBoost" data-def="XGBoost 是一种基于梯度提升树的高性能集成学习方法。它在经典 GBDT 基础上加入了二阶优化、显式正则化、列采样、缺失值处理和工程级并行优化，因此在表格数据预测中非常常用。">XGBoost（Extreme Gradient Boosting, XGBoost）</a></li>
-<li><a class="xlink" href="m-autoregressive-integrated-moving-average-model-arima.html" data-cn="自回归积分滑动平均模型" data-en="Autoregressive Integrated Moving Average Model, ARIMA" data-def="ARIMA 是用于单变量时间序列预测的经典模型。它通过差分把非平稳序列转为平稳序列，再用 ARMA 模型刻画差分后序列的自相关结构。">自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）</a></li>
-<li><a class="xlink" href="m-long-short-term-memory-for-time-series-forecasting.html" data-cn="LSTM时间序列预测" data-en="Long Short-Term Memory for Time Series Forecasting" data-def="LSTM 是循环神经网络的一种改进结构，通过门控机制保存、遗忘和输出序列信息。本条目聚焦 [[长短期记忆网络（Long Short-Term Memory, LSTM）]] 在时间序列预测中的应用型变体，强调窗口构造、时间切分和预测评估。">LSTM时间序列预测（Long Short-Term Memory for Time Series Forecasting）</a></li>
-<li><a class="xlink" href="m-prophet-forecasting-model.html" data-cn="Prophet时间序列模型" data-en="Prophet Forecasting Model" data-def="Prophet 是一种面向业务时间序列预测的可加性模型。它把序列分解为趋势、季节性、节假日效应和误差项，并通过变化点捕捉趋势斜率的改变。">Prophet时间序列模型（Prophet Forecasting Model）</a></li>
+<li><strong>滞后特征（Lag feature）</strong>：预测时点之前的观测值。</li>
+<li><strong>滚动统计（Rolling statistic）</strong>：仅用历史窗口计算的均值、极值等。</li>
+<li><strong>Walk-forward validation</strong>：保持时间顺序逐步向前回测。</li>
+<li><strong>目标泄漏（Target leakage）</strong>：特征含有预测时不可获得的信息。</li>
 </ul></div>
-    </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-extreme-gradient-boosting-xgboost.html" data-cn="XGBoost" data-en="Extreme Gradient Boosting, XGBoost" data-def="XGBoost 是带二阶近似、显式树复杂度惩罚、采样与高效实现的梯度提升树。">XGBoost（Extreme Gradient Boosting, XGBoost）</a></li>
+<li><a class="xlink" href="m-autoregressive-integrated-moving-average-model-arima.html" data-cn="自回归积分滑动平均模型" data-en="Autoregressive Integrated Moving Average Model, ARIMA" data-def="ARIMA 先用差分去掉随机趋势，再对差分后的平稳变化量建立 ARMA。">自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）</a></li>
+<li><a class="xlink" href="m-long-short-term-memory-for-time-series-forecasting.html" data-cn="LSTM时间序列预测" data-en="Long Short-Term Memory for Time Series Forecasting" data-def="LSTM 预测把过去窗口逐步压入门控记忆，再从最后状态输出未来值；真正关键的是无泄漏窗口构造与时间回测。">LSTM时间序列预测（Long Short-Term Memory for Time Series Forecasting）</a></li>
+<li><a class="xlink" href="m-prophet-forecasting-model.html" data-cn="Prophet时间序列模型" data-en="Prophet Forecasting Model" data-def="Prophet 把序列拆成分段趋势、周期季节、节假日与误差，让每种可解释结构单独建模后相加。">Prophet时间序列模型（Prophet Forecasting Model）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Chen T, Guestrin C. XGBoost: A scalable tree boosting system. <em>KDD</em>. 2016:785-794.</li>
 <li>Hyndman RJ, Athanasopoulos G. <em>Forecasting: Principles and Practice</em>. 3rd ed. OTexts; 2021. <a href="https://otexts.com/fpp3/">https://otexts.com/fpp3/</a> （访问日期：2026-07-02）</li>

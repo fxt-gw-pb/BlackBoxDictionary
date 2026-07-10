@@ -19,215 +19,272 @@ r_packages: [mclust, mixtools]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-期望最大化算法是一种用于含隐变量或缺失数据模型的迭代最大似然估计算法。它交替执行 E 步和 M 步：先估计隐变量的条件期望，再在该期望下更新模型参数。
+EM 在“根据当前参数推断隐藏信息”和“把推断出的软信息当作完整数据更新参数”之间交替，逐步提高观测数据似然。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：当模型中有看不见的类别、成分或缺失信息时，如何估计参数。
-- 适用任务：混合模型估计、软聚类、缺失数据模型、隐变量模型。
-- 常见医学场景：疾病潜在亚型建模，患者群体混合分布估计，带隐含类别的生物标志物模式分析。
+期望最大化算法是含隐变量、潜在类别或部分缺失数据模型的迭代最大似然方法。E 步计算完整数据对数似然关于隐变量后验的期望，M 步最大化该期望以更新参数。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-EM 像是在“猜标签”和“更新模型”之间反复来回。先根据当前参数猜每个样本属于各潜在成分的概率，再用这些软标签重新估计参数，直到似然稳定。
+- 直接似然中含有“对隐藏状态求和后再取对数”，难以优化。
+- 成分标签、潜在状态或部分数据未观察。
+- 完整数据下参数更新简单，但隐变量未知。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+像整理一叠来源标签脱落的化验单：先按当前各人群分布给每张单子分配软归属，再用这些分数重新估计各人群；新参数又会改变下一轮归属。
 
-设观测数据为 $X$，隐变量为 $Z$，参数为 $\theta$。目标是最大化观测数据似然：
+## 2. 核心思想与原理
+
+### 2.1 困难来自 log-sum
+
+观测似然为 $\log\sum_zp(X,z\mid\theta)$。对数外的求和使直接分离各隐状态很困难；如果 $Z$ 已知，完整数据似然通常容易最大化。
+
+### 2.2 E 步构造代理目标
+
+用当前参数下的 $p(Z\mid X,\theta^{(t)})$ 对完整数据对数似然取期望，得到 $Q$ 函数。它把未知标签替换为软权重。
+
+### 2.3 M 步与单调性
+
+M 步最大化 $Q$。精确 E/M 步通常保证观测对数似然不下降，但只保证到达局部驻点，不保证全局最优，也不保证潜在类别具有真实医学含义。
+
+## 3. 数学形式
+
+### 3.1 观测与完整数据似然
 
 $$
-\ell(\theta)=\log p(X\mid\theta)=\log\sum_Z p(X,Z\mid\theta)
+\ell(\theta)=
+\log p(X\mid\theta)
+=\log\sum_Zp(X,Z\mid\theta)
 $$
 
-E 步构造辅助函数：
+### 3.2 E 步
 
 $$
-Q(\theta\mid\theta^{(t)})=
-E_{Z\mid X,\theta^{(t)}}[\log p(X,Z\mid\theta)]
+Q(\theta\mid\theta^{(t)})
+=
+E_{Z\mid X,\theta^{(t)}}
+[\log p(X,Z\mid\theta)]
 $$
 
-M 步更新参数：
+### 3.3 M 步
 
 $$
-\theta^{(t+1)}=\arg\max_\theta Q(\theta\mid\theta^{(t)})
+\theta^{(t+1)}
+=
+\operatorname*{arg\,max}_{\theta}
+Q(\theta\mid\theta^{(t)})
 $$
 
-在 [[高斯混合模型（Gaussian Mixture Model, GMM）]] 中，责任概率为：
+在 GMM 中，E 步责任概率为：
 
 $$
 \gamma_{ik}=
-\frac{\pi_k\mathcal{N}(x_i\mid \mu_k,\Sigma_k)}
-{\sum_{j=1}^{K}\pi_j\mathcal{N}(x_i\mid \mu_j,\Sigma_j)}
+\frac{\pi_k\mathcal N(x_i\mid\mu_k,\Sigma_k)}
+{\sum_j\pi_j\mathcal N(x_i\mid\mu_j,\Sigma_j)}
 $$
 
-### 2.2 参数或统计量含义
+### 3.4 关键条件
 
-- $X$：观测数据。
-- $Z$：隐变量，如潜在类别或混合成分标签。
-- $\theta$：待估计参数。
-- $Q(\theta\mid\theta^{(t)})$：完整数据对数似然的条件期望。
-- 责任概率：样本属于各隐含成分的后验权重。
-- log-likelihood：迭代过程中应非下降的目标函数。
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 模型与隐变量结构可识别 | 多组参数给出同样分布 | 约束、模拟与理论审查 |
+| E/M 步正确且数值稳定 | 似然异常或不收敛 | 监控每轮似然 |
+| 多个初值得到稳定解 | 陷入不同局部最优 | 多初始化比较 |
+| 缺失机制假设合理 | 缺失数据估计偏倚 | 明确 MCAR/MAR/MNAR |
 
-### 2.3 关键假设
+## 4. 手把手算例
 
-- 模型形式已指定，隐变量结构合理。
-- E 步和 M 步可以计算或近似计算。
-- 似然函数可能有局部最优，需要多次初始化。
-- 收敛到的是驻点，不保证全局最优。
+沿用 [[高斯混合模型（Gaussian Mixture Model, GMM）]] 的一维两成分例子：
 
-## 3. 数据形式与输入输出
+$$
+x=(0,1,4),\quad
+\pi_1=\pi_2=0.5,\quad
+\mu_1=0,\quad\mu_2=4,\quad
+\sigma_1^2=\sigma_2^2=1
+$$
 
-### 3.1 适合的数据形式
+**E 步：计算软标签。** 根据贝叶斯公式得到：
 
-- 自变量类型：取决于具体隐变量模型，可为连续、分类、计数或混合数据。
-- 因变量类型：通常用于无监督或半监督场景。
-- 数据结构：观测数据加隐含结构。
-- 是否适合高维数据：可用，但参数估计和局部最优问题会更突出。
-- 是否适合缺失较多数据：EM 可用于某些缺失数据模型，但需明确缺失机制和模型假设。
-- 是否适合删失数据：可扩展到删失或截断模型，但普通聚类实现不直接处理。
-- 是否适合重复测量数据：可用于隐马尔可夫模型、混合效应模型等扩展，但需专门建模。
+| $x$ | $\gamma_{i1}$ | $\gamma_{i2}$ |
+| ---: | ---: | ---: |
+| 0 | 0.9997 | 0.0003 |
+| 1 | 0.9820 | 0.0180 |
+| 4 | 0.0003 | 0.9997 |
 
-### 3.2 示例表格
+例如 $x=1$：
 
-以潜在疾病亚型混合模型为例：
+$$
+\gamma_{1,1}
+=
+\frac{\exp(-0.5)}
+{\exp(-0.5)+\exp(-4.5)}
+\approx0.982
+$$
 
-| CRP | IL6 | BMI | FastingGlucose | LatentSubtype |
-| --- | --- | --- | --- | --- |
-| 5.2 | 8.1 | 31.2 | 7.8 | 未观测 |
-| 1.1 | 2.0 | 24.8 | 5.2 | 未观测 |
-| 3.8 | 5.5 | 29.5 | 6.9 | 未观测 |
-| 0.8 | 1.5 | 22.9 | 4.9 | 未观测 |
+**M 步：把软标签当权重。**
 
-### 3.3 输入与产出
+$$
+N_1=\sum_i\gamma_{i1}\approx1.982,\qquad
+N_2\approx1.018
+$$
 
-#### 输入
+更新混合比例：
 
-- 输入数据：观测变量矩阵。
-- 关键变量：模型形式、隐变量数量、初始化、收敛阈值。
-- 需要预处理的内容：缺失机制判断、标准化、异常值检查、模型可识别性评估。
+$$
+\pi_1^{new}=\frac{1.982}{3}\approx0.661,\qquad
+\pi_2^{new}\approx0.339
+$$
 
-#### 产出
+更新均值：
 
-- 模型对象/统计结果：参数估计、隐变量后验权重、对数似然、AIC/BIC。
-- 参数估计：取决于具体模型，如混合比例、均值、协方差。
-- 预测结果：隐类别软归属或硬标签。
-- 不确定性指标：后验权重、标准误、似然变化、多初始化稳定性。
+$$
+\mu_1^{new}
+=
+\frac{0(0.9997)+1(0.9820)+4(0.0003)}
+{1.982}
+\approx0.496
+$$
 
-## 4. 适用场景
+$$
+\mu_2^{new}\approx3.946
+$$
 
-- 适合：模型中有潜在类别、混合成分或可建模缺失信息，且希望做最大似然估计的场景。
-- 不适合：模型形式不清楚、隐变量不可识别、似然面高度复杂且无稳定初始化的场景。
-- 使用前需要特别检查的点：初始化、局部最优、收敛标准、模型选择和隐变量解释。
+然后用新参数进入下一轮 E 步，直到对数似然变化足够小。
 
-## 5. 实现
+**结论：** E 步没有“填死”一个标签，而是传播不确定性；M 步用这些概率加权完成普通参数估计。
 
-### 5.1 Python
+## 5. 数据形式与输入输出
 
-常用包：
+### 5.1 数据要求
 
-- `scikit-learn`
+- EM 是算法而非特定数据模型，可用于连续、类别、计数、缺失或序列数据。
+- 可用性取决于完整数据似然、E 步后验与 M 步更新是否可计算。
+- 用于缺失数据时，不能绕过缺失机制假设。
+
+### 5.2 输入与产出
+
+输入为概率模型、隐变量定义、初值与收敛阈值。输出为参数估计、后验隐状态、对数似然轨迹和收敛信息；具体含义由模型决定。
+
+## 6. 适用场景
+
+- GMM、潜类别、隐马尔可夫、随机效应或某些缺失数据模型。
+- 完整数据估计简单、观测似然直接优化困难。
+- 不适合模型不可识别、E/M 步均无可行计算或多局部最优无法区分的场景。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import pandas as pd
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv("latent_subtype_features.csv")
-X = df[["CRP", "IL6", "BMI", "FastingGlucose"]]
-X_scaled = StandardScaler().fit_transform(X)
-
-fit = GaussianMixture(
+X_s = StandardScaler().fit_transform(X)
+model = GaussianMixture(
     n_components=3,
     covariance_type="full",
-    n_init=20,
-    random_state=42
+    n_init=30,
+    max_iter=500,
+    tol=1e-5,
+    reg_covar=1e-6,
+    random_state=42,
 )
-fit.fit(X_scaled)
+model.fit(X_s)
 
-posterior = fit.predict_proba(X_scaled)
-cluster = fit.predict(X_scaled)
-print("BIC:", fit.bic(X_scaled))
-print(posterior[:5].round(3))
+posterior = model.predict_proba(X_s)
+cluster = model.predict(X_s)
+print("converged:", model.converged_)
+print("iterations:", model.n_iter_)
+print("lower bound:", model.lower_bound_)
 ```
 
-### 5.2 R
-
-常用包：
-
-- `mclust`
+### 7.2 R
 
 ```r
 library(mclust)
 
 x <- scale(df[, c("CRP", "IL6", "BMI", "FastingGlucose")])
-fit <- Mclust(x, G = 1:6)
+fit <- Mclust(
+  x,
+  G = 1:6,
+  modelNames = NULL,
+  control = emControl(tol = c(1e-5, 1e-5))
+)
 
-cluster <- fit$classification
 posterior <- fit$z
+cluster <- fit$classification
+fit$loglik
 fit$bic
-head(posterior)
 ```
 
-## 6. 结果如何解释
+软件通常封装了特定模型的 EM；不存在一个脱离模型、可对任意数据直接调用的通用 EM 聚类器。
 
-- 核心结果看什么：对数似然是否收敛、参数估计是否稳定、隐变量后验权重是否清晰。
-- 每个主要参数如何解释：在 GMM 中，混合比例表示潜在成分占比，责任概率表示样本对各成分的软归属。
-- 临床或医学意义如何表达：EM 只是估计算法，医学解释来自具体模型及其成分特征。
-- 常见误读：EM 不是一个单独的聚类模型；它是估计 GMM 等隐变量模型的算法。
+## 8. 结果如何解释
 
-## 7. 推荐可视化
+- `converged` 只说明停止标准满足，不说明达到全局最大值。
+- 隐状态编号可交换，参数比较前需进行成分匹配。
+- 后验责任度是给定模型与参数的条件概率，不是亚型真实性概率。
+- EM 本身没有医学结论，结论来自所拟合模型、数据和外部验证。
 
-- 对数似然随迭代变化曲线。
-- BIC/AIC 随成分数变化图。
+## 9. 诊断与稳健性
+
+1. 保存每轮对数似然，确认无异常下降并识别平台期。
+2. 运行多个随机初值，比较最终似然和参数。
+3. 检查极小成分、奇异协方差与参数边界。
+4. 用模拟数据检验模型可识别性和恢复能力。
+5. 比较成分数、模型约束及 bootstrap 稳定性。
+
+## 10. 推荐可视化
+
+- 对数似然或下界随迭代变化图。
+- 不同初始化的最终似然分布。
 - 后验责任概率热图。
-- 混合成分在降维空间中的分布图。
+- BIC 随模型和成分数变化图。
 
-## 8. 优势、局限与常见坑
+## 11. 优势、局限与常见坑
 
-### 优势
+**优势：** 将困难的隐变量似然拆成可解释两步，常有闭式更新，精确迭代保证似然不降。
 
-- 适合含隐变量模型的最大似然估计。
-- 每次迭代通常保证观测似然不下降。
-- 能自然产生软归属或后验权重。
+**局限：** 局部最优、初始化敏感、收敛可能慢，标准误与模型选择需额外处理。
 
-### 局限
+**常见坑：** 把 EM 当聚类模型；把收敛当全局最优；只跑一次；忽略成分退化；认为 EM 自动解决 MNAR 缺失。
 
-- 可能陷入局部最优。
-- 对初始化敏感。
-- 收敛速度可能较慢，且依赖模型可识别性。
+## 12. 与相近方法的区别
 
-### 常见坑
+- [[高斯混合模型（Gaussian Mixture Model, GMM）]]：GMM 是模型，EM 是其常用估计算法。
+- [[K-means聚类（K-means Clustering）]]：可视为特定极限下的硬分配迭代，但目标和概率解释不同。
+- [[模糊C均值聚类（Fuzzy C-Means Clustering, FCM）]]：隶属度来自模糊目标，不是后验概率。
+- 选择经验：先明确生成模型和隐变量，再判断 EM 是否是合适的估计器。
 
-- 只运行一次初始化就解释成分。
-- 把 EM 的收敛结果当作全局最优。
-- 忽略模型本身假设，只讨论算法步骤。
+## 13. 医学研究中的典型应用
 
-## 9. 与相近方法的区别
+- 潜在疾病亚型和生物标志物混合分布。
+- 隐马尔可夫疾病状态与纵向潜类别。
+- 某些 MAR 缺失数据、测量误差和随机效应模型估计。
 
-- 和 [[高斯混合模型（Gaussian Mixture Model, GMM）]] 的区别：GMM 是模型，EM 是常用的参数估计算法。
-- 和 [[K-means聚类（K-means Clustering）]] 的区别：K-means 可看作某些限制条件下的硬分配原型聚类，EM 在混合模型中进行软分配和参数更新。
-- 和 [[模糊C均值聚类（Fuzzy C-Means Clustering, FCM）]] 的区别：FCM 的隶属度来自模糊目标函数，EM 的责任概率来自概率模型后验。
+## 14. 术语表
 
-## 10. 医学研究中的典型应用
+| 术语 | 含义 |
+| --- | --- |
+| latent variable | 模型中存在但未直接观察的变量 |
+| complete-data likelihood | 假设隐变量已知时的似然 |
+| E-step | 对隐变量后验取完整似然期望 |
+| M-step | 最大化 E 步构造的期望目标 |
+| local optimum | 只在邻域内最优而非全局最优的解 |
 
-- 潜在疾病亚型或患者成分模型估计。
-- 生物标志物混合分布分解。
-- 隐变量模型、缺失数据模型或测量误差模型的参数估计。
-
-## 11. 相关方法
+## 15. 相关方法
 
 - [[高斯混合模型（Gaussian Mixture Model, GMM）]]
 - [[K-means聚类（K-means Clustering）]]
 - [[模糊C均值聚类（Fuzzy C-Means Clustering, FCM）]]
 - [[贝叶斯回归（Bayesian Regression）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
-- Dempster AP, Laird NM, Rubin DB. Maximum likelihood from incomplete data via the EM algorithm. *Journal of the Royal Statistical Society: Series B*. 1977;39(1):1-38.
+- Dempster AP, Laird NM, Rubin DB. Maximum likelihood from incomplete data via the EM algorithm. *J R Stat Soc Series B*. 1977;39(1):1-38.
 - McLachlan GJ, Krishnan T. *The EM Algorithm and Extensions*. 2nd ed. Wiley; 2008.
 - Bishop CM. *Pattern Recognition and Machine Learning*. Springer; 2006.

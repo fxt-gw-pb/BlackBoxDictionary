@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,250 +54,276 @@
     <div class="intro-note"><h1>嵌入式特征选择（Embedded Feature Selection）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>嵌入式特征选择是在模型训练过程中同步完成特征评价或筛选的方法。常见形式包括 L1 正则化模型、树模型特征重要性和基于模型系数的 <code>SelectFromModel</code>。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>嵌入式选择把“哪些变量留下”写进模型训练目标或结构，让预测拟合与特征取舍同时完成。</p>
+<h3>1.2 定义</h3>
+<p>嵌入式方法在模型拟合过程中产生稀疏系数、分裂使用或重要性，再据此选特征。典型包括 Lasso/Elastic Net、树模型重要性和带稀疏约束的神经网络。本卡讲通用框架，树模型另见专卡。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：如何让模型在学习预测规律的同时自动判断哪些特征重要。</li>
-<li>适用任务：分类、回归、高维特征筛选、预测建模。</li>
-<li>常见医学场景：Lasso 影像组学特征筛选、树模型变量重要性筛选、临床风险模型候选变量压缩。</li>
+<li>在考虑其他变量后选择有联合预测贡献的特征。</li>
+<li>避免过滤法完全脱离最终模型。</li>
+<li>医学场景：高维风险预测、组学签名、可部署变量面板压缩。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>过滤法是建模前先筛一遍特征，嵌入式方法则是“边建模边筛选”。它更贴近最终模型目标，但也更依赖所选模型本身的偏好。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>过滤法先海选、再组队；嵌入式方法让候选人在真实比赛中竞争位置。Lasso 还对每个非零系数收费，贡献不足以抵消费用的变量被压到 0。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>以 L1 正则化为例，嵌入式选择通过稀疏化系数实现：</p>
-<p>$$
-\hat\beta
-=
-\arg\min_{\beta}
-\left[
-L(y,X\beta)+\lambda\sum_{j=1}^{p}|\beta_j|
-\right]
-$$</p>
-<p>选择规则可写为：</p>
-<p>$$
-\text{keep}(X_j)=I(\hat\beta_j\neq 0)
-$$</p>
-<p>对基于模型重要性的选择，若模型给出重要性 $I_j$，阈值为 $\theta$：</p>
-<p>$$
-\text{keep}(X_j)=I(I_j\geq \theta)
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>单变量高分特征可能互相重复，单独弱的特征在控制混杂后可能重要。特征选择若与最终模型分离，筛选标准和预测目标会错位。</p>
+<h3>2.2 关键洞察</h3>
+<p>在损失中加入稀疏惩罚，或使用天然按特征分裂的模型，让“拟合改善”和“复杂度成本”直接权衡。选择结果因此依赖模型家族：Lasso 偏好线性稀疏，树模型偏好可分裂的非线性。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$\lambda$：正则化强度。</li>
-<li>$\hat\beta_j$：模型估计的第 $j$ 个特征系数。</li>
-<li>$I_j$：模型给出的特征重要性。</li>
-<li>阈值 $\theta$：保留特征的重要性或系数阈值。</li>
-<li>基模型：用于选择特征的模型，如 Lasso、随机森林、梯度提升树。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>所选模型适合当前任务和数据结构。</li>
-<li>模型的系数或重要性可作为特征价值的代理。</li>
-<li>选择过程必须嵌入交叉验证或训练流程，避免信息泄露。</li>
+<li>比过滤法考虑联合条件贡献，但计算更高。</li>
+<li>比 wrapper 的逐子集搜索高效，但不保证全局最优子集。</li>
+<li>Ridge 只收缩不清零，不能直接产生稀疏支持集。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>以 Lasso 为例：</p>
+<p>$$
+\hat{\boldsymbol\beta}
+=\underset{\boldsymbol\beta}{\operatorname{arg\,min}}
+\left[
+\frac{1}{2n}\|\mathbf y-\mathbf X\boldsymbol\beta\|_2^2
++\lambda\|\boldsymbol\beta\|_1
+\right]
+$$</p>
+<p>选择集合：</p>
+<p>$$
+\widehat{\mathcal S}
+=\{j:|\hat\beta_j|&gt;\epsilon\}
+$$</p>
+<p>这个式子在说：每个系数带来拟合收益，也要支付绝对值惩罚；收益不足的系数被压到 0。</p>
+<h3>3.2 推导脉络</h3>
+<p>在标准化、正交设计下，Lasso 解是对 OLS 系数做软阈值：</p>
+<p>$$
+\hat\beta_j^{Lasso}
+=\operatorname{sign}(\hat\beta_j^{OLS})
+\max(|\hat\beta_j^{OLS}|-\lambda,0)
+$$</p>
+<p>$L_1$ 球有尖角，最优解容易落在坐标轴上，从而产生精确 0。</p>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：连续、分类编码变量、高维特征。</li>
-<li>因变量类型：二分类、多分类或连续型。</li>
-<li>数据结构：监督学习特征矩阵。</li>
-<li>是否适合高维数据：适合，尤其是 L1/Elastic Net。</li>
-<li>是否适合缺失较多数据：需按基模型要求处理。</li>
-<li>是否适合删失数据：需使用支持删失结局的嵌入式模型。</li>
-<li>是否适合重复测量数据：需使用分组验证或相应纵向模型。</li>
+<li>$\lambda$：稀疏强度，越大保留越少。</li>
+<li>$\epsilon$：把数值近零视为未选的容差。</li>
+<li>coefficient path：系数随 $\lambda$ 变化的轨迹。</li>
+<li>support：非零特征集合。</li>
+<li>cross-validation：选择 $\lambda$ 的常用方法，必须嵌套在外层评估内。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>以影像组学特征筛选为例：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>Age</th>
-<th>Radiomics_1</th>
-<th>Radiomics_2</th>
-<th>Radiomics_3</th>
-<th>Radiomics_4</th>
-<th>Recurrence</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后果</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>64</td>
-<td>0.28</td>
-<td>1.42</td>
-<td>-0.12</td>
-<td>0.88</td>
-<td>1</td>
+<td>模型家族近似正确</td>
+<td>线性/树结构能表达信号</td>
+<td>选择错位</td>
 </tr>
 <tr>
-<td>52</td>
-<td>-0.31</td>
-<td>0.40</td>
-<td>0.05</td>
-<td>-0.22</td>
-<td>0</td>
+<td>预处理在训练折拟合</td>
+<td>缩放、插补不看测试</td>
+<td>泄漏</td>
 </tr>
 <tr>
-<td>70</td>
-<td>0.76</td>
-<td>1.91</td>
-<td>-0.41</td>
-<td>1.12</td>
-<td>1</td>
+<td>样本支撑稀疏度</td>
+<td>有足够事件/样本</td>
+<td>选择不稳定</td>
 </tr>
 <tr>
-<td>47</td>
-<td>-0.22</td>
-<td>0.15</td>
-<td>0.11</td>
-<td>-0.34</td>
-<td>0</td>
+<td>高相关组被合理处理</td>
+<td>Lasso 可任意选一个</td>
+<td>生物解释不稳</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>设特征已标准化且正交，OLS 系数为</p>
+<p>$$
+\hat{\boldsymbol\beta}^{OLS}=(3,\;0.8,\;0.3)
+$$</p>
+<p>取 $\lambda=1$，逐项软阈值：</p>
+<p>$$
+\hat\beta_1=3-1=2
+$$</p>
+<p>$$
+\hat\beta_2=\max(0.8-1,0)=0,\qquad
+\hat\beta_3=\max(0.3-1,0)=0
+$$</p>
+<p>因此选择集合为 $\{1\}$。若 $\lambda=0.5$，结果为 $(2.5,0.3,0)$，选择 $\{1,2\}$。可见特征集合不是数据的固定真相，而由惩罚和验证目标共同决定。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>数值化表格、高维组学，分类/回归结局。</li>
+<li>Lasso 前通常标准化；类别变量需成组选择时考虑 group lasso。</li>
+<li>缺失需在同一 pipeline 内插补。</li>
+<li>生存结局需 penalized Cox，而非普通回归。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>patient_id</th>
+<th style="text-align: right;">marker_1</th>
+<th style="text-align: right;">marker_2</th>
+<th style="text-align: right;">marker_3</th>
+<th style="text-align: right;">severe</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P01</td>
+<td style="text-align: right;">-1.2</td>
+<td style="text-align: right;">0.4</td>
+<td style="text-align: right;">0.1</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr>
-<td>61</td>
-<td>0.33</td>
-<td>0.98</td>
-<td>-0.18</td>
-<td>0.55</td>
-<td>1</td>
+<td>P02</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">-0.3</td>
+<td style="text-align: right;">1.1</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>P03</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">0.8</td>
+<td style="text-align: right;">-0.2</td>
+<td style="text-align: right;">1</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：特征矩阵和目标变量。</li>
-<li>关键变量：基模型、正则化强度或重要性阈值、交叉验证方案。</li>
-<li>需要预处理的内容：缺失处理、标准化、类别编码、训练测试拆分。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：选择器、基模型、特征系数或重要性。</li>
-<li>参数估计：模型系数、重要性得分或正则化参数。</li>
-<li>预测结果：若直接使用该模型，也可输出预测。</li>
-<li>不确定性指标：交叉验证性能、特征选择稳定性、测试集表现。</li>
-</ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：希望特征选择服务于最终预测模型的场景。</li>
-<li>不适合：只想做模型无关初筛，或需要与具体模型无关的变量解释。</li>
-<li>使用前需要特别检查的点：是否标准化、基模型是否稳定、选择结果是否随重采样变化很大。</li>
-</ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="embedded-feature-selection" data-i="0">Python</button><button class="codetab" data-uid="embedded-feature-selection" data-i="1">R</button></div><div class="codepanel active" data-uid="embedded-feature-selection" data-i="0"><p>常用包：</p>
-<ul>
-<li><code>scikit-learn</code></li>
-</ul>
-<pre><code class="language-python">import pandas as pd
-from sklearn.feature_selection import SelectFromModel
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
-
-df = pd.read_csv(&quot;radiomics_recurrence.csv&quot;)
-X = df[[&quot;Age&quot;, &quot;Radiomics_1&quot;, &quot;Radiomics_2&quot;, &quot;Radiomics_3&quot;, &quot;Radiomics_4&quot;]]
-y = df[&quot;Recurrence&quot;].astype(int)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
-
-lasso_logit = LogisticRegression(
-    penalty=&quot;l1&quot;,
-    solver=&quot;liblinear&quot;,
-    C=0.2,
-    random_state=42
-)
-
-selector = make_pipeline(
-    StandardScaler(),
-    SelectFromModel(lasso_logit)
-)
-X_train_sel = selector.fit_transform(X_train, y_train)
-X_test_sel = selector.transform(X_test)
-</code></pre></div><div class="codepanel" data-uid="embedded-feature-selection" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>glmnet</code></li>
-</ul>
-<pre><code class="language-r">library(glmnet)
-
-x &lt;- model.matrix(Recurrence ~ Age + Radiomics_1 + Radiomics_2 + Radiomics_3 + Radiomics_4 - 1, data = df_train)
-y &lt;- df_train$Recurrence
-
-fit &lt;- cv.glmnet(x, y, family = &quot;binomial&quot;, alpha = 1)
-coef_fit &lt;- coef(fit, s = &quot;lambda.min&quot;)
-selected &lt;- rownames(coef_fit)[as.vector(coef_fit != 0)]
-selected &lt;- setdiff(selected, &quot;(Intercept)&quot;)
-</code></pre></div></div></div>
+<h3>5.3 输入与产出</h3>
+<p>输入训练矩阵、结局、模型、惩罚网格和选择规则；产出拟合模型、非零支持、系数/重要性路径与验证性能。</p></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：被保留特征、模型性能、选择稳定性。</li>
-<li>每个主要参数如何解释：正则化越强或阈值越高，保留特征越少。</li>
-<li>临床或医学意义如何表达：保留特征是当前模型认为有预测贡献的变量，不等于独立危险因素或因果变量。</li>
-<li>常见误读：把模型重要性当作无条件通用的重要性。</li>
+<li>适合：预测与选择需要对齐、候选多、期望稀疏模型。</li>
+<li>不适合：选择稳定性比预测更重要但样本极小，或真实关系严重偏离模型家族。</li>
+<li>需嵌套验证并报告选择频率。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>正则化路径图。</li>
-<li>特征重要性或系数条形图。</li>
-<li>重采样下特征入选频率图。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="embedded-feature-selection" data-i="0">Python</button><button class="codetab" data-uid="embedded-feature-selection" data-i="1">R</button></div><div class="codepanel active" data-uid="embedded-feature-selection" data-i="0"><pre><code class="language-python">from sklearn.datasets import load_breast_cancer
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegressionCV
+
+X, y = load_breast_cancer(return_X_y=True, as_frame=True)
+model = make_pipeline(
+    StandardScaler(),
+    LogisticRegressionCV(
+        Cs=20, cv=5, penalty=&quot;l1&quot;, solver=&quot;liblinear&quot;,
+        scoring=&quot;roc_auc&quot;, max_iter=5000, random_state=42
+    ),
+)
+model.fit(X, y)
+coef = model[-1].coef_[0]
+selected = X.columns[abs(coef) &gt; 1e-8]
+print(selected.tolist())
+</code></pre></div><div class="codepanel" data-uid="embedded-feature-selection" data-i="1"><pre><code class="language-r">library(glmnet)
+
+x &lt;- model.matrix(Species ~ ., iris)[, -1]
+y &lt;- as.integer(iris$Species == &quot;setosa&quot;)
+set.seed(42)
+cv &lt;- cv.glmnet(
+  x, y, family = &quot;binomial&quot;, alpha = 1,
+  type.measure = &quot;auc&quot;
+)
+b &lt;- coef(cv, s = &quot;lambda.1se&quot;)
+rownames(b)[as.vector(b != 0)]
+</code></pre></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><p>非零表示在当前模型、惩罚和数据下被保留，不等于因果或独立生物效应。系数需在标准化尺度解释；相关特征间的选择可任意交换。</p></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>画系数路径与 CV 曲线，比较 $\lambda_{min}$ 和 $\lambda_{1se}$。</li>
+<li>外层交叉验证中重做全部选择，报告入选频率。</li>
+<li>bootstrap stability selection。</li>
+<li>比较 Lasso、Elastic Net 和树模型支持集。</li>
+<li>检查校准、亚组、外部中心与删减后的性能损失。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>系数路径图。</li>
+<li>CV 性能—$\log\lambda$ 曲线。</li>
+<li>特征入选频率图。</li>
+<li>相关组内系数交换图。</li>
+<li>特征数—性能—成本曲线。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>与模型目标一致。</li>
-<li>可利用正则化控制复杂度。</li>
-<li>常比纯过滤法更贴近最终预测性能。</li>
+<li>选择与训练目标一致。</li>
+<li>比穷举子集高效，可处理高维。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>依赖基模型选择。</li>
-<li>选择结果可能不稳定。</li>
-<li>解释性受模型偏倚影响。</li>
+<li>支持集依赖模型和超参数。</li>
+<li>高相关、小样本下不稳定。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>在交叉验证外先做嵌入式选择。</li>
-<li>用 Lasso 但不标准化特征。</li>
-<li>把树模型 impurity importance 当作完全无偏的重要性。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-univariate-feature-selection.html" data-cn="单变量特征选择" data-en="Univariate Feature Selection" data-def="单变量特征选择是一类过滤式方法。它逐个评估每个特征与目标变量之间的关系，根据统计量、P 值或信息量得分选择排名靠前或达到阈值的特征。">单变量特征选择（Univariate Feature Selection）</a> 的区别：单变量方法先独立打分；嵌入式方法在模型训练中打分或稀疏化。</li>
-<li>和 <a class="xlink" href="m-lasso-regression.html" data-cn="Lasso回归" data-en="Lasso Regression" data-def="Lasso 回归是在普通线性回归中加入 L1 正则化项的一种方法，它不仅能做回归拟合，还能自动把部分不重要特征的系数压缩到 0，从而实现变量选择。">Lasso回归（Lasso Regression）</a> 的区别：Lasso 是嵌入式特征选择的典型实现之一。</li>
-<li>和 <a class="xlink" href="m-tree-based-feature-selection.html" data-cn="基于树模型的特征选择" data-en="Tree-based Feature Selection" data-def="基于树模型的特征选择利用决策树、随机森林、梯度提升树等模型产生的特征重要性，对特征进行排序或筛选。常用重要性包括不纯度减少、分裂次数、置换重要性和 SHAP 重要性。">基于树模型的特征选择（Tree-based Feature Selection）</a> 的区别：树模型选择是嵌入式方法中的一个重要分支。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>Lasso 选择影像组学或组学特征。</li>
-<li>随机森林筛选非线性预测变量。</li>
-<li>Elastic Net 在高相关生物标志物中做稳定筛选。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-lasso-regression.html" data-cn="Lasso回归" data-en="Lasso Regression" data-def="Lasso 回归是在普通线性回归中加入 L1 正则化项的一种方法，它不仅能做回归拟合，还能自动把部分不重要特征的系数压缩到 0，从而实现变量选择。">Lasso回归（Lasso Regression）</a></li>
-<li><a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归是在普通线性回归的损失函数中加入 L2 正则化项的一种方法，用来缓解多重共线性、减少过拟合，并提升模型在新数据上的稳定性。">Ridge回归（Ridge Regression）</a></li>
-<li><a class="xlink" href="m-elastic-net-regression.html" data-cn="弹性网络回归" data-en="Elastic Net Regression" data-def="弹性网络回归结合了 Lasso 的 L1 正则化和 Ridge 的 L2 正则化，既能做变量选择，也能在高度相关特征中保持更稳定的系数结构。">弹性网络回归（Elastic Net Regression）</a></li>
-<li><a class="xlink" href="m-tree-based-feature-selection.html" data-cn="基于树模型的特征选择" data-en="Tree-based Feature Selection" data-def="基于树模型的特征选择利用决策树、随机森林、梯度提升树等模型产生的特征重要性，对特征进行排序或筛选。常用重要性包括不纯度减少、分裂次数、置换重要性和 SHAP 重要性。">基于树模型的特征选择（Tree-based Feature Selection）</a></li>
+<li>外层测试数据参与调 $\lambda$。</li>
+<li>未标准化就比较 Lasso 系数。</li>
+<li>把 Ridge 当稀疏选择。</li>
+<li>只报告一次支持集，不报告稳定性。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Guyon I, Elisseeff A. An introduction to variable and feature selection. <em>J Mach Learn Res</em>. 2003;3:1157-1182.</li>
-<li>Tibshirani R. Regression shrinkage and selection via the lasso. <em>J R Stat Soc Series B</em>. 1996;58(1):267-288.</li>
-<li>scikit-learn Developers. <code>SelectFromModel</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectFromModel.html">https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectFromModel.html</a> （访问日期：2026-07-02）</li>
+<li>过滤法先评分后建模；嵌入式方法在拟合中选。</li>
+<li>wrapper 反复评估子集，计算更昂贵。</li>
+<li>Elastic Net 比 Lasso 更倾向成组保留相关特征。</li>
+<li>如何选择：线性稀疏用 Lasso/Elastic Net，复杂非线性比较树选择。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>多组学预后签名。</li>
+<li>影像组学变量压缩。</li>
+<li>从大量 EHR 指标选择可部署风险面板。</li>
+</ul>
+<p>需报告缺失、标准化、事件数、嵌套验证、选择稳定性与外部校准。</p></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>嵌入式方法（Embedded method）</strong>：训练过程中完成选择。</li>
+<li><strong>稀疏性（Sparsity）</strong>：多数系数为 0。</li>
+<li><strong>软阈值（Soft thresholding）</strong>：先减阈值，再将越界内系数清零。</li>
+<li><strong>支持集（Support）</strong>：非零系数对应的特征。</li>
+<li><strong>稳定性选择（Stability selection）</strong>：重复抽样统计入选频率。</li>
+<li><strong>嵌套交叉验证（Nested CV）</strong>：外层评估，内层调参与选择。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-lasso-regression.html" data-cn="Lasso回归" data-en="Lasso Regression" data-def="Lasso 回归一边拟合连续结局，一边用 L1 惩罚把弱变量的系数直接压到 0，从而得到稀疏模型。">Lasso回归（Lasso Regression）</a></li>
+<li><a class="xlink" href="m-elastic-net-regression.html" data-cn="弹性网络回归" data-en="Elastic Net Regression" data-def="弹性网络把 Lasso 的「会筛变量」和 Ridge 的「对相关变量更稳定」合在一起，在稀疏性和稳定性之间调档。">弹性网络回归（Elastic Net Regression）</a></li>
+<li><a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归给回归系数套上一根「橡皮筋」：允许每个变量都参与预测，但惩罚过大的系数，让模型更稳。">Ridge回归（Ridge Regression）</a></li>
+<li><a class="xlink" href="m-tree-based-feature-selection.html" data-cn="基于树模型的特征选择" data-en="Tree-based Feature Selection" data-def="树模型选择按特征在分裂中减少多少预测误差或打乱后损失多少性能来排序，能捕捉非线性与交互，但重要性会受基数和相关性偏倚。">基于树模型的特征选择（Tree-based Feature Selection）</a></li>
+<li><a class="xlink" href="m-cross-validation.html" data-cn="交叉验证" data-en="Cross-Validation" data-def="交叉验证轮流把每部分样本当作未见数据，用多次“训练—验证”近似模型对新样本的泛化表现。">交叉验证（Cross-Validation）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Tibshirani R. Regression shrinkage and selection via the lasso. <em>JRSS B</em>. 1996;58(1):267-288.</li>
+<li>Zou H, Hastie T. Regularization and variable selection via the elastic net. <em>JRSS B</em>. 2005;67(2):301-320.</li>
+<li>Kuhn M, Johnson K. <em>Feature Engineering and Selection</em>. CRC Press; 2019.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-mutual-information-feature-selection.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">互信息特征选择</div></a><a class="pg pg-next" href="m-tree-based-feature-selection.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">基于树模型的特征选择</div></a></div>

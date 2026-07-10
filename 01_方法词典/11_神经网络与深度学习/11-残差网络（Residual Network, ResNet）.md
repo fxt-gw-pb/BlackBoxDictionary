@@ -19,173 +19,339 @@ r_packages: [keras]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-ResNet 是在深层 CNN 中引入残差连接的网络架构。它通过快捷连接把输入直接加到后续层输出上，从而缓解深层网络训练中的退化与梯度传播困难。
+ResNet 不要求每组层从头学习完整映射，而是学习“在输入基础上还要改多少”，并用快捷连接给信息和梯度提供一条直接通路。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：如何在网络很深时仍保持可训练性和较好的泛化。
-- 适用任务：图像分类、检测、分割、迁移学习、医学影像表征提取。
-- 常见医学场景：CT/MRI 分类、病理图像分型、眼底和皮肤图像识别。
+残差网络是在深层卷积网络中堆叠残差块的架构。典型块输出 $\mathbf y=\mathcal F(\mathbf x)+\mathbf x$；当尺寸不同，则用投影快捷连接匹配。残差连接缓解的是深层网络的优化退化和梯度传播困难，不等于完全消除过拟合或梯度问题。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-ResNet 让某些层学的不是完整映射，而是“相对输入还需要补充什么”。如果额外变化不多，网络可以更容易学到接近恒等映射的结果，因此深层训练更稳定。
+- 研究问题：网络加深后训练误差反而上升时，如何让新增层至少能方便地表示恒等映射。
+- 适用任务：图像分类、检测、分割、迁移学习和特征提取。
+- 常见医学场景：CT/MRI 分类、病理切片分型、胸片识别、医学影像骨干网络。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+普通层像要求医生重写整份病历摘要；残差块只要求写“相对上一版的修改意见”。若没有需要修改的内容，让残差接近 0 就能原样传递；快捷连接还像一条不经过复杂审批的直达通道，让早期信号和梯度不必穿过所有卷积。
 
-残差块可写为：
+## 2. 核心思想与原理
+
+### 2.1 它到底在解决什么根本困难
+
+理论上，给一个表现良好的浅层网络再加几层，新层只要学习恒等映射，性能不应变差；实践中普通深网却可能出现训练误差上升的“退化问题”。这说明障碍不只是过拟合，而是优化器很难让多层非线性恰好合成恒等映射。
+
+### 2.2 关键洞察
+
+把目标映射 $\mathcal H(\mathbf x)$ 改写为
 
 $$
-y = F(x, W) + x
+\mathcal F(\mathbf x)=\mathcal H(\mathbf x)-\mathbf x
 $$
 
-若输入输出维度不一致，则常用投影捷径：
+于是只需学习残差 $\mathcal F$。若理想映射接近恒等，残差接近 0 比多层网络直接拟合 $\mathcal H(\mathbf x)=\mathbf x$ 更容易。同时
 
 $$
-y = F(x, W) + W_s x
+\frac{\partial\mathbf y}{\partial\mathbf x}
+=\mathbf I+\frac{\partial\mathcal F}{\partial\mathbf x}
 $$
 
-其中 $F(x, W)$ 表示卷积、归一化和激活构成的残差分支。
+恒等项让梯度拥有直接分量。
 
-### 2.2 参数或统计量含义
+### 2.3 与朴素/相邻做法的对比
 
-- 残差分支 $F$：学习相对输入的增量表示。
-- 捷径连接：直接传递输入，改善梯度流动。
-- block 深度与通道数：决定网络容量和表征能力。
+- 相比普通 CNN：ResNet 通过加法快捷连接重用输入。
+- 相比 DenseNet：ResNet 做逐元素相加，通道数通常不累积；DenseNet 拼接所有旧特征。
+- 相比 Highway Network：ResNet 不依赖额外门控即可建立恒等通路。
+- 相比简单加深：残差连接改善可训练性，但仍需规范化、初始化和正则化。
 
-### 2.3 关键假设
+## 3. 数学形式
 
-- 深层卷积特征对任务有价值。
-- 训练数据足够支持较深网络。
-- 残差连接能改善优化而非仅增加参数。
+### 3.1 核心公式
 
-## 3. 数据形式与输入输出
+基本残差块为
 
-### 3.1 适合的数据形式
+$$
+\mathbf y=\phi\!\left(\mathcal F(\mathbf x;\mathbf W)+\mathbf x\right)
+$$
 
-- 自变量类型：二维或三维图像张量。
-- 因变量类型：分类、回归、分割等视觉任务标签。
-- 数据结构：图像张量。
-- 是否适合高维数据：适合高维图像输入。
-- 是否适合缺失较多数据：需先处理图像缺损或缺失切片。
-- 是否适合删失数据：不直接处理删失。
-- 是否适合重复测量数据：若是图像序列，可与时序结构结合。
+若空间尺寸或通道数变化：
 
-### 3.2 示例表格
+$$
+\mathbf y=\phi\!\left(
+\mathcal F(\mathbf x;\mathbf W)+\mathbf W_s\mathbf x
+\right)
+$$
 
-以眼底图像分级为例：
+这个式子在说：主分支学习修正量，快捷分支传递原输入；两者形状一致后逐元素相加。
 
-| ImageID | ImagePath | Eye | DRGrade |
+两层基本块可写为
+
+$$
+\mathcal F(\mathbf x)
+=\mathbf W_2\,\phi(\operatorname{BN}(\mathbf W_1\mathbf x))
+$$
+
+深层 ResNet 常用 $1\times1$、$3\times3$、$1\times1$ 的 bottleneck 块降低计算。
+
+### 3.2 推导脉络
+
+若最优新增模块什么也不做，普通深层块需要多个权重共同实现恒等映射；残差块只需把主分支权重学到近 0。反向传播时，损失梯度可分成快捷分支的恒等项与残差分支项，降低全部依赖长矩阵连乘的程度。投影快捷连接只在形状变化时使用，否则恒等连接最直接。
+
+### 3.3 参数与统计量含义
+
+- $\mathbf x$：残差块输入。
+- $\mathcal F$：由卷积、归一化和激活组成的残差分支。
+- $\mathbf W_s$：匹配尺寸的投影，常为 $1\times1$ 卷积。
+- $\phi$：块输出激活；pre-activation ResNet 将归一化/激活移到卷积前。
+- stage：保持同一空间尺度的一组残差块。
+- depth：网络层数，不能直接等同于有效复杂度或临床性能。
+
+### 3.4 关键假设（含违反后果）
+
+| 假设 | 含义 | 违反后会怎样 | 如何粗查 |
 | --- | --- | --- | --- |
-| F001 | fundus_001.png | left | 2 |
-| F002 | fundus_002.png | right | 0 |
-| F003 | fundus_003.png | left | 3 |
-| F004 | fundus_004.png | right | 1 |
+| 任务受益于深层层级特征 | 更大感受野和抽象层有增益 | 深网只增加方差和成本 | 与浅 CNN 比较学习曲线 |
+| 快捷分支形状匹配 | 加法两端维度一致 | 无法计算或语义错位 | 逐层记录张量形状 |
+| 图像域与预训练域可迁移 | 低层特征可复用 | 迁移收益有限或负迁移 | 冻结/微调对照 |
+| 患者级切分无泄漏 | 同一患者图像不跨集合 | 性能虚高 | patient_id 与近重复审计 |
+| 批归一化统计稳定 | 批量足够且部署域相近 | 小批量/域偏移不稳定 | 比较 GroupNorm、冻结 BN |
 
-### 3.3 输入与产出
+## 4. 手把手算例
+
+用二维线性残差块说明前向与梯度直通。设
+
+$$
+\mathbf x=(2,1)^\top,\qquad
+\mathcal F(\mathbf x)=\mathbf W\mathbf x,\qquad
+\mathbf W=
+\begin{pmatrix}
+0.1&0\\
+0&-0.2
+\end{pmatrix}
+$$
+
+**第 1 步：主分支只学修正量。**
+
+$$
+\mathcal F(\mathbf x)=(0.2,-0.2)^\top
+$$
+
+**第 2 步：快捷连接相加。**
+
+$$
+\mathbf y=\mathbf x+\mathcal F(\mathbf x)
+=(2.2,0.8)^\top
+$$
+
+输入主体被保留，只做小幅调整。若没有快捷连接，普通块输出仅为 $(0.2,-0.2)$。
+
+**第 3 步：看梯度。** 令损失 $L=y_1+y_2$，则
+
+$$
+\frac{\partial L}{\partial\mathbf x}
+=(1,1)(\mathbf I+\mathbf W)
+=(1.1,0.8)
+$$
+
+没有快捷连接时梯度仅为
+
+$$
+(1,1)\mathbf W=(0.1,-0.2)
+$$
+
+恒等通路贡献了 $(1,1)$，使梯度不必完全依赖残差权重。这就是残差连接帮助深层优化的数值本质。
+
+## 5. 数据形式与输入输出
+
+### 5.1 适合的数据形式
+
+- 自变量类型：二维图像、三维体数据或规则栅格。
+- 因变量类型：分类、连续结局、分割或检测标签。
+- 数据结构：保留空间和通道维的张量。
+- 是否适合高维数据：适合，但显存和有效样本量是限制。
+- 是否适合缺失较多数据：不直接处理缺失模态/切片。
+- 是否适合删失数据：需接专门生存损失。
+- 是否适合重复测量数据：图像需按患者切分，时序相关另建模。
+
+### 5.2 示例表格
+
+| patient_id | image_path | modality | scanner | label |
+| --- | --- | --- | --- | ---: |
+| P01 | p01_ct.nii.gz | CT | A | 0 |
+| P02 | p02_ct.nii.gz | CT | B | 1 |
+
+### 5.3 输入与产出
 
 #### 输入
 
-- 输入数据：图像张量和视觉任务标签。
-- 关键变量：网络深度、残差块类型、学习率、数据增强方案。
-- 需要预处理的内容：归一化、裁剪、增强、病人级划分。
+- 规范化图像、标签与患者/设备元数据。
+- ResNet 深度、输入通道、预训练权重和微调策略。
+- 患者级训练/验证/测试划分。
 
 #### 产出
 
-- 模型对象/统计结果：训练好的残差网络和验证指标。
-- 参数估计：各残差块与分类头权重。
-- 预测结果：类别概率、回归值或中间特征嵌入。
-- 不确定性指标：外部验证 AUC、灵敏度、校准和错误案例复核。
+- 类别概率、连续预测或空间任务输出。
+- 全局池化前后的图像表征。
+- 训练历史与验证指标。
+- 不自动产出可信机制解释或不确定性。
 
-## 4. 适用场景
+## 6. 适用场景
 
-- 适合：需要较深视觉特征抽取或迁移学习的影像任务。
-- 不适合：样本极少且无法借助预训练时。
-- 使用前需要特别检查的点：病人级划分、中心偏差、标签噪声、是否过度依赖预训练域。
+- 适合：需要成熟图像骨干、迁移学习或较深层级特征。
+- 不适合：样本极少且无预训练、二维投影丢失关键三维信息、简单模型已充分。
+- 使用前检查：输入尺寸/通道、患者级切分、设备偏倚、BN、小病灶与外部验证。
 
-## 5. 实现
+## 7. 实现
 
-### 5.1 Python
+### 7.1 Python
 
-常用包：
-
-- `torch`
-- `torchvision`
+常用包：PyTorch、torchvision。
 
 ```python
-from torchvision.models import resnet18
+import torch
+from torch import nn
+from torch.utils.data import DataLoader
+from torchvision import datasets, models, transforms
 
-model = resnet18(weights=None, num_classes=2)
+dataset = datasets.FakeData(
+    size=128, image_size=(3, 224, 224), num_classes=2,
+    transform=transforms.ToTensor()
+)
+loader = DataLoader(dataset, batch_size=8, shuffle=True)
+
+model = models.resnet18(weights=None)
+model.fc = nn.Linear(model.fc.in_features, 2)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+loss_fn = nn.CrossEntropyLoss()
+
+images, labels = next(iter(loader))
+optimizer.zero_grad()
+loss = loss_fn(model(images), labels)
+loss.backward()
+optimizer.step()
+print(float(loss))
 ```
 
-### 5.2 R
+真实医学数据应换成按患者划分的数据集；迁移学习时可使用预训练权重并比较冻结与全量微调。
 
-常用包：
+### 7.2 R
 
-- `keras`
+常用包：keras3。
 
 ```r
-# R 中可通过 keras 的 application_resnet* 预训练模型做迁移学习。
+library(keras3)
+
+inputs <- layer_input(shape = c(32, 32, 3))
+x <- inputs |>
+  layer_conv_2d(16, 3, padding = "same", activation = "relu")
+
+residual <- x |>
+  layer_conv_2d(16, 3, padding = "same", activation = "relu") |>
+  layer_conv_2d(16, 3, padding = "same")
+
+x <- layer_add(list(x, residual)) |>
+  layer_activation("relu") |>
+  layer_global_average_pooling_2d()
+outputs <- x |> layer_dense(2, activation = "softmax")
+
+model <- keras_model(inputs, outputs)
+model |> compile(
+  optimizer = "adam",
+  loss = "sparse_categorical_crossentropy",
+  metrics = "accuracy"
+)
+summary(model)
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解读
 
-- 核心结果看什么：外部图像集表现、不同病灶等级下召回率、错误样本模式。
-- 每个主要参数如何解释：深度越大容量越高，但也更依赖数据和正则化。
-- 临床或医学意义如何表达：更适合作为高性能视觉识别骨架，需配合热图和错误案例审核。
-- 常见误读：ResNet 深并不自动代表更好，数据质量和验证设计同样关键。
+- ResNet 是特征提取架构；结果仍需以患者级外部 AUC/PR-AUC、校准和阈值性能解释。
+- 更深网络验证性能更好才有意义，层数本身不是证据。
+- 预训练收益可能来自通用纹理，也可能受自然图像与医学域差异限制。
+- Grad-CAM 只作行为诊断，不证明病灶区域是因果依据。
+- 多切片/多视角预测需先按患者聚合再评价。
 
-## 7. 推荐可视化
+## 9. 假设诊断与稳健性
 
-- 训练/验证损失曲线。
-- 混淆矩阵或 ROC 曲线。
-- Grad-CAM 热图。
+- 比较 ResNet-18/34/50 与浅 CNN，检查加深是否真有收益。
+- 观察训练/验证曲线和残差分支输出范数。
+- 小批量训练比较 BatchNorm、GroupNorm 或冻结统计。
+- 做图像近重复、患者级与检查级泄漏审计。
+- 按设备、中心、视角和病灶大小分层评价。
+- 多随机种子与不同预训练/微调策略做敏感性分析。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
+
+- 残差块主分支与快捷分支结构图。
+- 各 stage 的张量尺寸和通道数。
+- 训练/验证曲线与不同深度性能曲线。
+- Grad-CAM/遮挡图及伪影对照。
+- 跨中心、设备和病灶大小性能森林图。
+
+## 11. 优势、局限与常见坑
 
 ### 优势
 
-- 深层训练更稳定。
-- 迁移学习生态成熟。
-- 在医学影像任务中常是强基线。
+- 恒等快捷连接让很深 CNN 更易优化。
+- 架构成熟，预训练模型和下游生态丰富。
+- 可作为分类、检测和分割的通用骨干。
 
 ### 局限
 
-- 仍需要较多算力和较好标注。
-- 可解释性有限。
-- 对域偏移较敏感。
+- 深度增加计算、显存和过拟合风险。
+- 加法融合要求形状一致，可能混合语义不同特征。
+- 不自动解决域偏移、泄漏或解释问题。
 
 ### 常见坑
 
-- 用图像级随机划分代替病人级划分。
-- 预训练后不检查目标域差异。
-- 只报告平均准确率，不看关键亚组。
+- 将退化问题误写成普通过拟合。
+- 尺寸变化时忘记投影快捷连接。
+- 小批量仍直接更新 BatchNorm 统计。
+- 只按切片随机切分。
+- 不经验证就认为更深一定更好。
 
-## 9. 与相近方法的区别
+## 12. 与相近方法的区别
 
-- 和 [[卷积神经网络（Convolutional Neural Network, CNN）]] 的区别：ResNet 是深层 CNN 的具体残差化架构。
-- 和 [[AlexNet（AlexNet）]] 的区别：AlexNet 更早、更浅，ResNet 重点解决深层训练退化。
-- 和 [[DenseNet（Densely Connected Convolutional Network, DenseNet）]] 的区别：DenseNet 采用密集连接，复用所有前层特征。
+- 与普通 CNN：ResNet 显式学习残差并保留恒等通路。
+- 与 DenseNet：ResNet 用加法融合；DenseNet 用通道拼接保留所有旧特征。
+- 与 AlexNet：AlexNet 是早期顺序堆叠架构，ResNet 可训练得更深。
+- 与 Vision Transformer：ResNet 强局部先验、样本效率较好；ViT 更直接建模全局关系。
+- 如何选择：中小型医学影像任务先用预训练 ResNet 建强基线，再比较 DenseNet/ViT。
 
-## 10. 医学研究中的典型应用
+## 13. 医学研究中的典型应用
 
-- 眼底、胸片、病理切片分类。
-- 影像表征提取和迁移学习。
-- 作为分割和检测网络骨干。
+- 胸片、眼底和皮肤镜图像分类。
+- CT/MRI 肿瘤分型与预后表征。
+- 病理图像块编码及多实例聚合。
+- 分割/检测模型的编码器骨干。
 
-## 11. 相关方法
+应报告患者级切分、图像预处理、预训练来源、设备/中心分布、类别不平衡和外部验证。时间到事件结局需另接删失感知目标。
+
+## 14. 关键术语
+
+- **残差（Residual）**：目标映射相对输入的修正量。
+- **快捷连接（Shortcut connection）**：绕过主分支直接传递输入的路径。
+- **恒等映射（Identity mapping）**：输出等于输入的映射。
+- **退化问题（Degradation problem）**：网络加深后训练误差反而升高。
+- **投影快捷连接（Projection shortcut）**：用 $1\times1$ 卷积匹配形状。
+- **Bottleneck block**：用 $1\times1$ 卷积先降维、再升维的残差块。
+- **Pre-activation**：归一化和激活置于卷积之前的残差设计。
+- **Stage**：共享空间尺度和通道设定的一组残差块。
+
+## 15. 相关方法
 
 - [[卷积神经网络（Convolutional Neural Network, CNN）]]
-- [[AlexNet（AlexNet）]]
 - [[DenseNet（Densely Connected Convolutional Network, DenseNet）]]
+- [[AlexNet（AlexNet）]]
 - [[Transformer（Transformer）]]
+- [[人工神经网络（Artificial Neural Network, ANN）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
-- He K, Zhang X, Ren S, Sun J. Deep residual learning for image recognition. *Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition*. 2016:770-778.
+- He K, Zhang X, Ren S, Sun J. Deep residual learning for image recognition. *CVPR*. 2016:770-778. https://doi.org/10.1109/CVPR.2016.90
+- He K, Zhang X, Ren S, Sun J. Identity mappings in deep residual networks. *ECCV*. 2016:630-645. https://doi.org/10.1007/978-3-319-46493-0_38
 - Goodfellow I, Bengio Y, Courville A. *Deep Learning*. MIT Press; 2016.
-- torchvision Developers. ResNet models. [https://pytorch.org/vision/stable/models/resnet.html](https://pytorch.org/vision/stable/models/resnet.html) （访问日期：2026-07-02）
+- torchvision developers. ResNet. https://pytorch.org/vision/stable/models/resnet.html

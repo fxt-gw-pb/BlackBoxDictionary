@@ -19,207 +19,252 @@ r_packages: [e1071]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-支持向量回归是支持向量机在回归问题中的扩展，它通过引入 $\epsilon$-不敏感损失函数，在允许一定误差带的同时寻找最平滑的回归函数。
+SVR 寻找尽可能平坦的回归函数，并允许预测曲线周围存在一个不计损失的 $\epsilon$ 容忍管。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：如何在复杂非线性关系下做稳健的连续结局预测。
-- 适用任务：非线性回归、小到中等规模数据预测、核方法回归。
-- 常见医学场景：复杂生理指标预测、连续风险评分估计、非线性剂量-反应曲线拟合。
+支持向量回归是 [[支持向量机（Support Vector Machine, SVM）]] 的连续结局版本。它不最小化所有点的平方误差，而用 $\epsilon$-不敏感损失忽略足够小的误差，只惩罚超出容忍管的部分。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-SVR 不要求每个点都精确拟合，而是在预测曲线周围放一个“容忍带”（$\epsilon$-tube）。只要点落在带内，就不产生损失；真正决定模型形状的是落在带外的那些支持向量。
+- 小到中等样本中的非线性连续结局预测。
+- 允许存在临床上可忽略误差的稳健函数拟合。
+- 通过核函数在不显式构造高维特征时学习弯曲关系。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+先在预测曲线周围画一条宽度为 $2\epsilon$ 的管道。管内点已经“够准”，不再消耗模型精力；管边界和管外点决定曲线的位置与形状。
 
-线性 SVR 的优化问题可写成：
+## 2. 核心思想与原理
+
+### 2.1 平坦与拟合的权衡
+
+$\|w\|^2/2$ 鼓励函数平坦，超出 $\epsilon$ 管的松弛量鼓励贴近数据，$C$ 决定后者相对前者有多重要。
+
+### 2.2 稀疏表示
+
+对预测函数有非零对偶系数的训练点称为支持向量。管内且不在边界上的点通常不直接出现在最终核展开中，因此模型由部分关键病例决定。
+
+### 2.3 核技巧
+
+线性 SVR 在原特征空间拟合平面；RBF 或多项式核把内积替换为相似度，使线性算法可在隐式高维空间形成非线性曲线。
+
+## 3. 数学形式
+
+### 3.1 原始优化问题
 
 $$
-\min_{w,b,\xi_i,\xi_i^*}
-\frac{1}{2}\|w\|^2
-+
-C\sum_{i=1}^n(\xi_i+\xi_i^*)
+\operatorname*{minimize}_{w,b,\xi,\xi^*}
+\quad
+\frac12\|w\|^2
++C\sum_{i=1}^{n}(\xi_i+\xi_i^*)
 $$
 
-满足约束：
+约束为：
 
 $$
 \begin{aligned}
-y_i - (w^\top x_i + b) &\le \epsilon + \xi_i \\
-(w^\top x_i + b) - y_i &\le \epsilon + \xi_i^* \\
+y_i-w^\top\phi(x_i)-b &\le \epsilon+\xi_i\\
+w^\top\phi(x_i)+b-y_i &\le \epsilon+\xi_i^*\\
 \xi_i,\xi_i^* &\ge 0
 \end{aligned}
 $$
 
-核化后预测函数为：
+### 3.2 $\epsilon$-不敏感损失
 
 $$
-f(x)=\sum_{i=1}^n (\alpha_i-\alpha_i^*)K(x_i,x)+b
+L_\epsilon(y,f)=
+\max\{0,|y-f(x)|-\epsilon\}
 $$
 
-### 2.2 参数或统计量含义
+### 3.3 核化预测
 
-- $\epsilon$：误差容忍带宽度。
-- $C$：误差惩罚强度。
-- $K(\cdot,\cdot)$：核函数，如线性核、多项式核、RBF 核。
-- 支持向量：落在 $\epsilon$ 带外、真正决定模型的样本点。
+$$
+f(x)=
+\sum_{i=1}^{n}(\alpha_i-\alpha_i^*)K(x_i,x)+b
+$$
 
-### 2.3 关键假设
+常用 RBF 核为：
 
-- 结局为连续型。
-- 数据规模通常不宜过大，否则计算成本会较高。
-- 特征尺度通常需要标准化。
+$$
+K(x,z)=\exp[-\gamma\|x-z\|^2]
+$$
 
-## 3. 数据形式与输入输出
+### 3.4 关键条件
 
-### 3.1 适合的数据形式
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 特征已合理缩放 | 大量纲变量支配核距离 | 管线内标准化 |
+| $C,\epsilon,\gamma$ 经训练内调参 | 欠拟合或过拟合 | 嵌套交叉验证 |
+| 样本规模适中 | 核矩阵训练成本高 | 记录时间与内存 |
+| 数据切分无患者泄漏 | 测试误差虚低 | 分组或时间切分 |
 
-- 自变量类型：连续变量为主，也可混合编码后的分类变量。
-- 因变量类型：连续型。
-- 数据结构：宽表数据，或低维非线性散点数据。
-- 是否适合高维数据：可以，但训练成本会提高。
-- 是否适合缺失较多数据：需先处理缺失值。
-- 是否适合删失数据：不适合。
-- 是否适合重复测量数据：不直接适合。
+## 4. 手把手算例
 
-### 3.2 示例表格
+假设候选线性函数为 $f(x)=x$，4 个观测为：
 
-一个简单的一维非线性回归表格如下：
+| $x$ | $y$ | $f(x)$ | 绝对误差 |
+| ---: | ---: | ---: | ---: |
+| 0 | 0.1 | 0 | 0.1 |
+| 1 | 1.1 | 1 | 0.1 |
+| 2 | 2.4 | 2 | 0.4 |
+| 3 | 4.0 | 3 | 1.0 |
 
-| X | y |
-| --- | --- |
-| 0.026 | 0.045 |
-| 1.126 | 0.735 |
-| 1.392 | 0.979 |
-| 1.501 | 1.123 |
-| 1.515 | 0.756 |
-| 2.340 | 0.636 |
+取 $\epsilon=0.2$。各点的 $\epsilon$-不敏感损失为：
 
-### 3.3 输入与产出
+$$
+(0,\ 0,\ 0.4-0.2,\ 1.0-0.2)
+=(0,0,0.2,0.8)
+$$
 
-#### 输入
+前两点位于管内，不计损失；后两点超出管道，是决定修正方向的支持病例。
 
-- 输入数据：连续结局和特征矩阵。
-- 关键变量：核函数、`C`、`epsilon`、`gamma`。
-- 需要预处理的内容：标准化、训练测试集划分、超参数搜索。
+若 $C=2$，总误差惩罚为：
 
-#### 产出
+$$
+C\sum_iL_\epsilon=2(0.2+0.8)=2
+$$
 
-- 模型对象/统计结果：支持向量集合、拟合函数、最佳超参数。
-- 参数估计：核参数和支持向量权重，不像线性回归那样直观。
-- 预测结果：连续型预测值。
-- 不确定性指标：通常依赖交叉验证误差和测试集性能。
+又因为 $w=1$，平坦度惩罚为 $\|w\|^2/2=0.5$，该候选函数的目标值为 $2.5$。
 
-## 4. 适用场景
+**参数直觉：** 增大 $\epsilon$ 会让更多点落入管内；增大 $C$ 会更强烈地要求模型修正管外误差。
 
-- 适合：复杂非线性、小到中等规模回归任务。
-- 不适合：超大规模数据、强调强可解释性的场景。
-- 使用前需要特别检查的点：标准化、核函数选择、`C/epsilon/gamma` 调参。
+## 5. 数据形式与输入输出
 
-## 5. 实现
+### 5.1 数据要求
 
-### 5.1 Python
+- 因变量为连续型。
+- 特征可连续或经编码后进入模型，通常必须标准化。
+- 缺失需预先处理；普通 SVR 不直接处理删失或重复测量相关性。
 
-常用包：
+### 5.2 输入与产出
 
-- `scikit-learn`
+输入为特征、连续结局、核函数及 $C,\epsilon,\gamma$。输出为连续预测、支持向量和对偶系数。标准实现不自然给出预测区间。
+
+## 6. 适用场景
+
+- 小到中等样本、特征数中等、非线性明显的连续预测。
+- 误差在某个容忍范围内临床意义相近的任务。
+- 不适合超大样本、要求参数效应解释或必须有可靠预测区间的任务。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
+from sklearn.model_selection import GridSearchCV, KFold
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
+from sklearn.metrics import mean_absolute_error
 
-fit = make_pipeline(
-    StandardScaler(),
-    SVR(kernel="rbf", C=10, epsilon=0.1, gamma="scale")
-)
-fit.fit(X_train, y_train)
-y_pred = fit.predict(X_test)
+pipe = make_pipeline(StandardScaler(), SVR(kernel="rbf"))
+grid = {
+    "svr__C": [0.1, 1, 10, 100],
+    "svr__epsilon": [0.05, 0.1, 0.2],
+    "svr__gamma": ["scale", 0.01, 0.1],
+}
+cv = KFold(n_splits=5, shuffle=True, random_state=42)
+search = GridSearchCV(pipe, grid, scoring="neg_mean_absolute_error", cv=cv)
+search.fit(X_train, y_train)
+
+pred = search.predict(X_test)
+print(search.best_params_)
+print(mean_absolute_error(y_test, pred))
 ```
 
-### 5.2 R
-
-常用包：
-
-- `e1071`
+### 7.2 R
 
 ```r
 library(e1071)
 
-fit <- svm(y ~ ., data = df, type = "eps-regression", kernel = "radial")
-pred <- predict(fit, newdata = df_test)
+tuned <- tune.svm(
+  y ~ .,
+  data = train,
+  type = "eps-regression",
+  kernel = "radial",
+  cost = c(0.1, 1, 10, 100),
+  epsilon = c(0.05, 0.1, 0.2),
+  gamma = c(0.01, 0.1)
+)
+
+fit <- tuned$best.model
+pred <- predict(fit, newdata = test)
+mean(abs(test$y - pred))
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：预测误差、支持向量数量、核参数。
-- 每个主要参数如何解释：SVR 更偏预测导向，参数解释通常不如线性模型直接。
-- 临床或医学意义如何表达：更适合强调“预测性能”和“非线性拟合能力”。
-- 常见误读：支持向量回归不是简单的“线性回归 + 核函数”，其损失函数和优化目标都不同。
+- MAE 与 $\epsilon$ 都有结局原单位，应结合临床可接受误差说明。
+- `C` 越大越不容忍管外误差；$\gamma$ 越大，RBF 影响范围越局部。
+- 支持向量比例过高可能提示管太窄、噪声大或模型复杂。
+- 预测曲线是条件预测，不代表暴露的因果剂量反应。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
 
-- 原始散点图 + SVR 拟合曲线。
-- 真实值 vs 预测值散点图。
-- 不同核函数拟合曲线对比图。
+1. 比较不同 $C,\epsilon,\gamma$ 的验证误差曲面。
+2. 检查支持向量比例与残差分布。
+3. 与线性回归、Ridge 和树模型建立基准。
+4. 做重复嵌套交叉验证，避免调参乐观偏倚。
+5. 检查训练范围外预测、时间外与中心外泛化。
 
-### 7.1 图像示例
+## 10. 推荐可视化
 
-下图展示 SVR 在一组非线性数据上的拟合曲线，体现了核方法对复杂曲线关系的刻画能力。
+- 散点、SVR 曲线和 $\epsilon$ 管。
+- 真实值-预测值与残差图。
+- $C,\epsilon,\gamma$ 的验证性能热图。
+
+下图展示非线性 SVR 拟合曲线：
 
 ![](../../04_示例图像/svr_nonlinear_curve.png)
 
-下图为 SVR 在房价数据上的真实值 vs 预测值散点图，点越贴近对角线说明预测越准确。
+下图展示真实值与预测值：
 
 ![](../../04_示例图像/svr_actual_vs_pred_houseprice.png)
 
-## 8. 优势、局限与常见坑
+## 11. 优势、局限与常见坑
 
-### 优势
+**优势：** 非线性灵活，对管内小误差不敏感，解由支持向量稀疏表示。
 
-- 非线性拟合能力强。
-- 对小误差不敏感，具有一定稳健性。
-- 核技巧让它在低到中等规模问题上很灵活。
+**局限：** 调参敏感，大样本训练慢，不直接提供概率型不确定性。
 
-### 局限
+**常见坑：** 未标准化；只调 $C$；调参和评估共用同一折；把 $\epsilon$ 当置信区间；在数万以上样本直接使用精确 RBF-SVR。
 
-- 大样本计算成本高。
-- 参数调优复杂。
-- 模型解释性一般。
+## 12. 与相近方法的区别
 
-### 常见坑
+- [[支持向量机（Support Vector Machine, SVM）]]：SVM 最大化分类间隔，SVR 构造回归容忍管。
+- [[高斯过程回归（Gaussian Process Regression）]]：GPR 是概率模型并自然输出不确定性。
+- [[多项式核回归（Polynomial Kernel Regression）]]：是 SVR 选用多项式核时的具体形式。
+- [[随机森林回归（Random Forest Regression）]]：树更擅长局部阈值与交互，SVR 更偏平滑核函数。
 
-- 不标准化特征就直接训练。
-- 在大数据上直接用 RBF-SVR。
-- 只调 `C` 不调 `epsilon` 和 `gamma`。
+## 13. 医学研究中的典型应用
 
-## 9. 与相近方法的区别
+- 连续生理指标、风险评分与资源消耗预测。
+- 小样本影像组学或组学连续结局建模。
+- 非线性剂量或暴露-响应的预测性拟合。
 
-- 和线性回归的区别：SVR 关注支持向量和 $\epsilon$-带，而不是整体平方误差最小化。
-- 和支持向量机的区别：SVR 处理连续结局，SVM 主条目聚焦分类任务。
-- 和多项式回归的区别：多项式回归靠特征扩展，SVR 靠核函数与 margin 思想。
-- 和随机森林回归的区别：SVR 更适合平滑非线性曲线，树模型更擅长复杂交互和局部结构。
+## 14. 术语表
 
-## 10. 医学研究中的典型应用
+| 术语 | 含义 |
+| --- | --- |
+| $\epsilon$-tube | 预测曲线周围不计损失的容忍带 |
+| support vector | 位于管边界或管外并决定解的训练点 |
+| slack variable | 超出容忍带的误差量 |
+| kernel trick | 通过核内积隐式进入高维特征空间 |
+| RBF kernel | 相似度随平方距离指数衰减的核 |
 
-- 非线性连续风险预测。
-- 生理参数与疾病评分之间的复杂关系拟合。
-- 小中样本、高维但非线性明显的预测任务。
-
-## 11. 相关方法
+## 15. 相关方法
 
 - [[支持向量机（Support Vector Machine, SVM）]]
-- [[多项式回归（Polynomial Regression）]]
+- [[高斯过程回归（Gaussian Process Regression）]]
+- [[多项式核回归（Polynomial Kernel Regression）]]
 - [[Ridge回归（Ridge Regression）]]
-- [[线性回归（Linear Regression）]]
+- [[随机森林回归（Random Forest Regression）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
 - Smola AJ, Schölkopf B. A tutorial on support vector regression. *Stat Comput*. 2004;14:199-222.
-- scikit-learn Developers. `sklearn.svm.SVR`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html](https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html) （访问日期：2026-07-02）
-- CRAN. Package `e1071`. [https://cran.r-project.org/package=e1071](https://cran.r-project.org/package=e1071) （访问日期：2026-07-02）
+- scikit-learn Developers. `SVR` API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html](https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html) （访问日期：2026-07-09）
+- CRAN. Package `e1071`. [https://cran.r-project.org/package=e1071](https://cran.r-project.org/package=e1071) （访问日期：2026-07-09）

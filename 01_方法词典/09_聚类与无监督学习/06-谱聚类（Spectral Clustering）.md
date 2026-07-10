@@ -19,210 +19,250 @@ r_packages: [kernlab]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-谱聚类是一种基于图的聚类方法。它先把样本表示成相似度图，再利用图拉普拉斯矩阵的特征向量把样本嵌入到低维空间，最后在该空间中进行聚类。
+谱聚类把样本变成相似图，利用图拉普拉斯的低频特征向量寻找“内部连接强、彼此连接弱”的节点组。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：当簇形状非凸或由复杂相似关系定义时，如何进行分组。
-- 适用任务：图分割、非球形簇识别、相似度矩阵聚类、复杂结构样本分群。
-- 常见医学场景：患者相似性网络分群，单细胞相似图聚类，影像区域图分割。
+谱聚类是一类图分割方法。它先构造相似度矩阵，再从图拉普拉斯矩阵的特征向量得到低维谱嵌入，最后对嵌入行进行 K-means 或直接离散化。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-谱聚类把样本看作图上的节点，相似样本之间连边更强。算法要做的是把图切成几块，使块内连接强、块间连接弱。
+- 原空间中的簇非凸，质心距离无法正确切分。
+- 数据天然以邻接图或患者相似矩阵表示。
+- 希望按照图连接模式而非全局欧氏中心分群。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+把患者看成节点，相似患者之间连边。理想切法像剪断少数弱桥，把网络分成内部紧密的社区；拉普拉斯特征向量提供了连续近似的切图坐标。
 
-设相似度矩阵为 $W$，度矩阵为：
+## 2. 核心思想与原理
 
-$$
-D_{ii}=\sum_j W_{ij}
-$$
+### 2.1 图比坐标更重要
 
-未归一化图拉普拉斯矩阵为：
+谱聚类先决定谁与谁相似，再做聚类。通过近邻图，两个月牙形簇可各自沿曲线连通，即使它们没有球形质心结构。
 
-$$
-L=D-W
-$$
+### 2.2 拉普拉斯编码平滑性
 
-常见归一化拉普拉斯包括：
+对向量 $f$：
 
 $$
-L_{\text{sym}}=I-D^{-1/2}WD^{-1/2}
+f^\top Lf=
+\frac12\sum_{i,j}W_{ij}(f_i-f_j)^2
 $$
 
-或：
+若强连接节点取值接近，该量较小。因此小特征值对应图上变化缓慢、可揭示社区的方向。
+
+### 2.3 图构造决定答案
+
+RBF 尺度、近邻数、互近邻规则和特征标准化会改变边。谱算法只能忠实切分给定图，无法弥补错误相似度。
+
+## 3. 数学形式
+
+### 3.1 图拉普拉斯
 
 $$
-L_{\text{rw}}=I-D^{-1}W
+D_{ii}=\sum_jW_{ij},\qquad L=D-W
 $$
 
-谱聚类取拉普拉斯矩阵前 $K$ 个特征向量组成嵌入矩阵 $U$，再对 $U$ 的行进行 [[K-means聚类（K-means Clustering）]]。
+常用对称归一化形式：
 
-### 2.2 参数或统计量含义
+$$
+L_{\mathrm{sym}}=
+I-D^{-1/2}WD^{-1/2}
+$$
 
-- $W$：样本相似度矩阵。
-- $D$：度矩阵，表示每个节点总连接强度。
-- $L$：图拉普拉斯矩阵。
-- `n_clusters`：目标簇数。
-- `affinity`：相似度构造方式，如 RBF 核、近邻图或预计算矩阵。
-- `gamma`：RBF 相似度的尺度参数。
+### 3.2 谱嵌入
 
-### 2.3 关键假设
+取 $L_{\mathrm{sym}}$ 最小的 $K$ 个特征值对应特征向量组成 $U$，按行归一化后对 $U$ 的行聚类。
 
-- 样本间相似度图能表达真实结构。
-- 图分割目标与研究问题一致。
-- 簇内连接强、簇间连接弱。
-- 相似度参数设置合理，不会造成图过稀或过密。
+### 3.3 RBF 相似度
 
-## 3. 数据形式与输入输出
+$$
+W_{ij}=
+\exp[-\gamma\|x_i-x_j\|^2]
+$$
 
-### 3.1 适合的数据形式
+也可只保留 K 近邻边，得到稀疏图。
 
-- 自变量类型：连续特征、图相似度矩阵、预计算邻接矩阵。
-- 因变量类型：无监督方法，不需要结局变量。
-- 数据结构：样本乘以特征矩阵，或样本乘以样本相似度矩阵。
-- 是否适合高维数据：可用，但相似度构造应谨慎，常先降维。
-- 是否适合缺失较多数据：需先处理缺失或定义能处理缺失的相似度。
-- 是否适合删失数据：不直接处理删失结局。
-- 是否适合重复测量数据：可通过自定义相似度纳入，但普通谱聚类不建模相关结构。
+### 3.4 关键条件
 
-### 3.2 示例表格
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 相似图表达真实邻近 | 切分没有临床意义 | 图与邻居审查 |
+| 图不过稀或过密 | 断裂或所有点连成一团 | 连通分量与度分布 |
+| 簇数和特征间隙稳定 | 分割对参数敏感 | eigengap 与重采样 |
+| 样本量可计算 | 相似矩阵内存过大 | 稀疏近邻图 |
 
-以患者相似度矩阵为例：
+## 4. 手把手算例
 
-| Patient | P001 | P002 | P003 | P004 |
-| --- | --- | --- | --- | --- |
-| P001 | 1.00 | 0.82 | 0.12 | 0.20 |
-| P002 | 0.82 | 1.00 | 0.18 | 0.22 |
-| P003 | 0.12 | 0.18 | 1.00 | 0.79 |
-| P004 | 0.20 | 0.22 | 0.79 | 1.00 |
+四名患者构成两个互不连接的二节点小组：
 
-### 3.3 输入与产出
+$$
+W=
+\begin{pmatrix}
+0&1&0&0\\
+1&0&0&0\\
+0&0&0&1\\
+0&0&1&0
+\end{pmatrix}
+$$
 
-#### 输入
+每个节点度为 1，所以 $D=I$，未归一化与归一化拉普拉斯相同：
 
-- 输入数据：特征矩阵或相似度矩阵。
-- 关键变量：簇数、相似度函数、近邻数或核参数。
-- 需要预处理的内容：缺失处理、标准化、相似度矩阵检查、图连通性检查。
+$$
+L=D-W=
+\begin{pmatrix}
+1&-1&0&0\\
+-1&1&0&0\\
+0&0&1&-1\\
+0&0&-1&1
+\end{pmatrix}
+$$
 
-#### 产出
+**Step 1：找零特征向量。**
 
-- 模型对象/统计结果：簇标签、谱嵌入、相似度图。
-- 参数估计：拉普拉斯特征向量。
-- 预测结果：标准谱聚类不自然支持新样本预测。
-- 不确定性指标：不同相似度参数下的聚类稳定性、图割质量指标。
+$$
+u_1=\frac{1}{\sqrt2}(1,1,0,0)^\top,\qquad
+u_2=\frac{1}{\sqrt2}(0,0,1,1)^\top
+$$
 
-## 4. 适用场景
+均满足 $Lu=0$。零特征值的重数为 2，正好等于图的连通分量数。
 
-- 适合：非凸簇、样本关系适合图表达、已有相似度矩阵的场景。
-- 不适合：样本量非常大、相似度矩阵难以存储、需要直接解释簇中心的场景。
-- 使用前需要特别检查的点：相似度构造、图是否连通、簇数选择、谱嵌入稳定性。
+**Step 2：组成谱坐标。** $U=(u_1,u_2)$ 的四行是：
 
-## 5. 实现
+$$
+\left(\frac1{\sqrt2},0\right),
+\left(\frac1{\sqrt2},0\right),
+\left(0,\frac1{\sqrt2}\right),
+\left(0,\frac1{\sqrt2}\right)
+$$
 
-### 5.1 Python
+**Step 3：聚类。** 前两行完全相同，后两行完全相同，K-means 自然得到 $\{1,2\}$ 与 $\{3,4\}$。
 
-常用包：
+**结论：** 谱嵌入把图连接结构变成容易分开的坐标；一般图不是完全断开时，小非零特征值提供近似分割。
 
-- `scikit-learn`
+## 5. 数据形式与输入输出
+
+### 5.1 数据要求
+
+- 可输入数值特征、相似矩阵或邻接图。
+- 相似矩阵应非负、通常对称，且需检查图连通性。
+- 缺失需在构图前处理。
+
+### 5.2 输入与产出
+
+输入为相似度规则、近邻数或 $\gamma$、簇数与标签离散化方法。输出为谱嵌入和簇标签；标准实现不自然支持新样本外推。
+
+## 6. 适用场景
+
+- 非凸簇、患者相似网络、单细胞近邻图和图像分割。
+- 数据规模允许构造稀疏图和求特征向量。
+- 不适合超大稠密图、相似度定义不可靠或需在线预测的任务。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import pandas as pd
 from sklearn.cluster import SpectralClustering
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv("patient_features.csv")
-X = df[["Marker_1", "Marker_2", "Marker_3", "Marker_4"]]
-X_scaled = StandardScaler().fit_transform(X)
-
-fit = SpectralClustering(
+X_s = StandardScaler().fit_transform(X)
+model = SpectralClustering(
     n_clusters=3,
     affinity="nearest_neighbors",
-    n_neighbors=10,
+    n_neighbors=15,
     assign_labels="kmeans",
-    random_state=42
+    n_init=50,
+    random_state=42,
+    n_jobs=-1,
 )
-cluster = fit.fit_predict(X_scaled)
-
-print(pd.Series(cluster).value_counts().sort_index())
+cluster = model.fit_predict(X_s)
+affinity = model.affinity_matrix_
+print(cluster)
 ```
 
-### 5.2 R
-
-常用包：
-
-- `kernlab`
+### 7.2 R
 
 ```r
 library(kernlab)
 
 x <- scale(df[, c("Marker_1", "Marker_2", "Marker_3", "Marker_4")])
-fit <- specc(x, centers = 3, kernel = "rbfdot")
+fit <- specc(
+  as.matrix(x),
+  centers = 3,
+  kernel = "rbfdot",
+  kpar = "automatic"
+)
 
 cluster <- as.integer(fit)
 table(cluster)
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：相似图中的分割、各簇样本量、谱嵌入中的分离情况、临床变量在簇间的差异。
-- 每个主要参数如何解释：近邻数越小，图越局部；近邻数越大，图更平滑但可能模糊边界。
-- 临床或医学意义如何表达：谱聚类发现的是相似性图上的社区结构，应说明相似度定义。
-- 常见误读：谱聚类没有天然质心，不能像 K-means 那样直接解释“中心患者”。
+- 簇是所选相似图上的社区，不一定有原空间质心。
+- 小特征值和 eigengap 可辅助理解图结构，但不自动确定唯一簇数。
+- 簇编号无顺序意义。
+- 必须报告 affinity、近邻数、核参数和标准化方式。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
 
-- 相似度矩阵热图。
+1. 检查图的连通分量、节点度与孤立点。
+2. 改变近邻数、$\gamma$ 和相似度定义。
+3. 比较前若干拉普拉斯特征值与 eigengap。
+4. 重采样后比较共同聚类矩阵。
+5. 与 K-means、DBSCAN 和层次聚类对照。
+
+## 10. 推荐可视化
+
+- 排序后的相似度矩阵热图。
+- 近邻图按簇着色。
 - 谱嵌入二维散点图。
-- 图网络分割可视化。
-- 聚类标签在 PCA/UMAP 空间中的分布。
+- 拉普拉斯特征值 scree/eigengap 图。
 
-## 8. 优势、局限与常见坑
+## 11. 优势、局限与常见坑
 
-### 优势
+**优势：** 能处理非凸簇，直接利用图或相似矩阵，图切分解释清晰。
 
-- 能处理非凸形状簇。
-- 可直接利用相似度矩阵或图结构。
-- 与图分割和网络社区发现关系紧密。
+**局限：** 构图与特征分解昂贵，参数敏感，新样本预测困难。
 
-### 局限
+**常见坑：** 默认相似度直接使用；图断裂却未检查；把 UMAP 图上的邻近当原始图；只展示标签不报告构图规则。
 
-- 相似度矩阵计算和存储成本高。
-- 参数选择影响很大。
-- 新样本预测不如质心模型方便。
+## 12. 与相近方法的区别
 
-### 常见坑
+- [[K-means聚类（K-means Clustering）]]：原空间质心分组；谱聚类先把图结构展开。
+- [[DBSCAN（Density-Based Spatial Clustering of Applications with Noise）]]：按密度可达分簇并标噪声。
+- [[层次聚类（Hierarchical Clustering）]]：产生树状嵌套结构，谱聚类产生给定 $K$ 的图分割。
+- 选择经验：复杂非凸结构且能构造可信相似图时使用谱聚类。
 
-- 使用默认 RBF 参数而不检查图结构。
-- 图不连通或过密时仍直接解释结果。
-- 把谱聚类标签当作稳定真实亚型而不做敏感性分析。
+## 13. 医学研究中的典型应用
 
-## 9. 与相近方法的区别
+- 患者相似网络亚群。
+- 单细胞或空间组学近邻图分群。
+- 医学图像区域与病灶轮廓分割。
 
-- 和 [[K-means聚类（K-means Clustering）]] 的区别：谱聚类先做图谱嵌入，能处理更复杂形状；K-means 直接在原特征空间按质心分组。
-- 和 [[DBSCAN（Density-Based Spatial Clustering of Applications with Noise）]] 的区别：DBSCAN 基于密度连通，谱聚类基于相似图切分。
-- 和 [[层次聚类（Hierarchical Clustering）]] 的区别：层次聚类输出树状结构，谱聚类输出图分割结果。
+## 14. 术语表
 
-## 10. 医学研究中的典型应用
+| 术语 | 含义 |
+| --- | --- |
+| affinity matrix | 节点两两相似度矩阵 |
+| degree matrix | 对角线上为节点总边权的矩阵 |
+| graph Laplacian | 编码图连接和平滑性的矩阵 |
+| spectral embedding | 由拉普拉斯低频特征向量形成的坐标 |
+| eigengap | 相邻特征值差距，用于观察潜在分割尺度 |
 
-- 患者相似性网络中的亚群发现。
-- 单细胞近邻图或相似图聚类。
-- 医学影像区域分割和复杂形状病灶结构探索。
-
-## 11. 相关方法
+## 15. 相关方法
 
 - [[K-means聚类（K-means Clustering）]]
 - [[DBSCAN（Density-Based Spatial Clustering of Applications with Noise）]]
 - [[层次聚类（Hierarchical Clustering）]]
 - [[UMAP（Uniform Manifold Approximation and Projection）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
-- von Luxburg U. A tutorial on spectral clustering. *Statistics and Computing*. 2007;17:395-416.
+- von Luxburg U. A tutorial on spectral clustering. *Stat Comput*. 2007;17:395-416.
 - Ng AY, Jordan MI, Weiss Y. On spectral clustering: analysis and an algorithm. *NeurIPS*. 2001.
-- scikit-learn Developers. `sklearn.cluster.SpectralClustering`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.cluster.SpectralClustering.html](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.SpectralClustering.html) （访问日期：2026-07-02）
+- scikit-learn Developers. `SpectralClustering` API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.cluster.SpectralClustering.html](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.SpectralClustering.html) （访问日期：2026-07-09）

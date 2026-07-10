@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,196 +54,453 @@
     <div class="intro-note"><h1>Transformer（Transformer）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>Transformer 是以多头注意力为核心的序列建模架构。它不依赖传统递归结构，而是通过自注意力和位置编码并行建模序列中的全局依赖。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>Transformer 让序列中每个位置用自注意力直接汇总其他位置，再通过残差、归一化和逐位置前馈网络反复加工，从而不依赖递归也能建模全局上下文。</p>
+<h3>1.2 定义</h3>
+<p>Transformer 是以多头注意力为核心的神经网络架构。一个编码器块通常包含多头自注意力、残差连接、层归一化和前馈网络；解码器还使用因果 mask 与编码器—解码器交叉注意力。由于各位置可并行计算，Transformer 很适合大规模预训练。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：当序列很长、远距离依赖重要且并行训练效率关键时，如何更高效地学习上下文关系。</li>
-<li>适用任务：文本理解与生成、时间序列建模、图像 patch 建模、多模态学习。</li>
-<li>常见医学场景：临床文本分类、长病历摘要、时序监测数据预测、多模态诊疗辅助建模。</li>
+<li>研究问题：序列很长、远距离关系重要、递归计算限制并行时，如何学习上下文表示。</li>
+<li>适用任务：文本理解/生成、序列分类、时间序列预测、图像块建模和多模态融合。</li>
+<li>常见医学场景：临床文本编码、纵向 EHR 风险预测、医学影像 Transformer、多模态诊疗模型。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>Transformer 不再一步一步“读”序列，而是让每个位置同时查看所有其他位置，决定哪些信息最相关，再把这些相关信息聚合到当前位置表示里。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>RNN 像按页阅读并不断改写一张摘要；Transformer 像把所有病历页铺在桌面上，每一页都能同时标记与自己最相关的其他页。多头注意力相当于让多位审阅者分别关注用药、检验、时间和症状关系，前馈层再对每页的综合信息做非线性加工。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>Transformer 的核心组件是多头注意力：</p>
-<p>$$
-\operatorname{head}_i = \operatorname{Attention}(QW_i^Q, KW_i^K, VW_i^V)
-$$</p>
-<p>$$
-\operatorname{MHA}(Q,K,V) = \operatorname{Concat}(\operatorname{head}_1,\dots,\operatorname{head}_h)W^O
-$$</p>
-<p>编码器层常写为：</p>
-<p>$$
-H' = \operatorname{LayerNorm}(H + \operatorname{MHA}(H,H,H))
-$$</p>
-<p>$$
-H^{+} = \operatorname{LayerNorm}(H' + \operatorname{FFN}(H'))
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>递归网络中，位置 1 的信息到位置 100 要经过约 99 次状态传递，路径长且不能完全并行。卷积可并行，但要堆叠多层才能扩大感受野。自注意力让任意两位置在一层内直接交互，将远距离依赖路径缩短为一步；代价是标准全局注意力对序列长度 $T$ 需要约 $T^2$ 的分数矩阵。</p>
+<h3>2.2 关键洞察</h3>
+<p>Transformer 的本质不只是“注意力”，而是四项组合：</p>
+<ol>
+<li>多头自注意力负责跨位置通信。</li>
+<li>位置/时间编码补回注意力本身缺少的顺序信息。</li>
+<li>逐位置前馈网络负责非线性特征变换。</li>
+<li>残差连接与层归一化让深层堆叠可训练。</li>
+</ol>
+<p>注意力负责“从哪里取信息”，前馈网络负责“取到后如何变换”；两者交替才构成完整块。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>头数 $h$：表示并行关注的子空间数。</li>
-<li>$d_{\text{model}}$：隐藏表示维度。</li>
-<li>位置编码：注入顺序信息。</li>
-<li>FFN：对每个位置独立进行非线性变换。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>全局依赖对任务很重要。</li>
-<li>数据量和算力足以支撑较大模型训练。</li>
-<li>顺序信息可以通过位置编码补充。</li>
+<li>相比 RNN/LSTM：Transformer 并行且远程路径短，但全局注意力内存更高。</li>
+<li>相比 CNN：Transformer 全局交互直接、局部先验较弱，通常更依赖数据或预训练。</li>
+<li>相比单独注意力层：Transformer 加入位置、残差、归一化、FFN 和层堆叠，是完整架构。</li>
+<li>相比传统 EHR 特征汇总：Transformer 保留事件级顺序和上下文，但解释、校准和数据需求更高。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>单头缩放点积自注意力：</p>
+<p>$$
+\mathbf Q=\mathbf X\mathbf W^Q,\qquad
+\mathbf K=\mathbf X\mathbf W^K,\qquad
+\mathbf V=\mathbf X\mathbf W^V
+$$</p>
+<p>$$
+\mathbf A
+=\operatorname{softmax}\!\left(
+\frac{\mathbf Q\mathbf K^\top}{\sqrt{d_k}}+\mathbf M
+\right),\qquad
+\mathbf Z=\mathbf A\mathbf V
+$$</p>
+<p>多头注意力：</p>
+<p>$$
+\operatorname{MHA}(\mathbf X)
+=\operatorname{Concat}(\operatorname{head}_1,\ldots,\operatorname{head}_H)
+\mathbf W^O
+$$</p>
+<p>编码器块常写为</p>
+<p>$$
+\mathbf R
+=\operatorname{LayerNorm}
+\left(\mathbf X+\operatorname{MHA}(\mathbf X)\right)
+$$</p>
+<p>$$
+\mathbf Y
+=\operatorname{LayerNorm}
+\left(\mathbf R+\operatorname{FFN}(\mathbf R)\right)
+$$</p>
+<p>$$
+\operatorname{FFN}(\mathbf r)
+=\phi(\mathbf r\mathbf W_1+\mathbf b_1)\mathbf W_2+\mathbf b_2
+$$</p>
+<p>这些式子在说：每个位置先从全序列汇总信息，再独立通过同一个小型 MLP；残差保留原表示，归一化稳定深层训练。</p>
+<h3>3.2 推导脉络</h3>
+<p>自注意力若只看内容，对输入置换具有等变性，不能区分“先用药后发热”和“先发热后用药”。因此先把 token embedding 与位置/时间编码相加：</p>
+<p>$$
+\mathbf x_t=\mathbf e_t+\mathbf p_t
+$$</p>
+<p>然后在每层重复“跨位置通信—逐位置计算”。分类任务可取特殊分类 token、最后位置或池化表示；生成任务用上三角因果 mask 禁止查看未来。预训练通过遮盖预测、下一 token 预测或对比目标学习通用表示，再在医学任务上微调。</p>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：文本 token 序列、时间序列窗口、图像 patch、跨模态嵌入。</li>
-<li>因变量类型：分类、回归、序列生成、掩码预测。</li>
-<li>数据结构：嵌入序列张量。</li>
-<li>是否适合高维数据：适合，但长序列时显存开销较大。</li>
-<li>是否适合缺失较多数据：需通过 mask 或缺失标记处理。</li>
-<li>是否适合删失数据：不直接处理删失。</li>
-<li>是否适合重复测量数据：适合，尤其是长程依赖明显的重复测量。</li>
+<li>$\mathbf X$：加入位置/时间信息的 token 表示矩阵。</li>
+<li>$\mathbf W^Q,\mathbf W^K,\mathbf W^V$：query/key/value 投影。</li>
+<li>$\mathbf A$：每个 query 对所有 keys 的注意力矩阵。</li>
+<li>$H$：注意力头数；各头在不同投影子空间工作。</li>
+<li>$\mathbf M$：padding 或 causal mask。</li>
+<li>FFN：对每个位置独立应用、参数共享的两层网络。</li>
+<li>residual：把模块输入直接加回输出。</li>
+<li>LayerNorm：在单个 token 的特征维上标准化。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>以出院小结文本分类为例：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>NoteID</th>
-<th>TokenSequence</th>
-<th>Department</th>
-<th>Outcome</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>N001</td>
-<td>t1, t2, ...</td>
-<td>cardiology</td>
-<td>readmit</td>
+<td>token 化保留临床信息</td>
+<td>事件/词/图像块表示合理</td>
+<td>关键信息在输入前已丢失</td>
+<td>审核词表、时间窗和 OOV</td>
 </tr>
 <tr>
-<td>N002</td>
-<td>t1, t2, ...</td>
-<td>oncology</td>
-<td>no_readmit</td>
+<td>位置/时间编码表达真实顺序</td>
+<td>模型能区分先后与间隔</td>
+<td>顺序或间隔被误解</td>
+<td>时间打乱、间隔分层</td>
 </tr>
 <tr>
-<td>N003</td>
-<td>t1, t2, ...</td>
-<td>nephrology</td>
-<td>readmit</td>
+<td>mask 与任务一致</td>
+<td>实时预测不看未来，padding 被排除</td>
+<td>严重泄漏或伪影</td>
+<td>权重与特征时间审计</td>
+</tr>
+<tr>
+<td>数据量/预训练支撑容量</td>
+<td>高参数模型有足够信息</td>
+<td>过拟合或不稳定</td>
+<td>学习曲线、简单基线</td>
+</tr>
+<tr>
+<td>训练分布覆盖应用域</td>
+<td>术语、中心、设备与流程可迁移</td>
+<td>外部性能和校准下降</td>
+<td>跨中心/时间验证</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>用两个 token、二维表示手算一个简化编码器块。设</p>
+<p>$$
+\mathbf X=
+\begin{pmatrix}
+1&amp;0\\
+0&amp;1
+\end{pmatrix},
+\qquad
+\mathbf W^Q=\mathbf W^K=\mathbf W^V=\mathbf I
+$$</p>
+<p>因此 $\mathbf Q=\mathbf K=\mathbf V=\mathbf X$，且 $d_k=2$。</p>
+<p><strong>第 1 步：计算所有 token 两两分数。</strong></p>
+<p>$$
+\frac{\mathbf Q\mathbf K^\top}{\sqrt2}
+=
+\begin{pmatrix}
+0.707&amp;0\\
+0&amp;0.707
+\end{pmatrix}
+$$</p>
+<p><strong>第 2 步：逐行 softmax。</strong> 因 $\exp(0.707)=2.028$：</p>
+<p>$$
+\mathbf A
+=
+\begin{pmatrix}
+0.670&amp;0.330\\
+0.330&amp;0.670
+\end{pmatrix}
+$$</p>
+<p>每个 token 对自身权重 0.670，也从另一个 token 汇入 0.330。</p>
+<p><strong>第 3 步：加权 values。</strong></p>
+<p>$$
+\mathbf Z=\mathbf A\mathbf V
+=
+\begin{pmatrix}
+0.670&amp;0.330\\
+0.330&amp;0.670
+\end{pmatrix}
+$$</p>
+<p><strong>第 4 步：残差连接。</strong> 暂时略去 LayerNorm 以便手算：</p>
+<p>$$
+\mathbf R=\mathbf X+\mathbf Z
+=
+\begin{pmatrix}
+1.670&amp;0.330\\
+0.330&amp;1.670
+\end{pmatrix}
+$$</p>
+<p><strong>第 5 步：逐位置 FFN。</strong> 为简化，设所有元素为正且 $\operatorname{FFN}(\mathbf r)=0.5\mathbf r$：</p>
+<p>$$
+\mathbf Y=\mathbf R+0.5\mathbf R
+=
+\begin{pmatrix}
+2.505&amp;0.495\\
+0.495&amp;2.505
+\end{pmatrix}
+$$</p>
+<p>这个例子展示了完整逻辑：自注意力让两个位置交换信息，残差保留原身份，FFN 再逐位置加工。若不加入位置编码，交换两个输入 token 只会交换两行输出，模型无法知道哪个是“先”发生的。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：文本 token、医疗事件、时间片、图像 patch 或多模态 token。</li>
+<li>因变量类型：分类、回归、序列生成、遮盖重构。</li>
+<li>数据结构：batch × sequence length × embedding，配 mask 与位置/时间编码。</li>
+<li>是否适合高维数据：适合，但参数和显存需求高。</li>
+<li>是否适合缺失较多数据：可显式编码 mask/缺失 token；信息性缺失仍需分析。</li>
+<li>是否适合删失数据：标准目标不处理删失，需生存损失。</li>
+<li>是否适合重复测量数据：适合事件序列预测，但需按患者切分并表达真实间隔。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>patient_id</th>
+<th>event_time</th>
+<th>token</th>
+<th style="text-align: right;">value</th>
+<th style="text-align: right;">delta_t</th>
+<th style="text-align: right;">valid_mask</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P01</td>
+<td>08:00</td>
+<td>heart_rate</td>
+<td style="text-align: right;">82</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>P01</td>
+<td>10:00</td>
+<td>lactate</td>
+<td style="text-align: right;">3.2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr>
+<td>P01</td>
+<td>NA</td>
+<td>PAD</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：token 或时间步嵌入序列。</li>
-<li>关键变量：层数、头数、隐藏维度、前馈维度、最大序列长度。</li>
-<li>需要预处理的内容：token 化、padding、mask、位置编码、数据切分。</li>
+<li>token/patch/事件序列、位置或时间编码、padding/causal mask。</li>
+<li>模型维度、头数、层数、FFN 宽度、dropout 和预训练权重。</li>
+<li>患者级、时间前向的训练/验证/测试划分。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：编码器/解码器参数和验证指标。</li>
-<li>参数估计：注意力投影矩阵、前馈网络参数。</li>
-<li>预测结果：类别概率、连续值、生成序列或上下文表征。</li>
-<li>不确定性指标：外部验证性能、校准、时间外或中心外泛化。</li>
+<li>每位置上下文表示或池化后的样本表示。</li>
+<li>分类概率、连续预测或生成序列。</li>
+<li>注意力矩阵与中间表示，可用于诊断但非天然解释。</li>
+<li>普通 Transformer 不自动给出传统效应量、删失校正或因果关系。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：长序列、多模态、需要全局上下文建模和并行计算的任务。</li>
-<li>不适合：数据量很小、算力受限、或简单时序结构即可解释的问题。</li>
-<li>使用前需要特别检查的点：序列长度、显存开销、mask 正确性、预训练与微调策略。</li>
-</ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="transformer" data-i="0">Python</button><button class="codetab" data-uid="transformer" data-i="1">R</button></div><div class="codepanel active" data-uid="transformer" data-i="0"><p>常用包：</p>
-<ul>
-<li><code>torch</code></li>
-</ul>
-<pre><code class="language-python">import torch.nn as nn
-
-encoder_layer = nn.TransformerEncoderLayer(
-    d_model=128,
-    nhead=4,
-    dim_feedforward=256,
-    batch_first=True
-)
-model = nn.TransformerEncoder(encoder_layer, num_layers=2)
-</code></pre></div><div class="codepanel" data-uid="transformer" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>keras</code></li>
-</ul>
-<pre><code class="language-r"># R 中通常通过 keras / torch 调用多头注意力与前馈层组合，
-# 构建简化版 Transformer 编码器。
-</code></pre></div></div></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：验证性能、长序列上的稳健性、是否优于 RNN/LSTM 基线。</li>
-<li>每个主要参数如何解释：层数和维度决定容量，头数影响多视角关联学习。</li>
-<li>临床或医学意义如何表达：适合强调复杂上下文建模能力，但仍需外部验证和错误案例审查。</li>
-<li>常见误读：注意力权重图不等于完整解释，也不能替代临床机制分析。</li>
+<li>适合：大规模文本/事件/图像数据、远距离依赖重要、可利用预训练。</li>
+<li>不适合：样本很少且无预训练、序列极长而资源有限、实时流式延迟严格，或简单模型已充分。</li>
+<li>使用前检查：token 化、时间/位置编码、未来泄漏、padding、序列截断、亚组和外部校准。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>训练/验证损失曲线。</li>
-<li>注意力热图。</li>
-<li>不同序列长度或不同模型架构的性能对比图。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="transformer" data-i="0">Python</button><button class="codetab" data-uid="transformer" data-i="1">R</button></div><div class="codepanel active" data-uid="transformer" data-i="0"><p>常用包：PyTorch。示例用一层 Transformer 编码合成序列并预测最后三步之和是否为正。</p>
+<pre><code class="language-python">import numpy as np
+import torch
+from torch import nn
+
+torch.manual_seed(42)
+rng = np.random.default_rng(42)
+X = rng.normal(size=(800, 12, 1)).astype(&quot;float32&quot;)
+y = (X[:, -3:, 0].sum(axis=1) &gt; 0).astype(&quot;float32&quot;)
+
+class TinyTransformer(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.input_proj = nn.Linear(1, 8)
+        self.position = nn.Parameter(torch.zeros(1, 12, 8))
+        layer = nn.TransformerEncoderLayer(
+            d_model=8, nhead=2, dim_feedforward=16,
+            dropout=0.1, batch_first=True
+        )
+        self.encoder = nn.TransformerEncoder(layer, num_layers=1)
+        self.output = nn.Linear(8, 1)
+
+    def forward(self, x):
+        h = self.input_proj(x) + self.position[:, :x.size(1)]
+        h = self.encoder(h)
+        return self.output(h.mean(dim=1)).squeeze(-1)
+
+model = TinyTransformer()
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+loss_fn = nn.BCEWithLogitsLoss()
+x_train = torch.tensor(X[:600])
+y_train = torch.tensor(y[:600])
+
+for _ in range(100):
+    optimizer.zero_grad()
+    loss = loss_fn(model(x_train), y_train)
+    loss.backward()
+    optimizer.step()
+
+with torch.no_grad():
+    prob = torch.sigmoid(model(torch.tensor(X[600:])))
+    accuracy = ((prob &gt;= 0.5) == torch.tensor(y[600:])).float().mean()
+print(float(accuracy))
+</code></pre></div><div class="codepanel" data-uid="transformer" data-i="1"><p>常用包：keras3。这里把归一化时间位置作为第二输入通道，显式提供顺序。</p>
+<pre><code class="language-r">library(keras3)
+
+set_random_seed(42)
+value &lt;- array(rnorm(800 * 12), dim = c(800, 12, 1))
+y &lt;- as.numeric(apply(value[, 10:12, 1], 1, sum) &gt; 0)
+position &lt;- array(
+  rep(seq(0, 1, length.out = 12), each = 800),
+  dim = c(800, 12, 1)
+)
+x &lt;- array(c(value, position), dim = c(800, 12, 2))
+idx &lt;- sample(seq_len(800), 600)
+
+inputs &lt;- layer_input(shape = c(12, 2))
+h &lt;- inputs |&gt; layer_dense(8)
+attn_layer &lt;- layer_multi_head_attention(num_heads = 2, key_dim = 4)
+attn &lt;- attn_layer(query = h, value = h)
+h1 &lt;- layer_add(list(h, attn)) |&gt; layer_layer_normalization()
+ffn &lt;- h1 |&gt;
+  layer_dense(16, activation = &quot;relu&quot;) |&gt;
+  layer_dense(8)
+h2 &lt;- layer_add(list(h1, ffn)) |&gt; layer_layer_normalization()
+outputs &lt;- h2 |&gt;
+  layer_global_average_pooling_1d() |&gt;
+  layer_dense(1, activation = &quot;sigmoid&quot;)
+
+model &lt;- keras_model(inputs, outputs)
+model |&gt; compile(
+  optimizer = &quot;adam&quot;,
+  loss = &quot;binary_crossentropy&quot;,
+  metrics = metric_auc(name = &quot;auc&quot;)
+)
+model |&gt; fit(
+  x[idx, , , drop = FALSE], y[idx],
+  validation_split = 0.2, epochs = 30, batch_size = 32,
+  callbacks = callback_early_stopping(
+    patience = 4, restore_best_weights = TRUE
+  ),
+  verbose = 0
+)
+model |&gt; evaluate(x[-idx, , , drop = FALSE], y[-idx])
+</code></pre></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>与其他预测模型一样，最终看患者级外部测试表现、校准、阈值和临床效用，不看预训练损失就下结论。</li>
+<li>注意力图展示信息路由，不等于忠实或因果解释；残差和 FFN 也会影响输出。</li>
+<li>预训练模型的高性能可能来自数据重叠、中心线索或编码习惯，需做去重与时间审计。</li>
+<li>截断长病历会丢失早期信息，应报告最大长度、截断方向和覆盖比例。</li>
+<li>生成式 Transformer 可能产生流畅但错误内容，临床使用需检索、约束、置信与人工复核。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>泄漏审计：核对预训练/微调/测试患者、文档和时间是否重叠。</li>
+<li>mask 测试：实时任务检查未来位置权重和特征是否严格不可见。</li>
+<li>位置消融：打乱顺序、移除时间间隔或改变位置编码，验证模型确实使用时序。</li>
+<li>长度稳健性：按序列长度、截断程度和稀疏度分层评估。</li>
+<li>基线比较：同切分下与 Logistic/GBDT、RNN/LSTM、CNN 比较。</li>
+<li>外部验证：跨医院、设备、术语系统和时间段评估性能与校准。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>token/事件时间线与 padding/causal mask。</li>
+<li>多层多头注意力热图，配合遮挡验证。</li>
+<li>不同序列长度和截断比例下的性能曲线。</li>
+<li>预训练—微调学习曲线和校准曲线。</li>
+<li>按中心、亚组、设备和时间的性能森林图。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>并行训练效率高。</li>
-<li>擅长长程依赖建模。</li>
-<li>易于扩展到预训练和多模态框架。</li>
+<li>远距离位置可在一层直接交互。</li>
+<li>训练高度并行，适合大规模预训练。</li>
+<li>同一基本架构可处理文本、图像、时间序列和多模态。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>对数据量和算力要求较高。</li>
-<li>长序列自注意力复杂度较高。</li>
-<li>结构复杂，可解释性有限。</li>
+<li>标准全局注意力时间和内存约随长度平方增长。</li>
+<li>参数多、数据和计算需求高。</li>
+<li>位置、mask、token 化与预训练数据问题会显著影响结果。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>训练样本不足却使用过大模型。</li>
-<li>只看内部验证，不做时间外或中心外评估。</li>
-<li>忽略 token 化和位置编码细节对结果的影响。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-attention-mechanism.html" data-cn="注意力机制" data-en="Attention Mechanism" data-def="注意力机制是一类根据“相关性权重”聚合信息的计算方式。它允许模型在处理当前目标时，对输入中的不同位置分配不同关注程度。">注意力机制（Attention Mechanism）</a> 的区别：注意力是组件，Transformer 是完整架构。</li>
-<li>和 <a class="xlink" href="m-recurrent-neural-network-rnn.html" data-cn="循环神经网络" data-en="Recurrent Neural Network, RNN" data-def="循环神经网络是一类面向序列数据的神经网络。它在每个时间步共享同一组参数，并把前一时刻的隐藏状态传递到当前时刻，从而建模顺序依赖关系。">循环神经网络（Recurrent Neural Network, RNN）</a> 的区别：Transformer 并行建模全局依赖，RNN 递归顺序处理。</li>
-<li>和 <a class="xlink" href="m-long-short-term-memory-lstm.html" data-cn="长短期记忆网络" data-en="Long Short-Term Memory, LSTM" data-def="LSTM 是循环神经网络的重要变体，通过遗忘门、输入门和输出门控制信息流动，专门用于缓解普通 RNN 难以学习长程依赖的问题。">长短期记忆网络（Long Short-Term Memory, LSTM）</a> 的区别：LSTM 更适合中短序列和较小模型，Transformer 在大规模长序列上通常更强。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>临床文本理解、编码和摘要。</li>
-<li>多变量监测序列预测。</li>
-<li>医学图像 patch 建模和多模态诊疗模型。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-attention-mechanism.html" data-cn="注意力机制" data-en="Attention Mechanism" data-def="注意力机制是一类根据“相关性权重”聚合信息的计算方式。它允许模型在处理当前目标时，对输入中的不同位置分配不同关注程度。">注意力机制（Attention Mechanism）</a></li>
-<li><a class="xlink" href="m-recurrent-neural-network-rnn.html" data-cn="循环神经网络" data-en="Recurrent Neural Network, RNN" data-def="循环神经网络是一类面向序列数据的神经网络。它在每个时间步共享同一组参数，并把前一时刻的隐藏状态传递到当前时刻，从而建模顺序依赖关系。">循环神经网络（Recurrent Neural Network, RNN）</a></li>
-<li><a class="xlink" href="m-long-short-term-memory-lstm.html" data-cn="长短期记忆网络" data-en="Long Short-Term Memory, LSTM" data-def="LSTM 是循环神经网络的重要变体，通过遗忘门、输入门和输出门控制信息流动，专门用于缓解普通 RNN 难以学习长程依赖的问题。">长短期记忆网络（Long Short-Term Memory, LSTM）</a></li>
-<li><a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="卷积神经网络是一类专门处理图像或局部空间结构数据的神经网络。它通过卷积核、激活函数和池化层，从原始像素中自动提取边缘、纹理和高级语义特征。">卷积神经网络（Convolutional Neural Network, CNN）</a></li>
+<li>未加入位置/时间信息却要求理解顺序。</li>
+<li>在线预测使用了双向上下文或未来事件。</li>
+<li>同一患者文档跨预训练、微调和测试。</li>
+<li>把注意力图当成临床机制证据。</li>
+<li>只因模型更大就忽略简单强基线。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Vaswani A, Shazeer N, Parmar N, et al. Attention is all you need. <em>Advances in Neural Information Processing Systems</em>. 2017;30.</li>
-<li>Dosovitskiy A, Beyer L, Kolesnikov A, et al. An image is worth 16x16 words: transformers for image recognition at scale. <em>arXiv</em>. 2020. <a href="https://arxiv.org/abs/2010.11929">https://arxiv.org/abs/2010.11929</a></li>
-<li>Goodfellow I, Bengio Y, Courville A. <em>Deep Learning</em>. MIT Press; 2016.</li>
+<li>与注意力机制：注意力是模块；Transformer 是注意力、位置、残差、归一化和 FFN 的架构。</li>
+<li>与 RNN/LSTM/GRU：Transformer 并行且全局路径短，循环模型更自然地流式更新。</li>
+<li>与 CNN：CNN 有强局部和平移先验；Transformer 全局灵活但通常更依赖数据/预训练。</li>
+<li>与 MLP：MLP 不共享序列位置间的内容依赖；Transformer 的注意力显式建立 token 间交互。</li>
+<li>如何选择：小到中等数据先比较树/RNN/CNN；有大规模预训练、长程依赖和算力时再采用 Transformer。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>临床文本分类、信息抽取、摘要和问答。</li>
+<li>纵向 EHR 中诊断、检验、处方序列预测。</li>
+<li>Vision Transformer 用于医学图像分类和分割。</li>
+<li>影像、文本、组学与结构化 EHR 的多模态融合。</li>
+</ul>
+<p>必须报告数据时间范围、预训练来源、患者去重、token 化、截断、缺失、类别不平衡和外部验证。时间到事件结局仍需删失感知损失；Transformer 不自动解决混杂或幻觉。</p></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>Token</strong>：序列中的基本建模单位，如词、诊断事件或图像块。</li>
+<li><strong>Embedding</strong>：把离散 token 或连续输入映射为稠密向量。</li>
+<li><strong>位置编码（Positional encoding）</strong>：向表示加入顺序/位置的信息。</li>
+<li><strong>自注意力（Self-attention）</strong>：同一序列内部各位置相互聚合。</li>
+<li><strong>残差连接（Residual connection）</strong>：把模块输入直接加回输出。</li>
+<li><strong>层归一化（Layer normalization）</strong>：在单个 token 的特征维上标准化。</li>
+<li><strong>前馈网络（Feed-forward network, FFN）</strong>：对每个位置独立应用的共享 MLP。</li>
+<li><strong>编码器（Encoder）</strong>：把输入转成上下文表示的 Transformer 堆栈。</li>
+<li><strong>解码器（Decoder）</strong>：在因果 mask 下逐步生成输出的堆栈。</li>
+<li><strong>预训练（Pretraining）</strong>：先在大规模任务上学习通用参数，再微调下游任务。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-attention-mechanism.html" data-cn="注意力机制" data-en="Attention Mechanism" data-def="注意力机制先计算“当前查询与每条信息有多相关”，再把相关性归一化成权重，对各条信息做数据依赖的加权汇总。">注意力机制（Attention Mechanism）</a></li>
+<li><a class="xlink" href="m-recurrent-neural-network-rnn.html" data-cn="循环神经网络" data-en="Recurrent Neural Network, RNN" data-def="RNN 用一个随时间递推的隐藏状态充当“压缩记忆”，让当前预测同时依赖当前输入和此前序列。">循环神经网络（Recurrent Neural Network, RNN）</a></li>
+<li><a class="xlink" href="m-long-short-term-memory-lstm.html" data-cn="长短期记忆网络" data-en="Long Short-Term Memory, LSTM" data-def="LSTM 在普通 RNN 之外增加一条近似加性的细胞状态，并用门控制“忘什么、写什么、读什么”，让有用信息和梯度能跨越更长时间。">长短期记忆网络（Long Short-Term Memory, LSTM）</a></li>
+<li><a class="xlink" href="m-gated-recurrent-unit-gru.html" data-cn="门控循环单元" data-en="Gated Recurrent Unit, GRU" data-def="GRU 用更新门在“保留旧状态”和“写入新候选”之间做逐维插值，再用重置门决定生成候选时要参考多少历史，以更紧凑的结构缓解普通 RNN 的长程梯度问题。">门控循环单元（Gated Recurrent Unit, GRU）</a></li>
+<li><a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="CNN 用同一个小型滤波器在整幅图像上滑动，把“局部模式可重复出现”写进网络结构，从而用远少于全连接层的参数学习空间特征。">卷积神经网络（Convolutional Neural Network, CNN）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Vaswani A, et al. Attention is all you need. <em>NeurIPS</em>. 2017;30.</li>
+<li>Devlin J, Chang MW, Lee K, Toutanova K. BERT: Pre-training of deep bidirectional transformers for language understanding. <em>NAACL</em>. 2019:4171-4186. https://doi.org/10.18653/v1/N19-1423</li>
+<li>Dosovitskiy A, et al. An image is worth 16x16 words: Transformers for image recognition at scale. <em>ICLR</em>. 2021. https://arxiv.org/abs/2010.11929</li>
+<li>Li Y, et al. BEHRT: Transformer for electronic health records. <em>Scientific Reports</em>. 2020;10:7155. https://doi.org/10.1038/s41598-020-62922-y</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-attention-mechanism.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">注意力机制</div></a><a class="pg pg-next" href="m-residual-network-resnet.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">残差网络</div></a></div>

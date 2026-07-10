@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,19 +54,29 @@
     <div class="intro-note"><h1>多重检验与错误率控制（Multiple Testing and Error Rate Control）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>多重检验校正不是“让 P 值更难显著”，而是把单次检验的错误承诺升级为对整组发现的错误承诺。</p>
+<h3>1.2 定义</h3>
 <p>多重检验与错误率控制关注的是：当同时进行很多次假设检验时，如何控制整体假阳性风险或错误发现比例。</p>
-<h3>1.2 它主要解决什么问题</h3>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
 <li>研究问题：一次做很多个检验时，如何避免仅靠运气就“发现”大量假阳性。</li>
 <li>适用任务：高通量分析、多指标比较、亚组比较、多特征筛选。</li>
 <li>常见医学场景：基因组学、蛋白组学、微生物组、多终点临床研究。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
+<h3>1.4 直觉理解</h3>
 <p>当检验次数很多时，即使每次单独控制在 0.05，整体至少出现一次假阳性的概率也会迅速升高。多重检验方法就是在“发现更多信号”和“控制错误发现”之间做取舍。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 根本困难</h3>
+<p>每次以 0.05 检验并不意味着做 100 次后总体仍只有 5% 假阳性；检验越多，至少撞上一次小 P 值的机会越大。</p>
+<h3>2.2 关键洞察</h3>
+<p>先定义研究真正要控制的错误单位：验证性研究常关心“整组一个假阳性都不要”的 FWER；探索性组学常接受少量假发现，控制发现中的平均假比例 FDR。方法选择是科学目标选择，不只是软件参数。</p>
+<h3>2.3 与朴素做法对比</h3>
+<p>未校正逐项阈值只控制每个原假设的第一类错误。Bonferroni/Holm 控制 FWER，BH 控制 FDR；后者通常发现更多，但承诺不同。</p></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
 <p>常见两类目标：</p>
 <p>$$
 \mathrm{FWER}=P(V \ge 1)
@@ -75,19 +85,33 @@ $$</p>
 \mathrm{FDR}=E\left(\frac{V}{R \vee 1}\right)
 $$</p>
 <p>其中 $V$ 是错误拒绝的真零假设个数，$R$ 是总拒绝数。</p>
-<h3>2.2 参数或统计量含义</h3>
+<h3>3.3 参数或统计量含义</h3>
 <ul>
 <li>FWER：family-wise error rate，强调“至少出现一次假阳性”的风险。</li>
 <li>FDR：false discovery rate，强调“被宣称显著的发现中有多少比例可能是假的”。</li>
 </ul>
-<h3>2.3 关键假设</h3>
+<h3>3.4 关键假设</h3>
 <ul>
 <li>输入通常是一组同一研究问题下的 p 值。</li>
 <li>不同方法对 p 值之间的独立性 / 正相关性要求不同。</li>
 </ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>5 个 P 值为 $(0.003,0.012,0.021,0.049,0.20)$，原始阈值 0.05 会宣布前 4 个显著。</p>
+<p>若 5 个原假设全真且相互独立，至少一个假阳性的概率为</p>
+<p>$$
+1-(1-0.05)^5=0.226
+$$</p>
+<p>不是 0.05。对同一组 P 值：</p>
+<ul>
+<li>Bonferroni 阈值 $0.05/5=0.01$：保留 1 个；</li>
+<li>Holm 逐步阈值 $(0.01,0.0125,0.0167,\ldots)$：保留 2 个；</li>
+<li>BH 阈值 $(0.01,0.02,0.03,0.04,0.05)$：保留 3 个。</li>
+</ul>
+<p>差异来自错误率目标和逐步策略，而不是数据发生了变化。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
 <li>自变量类型：不适用，核心输入是多重检验产生的一组 p 值。</li>
 <li>因变量类型：不适用。</li>
@@ -97,7 +121,7 @@ $$</p>
 <li>是否适合删失数据：不适用。</li>
 <li>是否适合重复测量数据：可用于重复测量后衍生出的多重检验结果。</li>
 </ul>
-<h3>3.2 示例表格</h3>
+<h3>5.2 示例表格</h3>
 <p>下面是一组排序后的原始 p 值及不同校正方法的调整结果：</p>
 <table>
 <thead>
@@ -147,7 +171,7 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
 <li>输入数据：一组 p 值。</li>
@@ -161,15 +185,15 @@ $$</p>
 <li>预测结果：无。</li>
 <li>不确定性指标：主要体现为错误率控制目标本身。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
 <li>适合：一次做很多个检验的任何场景。</li>
 <li>不适合：只有一个或极少数预先指定检验时。</li>
 <li>使用前需要特别检查的点：检验家族定义、控制目标是 FWER 还是 FDR。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="multiple-testing-and-error-rate-control" data-i="0">Python</button><button class="codetab" data-uid="multiple-testing-and-error-rate-control" data-i="1">R</button></div><div class="codepanel active" data-uid="multiple-testing-and-error-rate-control" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>statsmodels</code></li>
@@ -185,26 +209,35 @@ reject, p_adj, _, _ = multipletests(pvals, alpha=0.05, method=&quot;fdr_bh&quot;
 p.adjust(pvals, method = &quot;holm&quot;)
 p.adjust(pvals, method = &quot;BH&quot;)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
       <div class="sec-body"><ul>
 <li>核心结果看什么：哪些原始显著结果在校正后仍然显著。</li>
 <li>每个主要参数如何解释：校正后的 p 值可与目标水平直接比较。</li>
 <li>临床或医学意义如何表达：应说明控制的是 FWER 还是 FDR。</li>
 <li>常见误读：未校正显著并不等于校正后仍然显著。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>在看结果前定义假设家族，不能事后拆分家族逃避校正。</li>
+<li>检查 P 值有效性、依赖结构和选择性报告。</li>
+<li>比较 Bonferroni、Holm、BH 对结论的敏感性。</li>
+<li>同时报告效应量、置信区间和预注册主终点。</li>
+<li>高维研究检查零分布膨胀、批次效应与重复样本。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
 <li>原始 p 值与调整后 p 值对比图。</li>
 <li>不同校正方法的阈值比较图。</li>
 <li>Manhattan / volcano plot 上叠加校正阈值。</li>
 </ul>
-<h3>7.1 图像示例</h3>
+<h3>10.1 图像示例</h3>
 <p>下图比较原始 p 值与 Bonferroni、Holm、BH 三种方法的调整结果，适合作为多重检验控制思路的总览图。</p>
 <p><img alt="" src="img/multiple_testing_adjustments.png" /></p></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
 <li>能系统控制大规模检验的假阳性。</li>
@@ -223,29 +256,38 @@ p.adjust(pvals, method = &quot;BH&quot;)
 <li>混淆 FWER 和 FDR。</li>
 <li>把不相关的一堆检验强行合并或错误拆分家族。</li>
 </ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
 <li>FWER 控制更严格，适合不能容忍任何假阳性的情形。</li>
 <li>FDR 控制更宽松，适合高通量发现型研究。</li>
 <li>Bonferroni / Holm / BH 分别是不同控制目标或控制强度下的代表方法。</li>
 </ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
       <div class="sec-body"><ul>
 <li>GWAS 和多组学高通量分析。</li>
 <li>多终点临床研究。</li>
 <li>大量亚组和特征筛选检验。</li>
 </ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-bonferroni-correction.html" data-cn="Bonferroni校正" data-en="Bonferroni Correction" data-def="Bonferroni 校正是控制 FWER 的最经典单步方法，把显著性水平 $\alpha$ 平均分配到每个检验上。">Bonferroni校正（Bonferroni Correction）</a></li>
-<li><a class="xlink" href="m-holm-procedure.html" data-cn="Holm程序" data-en="Holm Procedure" data-def="Holm 程序是控制 FWER 的逐步法（step-down procedure），通常比 Bonferroni 更有力。">Holm程序（Holm Procedure）</a></li>
-<li><a class="xlink" href="m-benjamini-hochberg-procedure.html" data-cn="Benjamini-Hochberg程序" data-en="Benjamini-Hochberg Procedure" data-def="Benjamini-Hochberg（BH）程序是控制 FDR 的经典方法，特别适合高维发现型研究。">Benjamini-Hochberg程序（Benjamini-Hochberg Procedure）</a></li>
+<li><strong>假设家族（Family）</strong>：需要共同承担错误承诺的一组检验。</li>
+<li><strong>FWER</strong>：至少出现一个第一类错误的概率。</li>
+<li><strong>FDR</strong>：发现中假发现比例的期望。</li>
+<li><strong>q 值</strong>：使某发现进入集合所需的最小 FDR 水平。</li>
+<li><strong>调整 P 值</strong>：在指定程序下可拒绝该假设的最小整体 $\alpha$。</li>
 </ul></div>
-    </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-bonferroni-correction.html" data-cn="Bonferroni校正" data-en="Bonferroni Correction" data-def="Bonferroni 把总的第一类错误预算 $\alpha$ 平分给 $m$ 个检验，以最简单、最稳健的方式控制 FWER。">Bonferroni校正（Bonferroni Correction）</a></li>
+<li><a class="xlink" href="m-holm-procedure.html" data-cn="Holm程序" data-en="Holm Procedure" data-def="Holm 先审最小 P 值，再逐步放宽阈值；它与 Bonferroni 同样控制 FWER，却从不更差。">Holm程序（Holm Procedure）</a></li>
+<li><a class="xlink" href="m-benjamini-hochberg-procedure.html" data-cn="Benjamini-Hochberg程序" data-en="Benjamini-Hochberg Procedure" data-def="BH 不要求“一个假阳性都不能有”，而是控制发现集合中假发现比例的期望，从而在探索性高维研究中换取更高发现能力。">Benjamini-Hochberg程序（Benjamini-Hochberg Procedure）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Shaffer JP. Multiple hypothesis testing. <em>Annu Rev Psychol</em>. 1995;46:561-584.</li>
 <li>R Core Team. <code>p.adjust</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html</a> （访问日期：2026-07-02）</li>

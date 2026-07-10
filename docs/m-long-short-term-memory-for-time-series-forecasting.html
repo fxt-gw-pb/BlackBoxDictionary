@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,19 +54,24 @@
     <div class="intro-note"><h1>LSTM时间序列预测（Long Short-Term Memory for Time Series Forecasting）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>LSTM 是循环神经网络的一种改进结构，通过门控机制保存、遗忘和输出序列信息。本条目聚焦 <a class="xlink" href="m-long-short-term-memory-lstm.html" data-cn="长短期记忆网络" data-en="Long Short-Term Memory, LSTM" data-def="LSTM 是循环神经网络的重要变体，通过遗忘门、输入门和输出门控制信息流动，专门用于缓解普通 RNN 难以学习长程依赖的问题。">长短期记忆网络（Long Short-Term Memory, LSTM）</a> 在时间序列预测中的应用型变体，强调窗口构造、时间切分和预测评估。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>LSTM 预测把过去窗口逐步压入门控记忆，再从最后状态输出未来值；真正关键的是无泄漏窗口构造与时间回测。</p>
+<h3>1.2 定义</h3>
+<p>LSTM 是循环神经网络的一种改进结构，通过门控机制保存、遗忘和输出序列信息。本条目聚焦 <a class="xlink" href="m-long-short-term-memory-lstm.html" data-cn="长短期记忆网络" data-en="Long Short-Term Memory, LSTM" data-def="LSTM 在普通 RNN 之外增加一条近似加性的细胞状态，并用门控制“忘什么、写什么、读什么”，让有用信息和梯度能跨越更长时间。">长短期记忆网络（Long Short-Term Memory, LSTM）</a> 在时间序列预测中的应用型变体，强调窗口构造、时间切分和预测评估。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
 <li>研究问题：序列中存在非线性、长短期依赖或多变量复杂模式时，如何进行预测。</li>
 <li>适用任务：多步预测、生命体征序列建模、传感器数据预测、序列分类或异常检测。</li>
 <li>常见医学场景：ICU 生命体征预测、连续血糖预测、可穿戴设备序列分析、EHR 时间窗口风险预测。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
+<h3>1.4 直觉理解</h3>
 <p>LSTM 像一个带记忆的预测器。它每读入一个时间点，就决定哪些历史信息要保留、哪些要忘掉、哪些要输出给当前预测，因此比普通线性模型更能表示复杂序列模式。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><p>线性 ARIMA 难表示阈值、交互和长依赖。LSTM 用遗忘、输入与输出门动态保存历史，但并不自动理解时间间隔、季节或因果关系，且需要比经典模型更多数据。</p></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
 <p>给定输入 $x_t$、上一隐藏状态 $h_{t-1}$ 和细胞状态 $c_{t-1}$，LSTM 的门控更新为：</p>
 <p>$$
 f_t=\sigma(W_f x_t+U_f h_{t-1}+b_f)
@@ -88,7 +93,7 @@ $$</p>
 <p>$$
 \hat y_{t+h}=g(W_y h_t+b_y)
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
+<h3>3.3 参数或统计量含义</h3>
 <ul>
 <li>$f_t$：遗忘门，控制保留多少旧记忆。</li>
 <li>$i_t$：输入门，控制写入多少新信息。</li>
@@ -97,16 +102,23 @@ $$</p>
 <li>$h_t$：隐藏状态，表示当前输出表征。</li>
 <li>lookback window：输入历史窗口长度。</li>
 </ul>
-<h3>2.3 关键假设</h3>
+<h3>3.4 关键假设</h3>
 <ul>
 <li>训练数据量足以支持神经网络拟合。</li>
 <li>未来数据分布与训练期相近。</li>
 <li>输入窗口包含预测所需的主要历史信息。</li>
 <li>时间顺序严格保留，预处理不能泄露未来信息。</li>
 </ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>设简化细胞更新 $c_t=0.8c_{t-1}+0.5\tilde c_t$，$c_0=0$，三期候选为 $(2,-1,3)$：
+$$
+c_1=1,\quad c_2=0.8-0.5=0.3,\quad c_3=0.24+1.5=1.74
+$$
+若输出层为 $\hat y_{t+1}=10+2c_t$，则下一期预测 $13.48$。门控使旧信号衰减并与新信号合并。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
 <li>自变量类型：单变量或多变量历史序列窗口。</li>
 <li>因变量类型：未来连续值、类别标签或序列。</li>
@@ -116,7 +128,7 @@ $$</p>
 <li>是否适合删失数据：不直接处理删失结局，需结合生存模型扩展。</li>
 <li>是否适合重复测量数据：适合规则采样序列；不规则间隔需时间间隔特征或专门模型。</li>
 </ul>
-<h3>3.2 示例表格</h3>
+<h3>5.2 示例表格</h3>
 <p>以小时级生命体征为例：</p>
 <table>
 <thead>
@@ -164,7 +176,7 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
 <li>输入数据：按时间排序的序列窗口张量。</li>
@@ -178,15 +190,15 @@ $$</p>
 <li>预测结果：未来值、类别概率或多步预测序列。</li>
 <li>不确定性指标：验证集误差、bootstrap/ensemble 不确定性、预测区间近似。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
 <li>适合：数据量较大、非线性明显、多变量序列复杂、传统线性模型拟合不足的场景。</li>
 <li>不适合：样本很少、解释性要求极高、序列规律简单且线性模型已足够的场景。</li>
 <li>使用前需要特别检查的点：时间切分、标准化 fit 范围、过拟合、外部验证、临床可解释性。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="long-short-term-memory-for-time-series-forecasting" data-i="0">Python</button><button class="codetab" data-uid="long-short-term-memory-for-time-series-forecasting" data-i="1">R</button></div><div class="codepanel active" data-uid="long-short-term-memory-for-time-series-forecasting" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>torch</code></li>
@@ -233,24 +245,27 @@ model |&gt;
 history &lt;- model |&gt;
   fit(X_train, y_train, epochs = 50, batch_size = 32, validation_split = 0.2)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
       <div class="sec-body"><ul>
 <li>核心结果看什么：验证集/测试集误差、训练损失曲线、预测曲线、外部验证表现。</li>
 <li>每个主要参数如何解释：窗口长度决定模型能看到多长历史，隐藏单元数决定模型容量。</li>
 <li>临床或医学意义如何表达：可强调其预测性能，但需配合解释工具、误差分析和临床安全边界。</li>
 <li>常见误读：LSTM 预测好不代表学到了因果机制，也不代表在新医院或新设备上同样有效。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><p>严格按时间切分，缩放器只拟合训练段；比较不同窗口、随机种子和简单基线，检查多步递归误差、缺失 mask、预测区间与漂移。</p></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
 <li>实际值与预测值时间曲线。</li>
 <li>训练和验证损失曲线。</li>
 <li>不同预测步长的误差曲线。</li>
 <li>分层误差分析图，如按患者亚组或病区分层。</li>
 </ul></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
 <li>能表达复杂非线性和长短期依赖。</li>
@@ -269,32 +284,40 @@ history &lt;- model |&gt;
 <li>随机拆分窗口导致同一患者相邻时间泄露到测试集。</li>
 <li>只报告训练误差，不做时间外或中心外验证。</li>
 </ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-long-short-term-memory-lstm.html" data-cn="长短期记忆网络" data-en="Long Short-Term Memory, LSTM" data-def="LSTM 是循环神经网络的重要变体，通过遗忘门、输入门和输出门控制信息流动，专门用于缓解普通 RNN 难以学习长程依赖的问题。">长短期记忆网络（Long Short-Term Memory, LSTM）</a> 的关系：本条目是通用 LSTM 架构在时间序列预测场景下的具体应用版本。</li>
-<li>和 <a class="xlink" href="m-vector-autoregression-var.html" data-cn="向量自回归模型" data-en="Vector Autoregression, VAR" data-def="向量自回归模型是多变量时间序列模型，用每个变量自身和其他变量的历史值共同预测当前多个变量。VAR($p$) 可看作多变量版 AR 模型。">向量自回归模型（Vector Autoregression, VAR）</a> 的区别：VAR 是线性多变量模型，LSTM 是非线性神经网络。</li>
-<li>和 <a class="xlink" href="m-xgboost-for-time-series-forecasting.html" data-cn="XGBoost时间序列预测" data-en="XGBoost for Time Series Forecasting" data-def="XGBoost 时间序列预测是把时间序列问题转换为监督学习表格问题，再用 XGBoost 建模。核心做法是构造滞后特征、滚动统计量、日历特征和外部变量，用它们预测未来目标值。">XGBoost时间序列预测（XGBoost for Time Series Forecasting）</a> 的区别：XGBoost 依赖显式滞后特征表格化，LSTM 直接读取序列窗口。</li>
-<li>和 <a class="xlink" href="m-multilayer-perceptron-classifier-mlp.html" data-cn="多层感知机分类器" data-en="Multilayer Perceptron Classifier, MLP" data-def="多层感知机分类器是一类前馈神经网络模型。它通过若干隐藏层和非线性激活函数，把输入特征映射到输出类别概率，适合学习复杂的非线性判别边界。">多层感知机分类器（Multilayer Perceptron Classifier, MLP）</a> 的区别：MLP 不内置时间递归结构，LSTM 专门为序列依赖设计。</li>
+<li>和 <a class="xlink" href="m-long-short-term-memory-lstm.html" data-cn="长短期记忆网络" data-en="Long Short-Term Memory, LSTM" data-def="LSTM 在普通 RNN 之外增加一条近似加性的细胞状态，并用门控制“忘什么、写什么、读什么”，让有用信息和梯度能跨越更长时间。">长短期记忆网络（Long Short-Term Memory, LSTM）</a> 的关系：本条目是通用 LSTM 架构在时间序列预测场景下的具体应用版本。</li>
+<li>和 <a class="xlink" href="m-vector-autoregression-var.html" data-cn="向量自回归模型" data-en="Vector Autoregression, VAR" data-def="VAR 让一组变量都由这组变量的过去共同预测，从而刻画相互滞后联动。">向量自回归模型（Vector Autoregression, VAR）</a> 的区别：VAR 是线性多变量模型，LSTM 是非线性神经网络。</li>
+<li>和 <a class="xlink" href="m-xgboost-for-time-series-forecasting.html" data-cn="XGBoost时间序列预测" data-en="XGBoost for Time Series Forecasting" data-def="XGBoost 时序预测先把时间序列改造成滞后、滚动和日历特征表，再用梯度提升树学习非线性规则。">XGBoost时间序列预测（XGBoost for Time Series Forecasting）</a> 的区别：XGBoost 依赖显式滞后特征表格化，LSTM 直接读取序列窗口。</li>
+<li>和 <a class="xlink" href="m-multilayer-perceptron-classifier-mlp.html" data-cn="多层感知机分类器" data-en="Multilayer Perceptron Classifier, MLP" data-def="MLP 把多次“线性组合 + 非线性激活”串起来，将原本不能用一条直线分开的类别，在逐层变换后的表示空间中分开。">多层感知机分类器（Multilayer Perceptron Classifier, MLP）</a> 的区别：MLP 不内置时间递归结构，LSTM 专门为序列依赖设计。</li>
 </ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
       <div class="sec-body"><ul>
 <li>ICU 生命体征和实验室指标的短期预测。</li>
 <li>连续血糖、心率或可穿戴设备信号预测。</li>
 <li>EHR 时间窗口中的风险预警模型。</li>
 </ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-long-short-term-memory-lstm.html" data-cn="长短期记忆网络" data-en="Long Short-Term Memory, LSTM" data-def="LSTM 是循环神经网络的重要变体，通过遗忘门、输入门和输出门控制信息流动，专门用于缓解普通 RNN 难以学习长程依赖的问题。">长短期记忆网络（Long Short-Term Memory, LSTM）</a></li>
-<li><a class="xlink" href="m-vector-autoregression-var.html" data-cn="向量自回归模型" data-en="Vector Autoregression, VAR" data-def="向量自回归模型是多变量时间序列模型，用每个变量自身和其他变量的历史值共同预测当前多个变量。VAR($p$) 可看作多变量版 AR 模型。">向量自回归模型（Vector Autoregression, VAR）</a></li>
-<li><a class="xlink" href="m-xgboost-for-time-series-forecasting.html" data-cn="XGBoost时间序列预测" data-en="XGBoost for Time Series Forecasting" data-def="XGBoost 时间序列预测是把时间序列问题转换为监督学习表格问题，再用 XGBoost 建模。核心做法是构造滞后特征、滚动统计量、日历特征和外部变量，用它们预测未来目标值。">XGBoost时间序列预测（XGBoost for Time Series Forecasting）</a></li>
-<li><a class="xlink" href="m-multilayer-perceptron-classifier-mlp.html" data-cn="多层感知机分类器" data-en="Multilayer Perceptron Classifier, MLP" data-def="多层感知机分类器是一类前馈神经网络模型。它通过若干隐藏层和非线性激活函数，把输入特征映射到输出类别概率，适合学习复杂的非线性判别边界。">多层感知机分类器（Multilayer Perceptron Classifier, MLP）</a></li>
-<li><a class="xlink" href="m-autoregressive-integrated-moving-average-model-arima.html" data-cn="自回归积分滑动平均模型" data-en="Autoregressive Integrated Moving Average Model, ARIMA" data-def="ARIMA 是用于单变量时间序列预测的经典模型。它通过差分把非平稳序列转为平稳序列，再用 ARMA 模型刻画差分后序列的自相关结构。">自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）</a></li>
+<li><strong>滑动窗口（Sliding window）</strong>：把过去 $L$ 步转为一个监督样本。</li>
+<li><strong>直接多步预测</strong>：一次输出多个未来步。</li>
+<li><strong>递归预测</strong>：把前一步预测继续作为输入。</li>
+<li><strong>教师强制（Teacher forcing）</strong>：训练时使用真实前一步而非模型预测。</li>
 </ul></div>
-    </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-long-short-term-memory-lstm.html" data-cn="长短期记忆网络" data-en="Long Short-Term Memory, LSTM" data-def="LSTM 在普通 RNN 之外增加一条近似加性的细胞状态，并用门控制“忘什么、写什么、读什么”，让有用信息和梯度能跨越更长时间。">长短期记忆网络（Long Short-Term Memory, LSTM）</a></li>
+<li><a class="xlink" href="m-vector-autoregression-var.html" data-cn="向量自回归模型" data-en="Vector Autoregression, VAR" data-def="VAR 让一组变量都由这组变量的过去共同预测，从而刻画相互滞后联动。">向量自回归模型（Vector Autoregression, VAR）</a></li>
+<li><a class="xlink" href="m-xgboost-for-time-series-forecasting.html" data-cn="XGBoost时间序列预测" data-en="XGBoost for Time Series Forecasting" data-def="XGBoost 时序预测先把时间序列改造成滞后、滚动和日历特征表，再用梯度提升树学习非线性规则。">XGBoost时间序列预测（XGBoost for Time Series Forecasting）</a></li>
+<li><a class="xlink" href="m-multilayer-perceptron-classifier-mlp.html" data-cn="多层感知机分类器" data-en="Multilayer Perceptron Classifier, MLP" data-def="MLP 把多次“线性组合 + 非线性激活”串起来，将原本不能用一条直线分开的类别，在逐层变换后的表示空间中分开。">多层感知机分类器（Multilayer Perceptron Classifier, MLP）</a></li>
+<li><a class="xlink" href="m-autoregressive-integrated-moving-average-model-arima.html" data-cn="自回归积分滑动平均模型" data-en="Autoregressive Integrated Moving Average Model, ARIMA" data-def="ARIMA 先用差分去掉随机趋势，再对差分后的平稳变化量建立 ARMA。">自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Hochreiter S, Schmidhuber J. Long short-term memory. <em>Neural Computation</em>. 1997;9(8):1735-1780.</li>
 <li>Goodfellow I, Bengio Y, Courville A. <em>Deep Learning</em>. MIT Press; 2016.</li>

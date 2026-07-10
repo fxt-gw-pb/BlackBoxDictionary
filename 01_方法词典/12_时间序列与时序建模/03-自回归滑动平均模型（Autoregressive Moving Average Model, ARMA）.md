@@ -18,198 +18,115 @@ r_packages: [forecast, stats]
 # 自回归滑动平均模型（Autoregressive Moving Average Model, ARMA）
 
 ## 1. 方法概览
+### 1.1 一句话本质
+ARMA 同时用过去观测的惯性和过去冲击的回声，以较少参数描述平稳序列复杂自相关。
+### 1.2 定义
+ARMA($p,q$) 合并 AR($p$) 与 MA($q$)，适用于已平稳的单变量序列。
+### 1.3 它主要解决什么问题
+当 ACF/PACF 都拖尾、纯 AR 或纯 MA 需要很高阶时进行简约建模。
+### 1.4 直觉与类比
+序列既会沿用昨天的状态，也会继续消化昨天未预料到的冲击。
 
-### 1.1 定义
+## 2. 核心思想与原理
+### 2.1 根本困难
+惯性和短期冲击常同时存在，单一机制会把另一机制误塞进高阶参数。
+### 2.2 关键洞察
+AR 产生持续衰减记忆，MA 产生有限冲击记忆；组合可生成更丰富但仍简约的相关结构。
+### 2.3 与朴素做法对比
+相比高阶 AR，低阶 ARMA 可能参数更少；代价是 MA 创新未观测、估计更复杂。
 
-ARMA 模型把自回归 AR 部分和移动平均 MA 部分组合起来，用于建模平稳单变量时间序列。ARMA($p,q$) 同时利用过去观测值和过去误差项预测当前值。
-
-### 1.2 它主要解决什么问题
-
-- 研究问题：平稳序列中既有历史惯性，又有短期冲击传播时，如何统一建模。
-- 适用任务：平稳时间序列预测、残差相关建模、ARIMA 的无差分特例。
-- 常见医学场景：平稳阶段的床位占用率、标准化后的空气污染指标、去趋势后的病例数或监测指标。
-
-### 1.3 直觉理解
-
-ARMA 同时问两件事：过去观测水平会不会影响现在，过去没解释掉的冲击会不会继续影响现在。它比单独 AR 或 MA 更灵活，但仍要求序列近似平稳。
-
-## 2. 数学形式
-
-### 2.1 核心公式
-
-ARMA($p,q$) 模型为：
-
+## 3. 数学形式
+### 3.1 核心公式
 $$
 y_t=c+\sum_{i=1}^{p}\phi_i y_{t-i}
 +\varepsilon_t+\sum_{j=1}^{q}\theta_j\varepsilon_{t-j}
 $$
+### 3.2 推导脉络
+用滞后算子写为 $\phi(B)y_t=c+\theta(B)\varepsilon_t$；AR 多项式决定平稳性，MA 多项式决定可逆性。
+### 3.3 参数含义
+$p$ 是观测记忆阶数，$q$ 是冲击记忆阶数；AIC/BIC 与残差诊断共同选型。
+### 3.4 关键假设
+弱平稳、可逆、参数稳定、残差白噪声、等间隔；结构变点会使全期单一参数失真。
 
-滞后算子形式为：
-
+## 4. 手把手算例
+ARMA(1,1)：$y_t=0.5y_{t-1}+\varepsilon_t+0.4\varepsilon_{t-1}$，$y_0=\varepsilon_0=0$。
+若 $\varepsilon_1=2,\varepsilon_2=-1,\varepsilon_3=0$：
 $$
-\phi(B)y_t=c+\theta(B)\varepsilon_t
+y_1=2
 $$
-
-其中：
-
 $$
-\phi(B)=1-\phi_1B-\cdots-\phi_pB^p,\quad
-\theta(B)=1+\theta_1B+\cdots+\theta_qB^q
+y_2=0.5(2)-1+0.4(2)=0.8
 $$
+$$
+y_3=0.5(0.8)+0+0.4(-1)=0
+$$
+第 2 期既继承 $y_1$ 的 1.0，又保留冲击 2 的 0.8，再叠加新冲击 $-1$。
 
-### 2.2 参数或统计量含义
+## 5. 数据形式与输入输出
+### 5.1 适合的数据形式
+等间隔、平稳、连续单变量序列；不直接处理趋势、删失或层级数据。
+### 5.2 示例表格
+| time | y |
+| --- | ---: |
+| 1 | 2.0 |
+| 2 | 0.8 |
+| 3 | 0.0 |
+### 5.3 输入与产出
+输入序列与 $(p,q)$；产出系数、创新、信息准则和多步预测区间。
 
-- $p$：AR 阶数。
-- $q$：MA 阶数。
-- $\phi_i$：自回归系数。
-- $\theta_j$：移动平均系数。
-- AIC/BIC：常用于比较不同阶数组合。
-- ACF/PACF：用于初步判断 AR 与 MA 结构。
+## 6. 适用场景
+适合平稳且 ACF/PACF 均拖尾的序列；明显趋势季节、非线性或变点需扩展。
 
-### 2.3 关键假设
-
-- 序列平稳。
-- 残差为白噪声。
-- 模型满足稳定性和可逆性条件。
-- 线性滞后结构足以描述主要时间依赖。
-
-## 3. 数据形式与输入输出
-
-### 3.1 适合的数据形式
-
-- 自变量类型：目标变量滞后值和误差滞后项。
-- 因变量类型：连续型平稳时间序列。
-- 数据结构：等间隔单变量时间序列。
-- 是否适合高维数据：不适合直接处理多变量高维。
-- 是否适合缺失较多数据：需先处理缺失或使用支持缺失的估计方法。
-- 是否适合删失数据：不直接处理删失结局。
-- 是否适合重复测量数据：适合总体级序列，不适合直接处理个体重复测量。
-
-### 3.2 示例表格
-
-以去趋势后的 PM2.5 日均值为例：
-
-| Date | PM25_detrended |
-| --- | --- |
-| 2026-01-01 | -3.2 |
-| 2026-01-02 | 1.8 |
-| 2026-01-03 | 4.1 |
-| 2026-01-04 | -0.7 |
-
-### 3.3 输入与产出
-
-#### 输入
-
-- 输入数据：平稳或已去趋势的单变量序列。
-- 关键变量：AR 阶数 $p$、MA 阶数 $q$、是否包含常数项。
-- 需要预处理的内容：平稳性检查、缺失处理、异常值检查、训练测试时间切分。
-
-#### 产出
-
-- 模型对象/统计结果：AR/MA 系数、残差、信息准则、预测值。
-- 参数估计：$\phi_i$、$\theta_j$、误差方差。
-- 预测结果：未来若干期点预测和预测区间。
-- 不确定性指标：参数标准误、预测区间、残差白噪声检验。
-
-## 4. 适用场景
-
-- 适合：平稳单变量序列，ACF/PACF 显示有限滞后依赖。
-- 不适合：明显趋势或季节性未处理、结构突变、强非线性、外部协变量很重要的场景。
-- 使用前需要特别检查的点：平稳性、阶数选择、残差诊断、预测窗口是否合理。
-
-## 5. 实现
-
-### 5.1 Python
-
-常用包：
-
-- `statsmodels`
-
+## 7. 实现
+### 7.1 Python
 ```python
-import pandas as pd
+import numpy as np
 from statsmodels.tsa.arima.model import ARIMA
-
-df = pd.read_csv("daily_pm25_detrended.csv", parse_dates=["Date"])
-y = df.set_index("Date")["PM25_detrended"].asfreq("D").interpolate()
-
-fit = ARIMA(y, order=(2, 0, 1)).fit()
-forecast = fit.get_forecast(steps=7)
-
-print(fit.summary())
-print(forecast.summary_frame())
+rng = np.random.default_rng(42)
+e = rng.normal(size=300)
+y = np.zeros(300)
+for t in range(1, 300):
+    y[t] = 0.5*y[t-1] + e[t] + 0.4*e[t-1]
+fit = ARIMA(y, order=(1, 0, 1)).fit()
+print(fit.summary(), fit.forecast(5))
 ```
-
-### 5.2 R
-
-常用包：
-
-- `forecast`
-
+### 7.2 R
 ```r
-library(forecast)
-
-y <- ts(df$PM25_detrended, frequency = 7)
-fit <- Arima(y, order = c(2, 0, 1), include.mean = TRUE)
-
-forecast(fit, h = 7)
-checkresiduals(fit)
+set.seed(42)
+y <- arima.sim(model = list(ar = 0.5, ma = 0.4), n = 300)
+fit <- arima(y, order = c(1, 0, 1))
+predict(fit, n.ahead = 5)
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解读
+$\phi$ 描述条件惯性，$\theta$ 描述旧创新回声；二者可能抵消，不能逐个脱离整体动态解释。
 
-- 核心结果看什么：AR/MA 系数、AIC/BIC、残差是否白噪声、预测误差。
-- 每个主要参数如何解释：AR 系数反映历史观测影响，MA 系数反映历史冲击影响。
-- 临床或医学意义如何表达：适合描述去趋势后指标的短期自相关结构，并用于短期预测。
-- 常见误读：ARMA 对平稳序列建模，不应直接套在有明显趋势的原始序列上。
+## 9. 假设诊断与稳健性
+检查平稳/可逆根、残差 ACF 与 Ljung–Box、参数近边界、滚动验证和变点。
 
-## 7. 推荐可视化
+## 10. 推荐可视化
+序列、ACF/PACF、残差诊断、滚动预测和冲击响应。
 
-- 原始/去趋势序列图。
-- ACF 与 PACF 图。
-- 拟合值和预测值对比图。
-- 残差 ACF、QQ 图和残差时间图。
+## 11. 优势、局限与常见坑
+优势是简约灵活；局限是阶数识别与非线性。常见坑：只凭 ACF 机械选阶、搜索后不留测试集。
 
-## 8. 优势、局限与常见坑
+## 12. 与相近方法的区别
+纯 AR 令 $q=0$，纯 MA 令 $p=0$；ARIMA 对差分后序列使用 ARMA。
 
-### 优势
+## 13. 医学研究中的典型应用
+平稳化后的床位、监护与实验室质控序列短期预测。
 
-- 统一表达 AR 和 MA 依赖。
-- 对平稳线性序列预测效果稳健。
-- 模型诊断体系成熟。
+## 14. 关键术语
+- **滞后算子（Backshift operator）**：$By_t=y_{t-1}$。
+- **简约性（Parsimony）**：用尽量少参数解释动态。
+- **信息准则**：拟合与参数数量的权衡。
+- **拖尾（Tailing off）**：相关随阶数逐渐衰减而非突然归零。
 
-### 局限
-
-- 不能直接处理非平稳趋势。
-- 阶数选择需要诊断和比较。
-- 对结构突变和非线性关系表达有限。
-
-### 常见坑
-
-- 忽略平稳性要求。
-- 只靠 AIC 选模型而不看残差。
-- 在模型选择中反复看测试集造成乐观偏差。
-
-## 9. 与相近方法的区别
-
-- 和 [[自回归模型（Autoregressive Model, AR）]] 的区别：ARMA 额外加入 MA 误差项。
-- 和 [[移动平均模型（Moving Average Model, MA）]] 的区别：ARMA 额外加入过去观测值。
-- 和 [[自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）]] 的区别：ARIMA 通过差分处理非平稳序列，ARMA 适合已平稳序列。
-
-## 10. 医学研究中的典型应用
-
-- 去趋势后的空气污染或温度暴露预测。
-- 医院运行指标的平稳阶段短期预测。
-- 传染病监测残差相关结构建模。
-
-## 11. 相关方法
-
+## 15. 相关方法
 - [[自回归模型（Autoregressive Model, AR）]]
 - [[移动平均模型（Moving Average Model, MA）]]
 - [[自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）]]
-- [[向量自回归模型（Vector Autoregression, VAR）]]
 
-## 12. 参考资料
-
-- Box GEP, Jenkins GM, Reinsel GC, Ljung GM. *Time Series Analysis: Forecasting and Control*. 5th ed. Wiley; 2015.
-- Brockwell PJ, Davis RA. *Time Series: Theory and Methods*. 2nd ed. Springer; 1991.
-- Hyndman RJ, Athanasopoulos G. *Forecasting: Principles and Practice*. 3rd ed. OTexts; 2021. [https://otexts.com/fpp3/](https://otexts.com/fpp3/) （访问日期：2026-07-02）
+## 16. 参考资料
+- Box GEP, et al. *Time Series Analysis*. Wiley; 2015.
+- Hyndman RJ, Athanasopoulos G. *Forecasting: Principles and Practice*. OTexts; 2021.

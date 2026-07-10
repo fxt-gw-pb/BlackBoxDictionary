@@ -18,198 +18,110 @@ r_packages: [stats, forecast]
 # 移动平均模型（Moving Average Model, MA）
 
 ## 1. 方法概览
+### 1.1 一句话本质
+统计时间序列中的 MA 用有限个过去随机冲击解释当前值，而不是对过去观测做滚动平均。
+### 1.2 定义
+MA($q$) 是白噪声及其前 $q$ 期值的线性组合，天然为平稳过程。
+### 1.3 它主要解决什么问题
+刻画一次异常冲击在有限时间内持续影响观测的序列。
+### 1.4 直觉与类比
+一次设备误差或突发事件会在当前及随后几期留下“回声”，到第 $q+1$ 期完全消失。
 
-### 1.1 定义
+## 2. 核心思想与原理
+### 2.1 根本困难
+过去观测混合了许多冲击；MA 直接描述新冲击如何传播。
+### 2.2 关键洞察
+有限冲击记忆导致理论 ACF 在 $q$ 阶后截尾。
+### 2.3 与朴素做法对比
+滚动平均是平滑器；MA($q$) 是概率生成模型，参数、残差和预测区间均有统计含义。
 
-移动平均模型在时间序列建模中通常指 MA($q$)：当前值由当前随机冲击和过去 $q$ 个随机冲击线性组合而成。实践中“移动平均”也常指简单移动平均平滑，用于去噪和观察趋势。
-
-### 1.2 它主要解决什么问题
-
-- 研究问题：短期随机冲击是否会在随后几个时间点继续影响序列。
-- 适用任务：误差相关建模、时间序列平滑、ARMA/ARIMA 的基础组件。
-- 常见医学场景：短期异常就诊峰值平滑，监测指标噪声过滤，感染病例报告延迟造成的短期波动建模。
-
-### 1.3 直觉理解
-
-AR 模型看过去的观测值，MA 模型看过去未被解释的“意外冲击”。如果一次突发事件会让接下来几期都偏高或偏低，MA 项就可以描述这种短期冲击传播。
-
-## 2. 数学形式
-
-### 2.1 核心公式
-
-MA($q$) 模型写作：
-
+## 3. 数学形式
+### 3.1 核心公式
 $$
 y_t=\mu+\varepsilon_t+\theta_1\varepsilon_{t-1}+\cdots+\theta_q\varepsilon_{t-q}
 $$
+这个式子在说：当前值由当前新冲击与有限个旧冲击共同组成。
+### 3.2 推导脉络
+把序列表示为白噪声的线性滤波；可逆性保证能由观测唯一恢复冲击，MA(1) 常要求 $|\theta|<1$。
+### 3.3 参数含义
+$\theta_j$ 是冲击第 $j$ 期回声；$q$ 是冲击记忆长度。
+### 3.4 关键假设
+平稳、可逆、白噪声残差、等间隔；用残差 ACF/Ljung–Box 和根检查。
 
-其中：
-
+## 4. 手把手算例
+设 $\mu=0,\theta=0.5$，冲击依次为 $(2,-1,3,0)$，且 $\varepsilon_0=0$：
 $$
-\varepsilon_t\sim WN(0,\sigma^2)
+y_1=2,\quad y_2=-1+0.5(2)=0
 $$
-
-简单移动平均平滑常写为：
-
 $$
-\operatorname{SMA}_t=\frac{1}{m}\sum_{j=0}^{m-1}y_{t-j}
+y_3=3+0.5(-1)=2.5,\quad y_4=0+0.5(3)=1.5
 $$
+冲击 3 在当期贡献 3、下一期贡献 1.5，之后归零，展示有限记忆。
 
-### 2.2 参数或统计量含义
+## 5. 数据形式与输入输出
+### 5.1 适合的数据形式
+单变量等间隔平稳序列；不直接处理删失、趋势或多患者层级。
+### 5.2 示例表格
+| day | centered_count |
+| --- | ---: |
+| 1 | 2.0 |
+| 2 | 0.0 |
+| 3 | 2.5 |
+### 5.3 输入与产出
+输入序列和 $q$；产出 $\theta$、创新残差、预测与区间。
 
-- $q$：移动平均阶数，表示过去多少期冲击进入模型。
-- $\theta_j$：第 $j$ 个滞后冲击的影响系数。
-- $\varepsilon_t$：创新项或白噪声误差。
-- $m$：简单移动平均窗口长度。
-- ACF：MA 模型阶数识别中常用的自相关图。
+## 6. 适用场景
+适合 ACF 明显截尾的短冲击过程；持续惯性更适合 AR，非平稳序列先差分。
 
-### 2.3 关键假设
-
-- 序列或残差过程近似平稳。
-- 创新项为白噪声。
-- 冲击影响有限，超过 $q$ 期后消失。
-- 简单移动平均平滑会引入滞后，不应用于因果解释。
-
-## 3. 数据形式与输入输出
-
-### 3.1 适合的数据形式
-
-- 自变量类型：过去误差项或滚动窗口内历史观测。
-- 因变量类型：连续型时间序列。
-- 数据结构：等间隔单变量时间序列。
-- 是否适合高维数据：不适合直接处理多变量高维。
-- 是否适合缺失较多数据：需先处理缺失。
-- 是否适合删失数据：不直接处理删失结局。
-- 是否适合重复测量数据：适合总体级时间序列；多受试者需专门纵向模型。
-
-### 3.2 示例表格
-
-以每周流感样病例数为例：
-
-| Week | ILICases |
-| --- | --- |
-| 2026-W01 | 320 |
-| 2026-W02 | 355 |
-| 2026-W03 | 410 |
-| 2026-W04 | 390 |
-
-### 3.3 输入与产出
-
-#### 输入
-
-- 输入数据：按时间排序的单变量序列。
-- 关键变量：MA 阶数 $q$，或平滑窗口长度 $m$。
-- 需要预处理的内容：缺失处理、频率对齐、平稳性检查、异常峰值标注。
-
-#### 产出
-
-- 模型对象/统计结果：MA 系数、残差、拟合值、预测值。
-- 参数估计：$\theta_1,\dots,\theta_q$ 和误差方差。
-- 预测结果：短期预测和预测区间。
-- 不确定性指标：标准误、预测区间、残差诊断。
-
-## 4. 适用场景
-
-- 适合：短期冲击明显、残差自相关有限、需要平滑噪声观察趋势的序列。
-- 不适合：长期趋势或季节性强而未处理、冲击持续时间很长、非线性变化明显的序列。
-- 使用前需要特别检查的点：MA 阶数、残差白噪声、平滑窗口是否造成过度滞后。
-
-## 5. 实现
-
-### 5.1 Python
-
-常用包：
-
-- `statsmodels`
-- `pandas`
-
+## 7. 实现
+### 7.1 Python
 ```python
-import pandas as pd
+import numpy as np
 from statsmodels.tsa.arima.model import ARIMA
-
-df = pd.read_csv("weekly_ili_cases.csv")
-y = pd.Series(df["ILICases"].values, index=pd.PeriodIndex(df["Week"], freq="W"))
-
-smooth = y.rolling(window=4, min_periods=1).mean()
-fit = ARIMA(y.astype(float), order=(0, 0, 2)).fit()
-forecast = fit.forecast(steps=4)
-
-print(smooth.tail())
-print(forecast)
+rng = np.random.default_rng(42)
+e = rng.normal(size=300)
+y = e.copy()
+y[1:] += 0.5 * e[:-1]
+fit = ARIMA(y, order=(0, 0, 1), trend="c").fit()
+print(fit.params, fit.forecast(5))
 ```
-
-### 5.2 R
-
-常用包：
-
-- `stats`
-- `forecast`
-
+### 7.2 R
 ```r
-library(forecast)
-
-y <- ts(df$ILICases, frequency = 52)
-smooth <- stats::filter(y, rep(1 / 4, 4), sides = 1)
-fit <- Arima(y, order = c(0, 0, 2), include.mean = TRUE)
-
-forecast(fit, h = 4)
+set.seed(42)
+y <- arima.sim(model = list(ma = 0.5), n = 300)
+fit <- arima(y, order = c(0, 0, 1))
+predict(fit, n.ahead = 5)
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解读
+$\theta_1=0.5$ 表示一次正冲击下一期仍留下其一半回声；符号约定在不同软件中可能相反。
 
-- 核心结果看什么：MA 系数、残差 ACF、预测误差、平滑曲线与原始曲线差异。
-- 每个主要参数如何解释：$\theta_1$ 表示上一期未解释冲击对当前值的影响。
-- 临床或医学意义如何表达：适合描述短期报告噪声、突发冲击或监测指标平滑趋势。
-- 常见误读：简单移动平均曲线不是预测模型的充分证据，也不能消除真实延迟偏倚。
+## 9. 假设诊断与稳健性
+看 ACF 截尾、残差白噪声、可逆根、异常冲击和滚动预测；不要从估计残差中作因果解释。
 
-## 7. 推荐可视化
+## 10. 推荐可视化
+序列、ACF/PACF、冲击响应、残差 ACF、预测区间。
 
-- 原始序列与移动平均平滑曲线。
-- ACF 图。
-- 残差时间图。
-- 预测值与实际值对比图。
+## 11. 优势、局限与常见坑
+优势是有限记忆清晰；局限是冲击不可直接观测。常见坑是把 MA 模型与 rolling mean 混为一谈。
 
-## 8. 优势、局限与常见坑
+## 12. 与相近方法的区别
+AR 用过去值；MA 用过去创新；ARMA 同时使用；指数平滑是另一类预测递推。
 
-### 优势
+## 13. 医学研究中的典型应用
+设备误差回声、短期报告延迟、突发事件后的有限持续影响。
 
-- 能描述短期冲击影响。
-- 平滑版本直观易懂。
-- 是 ARMA/ARIMA 的重要组成部分。
+## 14. 关键术语
+- **创新（Innovation）**：看到过去后仍不可预测的新信息。
+- **可逆性（Invertibility）**：观测可唯一对应稳定创新表示。
+- **ACF 截尾**：超过某阶理论自相关为零。
+- **滚动平均**：对观测求局部均值的平滑操作，不是 MA 模型。
 
-### 局限
-
-- 纯 MA 模型解释长期结构能力有限。
-- 简单移动平均窗口选择主观。
-- 平滑会削弱峰值并引入滞后。
-
-### 常见坑
-
-- 混淆“MA 模型”和“简单移动平均平滑”。
-- 使用居中移动平均时不小心引入未来信息。
-- 窗口过大导致疫情或就诊峰值被抹平。
-
-## 9. 与相近方法的区别
-
-- 和 [[自回归模型（Autoregressive Model, AR）]] 的区别：AR 使用过去观测值，MA 使用过去创新误差。
-- 和 [[自回归滑动平均模型（Autoregressive Moving Average Model, ARMA）]] 的区别：ARMA 同时建模历史观测和历史误差。
-- 和 [[Holt-Winters指数平滑（Holt-Winters Exponential Smoothing）]] 的区别：Holt-Winters 专门处理水平、趋势和季节性平滑。
-
-## 10. 医学研究中的典型应用
-
-- 传染病病例数的短期报告噪声平滑。
-- 医院服务量监测中的短期异常波动识别。
-- 生理监测序列中短期测量噪声过滤。
-
-## 11. 相关方法
-
+## 15. 相关方法
 - [[自回归模型（Autoregressive Model, AR）]]
 - [[自回归滑动平均模型（Autoregressive Moving Average Model, ARMA）]]
-- [[自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）]]
 - [[Holt-Winters指数平滑（Holt-Winters Exponential Smoothing）]]
 
-## 12. 参考资料
-
-- Box GEP, Jenkins GM, Reinsel GC, Ljung GM. *Time Series Analysis: Forecasting and Control*. 5th ed. Wiley; 2015.
-- Brockwell PJ, Davis RA. *Introduction to Time Series and Forecasting*. 3rd ed. Springer; 2016.
-- Hyndman RJ, Athanasopoulos G. *Forecasting: Principles and Practice*. 3rd ed. OTexts; 2021. [https://otexts.com/fpp3/](https://otexts.com/fpp3/) （访问日期：2026-07-02）
+## 16. 参考资料
+- Box GEP, et al. *Time Series Analysis*. Wiley; 2015.
+- Brockwell PJ, Davis RA. *Introduction to Time Series and Forecasting*. Springer; 2016.

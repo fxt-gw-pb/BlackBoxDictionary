@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">术语表</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,230 +54,268 @@
     <div class="intro-note"><h1>梯度提升回归（Gradient Boosting Regression）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>梯度提升回归是一类通过逐步叠加弱学习器来逼近目标函数的集成回归方法，常见实现是以浅层回归树作为基学习器。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>梯度提升回归用一连串浅回归树逐步拟合当前损失的负梯度，从而不断修正连续结局预测。</p>
+<h3>1.2 定义</h3>
+<p>梯度提升回归是 <a class="xlink" href="m-gradient-boosting-decision-tree-gbdt.html" data-cn="梯度提升决策树" data-en="Gradient Boosting Decision Tree, GBDT" data-def="GBDT 把“拟合残差”推广为“拟合损失函数的负梯度”，让浅决策树在函数空间中逐步走向更低损失。">梯度提升决策树（Gradient Boosting Decision Tree, GBDT）</a> 在连续结局上的具体形式。平方损失下，每棵新树拟合当前残差；使用绝对误差、Huber 或分位数损失时，它拟合相应损失给出的伪残差。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：如何通过一系列逐步修正残差的小模型，得到更强的预测器。</li>
-<li>适用任务：表格数据连续结局预测、复杂非线性回归、性能导向建模。</li>
-<li>常见医学场景：连续风险评分预测、成本预测、住院时长预测。</li>
+<li>连续结局与特征关系明显非线性。</li>
+<li>不同变量间存在阈值效应与交互。</li>
+<li>线性回归偏差较大，而单棵回归树预测不够稳定。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>梯度提升的思路像是“不断纠错”：先用一个简单模型做粗略预测，再让后续模型专门去学习前面模型留下的误差，逐步把预测修正得更准。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>先用总体均值作为粗略预测，再让第一棵树修正大方向，第二棵树修正剩余偏差。学习率像修订幅度，避免每轮因局部误差而改得过猛。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>梯度提升的加法模型可写成：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 损失决定学习目标</h3>
+<ul>
+<li>平方损失：重罚大误差，伪残差等于普通残差。</li>
+<li>绝对误差：对离群值更稳健，目标更接近条件中位数。</li>
+<li>Huber 损失：小误差用平方惩罚，大误差近似线性惩罚。</li>
+<li>分位数损失：估计给定条件分位数，可构造预测区间的上下界。</li>
+</ul>
+<h3>2.2 偏差与方差控制</h3>
+<p>浅树、小学习率和较多轮数常形成平滑的逐步逼近；树太深或步长太大，则容易快速贴合训练噪声。</p>
+<h3>2.3 它不是传统回归推断</h3>
+<p>模型给出预测函数而非一组可直接解释的斜率。变量效应、标准误和置信区间不是默认产物；若研究目标是参数估计，应考虑更合适的统计模型。</p></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 平方损失</h3>
 <p>$$
-F_M(x)=F_{M-1}(x)+\nu h_M(x)
+L(y,F)=\frac12[y-F(x)]^2
 $$</p>
-<p>其中 $h_M(x)$ 是第 $M$ 轮拟合到负梯度（在平方损失下就是残差）的弱学习器，$\nu$ 是学习率。</p>
-<p>在平方误差损失下：</p>
+<p>其负梯度为：</p>
 <p>$$
 r_{im}=y_i-F_{m-1}(x_i)
 $$</p>
-<p>第 $m$ 棵树就是去拟合这些残差。</p>
-<h3>2.2 参数或统计量含义</h3>
+<h3>3.2 树与叶节点更新</h3>
+<p>用回归树把特征空间分为 $R_{1m},\ldots,R_{Jm}$。平方损失下，第 $j$ 个叶节点的最佳修正是叶内残差均值：</p>
+<p>$$
+\gamma_{jm}=
+\frac{1}{|R_{jm}|}
+\sum_{x_i\in R_{jm}}r_{im}
+$$</p>
+<p>$$
+F_m(x)=F_{m-1}(x)+
+\nu\sum_{j=1}^{J}\gamma_{jm}I(x\in R_{jm})
+$$</p>
+<h3>3.3 关键参数</h3>
 <ul>
-<li><code>n_estimators</code>：基学习器数量。</li>
-<li><code>learning_rate</code>：每一步修正幅度。</li>
-<li><code>max_depth</code>：每棵基树复杂度。</li>
-<li>boosting：串行逐步纠错。</li>
+<li><code>loss</code>：平方、绝对、Huber 或分位数等。</li>
+<li><code>learning_rate</code> 与 <code>n_estimators</code>：更新幅度与轮数。</li>
+<li><code>max_depth</code>、<code>min_samples_leaf</code>：单树复杂度和平滑程度。</li>
+<li><code>subsample</code>：每轮抽样比例，低于 1 时形成随机梯度提升。</li>
 </ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>对函数形式没有强线性假设。</li>
-<li>依赖较多超参数控制模型复杂度。</li>
-<li>学习率和树数之间需要平衡。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：连续、离散或编码后的分类变量。</li>
-<li>因变量类型：连续型。</li>
-<li>数据结构：宽表数据。</li>
-<li>是否适合高维数据：适合表格型中高维数据。</li>
-<li>是否适合缺失较多数据：需先处理缺失值。</li>
-<li>是否适合删失数据：不适合。</li>
-<li>是否适合重复测量数据：不直接适合。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>梯度提升回归常用在这类表格型预测任务：</p>
+<h3>3.4 关键条件</h3>
 <table>
 <thead>
 <tr>
-<th>OverallQual</th>
-<th>GrLivArea</th>
-<th>GarageCars</th>
-<th>TotalBsmtSF</th>
-<th>YearBuilt</th>
-<th>SalePrice</th>
+<th>条件</th>
+<th>违反后果</th>
+<th>检查方式</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>7</td>
-<td>1710</td>
-<td>2</td>
-<td>856</td>
-<td>2003</td>
-<td>208500</td>
+<td>结局定义一致</td>
+<td>模型学习测量或编码差异</td>
+<td>核查结局分布与单位</td>
 </tr>
 <tr>
-<td>6</td>
-<td>1262</td>
-<td>2</td>
-<td>1262</td>
-<td>1976</td>
-<td>181500</td>
+<td>损失符合目标</td>
+<td>均值、稳健位置或分位数答非所问</td>
+<td>预先定义 estimand</td>
 </tr>
 <tr>
-<td>7</td>
-<td>1786</td>
-<td>2</td>
-<td>920</td>
-<td>2001</td>
-<td>223500</td>
+<td>外推范围有限</td>
+<td>树模型在训练范围外常近似常数外推</td>
+<td>比较特征取值范围</td>
 </tr>
 <tr>
-<td>7</td>
-<td>1717</td>
-<td>3</td>
-<td>756</td>
-<td>1915</td>
-<td>140000</td>
-</tr>
-<tr>
-<td>8</td>
-<td>2198</td>
-<td>3</td>
-<td>1145</td>
-<td>2000</td>
-<td>250000</td>
+<td>数据独立或已妥善分组</td>
+<td>重复测量造成泄漏</td>
+<td>按患者分组切分</td>
 </tr>
 </tbody>
-</table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：连续结局和特征矩阵。</li>
-<li>关键变量：树数、学习率、每棵树深度。</li>
-<li>需要预处理的内容：缺失处理、训练测试集划分。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：集成模型、特征重要性、预测值。</li>
-<li>参数估计：不强调系数，更强调整体模型表现。</li>
-<li>预测结果：连续型预测值。</li>
-<li>不确定性指标：测试集误差、交叉验证误差。</li>
-</ul></div>
+</table></div>
     </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：追求较高预测性能、非线性和交互明显的表格数据场景。</li>
-<li>不适合：只追求简单解释或样本非常小的场景。</li>
-<li>使用前需要特别检查的点：学习率、树数、过拟合、早停策略。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>4 名患者连续结局为 $y=(2,4,6,8)$，用平方损失和学习率 $\nu=0.5$。</p>
+<p><strong>Step 1：初始常数。</strong></p>
+<p>$$
+F_0=\bar y=5
+$$</p>
+<p>残差为 $(-3,-1,1,3)$，初始 $\operatorname{MSE}=5$。</p>
+<p><strong>Step 2：第一棵树。</strong> 假设树把前两人与后两人分开。两个叶节点的残差均值分别为：</p>
+<p>$$
+\gamma_L=(-3-1)/2=-2,\qquad
+\gamma_R=(1+3)/2=2
+$$</p>
+<p>更新后：</p>
+<p>$$
+F_1=(5,5,5,5)+0.5(-2,-2,2,2)=(4,4,6,6)
+$$</p>
+<p>新残差为 $(-2,0,0,2)$，$\operatorname{MSE}=2$。</p>
+<p><strong>Step 3：再修正。</strong> 若第二棵树把两个端点的残差近似为 $(-2,0,0,2)$：</p>
+<p>$$
+F_2=F_1+0.5(-2,0,0,2)=(3,4,6,7)
+$$</p>
+<p>此时 $\operatorname{MSE}=0.5$。</p>
+<p><strong>结论：</strong> 浅树每轮只解释一部分剩余结构，小步累加形成最终非线性回归函数。</p></div>
     </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="gradient-boosting-regression" data-i="0">Python</button><button class="codetab" data-uid="gradient-boosting-regression" data-i="1">R</button></div><div class="codepanel active" data-uid="gradient-boosting-regression" data-i="0"><p>常用包：</p>
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 数据要求</h3>
 <ul>
-<li><code>scikit-learn</code></li>
+<li>因变量为连续型，可按研究目标变换尺度。</li>
+<li>特征可为数值或编码后的类别变量。</li>
+<li>经典实现通常需预先处理缺失。</li>
+<li>重复测量必须按患者分组切分，避免同一患者进入训练与测试。</li>
 </ul>
-<pre><code class="language-python">from sklearn.ensemble import GradientBoostingRegressor
-
-fit = GradientBoostingRegressor(
-    n_estimators=200,
-    learning_rate=0.05,
-    max_depth=3,
-    random_state=42
-)
-fit.fit(X_train, y_train)
-y_pred = fit.predict(X_test)
-</code></pre></div><div class="codepanel" data-uid="gradient-boosting-regression" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>gbm</code></li>
-</ul>
-<pre><code class="language-r">library(gbm)
-
-fit &lt;- gbm(
-  formula = SalePrice ~ .,
-  data = df,
-  distribution = &quot;gaussian&quot;,
-  n.trees = 200,
-  interaction.depth = 3,
-  shrinkage = 0.05
-)
-</code></pre></div></div></div>
+<h3>5.2 产出</h3>
+<p>输出连续预测、逐轮损失和特征重要性。预测不确定性通常需借助分位数模型、bootstrap、保形预测或其他专门方法获得，不能把单点预测误写成区间。</p></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：测试集性能、学习曲线、重要特征。</li>
-<li>每个主要参数如何解释：更多从模型复杂度和学习过程角度解释，而不是单个系数解释。</li>
-<li>临床或医学意义如何表达：适合强调预测精度和高阶模式捕捉能力。</li>
-<li>常见误读：更多的树并不总是更好，学习率和树数需要一起看。</li>
+<li>费用、住院时长、实验室数值和连续风险评分预测。</li>
+<li>非线性和交互强、预测性能优先的表格数据。</li>
+<li>慎用于需可靠外推、样本很小或主要目标为变量效应估计的研究。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>真实值 vs 预测值散点图。</li>
-<li>学习曲线。</li>
-<li>特征重要性条形图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图展示梯度提升回归在房价数据上的真实值与预测值对照关系，用来直观查看拟合效果。</p>
-<p><img alt="" src="img/gradient_boosting_actual_vs_pred.png" /></p></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="gradient-boosting-regression" data-i="0">Python</button><button class="codetab" data-uid="gradient-boosting-regression" data-i="1">R</button></div><div class="codepanel active" data-uid="gradient-boosting-regression" data-i="0"><pre><code class="language-python">from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.metrics import mean_absolute_error, root_mean_squared_error
+
+model = GradientBoostingRegressor(
+    loss=&quot;huber&quot;,
+    n_estimators=800,
+    learning_rate=0.03,
+    max_depth=2,
+    min_samples_leaf=20,
+    subsample=0.8,
+    n_iter_no_change=30,
+    validation_fraction=0.2,
+    random_state=42,
+)
+model.fit(X_train, y_train)
+
+pred = model.predict(X_test)
+print(&quot;MAE:&quot;, mean_absolute_error(y_test, pred))
+print(&quot;RMSE:&quot;, root_mean_squared_error(y_test, pred))
+</code></pre></div><div class="codepanel" data-uid="gradient-boosting-regression" data-i="1"><pre><code class="language-r">library(gbm)
+
+fit &lt;- gbm(
+  AnnualCost ~ Age + Charlson + HbA1c + eGFR + PriorCost,
+  data = train,
+  distribution = &quot;tdist&quot;,
+  n.trees = 800,
+  interaction.depth = 2,
+  n.minobsinnode = 20,
+  shrinkage = 0.03,
+  bag.fraction = 0.8,
+  cv.folds = 5
+)
+
+best_n &lt;- gbm.perf(fit, method = &quot;cv&quot;, plot.it = FALSE)
+pred &lt;- predict(fit, newdata = test, n.trees = best_n)
+</code></pre>
+<p>这里 Python 使用 Huber 损失，R 的 <code>gbm</code> 示例使用 t-distribution loss 作为稳健回归方案；二者不是同一个损失函数。</p></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>对表格数据性能通常很强。</li>
-<li>能处理复杂非线性和交互。</li>
-<li>可逐步提升预测精度。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>调参较多。</li>
-<li>训练时间通常比单棵树更长。</li>
-<li>若学习率和树数设置不当，容易过拟合。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>学习率太大、树太深导致过拟合。</li>
-<li>只看训练误差不看验证集误差。</li>
-<li>误把特征重要性当成因果重要性。</li>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>MAE 表示平均绝对误差，单位与结局相同；RMSE 对大误差更敏感。</li>
+<li>$R^2$ 反映相对基准的解释程度，但不能替代误差的临床单位解释。</li>
+<li>残差应按预测值、时间、中心和关键亚组检查。</li>
+<li>变量重要性和解释图描述模型预测关系，不是调整后的因果效应。</li>
 </ul></div>
     </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和随机森林的区别：随机森林是并行 bagging；梯度提升是串行 boosting。</li>
-<li>和 XGBoost/LightGBM 的区别：后者是在 boosting 基础上的工程和算法增强。</li>
-<li>和决策树回归的区别：梯度提升是多棵树逐步叠加。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">诊断与稳健性</h2></div>
+      <div class="sec-body"><ol>
+<li>画训练/验证损失，检查最佳轮数与过拟合。</li>
+<li>比较平方、Huber 和绝对误差损失。</li>
+<li>检查真实值-预测值、残差-预测值图和极端误差病例。</li>
+<li>以简单均值、线性回归和 <a class="xlink" href="m-random-forest-regression.html" data-cn="随机森林回归" data-en="Random Forest Regression" data-def="随机森林回归训练许多带随机性的回归树，再把它们的连续预测取平均，得到比单棵树更稳定的预测值。">随机森林回归（Random Forest Regression）</a> 为基准。</li>
+<li>做时间外、中心外和亚组验证；按临床可接受误差解释结果。</li>
+</ol></div>
     </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
-<li>表格型连续风险预测。</li>
-<li>多变量费用和资源消耗预测。</li>
-<li>临床数据中的复杂非线性建模。</li>
-</ul></div>
+<li>真实值与预测值散点图，叠加 45 度参考线。</li>
+<li>残差与预测值图。</li>
+<li>训练/验证损失曲线。</li>
+<li>特征重要性、部分依赖或 SHAP 图。</li>
+</ul>
+<p>下图展示真实值与预测值的对照关系：</p>
+<p><img alt="" src="img/gradient_boosting_actual_vs_pred.png" /></p></div>
     </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-boosting.html" data-cn="Boosting算法" data-en="Boosting" data-def="Boosting 是一类串行集成学习方法，它把多个弱学习器按顺序组合起来，每一轮都让新模型重点修正当前集成模型的错误。AdaBoost、GBDT、XGBoost 和 LightGBM 都属于 Boosting 家族。">Boosting算法（Boosting）</a></li>
-<li><a class="xlink" href="m-gradient-boosting-decision-tree-gbdt.html" data-cn="梯度提升决策树" data-en="Gradient Boosting Decision Tree, GBDT" data-def="梯度提升决策树是以决策树为基学习器的梯度提升方法。它通过逐轮拟合损失函数的负梯度或伪残差，把多棵浅树叠加成一个强预测模型。">梯度提升决策树（Gradient Boosting Decision Tree, GBDT）</a></li>
-<li><a class="xlink" href="m-extreme-gradient-boosting-xgboost.html" data-cn="XGBoost" data-en="Extreme Gradient Boosting, XGBoost" data-def="XGBoost 是一种基于梯度提升树的高性能集成学习方法。它在经典 GBDT 基础上加入了二阶优化、显式正则化、列采样、缺失值处理和工程级并行优化，因此在表格数据预测中非常常用。">XGBoost（Extreme Gradient Boosting, XGBoost）</a></li>
-<li><a class="xlink" href="m-light-gradient-boosting-machine.html" data-cn="LightGBM" data-en="Light Gradient Boosting Machine" data-def="LightGBM 是一种高效的梯度提升树实现。它在传统 GBDT 基础上引入直方图分桶、leaf-wise 生长策略，以及大样本场景常用的 GOSS 和 EFB 等优化，使其在大规模表格数据上训练更快、内存占用更低。">LightGBM（Light Gradient Boosting Machine）</a></li>
-<li><a class="xlink" href="m-decision-tree-regression.html" data-cn="决策树回归" data-en="Decision Tree Regression" data-def="决策树回归是一种通过递归划分特征空间，把连续结局映射到一系列区域均值上的非参数回归方法。">决策树回归（Decision Tree Regression）</a></li>
-<li><a class="xlink" href="m-random-forest-regression.html" data-cn="随机森林回归" data-en="Random Forest Regression" data-def="随机森林回归通过训练多棵带有随机性的回归树，并对它们的预测结果取平均，从而获得更稳定、更鲁棒的连续结局预测模型。">随机森林回归（Random Forest Regression）</a></li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p><strong>优势：</strong> 连续结局预测能力强，损失灵活，能自动学习非线性与交互。</p>
+<p><strong>局限：</strong> 外推能力弱、调参较多、不直接提供经典推断与预测区间。</p>
+<p><strong>常见坑：</strong> 随机拆分重复测量；只报 $R^2$；未与简单基准比较；把特征重要性解释成效应大小。</p></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-gradient-boosting-decision-tree-gbdt.html" data-cn="梯度提升决策树" data-en="Gradient Boosting Decision Tree, GBDT" data-def="GBDT 把“拟合残差”推广为“拟合损失函数的负梯度”，让浅决策树在函数空间中逐步走向更低损失。">梯度提升决策树（Gradient Boosting Decision Tree, GBDT）</a>：总框架与连续结局具体应用的关系。</li>
+<li><a class="xlink" href="m-decision-tree-regression.html" data-cn="决策树回归" data-en="Decision Tree Regression" data-def="决策树回归把连续结局分成一块块区域，每个叶节点用该区域的平均值作为预测。">决策树回归（Decision Tree Regression）</a>：单树易解释但不稳定，提升回归逐轮叠加多树。</li>
+<li><a class="xlink" href="m-random-forest-regression.html" data-cn="随机森林回归" data-en="Random Forest Regression" data-def="随机森林回归训练许多带随机性的回归树，再把它们的连续预测取平均，得到比单棵树更稳定的预测值。">随机森林回归（Random Forest Regression）</a>：并行平均主要降方差，梯度提升串行修正偏差。</li>
+<li><a class="xlink" href="m-extreme-gradient-boosting-xgboost.html" data-cn="XGBoost" data-en="Extreme Gradient Boosting, XGBoost" data-def="XGBoost 是带二阶近似、显式树复杂度惩罚、采样与高效实现的梯度提升树。">XGBoost（Extreme Gradient Boosting, XGBoost）</a>：增加二阶近似、显式正则化和工程优化。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>年度医疗费用和住院时长预测。</li>
+<li>肾功能、血糖、血压等连续指标预测。</li>
+<li>术后恢复评分、生活质量评分与剂量需求预测。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">术语表</h2></div>
+      <div class="sec-body"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>平方损失</td>
+<td>对大残差施加平方惩罚</td>
+</tr>
+<tr>
+<td>Huber 损失</td>
+<td>兼顾平方损失效率与绝对误差稳健性</td>
+</tr>
+<tr>
+<td>分位数损失</td>
+<td>针对条件分位数的非对称绝对损失</td>
+</tr>
+<tr>
+<td>叶节点值</td>
+<td>新树在该区域给出的预测修正</td>
+</tr>
+<tr>
+<td>外推</td>
+<td>对训练特征范围之外的数据预测</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-boosting.html" data-cn="Boosting算法" data-en="Boosting" data-def="Boosting 让弱学习器依次上场，每一轮都针对当前模型尚未解决的错误做一次小修正，最后把这些修正相加成强模型。">Boosting算法（Boosting）</a></li>
+<li><a class="xlink" href="m-gradient-boosting-decision-tree-gbdt.html" data-cn="梯度提升决策树" data-en="Gradient Boosting Decision Tree, GBDT" data-def="GBDT 把“拟合残差”推广为“拟合损失函数的负梯度”，让浅决策树在函数空间中逐步走向更低损失。">梯度提升决策树（Gradient Boosting Decision Tree, GBDT）</a></li>
+<li><a class="xlink" href="m-extreme-gradient-boosting-xgboost.html" data-cn="XGBoost" data-en="Extreme Gradient Boosting, XGBoost" data-def="XGBoost 是带二阶近似、显式树复杂度惩罚、采样与高效实现的梯度提升树。">XGBoost（Extreme Gradient Boosting, XGBoost）</a></li>
+<li><a class="xlink" href="m-light-gradient-boosting-machine.html" data-cn="LightGBM" data-en="Light Gradient Boosting Machine" data-def="LightGBM 用直方图近似分裂搜索，并优先分裂全树中收益最大的叶节点，以较低内存和较高速度训练梯度提升树。">LightGBM（Light Gradient Boosting Machine）</a></li>
+<li><a class="xlink" href="m-decision-tree-regression.html" data-cn="决策树回归" data-en="Decision Tree Regression" data-def="决策树回归把连续结局分成一块块区域，每个叶节点用该区域的平均值作为预测。">决策树回归（Decision Tree Regression）</a></li>
+<li><a class="xlink" href="m-random-forest-regression.html" data-cn="随机森林回归" data-en="Random Forest Regression" data-def="随机森林回归训练许多带随机性的回归树，再把它们的连续预测取平均，得到比单棵树更稳定的预测值。">随机森林回归（Random Forest Regression）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Friedman JH. Greedy function approximation: a gradient boosting machine. <em>Ann Stat</em>. 2001;29(5):1189-1232.</li>
-<li>scikit-learn Developers. <code>sklearn.ensemble.GradientBoostingRegressor</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingRegressor.html">https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingRegressor.html</a> （访问日期：2026-07-02）</li>
-<li>CRAN. Package <code>gbm</code>. <a href="https://cran.r-project.org/package=gbm">https://cran.r-project.org/package=gbm</a> （访问日期：2026-07-02）</li>
+<li>Friedman JH. Stochastic gradient boosting. <em>Comput Stat Data Anal</em>. 2002;38(4):367-378.</li>
+<li>scikit-learn Developers. <code>GradientBoostingRegressor</code> API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingRegressor.html">https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingRegressor.html</a> （访问日期：2026-07-09）</li>
+<li>CRAN. Package <code>gbm</code>. <a href="https://cran.r-project.org/package=gbm">https://cran.r-project.org/package=gbm</a> （访问日期：2026-07-09）</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-gradient-boosting-decision-tree-gbdt.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">梯度提升决策树</div></a><a class="pg pg-next" href="m-extreme-gradient-boosting-xgboost.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">XGBoost</div></a></div>

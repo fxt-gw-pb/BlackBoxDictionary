@@ -46,7 +46,7 @@
           <span class="entry-cn">自回归模型</span>
           <span class="entry-en">Autoregressive Model, AR</span>
         </div>
-        <p class="entry-def">自回归模型是一类用序列自身过去值预测当前值的时间序列模型。AR($p$) 表示当前观测由前 $p$ 个滞后值的线性组合和随机误差构成。</p>
+        <p class="entry-def">AR 用序列自身过去的值预测现在，把“惯性会延续但逐渐衰减”写成线性递推。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -59,7 +59,7 @@
           <span class="entry-cn">移动平均模型</span>
           <span class="entry-en">Moving Average Model, MA</span>
         </div>
-        <p class="entry-def">移动平均模型在时间序列建模中通常指 MA($q$)：当前值由当前随机冲击和过去 $q$ 个随机冲击线性组合而成。实践中“移动平均”也常指简单移动平均平滑，用于去噪和观察趋势。</p>
+        <p class="entry-def">统计时间序列中的 MA 用有限个过去随机冲击解释当前值，而不是对过去观测做滚动平均。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -72,7 +72,7 @@
           <span class="entry-cn">自回归滑动平均模型</span>
           <span class="entry-en">Autoregressive Moving Average Model, ARMA</span>
         </div>
-        <p class="entry-def">ARMA 模型把自回归 AR 部分和移动平均 MA 部分组合起来，用于建模平稳单变量时间序列。ARMA($p,q$) 同时利用过去观测值和过去误差项预测当前值。</p>
+        <p class="entry-def">ARMA 同时用过去观测的惯性和过去冲击的回声，以较少参数描述平稳序列复杂自相关。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -85,7 +85,7 @@
           <span class="entry-cn">自回归积分滑动平均模型</span>
           <span class="entry-en">Autoregressive Integrated Moving Average Model, ARIMA</span>
         </div>
-        <p class="entry-def">ARIMA 是用于单变量时间序列预测的经典模型。它通过差分把非平稳序列转为平稳序列，再用 ARMA 模型刻画差分后序列的自相关结构。</p>
+        <p class="entry-def">ARIMA 先用差分去掉随机趋势，再对差分后的平稳变化量建立 ARMA。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -98,7 +98,7 @@
           <span class="entry-cn">向量自回归模型</span>
           <span class="entry-en">Vector Autoregression, VAR</span>
         </div>
-        <p class="entry-def">向量自回归模型是多变量时间序列模型，用每个变量自身和其他变量的历史值共同预测当前多个变量。VAR($p$) 可看作多变量版 AR 模型。</p>
+        <p class="entry-def">VAR 让一组变量都由这组变量的过去共同预测，从而刻画相互滞后联动。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -111,7 +111,7 @@
           <span class="entry-cn">向量自回归滑动平均模型</span>
           <span class="entry-en">Vector Autoregressive Moving Average Model, VARMA</span>
         </div>
-        <p class="entry-def">VARMA 是多变量时间序列模型，同时包含向量自回归 VAR 部分和向量移动平均 VMA 部分。它既用多个变量的历史值，也用多个变量的过去创新项解释当前向量序列。</p>
+        <p class="entry-def">VARMA 同时用多变量过去水平与过去联合冲击预测现在，是 VAR 与多变量 MA 的合体。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -124,7 +124,7 @@
           <span class="entry-cn">Prophet时间序列模型</span>
           <span class="entry-en">Prophet Forecasting Model</span>
         </div>
-        <p class="entry-def">Prophet 是一种面向业务时间序列预测的可加性模型。它把序列分解为趋势、季节性、节假日效应和误差项，并通过变化点捕捉趋势斜率的改变。</p>
+        <p class="entry-def">Prophet 把序列拆成分段趋势、周期季节、节假日与误差，让每种可解释结构单独建模后相加。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -137,7 +137,7 @@
           <span class="entry-cn">Holt-Winters指数平滑</span>
           <span class="entry-en">Holt-Winters Exponential Smoothing</span>
         </div>
-        <p class="entry-def">Holt-Winters 指数平滑是一种用于带趋势和季节性的单变量时间序列预测方法。它递推更新水平、趋势和季节性三个成分，并用它们生成未来预测。</p>
+        <p class="entry-def">Holt-Winters 用指数衰减权重在线更新水平、趋势和季节三个状态，并把它们外推到未来。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -150,7 +150,7 @@
           <span class="entry-cn">LSTM时间序列预测</span>
           <span class="entry-en">Long Short-Term Memory for Time Series Forecasting</span>
         </div>
-        <p class="entry-def">LSTM 是循环神经网络的一种改进结构，通过门控机制保存、遗忘和输出序列信息。本条目聚焦 [[长短期记忆网络（Long Short-Term Memory, LSTM）]] 在时间</p>
+        <p class="entry-def">LSTM 预测把过去窗口逐步压入门控记忆，再从最后状态输出未来值；真正关键的是无泄漏窗口构造与时间回测。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -163,7 +163,7 @@
           <span class="entry-cn">XGBoost时间序列预测</span>
           <span class="entry-en">XGBoost for Time Series Forecasting</span>
         </div>
-        <p class="entry-def">XGBoost 时间序列预测是把时间序列问题转换为监督学习表格问题，再用 XGBoost 建模。核心做法是构造滞后特征、滚动统计量、日历特征和外部变量，用它们预测未来目标值。</p>
+        <p class="entry-def">XGBoost 时序预测先把时间序列改造成滞后、滚动和日历特征表，再用梯度提升树学习非线性规则。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>

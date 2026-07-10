@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,59 +54,219 @@
     <div class="intro-note"><h1>C4.5决策树（C4.5 Decision Tree）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>C4.5 是 ID3 的改进版本。它用信息增益率代替单纯的信息增益，并支持连续特征、缺失值处理和后剪枝，因此比 ID3 更接近实际应用环境。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>C4.5 是 ID3 的实用升级版：它用信息增益率惩罚「把数据切得过碎」的特征，并支持连续变量、缺失处理和剪枝。</p>
+<h3>1.2 定义</h3>
+<p>C4.5 是 Quinlan 在 ID3 基础上提出的分类树算法。它仍然用信息论思想选择分裂，但把单纯信息增益改为信息增益率，从而降低高基数特征偏倚；同时加入连续阈值搜索和后剪枝，更接近实际建模需要。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：如何在避免高基数特征偏倚的同时，构建更稳健的分类树。</li>
-<li>适用任务：离散或连续特征混合的分类、教学型规则挖掘、可解释分类。</li>
-<li>常见医学场景：结合实验室指标、评分量表和病史变量做疾病分型或风险类别判别。</li>
+<li>研究问题：如何在离散和连续特征混合的数据中构建可解释分类规则，并避免取值很多的特征被过度偏爱。</li>
+<li>适用任务：分类规则学习、混合型特征建模、可解释风险分层。</li>
+<li>常见医学场景：结合实验室连续指标、病史分类变量和症状分级做疾病分型或重症风险判别。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>C4.5 的思路和 ID3 类似，但它会额外追问一句：“这个特征虽然能把数据分得很细，但这种细分是不是只是因为它取值太多？”信息增益率就是用来约束这种偏差的。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>ID3 只问「这个特征能减少多少不确定性」；C4.5 还会问「它是不是靠把每个人都单独分出去才显得有用」。患者 ID 可以把每个患者分成单独叶子，训练集看似完美，但毫无泛化意义。增益率正是给这种过度细分打折。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>先计算信息增益：</p>
-<p>$$
-IG(S, A) = H(S) - H(S \mid A)
-$$</p>
-<p>再计算特征 $A$ 的固有值：</p>
-<p>$$
-SI(S, A) = - \sum_{v \in \mathcal{V}(A)} \frac{|S_v|}{|S|} \log_2 \frac{|S_v|}{|S|}
-$$</p>
-<p>信息增益率定义为：</p>
-<p>$$
-GR(S, A) = \frac{IG(S, A)}{SI(S, A)}
-$$</p>
-<p>对于连续特征，C4.5 会搜索候选阈值 $c$，比较按 $X \le c$ 与 $X &gt; c$ 划分后的增益率。</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>单纯信息增益偏爱取值多的特征。比如患者 ID、住院号、罕见类别变量，可能把训练样本切得很碎，使每个叶子看起来很纯，但这不是可推广的医学规律。C4.5 解决的是：<strong>如何区分真正有分类信息的特征，与只是因为取值太多而制造纯节点的特征</strong>。</p>
+<h3>2.2 关键洞察</h3>
+<p>C4.5 的关键洞察是把信息增益除以分裂本身的复杂度。若一个特征把样本切成许多小块，它的 Split Information 会很大；即使信息增益高，增益率也会被拉低。这样更偏向选择既能降低类别不确定性、又不过度碎片化的分裂。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$IG(S, A)$：特征带来的不确定性下降。</li>
-<li>$SI(S, A)$：特征自身取值分布带来的“分裂复杂度”。</li>
-<li>$GR(S, A)$：兼顾有效性与复杂度后的分裂评分。</li>
-<li>剪枝误差：用于控制树复杂度、减少过拟合。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>分类边界可由树状规则近似。</li>
-<li>连续特征可通过阈值切分获得有效信息。</li>
-<li>后剪枝有助于改善泛化能力。</li>
+<li>相对 <a class="xlink" href="m-id3-decision-tree.html" data-cn="ID3决策树" data-en="ID3 Decision Tree" data-def="ID3 每一步都选择「最能减少类别不确定性」的离散特征来分裂节点。">ID3决策树（ID3 Decision Tree）</a>：C4.5 用增益率、支持连续变量、缺失值和后剪枝。</li>
+<li>相对 CART：CART 常用 Gini 并偏二叉分裂；C4.5 的标志是信息增益率。</li>
+<li>相对 <a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是在 Bagging 多棵树的基础上，再让每个节点只看一部分随机特征，从而让树与树更不相似、投票更稳。">随机森林（Random Forest）</a>：C4.5 仍是单棵树，规则更清楚，但稳定性和预测性能通常不如集成树。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>先计算信息增益：</p>
+<p>$$
+\operatorname{IG}(S,A)=H(S)-H(S\mid A)
+$$</p>
+<p>再计算特征 $A$ 的分裂信息：</p>
+<p>$$
+\operatorname{SI}(S,A)=
+-\sum_{v\in\mathcal V(A)}
+\frac{|S_v|}{|S|}
+\log_2\frac{|S_v|}{|S|}
+$$</p>
+<p>信息增益率为：</p>
+<p>$$
+\operatorname{GR}(S,A)=
+\frac{\operatorname{IG}(S,A)}{\operatorname{SI}(S,A)}
+$$</p>
+<p>连续变量可枚举候选阈值 $c$，比较按 $X\le c$ 与 $X\gt c$ 分裂后的增益率。</p>
+<p>这个式子在说：分裂既要带来类别信息，也不能只是靠过度细分来制造纯度。</p>
+<h3>3.2 推导脉络</h3>
+<ol>
+<li>按 ID3 的方式计算每个候选特征的信息增益。</li>
+<li>再计算该特征把数据切分得多细，即 Split Information。</li>
+<li>用信息增益除以 Split Information，得到增益率。</li>
+<li>对连续变量，先排序并枚举相邻类别变化处的阈值。</li>
+<li>树生成后做后剪枝，减少对训练集噪声的依赖。</li>
+</ol>
+<h3>3.3 参数与统计量含义</h3>
+<ul>
+<li>$\operatorname{IG}$：特征带来的类别不确定性下降。</li>
+<li>$\operatorname{SI}$：特征自身分裂的复杂度。</li>
+<li>$\operatorname{GR}$：单位分裂复杂度带来的信息收益。</li>
+<li>阈值 $c$：连续变量的候选切分点。</li>
+<li>剪枝参数：控制是否合并对泛化帮助不大的子树。</li>
+</ul>
+<h3>3.4 关键假设(含违反后果)</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>可解释规则存在</td>
+<td>类别可由分段规则近似</td>
+<td>树复杂且泛化差</td>
+<td>验证集误差、树深度</td>
+</tr>
+<tr>
+<td>高基数特征需惩罚</td>
+<td>取值多不等于有医学意义</td>
+<td>训练集过拟合</td>
+<td>检查 ID、编码变量</td>
+</tr>
+<tr>
+<td>连续阈值可泛化</td>
+<td>阈值不是样本偶然产物</td>
+<td>cut-off 不稳定</td>
+<td>重采样阈值稳定性</td>
+</tr>
+<tr>
+<td>缺失机制可处理</td>
+<td>缺失不会完全破坏分裂</td>
+<td>分裂偏向缺失模式</td>
+<td>缺失图、敏感性分析</td>
+</tr>
+<tr>
+<td>剪枝合理</td>
+<td>简化树能改善泛化</td>
+<td>过剪枝欠拟合，少剪枝过拟合</td>
+<td>交叉验证</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>沿用 ID3 的 8 名患者数据，并额外加入「患者ID」这个高基数特征。</p>
+<table>
+<thead>
+<tr>
+<th>患者ID</th>
+<th>CRP高</th>
+<th>乳酸高</th>
+<th>重症Y</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1</td>
+<td>是</td>
+<td>是</td>
+<td>1</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>是</td>
+<td>否</td>
+<td>1</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>是</td>
+<td>是</td>
+<td>1</td>
+</tr>
+<tr>
+<td>P4</td>
+<td>是</td>
+<td>否</td>
+<td>1</td>
+</tr>
+<tr>
+<td>P5</td>
+<td>否</td>
+<td>是</td>
+<td>1</td>
+</tr>
+<tr>
+<td>P6</td>
+<td>否</td>
+<td>是</td>
+<td>0</td>
+</tr>
+<tr>
+<td>P7</td>
+<td>否</td>
+<td>否</td>
+<td>0</td>
+</tr>
+<tr>
+<td>P8</td>
+<td>否</td>
+<td>否</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>父节点熵仍为：</p>
+<p>$$
+H(S)=0.954
+$$</p>
+<p><strong>Step 1：CRP 高的增益率。</strong></p>
+<p>ID3 卡已算出：</p>
+<p>$$
+\operatorname{IG}(S,\mathrm{CRP})=0.548
+$$</p>
+<p>CRP 高低各 4 人，因此：</p>
+<p>$$
+\operatorname{SI}(S,\mathrm{CRP})=
+-\frac48\log_2\frac48-\frac48\log_2\frac48=1
+$$</p>
+<p>$$
+\operatorname{GR}(S,\mathrm{CRP})=\frac{0.548}{1}=0.548
+$$</p>
+<p><strong>Step 2：患者 ID 的信息增益。</strong></p>
+<p>按患者 ID 分裂后，每个子节点只有 1 人，熵都是 0，所以条件熵为 0：</p>
+<p>$$
+\operatorname{IG}(S,\mathrm{ID})=0.954-0=0.954
+$$</p>
+<p>如果只看信息增益，ID 会赢过 CRP，这显然荒唐。</p>
+<p><strong>Step 3：患者 ID 的增益率。</strong></p>
+<p>8 个 ID 各占 $1/8$：</p>
+<p>$$
+\operatorname{SI}(S,\mathrm{ID})
+=-\sum_{i=1}^{8}\frac18\log_2\frac18=3
+$$</p>
+<p>$$
+\operatorname{GR}(S,\mathrm{ID})=\frac{0.954}{3}=0.318
+$$</p>
+<p><strong>结论：</strong> ID 的信息增益最高，但增益率只有 0.318，低于 CRP 的 0.548。C4.5 因此更可能选择 CRP，而不是被患者 ID 这种无泛化意义的高基数字段骗走。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
 <li>自变量类型：离散和连续变量均可。</li>
 <li>因变量类型：二分类或多分类。</li>
 <li>数据结构：宽表数据。</li>
-<li>是否适合高维数据：可以，但仍可能不稳定。</li>
-<li>是否适合缺失较多数据：比 ID3 更好，但大量缺失仍建议先系统处理。</li>
+<li>是否适合高维数据：可以，但单棵树仍可能不稳定。</li>
+<li>是否适合缺失较多数据：比 ID3 更友好，但大量缺失仍需系统处理。</li>
 <li>是否适合删失数据：不适合。</li>
 <li>是否适合重复测量数据：不直接适合。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>以 ICU 患者感染类型判别为例：</p>
+<h3>5.2 示例表格</h3>
 <table>
 <thead>
 <tr>
@@ -161,12 +321,12 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
 <li>输入数据：类别标签与混合型特征。</li>
 <li>关键变量：候选切分点、最小样本阈值、剪枝策略。</li>
-<li>需要预处理的内容：异常值检查、缺失处理、训练测试集划分。</li>
+<li>需要预处理的内容：异常值检查、缺失处理、训练测试集划分、高基数字段筛查。</li>
 </ul>
 <h4>产出</h4>
 <ul>
@@ -175,109 +335,139 @@ $$</p>
 <li>预测结果：类别标签与概率。</li>
 <li>不确定性指标：验证集准确率、宏平均 F1、校准情况。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
 <li>适合：混合型特征分类、需要规则解释、希望比 ID3 更稳健的场景。</li>
-<li>不适合：极大规模数据、对最优预测性能要求远高于解释性的任务。</li>
-<li>使用前需要特别检查的点：高基数特征、剪枝策略、类别不平衡。</li>
+<li>不适合：极大规模复杂预测、强噪声小样本、主要目标是最优预测性能而非规则解释。</li>
+<li>使用前需要特别检查的点：高基数字段、连续阈值稳定性、剪枝策略、类别不平衡。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="c4-5-decision-tree" data-i="0">Python</button><button class="codetab" data-uid="c4-5-decision-tree" data-i="1">R</button></div><div class="codepanel active" data-uid="c4-5-decision-tree" data-i="0"><p>常用包：</p>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="c4-5-decision-tree" data-i="0">Python</button><button class="codetab" data-uid="c4-5-decision-tree" data-i="1">R</button></div><div class="codepanel active" data-uid="c4-5-decision-tree" data-i="0"><p>常用包:</p>
 <ul>
 <li><code>scikit-learn</code></li>
 </ul>
 <pre><code class="language-python">import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 
-df = pd.read_csv(&quot;icu_infection.csv&quot;)
 X = df[[&quot;Age&quot;, &quot;WBC&quot;, &quot;CRP&quot;, &quot;Ventilator&quot;, &quot;AntibioticHistory&quot;]]
 X = pd.get_dummies(X, drop_first=True)
 y = df[&quot;InfectionClass&quot;]
 
-# Python 生态里更常用 CART；这里给出接近 C4.5 训练流程的替代实现
-fit = DecisionTreeClassifier(
+# scikit-learn 更接近 CART；criterion=&quot;entropy&quot; 可近似信息论分裂，
+# 严格 C4.5/J48 通常在 R/Weka 中实现。
+model = DecisionTreeClassifier(
     criterion=&quot;entropy&quot;,
     ccp_alpha=0.002,
     min_samples_leaf=10,
     random_state=42
 )
-fit.fit(X, y)
-</code></pre></div><div class="codepanel" data-uid="c4-5-decision-tree" data-i="1"><p>常用包：</p>
+model.fit(X, y)
+</code></pre></div><div class="codepanel" data-uid="c4-5-decision-tree" data-i="1"><p>常用包:</p>
 <ul>
 <li><code>RWeka</code></li>
 </ul>
 <pre><code class="language-r">library(RWeka)
 
-fit &lt;- J48(InfectionClass ~ Age + WBC + CRP + Ventilator + AntibioticHistory, data = df)
-pred &lt;- predict(fit, newdata = df_test)
+fit &lt;- J48(
+  InfectionClass ~ Age + WBC + CRP + Ventilator + AntibioticHistory,
+  data = train_df
+)
+
+pred &lt;- predict(fit, newdata = test_df)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
       <div class="sec-body"><ul>
 <li>核心结果看什么：根节点分裂、连续变量阈值、剪枝后树深度、测试集表现。</li>
-<li>每个主要参数如何解释：剪枝越强，树越简单，方差更低但偏差可能更高。</li>
-<li>临床或医学意义如何表达：可用“当 CRP 超过某阈值且存在机械通气时，更倾向于某感染类别”来表达。</li>
-<li>常见误读：增益率更高并不代表该特征单独就足以进行临床决策。</li>
+<li>每个主要参数如何解读：增益率高表示该分裂在控制碎片化后仍有较高信息收益。</li>
+<li>临床或医学意义如何表达：可写作「在该样本中，CRP 阈值提供了比患者 ID 更可推广的分类信息」。</li>
+<li>常见误读：增益率更高不代表该变量单独足以做临床决策，也不代表因果作用。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>高基数诊断：移除 ID、编码、极稀有类别变量，或明确其无预测泛化意义。</li>
+<li>阈值稳定性：重采样后检查连续变量阈值是否大幅变化。</li>
+<li>剪枝诊断：比较剪枝前后验证集误差和树复杂度。</li>
+<li>类别不平衡：报告每类召回率和宏平均 F1。</li>
+<li>实现差异：说明所用软件是否是真正 C4.5/J48，还是 CART 的近似替代。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
 <li>剪枝前后树结构对比图。</li>
 <li>连续变量最佳阈值示意图。</li>
+<li>信息增益与增益率对比条形图。</li>
 <li>混淆矩阵和每类召回率图。</li>
 </ul>
-<h3>7.1 图像示例</h3>
+<h3>10.1 图像示例</h3>
 <p>下图给出一个 C4.5 风格分类树的规则结构示意，适合说明连续特征阈值切分和逐层判别路径。</p>
 <p><img alt="" src="img/c45_tree_structure.png" /></p></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>比 ID3 更稳健。</li>
-<li>能处理连续特征。</li>
-<li>规则依然清晰。</li>
+<li>比 ID3 更能抵抗高基数特征偏倚。</li>
+<li>能处理连续特征和缺失值。</li>
+<li>规则仍然清晰，适合解释和教学。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>仍然属于单棵树，稳定性有限。</li>
-<li>在复杂表格预测中常不如集成方法。</li>
-<li>不同实现之间细节差异较大。</li>
+<li>仍是单棵树，稳定性有限。</li>
+<li>在复杂表格预测中常不如随机森林和梯度提升。</li>
+<li>不同软件实现细节差异较大。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>把 scikit-learn 的 CART 结果直接当成严格 C4.5。</li>
-<li>忽略剪枝。</li>
+<li>把 scikit-learn 的 CART 结果直接当作严格 C4.5。</li>
+<li>忽略剪枝，得到过深规则。</li>
 <li>把树阈值当成通用医学 cut-off。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 ID3 的区别：C4.5 使用信息增益率，并支持连续特征、缺失值与后剪枝。</li>
-<li>和 CART 的区别：CART 常用基尼指数并偏二叉分裂；C4.5 更强调增益率。</li>
-<li>和随机森林的区别：随机森林牺牲部分可解释性来换取更强预测稳定性。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>混合型临床指标的疾病分类。</li>
-<li>医学教学中的规则树示例。</li>
-<li>需要可解释路径的初步分型任务。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-decision-tree.html" data-cn="决策树" data-en="Decision Tree" data-def="决策树是一类通过递归划分特征空间来完成分类或回归的树状模型。对于分类任务，它把样本一步步分到更“纯”的叶节点中，再用叶节点中的多数类别作为预测结果。">决策树（Decision Tree）</a></li>
-<li><a class="xlink" href="m-id3-decision-tree.html" data-cn="ID3决策树" data-en="ID3 Decision Tree" data-def="ID3 是 Ross Quinlan 提出的经典决策树构建算法。它用信息增益作为特征选择标准，递归地挑选最能降低类别不确定性的特征来生成分类树。">ID3决策树（ID3 Decision Tree）</a></li>
-<li><a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是一类基于 bagging 的树集成方法。它通过对样本做 bootstrap 抽样、对特征做随机子采样，训练许多彼此不同的决策树，再把它们的结果投票或平均起来。">随机森林（Random Forest）</a></li>
+<li>不处理 ID、住院号等高基数字段。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-id3-decision-tree.html" data-cn="ID3决策树" data-en="ID3 Decision Tree" data-def="ID3 每一步都选择「最能减少类别不确定性」的离散特征来分裂节点。">ID3决策树（ID3 Decision Tree）</a> 的区别：C4.5 使用信息增益率，并支持连续特征、缺失值与后剪枝。</li>
+<li>和 <a class="xlink" href="m-decision-tree.html" data-cn="决策树" data-en="Decision Tree" data-def="决策树把复杂分类问题拆成一连串「如果满足某条件，就往左；否则往右」的问题，最后在叶节点用多数类别做预测。">决策树（Decision Tree）</a> 的关系：C4.5 是决策树家族的一种具体算法。</li>
+<li>和 CART 的区别：CART 常用基尼指数和二叉分裂；C4.5 的核心是增益率。</li>
+<li>和 <a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是在 Bagging 多棵树的基础上，再让每个节点只看一部分随机特征，从而让树与树更不相似、投票更稳。">随机森林（Random Forest）</a> 的区别：随机森林集成多棵树，更稳但单棵规则不如 C4.5 清楚。</li>
+<li>如何选择：需要解释单棵规则且特征混合时可考虑 C4.5；生产预测常用集成树。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>混合型临床指标的疾病分类。</li>
+<li>可解释分诊规则或风险分层规则原型。</li>
+<li>医学教学中的信息增益率与剪枝示例。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>信息增益率（Gain Ratio）</strong>：信息增益除以分裂信息后的评分。</li>
+<li><strong>分裂信息（Split Information）</strong>：衡量一个特征把数据切得多碎。</li>
+<li><strong>高基数特征（High-cardinality Feature）</strong>：取值很多的类别变量，如 ID。</li>
+<li><strong>连续阈值（Continuous Threshold）</strong>：连续变量用于二叉切分的 cut-point。</li>
+<li><strong>后剪枝（Post-pruning）</strong>：先长树，再删除泛化帮助不大的子树。</li>
+<li><strong>J48</strong>：Weka/RWeka 中 C4.5 的常用实现名称。</li>
+<li><strong>泛化（Generalization）</strong>：模型在新样本上的表现能力。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-decision-tree.html" data-cn="决策树" data-en="Decision Tree" data-def="决策树把复杂分类问题拆成一连串「如果满足某条件，就往左；否则往右」的问题，最后在叶节点用多数类别做预测。">决策树（Decision Tree）</a></li>
+<li><a class="xlink" href="m-id3-decision-tree.html" data-cn="ID3决策树" data-en="ID3 Decision Tree" data-def="ID3 每一步都选择「最能减少类别不确定性」的离散特征来分裂节点。">ID3决策树（ID3 Decision Tree）</a></li>
+<li><a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是在 Bagging 多棵树的基础上，再让每个节点只看一部分随机特征，从而让树与树更不相似、投票更稳。">随机森林（Random Forest）</a></li>
+<li><a class="xlink" href="m-information-gain.html" data-cn="信息增益" data-en="Information Gain" data-def="信息增益衡量知道某特征后，类别的不确定性平均减少了多少；减少越多，特征越能把不同类别分开。">信息增益（Information Gain）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Quinlan JR. <em>C4.5: Programs for Machine Learning</em>. Morgan Kaufmann; 1993.</li>
+<li>Quinlan JR. Induction of decision trees. <em>Mach Learn</em>. 1986;1:81-106.</li>
 <li>Witten IH, Frank E, Hall MA, Pal CJ. <em>Data Mining: Practical Machine Learning Tools and Techniques</em>. 4th ed. Morgan Kaufmann; 2016.</li>
-<li>Hornik K, Buchta C, Zeileis A. Open-source machine learning: RWeka package. <em>Comput Stat</em>. 2009;24:225-232.</li>
+<li>Hastie T, Tibshirani R, Friedman J. <em>The Elements of Statistical Learning</em>. 2nd ed. Springer; 2009.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-id3-decision-tree.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">ID3决策树</div></a><a class="pg pg-next" href="m-decision-tree-regression.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">决策树回归</div></a></div>

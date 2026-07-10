@@ -46,7 +46,7 @@
           <span class="entry-cn">方差阈值法</span>
           <span class="entry-en">Variance Threshold</span>
         </div>
-        <p class="entry-def">方差阈值法是一种过滤式特征选择方法。它计算每个特征在样本中的方差，并删除方差低于预设阈值的特征，用来去掉几乎不变化、信息量很低的变量。</p>
+        <p class="entry-def">方差阈值法删除在训练样本中几乎不变化的特征，因为一个近似常数很难区分样本，却会增加存储、计算和数值负担。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -59,7 +59,7 @@
           <span class="entry-cn">单变量特征选择</span>
           <span class="entry-en">Univariate Feature Selection</span>
         </div>
-        <p class="entry-def">单变量特征选择是一类过滤式方法。它逐个评估每个特征与目标变量之间的关系，根据统计量、P 值或信息量得分选择排名靠前或达到阈值的特征。</p>
+        <p class="entry-def">单变量特征选择让每个特征单独参加一次“与结局的考试”，再按得分或校正后的显著性筛选，但看不到联合效应和交互。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -72,7 +72,7 @@
           <span class="entry-cn">相关系数特征选择</span>
           <span class="entry-en">Correlation-based Feature Selection</span>
         </div>
-        <p class="entry-def">相关系数特征选择是一种基于变量间相关性的过滤方法。它通过计算特征之间，或特征与结局之间的相关系数，删除冗余特征或保留与结局关系更强的特征。</p>
+        <p class="entry-def">相关过滤把高度同步变化的特征视为重复测量，在每组冗余变量中保留代表，以降低共线性与重复信息。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -85,7 +85,7 @@
           <span class="entry-cn">信息增益</span>
           <span class="entry-en">Information Gain</span>
         </div>
-        <p class="entry-def">信息增益是基于信息熵的特征评价指标，用来衡量使用某个特征划分数据后，类别不确定性减少了多少。它是 ID3 决策树和许多过滤式分类特征选择方法的核心思想。</p>
+        <p class="entry-def">信息增益衡量知道某特征后，类别的不确定性平均减少了多少；减少越多，特征越能把不同类别分开。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -98,7 +98,7 @@
           <span class="entry-cn">互信息特征选择</span>
           <span class="entry-en">Mutual Information Feature Selection</span>
         </div>
-        <p class="entry-def">互信息特征选择用互信息衡量每个特征与目标变量之间共享的信息量，并据此筛选特征。它可以捕捉非线性依赖，不局限于线性相关。</p>
+        <p class="entry-def">互信息衡量知道一个特征后，结局的不确定性平均减少多少，因此能发现不限于线性或均值差异的边际依赖。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -111,7 +111,7 @@
           <span class="entry-cn">嵌入式特征选择</span>
           <span class="entry-en">Embedded Feature Selection</span>
         </div>
-        <p class="entry-def">嵌入式特征选择是在模型训练过程中同步完成特征评价或筛选的方法。常见形式包括 L1 正则化模型、树模型特征重要性和基于模型系数的 SelectFromModel。</p>
+        <p class="entry-def">嵌入式选择把“哪些变量留下”写进模型训练目标或结构，让预测拟合与特征取舍同时完成。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -124,7 +124,7 @@
           <span class="entry-cn">基于树模型的特征选择</span>
           <span class="entry-en">Tree-based Feature Selection</span>
         </div>
-        <p class="entry-def">基于树模型的特征选择利用决策树、随机森林、梯度提升树等模型产生的特征重要性，对特征进行排序或筛选。常用重要性包括不纯度减少、分裂次数、置换重要性和 SHAP 重要性。</p>
+        <p class="entry-def">树模型选择按特征在分裂中减少多少预测误差或打乱后损失多少性能来排序，能捕捉非线性与交互，但重要性会受基数和相关性偏倚。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -137,7 +137,7 @@
           <span class="entry-cn">多重插补</span>
           <span class="entry-en">Multiple Imputation</span>
         </div>
-        <p class="entry-def">多重插补通过为每个缺失值生成多套（$m$ 套）“合理猜测”得到多份完整数据集，分别分析后按 Rubin 规则合并结果，使插补带来的不确定性被正确传播到最终推断中。</p>
+        <p class="entry-def">多重插补不假装缺失值有唯一答案，而是生成多份合理完整数据，分别分析，再把“数据内不确定性”和“不同填法之间的不确定性”一起合并。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>

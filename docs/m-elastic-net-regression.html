@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,59 +54,156 @@
     <div class="intro-note"><h1>弹性网络回归（Elastic Net Regression）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>弹性网络回归结合了 Lasso 的 L1 正则化和 Ridge 的 L2 正则化，既能做变量选择，也能在高度相关特征中保持更稳定的系数结构。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>弹性网络把 Lasso 的「会筛变量」和 Ridge 的「对相关变量更稳定」合在一起，在稀疏性和稳定性之间调档。</p>
+<h3>1.2 定义</h3>
+<p>弹性网络回归是在回归损失中同时加入 L1 和 L2 正则化的模型。它既可以把部分变量系数压到 0，也能通过 L2 部分缓解 Lasso 在高度相关变量组中选择不稳定的问题。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：当变量很多且彼此相关时，如何同时获得稀疏性和稳定性。</li>
-<li>适用任务：高维预测、相关特征组建模、变量筛选。</li>
-<li>常见医学场景：多组学、影像组学、多个相关临床指标联合建模。</li>
+<li>研究问题：变量很多且彼此相关时，如何既筛变量，又避免 Lasso 随机挑一个相关变量。</li>
+<li>适用任务：高维连续结局预测、相关特征组筛选、组学/影像组学建模。</li>
+<li>常见医学场景：多个相关生物标志物、影像纹理特征、组学特征共同预测连续风险评分或治疗反应。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>Elastic Net 像是在 Lasso 和 Ridge 之间做折中：既希望删掉不重要的变量，又不希望在高度相关的一组变量里只留下一个“幸存者”。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>如果 Ridge 像橡皮筋、Lasso 像闸门，Elastic Net 就像带闸门的橡皮筋：弱变量仍会被关掉，但对一组彼此相似的变量，它不会像纯 Lasso 那样非得只留下一个，而是可以让一组相关变量共同分摊贡献。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>Lasso 能筛变量，但在高度相关的一组变量中常常只保留一个，且保留谁可能随样本扰动而变。Ridge 很稳定，却不会筛变量。Elastic Net 解决的是这两者之间的张力：<strong>医学高维数据常既需要变量压缩，又希望相关生物指标或影像特征不要被过度随机地二选一</strong>。</p>
+<h3>2.2 关键洞察</h3>
+<p>Elastic Net 的关键洞察是把惩罚拆成两部分：L1 负责制造稀疏性，L2 负责平滑和稳定相关变量组。通过 <code>l1_ratio</code> 或 $\rho$，研究者可以选择更像 Lasso，还是更像 Ridge。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
+<ul>
+<li>相对 <a class="xlink" href="m-lasso-regression.html" data-cn="Lasso回归" data-en="Lasso Regression" data-def="Lasso 回归一边拟合连续结局，一边用 L1 惩罚把弱变量的系数直接压到 0，从而得到稀疏模型。">Lasso回归（Lasso Regression）</a>：Elastic Net 对相关变量组更友好，选择更稳定。</li>
+<li>相对 <a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归给回归系数套上一根「橡皮筋」：允许每个变量都参与预测，但惩罚过大的系数，让模型更稳。">Ridge回归（Ridge Regression）</a>：Elastic Net 可以产生精确 0，模型更简洁。</li>
+<li>相对手动筛变量：Elastic Net 在一个统一的优化目标中同时完成拟合、收缩和筛选。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>一种常用写法为：</p>
 <p>$$
 \hat{\boldsymbol{\beta}}
 =
-\arg\min_{\boldsymbol{\beta}}
+\operatorname*{arg\,min}_{\boldsymbol{\beta}}
 \left[
-\frac{1}{n}\|y-\mathbf{X}\boldsymbol{\beta}\|_2^2
-+
-\alpha\left(
-\rho\|\boldsymbol{\beta}\|_1
-+
-\frac{1-\rho}{2}\|\boldsymbol{\beta}\|_2^2
-\right)
+\sum_{i=1}^{n}(y_i-\mathbf x_i^\top\boldsymbol{\beta})^2
++\lambda\left\{
+\rho\sum_{j=1}^{p}|\beta_j|
++\frac{1-\rho}{2}\sum_{j=1}^{p}\beta_j^2
+\right\}
 \right]
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
+<p>其中 $0\le \rho\le 1$。$\rho=1$ 时是 Lasso，$\rho=0$ 时是 Ridge。</p>
+<p>在正交特征下，Elastic Net 近似为：</p>
+<p>$$
+\hat\beta_j=
+\frac{\operatorname{sign}(z_j)\max(|z_j|-\lambda\rho,0)}
+{1+\lambda(1-\rho)}
+$$</p>
+<p>这个式子在说：先像 Lasso 一样扣掉一个阈值 $\lambda\rho$，再像 Ridge 一样除以一个收缩因子。</p>
+<h3>3.2 推导脉络</h3>
+<ol>
+<li>从 Lasso 的 L1 惩罚出发，它提供稀疏性，但相关变量组不稳定。</li>
+<li>加入 Ridge 的 L2 惩罚，让相关变量的系数更倾向于一起收缩。</li>
+<li>$\rho$ 控制 L1 与 L2 的比例；$\lambda$ 控制总体惩罚强度。</li>
+<li>实际软件通常用坐标下降和交叉验证，在一组 $\lambda$ 与 $\rho$ 候选值中选择。</li>
+</ol>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>$\alpha$：正则化整体强度。</li>
-<li>$\rho$（或 <code>l1_ratio</code>）：控制 L1 与 L2 的权重平衡。</li>
-<li>当 $\rho=1$ 时退化为 Lasso；当 $\rho=0$ 时退化为 Ridge。</li>
+<li>$\lambda$：总体正则化强度，越大模型越简单。</li>
+<li>$\rho$ / <code>l1_ratio</code>：L1 占比，越接近 1 越像 Lasso，越接近 0 越像 Ridge。</li>
+<li>非零系数：被模型保留的变量。</li>
+<li>相关变量组：彼此强相关的一组特征，Elastic Net 倾向于比 Lasso 更稳定地处理它们。</li>
+<li>交叉验证误差：选择 $\lambda$ 和 $\rho$ 的核心依据。</li>
 </ul>
-<h3>2.3 关键假设</h3>
+<h3>3.4 关键假设(含违反后果)</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>线性可加近似</td>
+<td>特征线性组合能解释结局均值</td>
+<td>预测偏差、筛选错位</td>
+<td>残差图、非线性扩展</td>
+</tr>
+<tr>
+<td>特征尺度可比</td>
+<td>L1/L2 惩罚公平作用</td>
+<td>变量选择受量纲影响</td>
+<td>标准化</td>
+</tr>
+<tr>
+<td>训练验证独立</td>
+<td>调参不使用测试信息</td>
+<td>性能虚高</td>
+<td>pipeline、嵌套交叉验证</td>
+</tr>
+<tr>
+<td>相关结构可被惩罚处理</td>
+<td>相关变量组适合成组收缩</td>
+<td>仍可能选择不稳定</td>
+<td>相关矩阵、稳定性选择</td>
+</tr>
+<tr>
+<td>目标是预测/筛选而非因果</td>
+<td>非零系数不等于因果变量</td>
+<td>过度解释</td>
+<td>外部验证、因果设计另行处理</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>继续使用 Ridge 和 Lasso 卡中的同一组正交特征：</p>
+<p>$$
+\mathbf X^\top\mathbf X=\mathbf I,\qquad \mathbf X^\top\mathbf y=(3,\ 0.8,\ 0.3)
+$$</p>
+<p>取 $\lambda=1$、$\rho=0.5$，也就是 L1 和 L2 各占一部分。</p>
+<p><strong>Step 1：计算 L1 阈值和 L2 收缩因子。</strong></p>
+<p>$$
+\lambda\rho=1\times 0.5=0.5
+$$</p>
+<p>$$
+1+\lambda(1-\rho)=1+1\times 0.5=1.5
+$$</p>
+<p><strong>Step 2：逐个变量先软阈值，再收缩。</strong></p>
 <ul>
-<li>结局为连续型。</li>
-<li>线性可加结构基本合理。</li>
-<li>特征通常需要标准化。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<li>$x1$：先扣阈值 $3-0.5=2.5$，再除以 1.5，得 $\hat\beta_1=1.67$。</li>
+<li>$x2$：先扣阈值 $0.8-0.5=0.3$，再除以 1.5，得 $\hat\beta_2=0.20$。</li>
+<li>$x3$：$0.3-0.5$ 不足 0，得 $\hat\beta_3=0$。</li>
+</ul>
+<p>所以：</p>
+<p>$$
+\hat{\boldsymbol\beta}_{\mathrm{EN}}=(1.67,\ 0.20,\ 0)
+$$</p>
+<p><strong>Step 3：和 Ridge/Lasso 对照。</strong></p>
 <ul>
-<li>自变量类型：连续变量为主，也可包含编码后的分类变量。</li>
-<li>因变量类型：连续型。</li>
-<li>数据结构：宽表数据。</li>
+<li>Ridge：$(1.5,\ 0.4,\ 0.15)$，三个变量都保留。</li>
+<li>Lasso：$(2,\ 0,\ 0)$，只保留最强变量。</li>
+<li>Elastic Net：$(1.67,\ 0.20,\ 0)$，保留强变量和中等变量，删除最弱变量。</li>
+</ul>
+<p><strong>结论：</strong> Elastic Net 的行为介于 Ridge 和 Lasso 之间：它既能清零，又不像 Lasso 那样激进。对于一组相关且中等强度的医学特征，这种折中经常更稳。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续变量、哑变量、组学特征、影像特征、标准化临床指标。</li>
+<li>因变量类型：连续型；可扩展为二分类、计数或生存结局的正则化模型。</li>
+<li>数据结构：宽表数据，常见于 $p$ 较大、变量相关性明显的任务。</li>
 <li>是否适合高维数据：非常适合。</li>
-<li>是否适合缺失较多数据：需先完成缺失值处理。</li>
-<li>是否适合删失数据：不适合。</li>
-<li>是否适合重复测量数据：不直接适合。</li>
+<li>是否适合缺失较多数据：需先处理缺失。</li>
+<li>是否适合删失数据：普通 Elastic Net 不适合；需正则化 Cox。</li>
+<li>是否适合重复测量数据：不直接适合；需纵向扩展或先明确独立分析单位。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>Elastic Net 常用于这类“多个相关特征共同预测连续结局”的宽表：</p>
+<h3>5.2 示例表格</h3>
 <table>
 <thead>
 <tr>
@@ -161,30 +258,30 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：连续结局和一组候选特征。</li>
-<li>关键变量：<code>alpha</code> 和 <code>l1_ratio</code>。</li>
-<li>需要预处理的内容：标准化、缺失处理、训练测试集划分。</li>
+<li>输入数据：连续结局和候选特征矩阵。</li>
+<li>关键变量：$\lambda$、$\rho$ 或 <code>alpha</code>、<code>l1_ratio</code>。</li>
+<li>需要预处理的内容：缺失处理、分类变量编码、标准化、训练/验证划分。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：混合正则化后的系数、最佳 <code>alpha</code>、最佳 <code>l1_ratio</code>。</li>
-<li>参数估计：兼顾稀疏性与稳定性的收缩系数。</li>
+<li>模型对象/统计结果：最佳 $\lambda$、最佳 $\rho$、非零系数。</li>
+<li>参数估计：兼顾稀疏性和稳定性的收缩系数。</li>
 <li>预测结果：连续型预测值。</li>
-<li>不确定性指标：交叉验证误差、测试集性能。</li>
+<li>不确定性指标：交叉验证误差、测试集误差、变量入选稳定性。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：高维、变量相关性强、希望做稳定筛选的场景。</li>
-<li>不适合：特征很少且共线性不明显时。</li>
-<li>使用前需要特别检查的点：标准化、超参数网格、相关特征组结构。</li>
+<li>适合：高维、变量相关性强、希望稳定筛选一组变量。</li>
+<li>不适合：变量很少且共线性不明显；只想保留全部变量；需要无偏因果估计。</li>
+<li>使用前需要特别检查的点：标准化、$\lambda$ 与 $\rho$ 网格、相关变量组、外部验证性能。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="elastic-net-regression" data-i="0">Python</button><button class="codetab" data-uid="elastic-net-regression" data-i="1">R</button></div><div class="codepanel active" data-uid="elastic-net-regression" data-i="0"><p>常用包：</p>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="elastic-net-regression" data-i="0">Python</button><button class="codetab" data-uid="elastic-net-regression" data-i="1">R</button></div><div class="codepanel active" data-uid="elastic-net-regression" data-i="0"><p>常用包:</p>
 <ul>
 <li><code>scikit-learn</code></li>
 </ul>
@@ -192,94 +289,129 @@ $$</p>
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-fit = make_pipeline(
+model = make_pipeline(
     StandardScaler(),
     ElasticNetCV(
         l1_ratio=[0.1, 0.3, 0.5, 0.7, 0.9],
         cv=5,
-        max_iter=20000
+        max_iter=20000,
+        random_state=1
     )
 )
-fit.fit(X_train, y_train)
-</code></pre></div><div class="codepanel" data-uid="elastic-net-regression" data-i="1"><p>常用包：</p>
+
+model.fit(X_train, y_train)
+enet = model.named_steps[&quot;elasticnetcv&quot;]
+print(enet.alpha_, enet.l1_ratio_)
+print(X_train.columns[enet.coef_ != 0].tolist())
+</code></pre></div><div class="codepanel" data-uid="elastic-net-regression" data-i="1"><p>常用包:</p>
 <ul>
 <li><code>glmnet</code></li>
 </ul>
 <pre><code class="language-r">library(glmnet)
 
-x &lt;- model.matrix(SalePrice ~ . - 1, data = df)
-y &lt;- df$SalePrice
+x &lt;- model.matrix(SalePrice ~ . - 1, data = train_df)
+y &lt;- train_df$SalePrice
 
-fit &lt;- cv.glmnet(x, y, alpha = 0.5)  # alpha between 0 and 1
-coef(fit, s = &quot;lambda.min&quot;)
+grid &lt;- seq(0.1, 0.9, by = 0.2)
+fits &lt;- lapply(grid, function(a) cv.glmnet(x, y, alpha = a, standardize = TRUE))
+cv_min &lt;- sapply(fits, function(f) min(f$cvm))
+best &lt;- which.min(cv_min)
+
+coef(fits[[best]], s = &quot;lambda.min&quot;)
+grid[best]  # 最优 alpha，即 L1 占比
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：被保留的变量、系数大小、<code>l1_ratio</code> 所代表的惩罚平衡。</li>
-<li>每个主要参数如何解释：Elastic Net 系数同样受到收缩影响，更适合解释变量相对重要性和方向。</li>
-<li>临床或医学意义如何表达：适合在很多相关变量中筛出一组更稳定的候选因子。</li>
-<li>常见误读：Elastic Net 不是“自动最优”，仍然依赖超参数选择。</li>
+<li>核心结果看什么：最佳 $\rho$、最佳 $\lambda$、非零变量、交叉验证和外部验证性能。</li>
+<li>每个主要参数如何解读：$\rho$ 越高，模型越稀疏；$\rho$ 越低，越强调相关变量组的稳定收缩。</li>
+<li>临床或医学意义如何表达：非零变量是预测模型选择出的候选特征集合，需要结合领域知识和外部验证解读。</li>
+<li>常见误读：Elastic Net 不是自动发现病因；它发现的是在当前建模目标下有预测贡献的变量组合。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
       <div class="sec-body"><ul>
-<li>系数条形图。</li>
-<li>系数路径图。</li>
-<li>不同 <code>l1_ratio</code> 下的性能比较图。</li>
+<li>超参数稳健性：比较不同 $\rho$ 下的误差曲线和变量集合。</li>
+<li>变量选择稳定性：bootstrap 或重复交叉验证，统计变量入选频率。</li>
+<li>相关变量组：检查是否成组保留了高度相关特征，或是否仍不稳定。</li>
+<li>外部验证：在独立队列中验证预测误差和入选变量方向。</li>
+<li>数据泄漏：标准化、调参、筛选必须放在训练流程内部。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>二维调参热图：横轴 $\lambda$，纵轴 $\rho$，颜色为交叉验证误差。</li>
+<li>系数路径图：展示不同惩罚下变量进入或退出模型。</li>
+<li>非零系数条形图：展示最终模型保留变量。</li>
+<li>稳定性选择图：展示每个变量在重复重采样中的入选比例。</li>
 </ul>
-<h3>7.1 图像示例</h3>
+<h3>10.1 图像示例</h3>
 <p>下图展示 Elastic Net 回归在房价建模中的系数分布，体现了它在稀疏性和稳定性之间的折中。</p>
 <p><img alt="" src="img/elasticnet_coefficients_houseprice.png" /></p></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
 <li>兼顾变量选择和系数稳定性。</li>
-<li>对高度相关特征更友好。</li>
-<li>很适合中高维数据。</li>
+<li>对高度相关特征组比 Lasso 更友好。</li>
+<li>很适合组学、影像组学等中高维医学预测。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>超参数更多，调参更复杂。</li>
-<li>解释比普通线性回归更弱。</li>
-<li>若数据很简单，未必比 Ridge/Lasso 更必要。</li>
+<li>超参数比 Ridge 或 Lasso 更多，调参更复杂。</li>
+<li>结果仍有收缩偏倚，不适合直接做传统推断。</li>
+<li>变量选择结果仍可能随样本变化，需要稳定性评估。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>只调 <code>alpha</code> 不调 <code>l1_ratio</code>。</li>
-<li>不标准化就直接上 Elastic Net。</li>
-<li>把非零系数当成严格因果证据。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 Ridge 的区别：Elastic Net 允许产生稀疏解。</li>
-<li>和 Lasso 的区别：Elastic Net 对相关变量组更稳定。</li>
-<li>和逐步回归的区别：Elastic Net 通过连续优化完成筛选。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>多组学特征筛选。</li>
-<li>多个相关危险因素联合预测。</li>
-<li>需要在稀疏性和稳定性之间折中的预测模型。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归是在普通线性回归的损失函数中加入 L2 正则化项的一种方法，用来缓解多重共线性、减少过拟合，并提升模型在新数据上的稳定性。">Ridge回归（Ridge Regression）</a></li>
-<li><a class="xlink" href="m-lasso-regression.html" data-cn="Lasso回归" data-en="Lasso Regression" data-def="Lasso 回归是在普通线性回归中加入 L1 正则化项的一种方法，它不仅能做回归拟合，还能自动把部分不重要特征的系数压缩到 0，从而实现变量选择。">Lasso回归（Lasso Regression）</a></li>
-<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a></li>
-<li><a class="xlink" href="m-embedded-feature-selection.html" data-cn="嵌入式特征选择" data-en="Embedded Feature Selection" data-def="嵌入式特征选择是在模型训练过程中同步完成特征评价或筛选的方法。常见形式包括 L1 正则化模型、树模型特征重要性和基于模型系数的 SelectFromModel。">嵌入式特征选择（Embedded Feature Selection）</a></li>
-<li><a class="xlink" href="m-correlation-based-feature-selection.html" data-cn="相关系数特征选择" data-en="Correlation-based Feature Selection" data-def="相关系数特征选择是一种基于变量间相关性的过滤方法。它通过计算特征之间，或特征与结局之间的相关系数，删除冗余特征或保留与结局关系更强的特征。">相关系数特征选择（Correlation-based Feature Selection）</a></li>
+<li>只调 $\lambda$，不调或不报告 $\rho$。</li>
+<li>不标准化就比较系数或做筛选。</li>
+<li>把非零变量当成严格因果变量。</li>
+<li>没有外部验证就宣称筛选出了可靠生物标志物。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归给回归系数套上一根「橡皮筋」：允许每个变量都参与预测，但惩罚过大的系数，让模型更稳。">Ridge回归（Ridge Regression）</a> 的区别：Elastic Net 可以清零变量，Ridge 不会。</li>
+<li>和 <a class="xlink" href="m-lasso-regression.html" data-cn="Lasso回归" data-en="Lasso Regression" data-def="Lasso 回归一边拟合连续结局，一边用 L1 惩罚把弱变量的系数直接压到 0，从而得到稀疏模型。">Lasso回归（Lasso Regression）</a> 的区别：Elastic Net 加入 L2 惩罚，对相关变量组更稳定。</li>
+<li>和逐步回归的区别：Elastic Net 是连续正则化优化，不是逐步增删变量。</li>
+<li>如何选择：变量相关性强且仍想筛选变量时，用 Elastic Net 往往比纯 Lasso 更稳。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>多组学特征筛选和连续表型预测。</li>
+<li>影像组学特征高度相关时的稳定变量压缩。</li>
+<li>多个相关危险因素联合预测住院天数、费用、评分或生理指标。</li>
+<li>临床预测模型开发中，在候选变量很多时作为嵌入式筛选步骤。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>弹性网络（Elastic Net）</strong>：同时使用 L1 和 L2 正则化的回归方法。</li>
+<li><strong>混合惩罚（Mixed Penalty）</strong>：把两类惩罚按比例加权组合。</li>
+<li><strong>L1 占比（L1 Ratio）</strong>：控制模型更像 Lasso 还是更像 Ridge 的参数。</li>
+<li><strong>相关变量组（Correlated Feature Group）</strong>：彼此高度相关、携带相似信息的一组变量。</li>
+<li><strong>成组效应（Grouping Effect）</strong>：相关变量倾向于被共同保留或共同收缩的现象。</li>
+<li><strong>交叉验证网格（Cross-validation Grid）</strong>：用于搜索 $\lambda$ 和 $\rho$ 的候选组合。</li>
+<li><strong>收缩偏倚（Shrinkage Bias）</strong>：惩罚项使系数向 0 偏移带来的估计偏倚。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归给回归系数套上一根「橡皮筋」：允许每个变量都参与预测，但惩罚过大的系数，让模型更稳。">Ridge回归（Ridge Regression）</a></li>
+<li><a class="xlink" href="m-lasso-regression.html" data-cn="Lasso回归" data-en="Lasso Regression" data-def="Lasso 回归一边拟合连续结局，一边用 L1 惩罚把弱变量的系数直接压到 0，从而得到稀疏模型。">Lasso回归（Lasso Regression）</a></li>
+<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a></li>
+<li><a class="xlink" href="m-embedded-feature-selection.html" data-cn="嵌入式特征选择" data-en="Embedded Feature Selection" data-def="嵌入式选择把“哪些变量留下”写进模型训练目标或结构，让预测拟合与特征取舍同时完成。">嵌入式特征选择（Embedded Feature Selection）</a></li>
+<li><a class="xlink" href="m-correlation-based-feature-selection.html" data-cn="相关系数特征选择" data-en="Correlation-based Feature Selection" data-def="相关过滤把高度同步变化的特征视为重复测量，在每组冗余变量中保留代表，以降低共线性与重复信息。">相关系数特征选择（Correlation-based Feature Selection）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Zou H, Hastie T. Regularization and variable selection via the elastic net. <em>J R Stat Soc Series B</em>. 2005;67(2):301-320.</li>
-<li>scikit-learn Developers. <code>sklearn.linear_model.ElasticNet</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.ElasticNet.html">https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.ElasticNet.html</a> （访问日期：2026-07-02）</li>
-<li>CRAN. Package <code>glmnet</code>. <a href="https://cran.r-project.org/package=glmnet">https://cran.r-project.org/package=glmnet</a> （访问日期：2026-07-02）</li>
+<li>Hastie T, Tibshirani R, Friedman J. <em>The Elements of Statistical Learning</em>. 2nd ed. Springer; 2009.</li>
+<li>James G, Witten D, Hastie T, Tibshirani R. <em>An Introduction to Statistical Learning</em>. 2nd ed. Springer; 2021.</li>
+<li>Friedman J, Hastie T, Tibshirani R. Regularization paths for generalized linear models via coordinate descent. <em>J Stat Softw</em>. 2010;33(1):1-22.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-lasso-regression.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">Lasso回归</div></a><span></span></div>

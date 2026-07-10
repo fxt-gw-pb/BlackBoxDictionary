@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,187 +54,349 @@
     <div class="intro-note"><h1>DenseNet（Densely Connected Convolutional Network, DenseNet）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>DenseNet 是一种密集连接卷积网络。它让每一层都接收所有前面层的特征图作为输入，从而强化特征复用并改善梯度传播。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>DenseNet 让每一层直接看到并保留所有前层特征，通过通道拼接实现特征复用和短梯度路径，而不是反复覆盖旧表示。</p>
+<h3>1.2 定义</h3>
+<p>DenseNet 是由 dense block 与 transition layer 组成的深层卷积架构。在一个 dense block 内，第 $\ell$ 层接收初始输入及前 $\ell-1$ 层输出的拼接；每层只新增少量特征图。transition layer 用 $1\times1$ 卷积和池化控制通道与空间尺寸。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：如何在保持深层表达能力的同时，更充分地复用浅层和中层特征。</li>
-<li>适用任务：图像分类、迁移学习、医学影像表征提取。</li>
-<li>常见医学场景：胸片识别、病理切片分类、皮肤和眼底图像分级。</li>
+<li>研究问题：深网中早期细节被后续层反复变换、梯度路径过长时，如何让特征直接复用。</li>
+<li>适用任务：图像分类、迁移学习、检测和分割骨干。</li>
+<li>常见医学场景：胸片分类、病理切片分型、皮肤/眼底分级、CT/MRI 表征。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>DenseNet 像一套层层共享笔记的网络。后面每一层不仅看上一层结果，还能直接查看更早层的特征，因此对细粒度纹理和高层语义都能同时利用。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>ResNet 像把旧笔记与新修改相加；DenseNet 像把每次新笔记都追加到共享档案夹，后续层可随时翻阅所有旧页。每层无需重新发明边缘和纹理，只需贡献少量新特征。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>DenseNet 的第 $l$ 层通常写为：</p>
-<p>$$
-x_l = H_l([x_0, x_1, \dots, x_{l-1}])
-$$</p>
-<p>其中 $[\cdot]$ 表示特征拼接，$H_l$ 是卷积、归一化和激活组成的变换。增长率 $k$ 表示每层新增的特征图数量。</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>普通顺序 CNN 中，第十层只能通过第九层间接获取第一层信息；若中间变换丢掉细节，后层无法直接恢复。加深还让梯度必须穿过很长路径。DenseNet 为每一对前后层建立直接连接，让早期细粒度特征和监督梯度都走短路。</p>
+<h3>2.2 关键洞察</h3>
+<p>DenseNet 不让一层生成完整的新宽表示，而是每层只产生 $k$ 个新通道，再与已有通道拼接。$k$ 称 growth rate。网络深度增加时“档案夹”逐步变厚，但每层计算可保持窄小；bottleneck 与 compression 再控制成本。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>密集连接：当前层可直接访问所有前层特征。</li>
-<li>growth rate：每层新增通道数。</li>
-<li>transition layer：用于压缩通道和下采样。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>任务受益于多层级特征共享。</li>
-<li>训练数据和计算资源足以支持密集连接带来的内存开销。</li>
-<li>特征复用优于简单加深网络。</li>
+<li>相比普通 CNN：每层直接访问所有历史特征。</li>
+<li>相比 ResNet：DenseNet 拼接而非相加，不会把旧特征与新特征压在同一通道。</li>
+<li>相比 U-Net 跳连：U-Net 主要跨编码器—解码器尺度连接；DenseNet 在块内连接所有前层。</li>
+<li>代价：拼接会增加通道和激活内存，连接数约随深度平方增长。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>第 $\ell$ 层输入为</p>
+<p>$$
+\mathbf x_\ell
+=H_\ell\!\left(
+[\mathbf x_0,\mathbf x_1,\ldots,\mathbf x_{\ell-1}]
+\right)
+$$</p>
+<p>方括号表示沿通道维拼接。若初始通道数为 $k_0$，每层新增 $k$ 个通道，则经过 $L$ 层：</p>
+<p>$$
+k_{\text{out}}=k_0+Lk
+$$</p>
+<p>这个式子在说：旧特征原样保留，每层只把自己的 $k$ 个新特征追加进去。</p>
+<p>DenseNet-BC 中一层常为</p>
+<p>$$
+H_\ell
+=\operatorname{Conv}_{3\times3}
+\circ\operatorname{BN}\circ\operatorname{ReLU}
+\circ\operatorname{Conv}_{1\times1}
+\circ\operatorname{BN}\circ\operatorname{ReLU}
+$$</p>
+<p>transition 的压缩因子 $\theta$ 将 $m$ 个通道降到 $\lfloor\theta m\rfloor$。</p>
+<h3>3.2 推导脉络</h3>
+<p>若希望第 $\ell$ 层复用所有早期特征，最直接方法就是拼接而不是反复相加/覆盖。为防止通道爆炸，让每层只输出较小 growth rate；在 $3\times3$ 卷积前用 $1\times1$ bottleneck 降低输入通道，并在 block 之间压缩和下采样。梯度可从损失直接到达任意早层，形成隐式深度监督。</p>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：二维或三维图像张量。</li>
-<li>因变量类型：分类、回归、视觉识别任务标签。</li>
-<li>数据结构：图像张量。</li>
-<li>是否适合高维数据：适合图像高维输入，但内存开销需关注。</li>
-<li>是否适合缺失较多数据：需先处理图像质量问题。</li>
-<li>是否适合删失数据：不直接处理删失。</li>
-<li>是否适合重复测量数据：若是图像序列，需额外时序建模。</li>
+<li>$\mathbf x_0$：dense block 初始输入。</li>
+<li>$\mathbf x_\ell$：第 $\ell$ 层新增的特征图。</li>
+<li>$[\cdot]$：通道拼接，空间高宽必须一致。</li>
+<li>$k$：growth rate，每层新增通道数。</li>
+<li>$L$：block 内层数。</li>
+<li>bottleneck：用 $1\times1$ 卷积减少 $3\times3$ 卷积输入。</li>
+<li>compression $\theta$：transition 保留通道比例。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>以肺结节影像分类为例：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>ImageID</th>
-<th>ImagePath</th>
-<th>SliceType</th>
-<th>NoduleLabel</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>C001</td>
-<td>ct_001.png</td>
-<td>axial</td>
-<td>malignant</td>
+<td>多层特征值得同时保留</td>
+<td>浅层细节与深层语义都有用</td>
+<td>拼接只增加冗余</td>
+<td>消融、通道利用分析</td>
 </tr>
 <tr>
-<td>C002</td>
-<td>ct_002.png</td>
-<td>axial</td>
-<td>benign</td>
+<td>同一 block 空间尺寸一致</td>
+<td>特征可沿通道拼接</td>
+<td>形状不匹配</td>
+<td>逐层形状日志</td>
 </tr>
 <tr>
-<td>C003</td>
-<td>ct_003.png</td>
-<td>coronal</td>
-<td>malignant</td>
+<td>growth rate 足够且不过大</td>
+<td>每层有新增表达又不爆内存</td>
+<td>欠拟合或内存过高</td>
+<td>比较 $k$ 与学习曲线</td>
 </tr>
 <tr>
-<td>C004</td>
-<td>ct_004.png</td>
-<td>axial</td>
-<td>benign</td>
+<td>训练/部署图像域相近</td>
+<td>复用特征可迁移</td>
+<td>外部性能下降</td>
+<td>跨中心/设备验证</td>
+</tr>
+<tr>
+<td>患者级切分正确</td>
+<td>无同源图像泄漏</td>
+<td>性能虚高</td>
+<td>patient_id、近重复审计</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>先用标量“通道”展示拼接。初始特征</p>
+<p>$$
+\mathbf x_0=[1,2]
+$$</p>
+<p>设每层只新增一个通道，即 growth rate $k=1$。</p>
+<p><strong>第 1 层：</strong></p>
+<p>$$
+x_1=H_1([1,2])=1+2=3
+$$</p>
+<p>拼接后为 $[1,2,3]$。</p>
+<p><strong>第 2 层：</strong></p>
+<p>$$
+x_2=H_2([1,2,3])=1-2+3=2
+$$</p>
+<p>拼接后为 $[1,2,3,2]$。</p>
+<p><strong>第 3 层：</strong></p>
+<p>$$
+x_3=H_3([1,2,3,2])=1+2-3+2=2
+$$</p>
+<p>最终输出</p>
+<p>$$
+[\mathbf x_0,x_1,x_2,x_3]=[1,2,3,2,2]
+$$</p>
+<p>初始两个特征始终原样可见，三层各新增一个特征，通道从 $k_0=2$ 增至</p>
+<p>$$
+k_{\text{out}}=2+3\times1=5
+$$</p>
+<p>再看真实卷积参数量：若 $k_0=3$、$k=2$，三层均直接用 $3\times3$ 卷积且不计偏置，则输入通道依次为 3、5、7：</p>
+<p>$$
+3\times2\times9+5\times2\times9+7\times2\times9
+=54+90+126=270
+$$</p>
+<p>这也提醒：密集连接本身不保证每个玩具配置参数更少；真实 DenseNet 靠小 growth rate、bottleneck 和 compression 相对“宽层堆叠”提高效率。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：二维/三维医学图像与规则栅格。</li>
+<li>因变量类型：分类、连续预测、检测或分割。</li>
+<li>数据结构：保留空间与通道维的张量。</li>
+<li>是否适合高维数据：适合，但激活内存可能较大。</li>
+<li>是否适合缺失较多数据：不直接处理缺失模态。</li>
+<li>是否适合删失数据：需接生存损失。</li>
+<li>是否适合重复测量数据：按患者切分，时序关系另建模。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>patient_id</th>
+<th>image_path</th>
+<th>view</th>
+<th>site</th>
+<th style="text-align: right;">label</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P01</td>
+<td>p01_pa.png</td>
+<td>PA</td>
+<td>A</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>P02</td>
+<td>p02_ap.png</td>
+<td>AP</td>
+<td>B</td>
+<td style="text-align: right;">1</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：图像张量和分类标签。</li>
-<li>关键变量：网络版本、growth rate、压缩率、学习率。</li>
-<li>需要预处理的内容：标准化、增强、中心和病人级划分。</li>
+<li>图像、标签、患者/设备元数据。</li>
+<li>block 配置、growth rate、compression 与预训练权重。</li>
+<li>患者级数据划分和图像预处理。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：DenseNet 权重和验证指标。</li>
-<li>参数估计：各 dense block 与分类头参数。</li>
-<li>预测结果：类别概率、回归值或图像嵌入。</li>
-<li>不确定性指标：外部验证性能、校准与错误模式分析。</li>
+<li>分类概率或空间任务输出。</li>
+<li>多尺度、多深度拼接特征。</li>
+<li>训练历史与外部验证指标。</li>
+<li>不自动产出可信因果解释或隐私保证。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：希望充分复用多尺度特征的影像任务，尤其是迁移学习场景。</li>
-<li>不适合：显存十分有限、样本特别少且无法迁移学习的任务。</li>
-<li>使用前需要特别检查的点：内存占用、特征冗余、域偏移。</li>
-</ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="densely-connected-convolutional-network-densenet" data-i="0">Python</button><button class="codetab" data-uid="densely-connected-convolutional-network-densenet" data-i="1">R</button></div><div class="codepanel active" data-uid="densely-connected-convolutional-network-densenet" data-i="0"><p>常用包：</p>
-<ul>
-<li><code>torch</code></li>
-<li><code>torchvision</code></li>
-</ul>
-<pre><code class="language-python">from torchvision.models import densenet121
-
-model = densenet121(weights=None, num_classes=2)
-</code></pre></div><div class="codepanel" data-uid="densely-connected-convolutional-network-densenet" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>keras</code></li>
-</ul>
-<pre><code class="language-r"># R 中通常通过 keras 的 DenseNet 预训练应用模型做迁移学习，
-# 或直接在 Python 生态中训练后导出结果。
-</code></pre></div></div></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：分类性能、外部泛化、不同病灶类型下表现。</li>
-<li>每个主要参数如何解释：growth rate 越大，新增特征越多，容量和资源需求也越高。</li>
-<li>临床或医学意义如何表达：DenseNet 常用于提高视觉任务性能，但仍需临床验证和解释工具辅助。</li>
-<li>常见误读：特征共享多不代表一定优于 ResNet，具体效果依赖任务和数据域。</li>
+<li>适合：浅层纹理与深层语义都重要、希望特征复用、可利用预训练。</li>
+<li>不适合：显存极受限、样本很小且无迁移学习、简单 CNN 已充分。</li>
+<li>使用前检查：growth rate、激活内存、输入分辨率、患者级切分和域偏移。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>训练/验证曲线。</li>
-<li>混淆矩阵。</li>
-<li>特征嵌入投影或热图解释。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="densely-connected-convolutional-network-densenet" data-i="0">Python</button><button class="codetab" data-uid="densely-connected-convolutional-network-densenet" data-i="1">R</button></div><div class="codepanel active" data-uid="densely-connected-convolutional-network-densenet" data-i="0"><p>常用包：PyTorch、torchvision。</p>
+<pre><code class="language-python">import torch
+from torch import nn
+from torch.utils.data import DataLoader
+from torchvision import datasets, models, transforms
+
+dataset = datasets.FakeData(
+    size=64, image_size=(3, 224, 224), num_classes=2,
+    transform=transforms.ToTensor()
+)
+loader = DataLoader(dataset, batch_size=4, shuffle=True)
+
+model = models.densenet121(weights=None)
+model.classifier = nn.Linear(model.classifier.in_features, 2)
+images, labels = next(iter(loader))
+logits = model(images)
+loss = nn.CrossEntropyLoss()(logits, labels)
+loss.backward()
+print(logits.shape, float(loss))
+</code></pre></div><div class="codepanel" data-uid="densely-connected-convolutional-network-densenet" data-i="1"><p>常用包：keras3。下面实现一个最小 dense block。</p>
+<pre><code class="language-r">library(keras3)
+
+inputs &lt;- layer_input(shape = c(32, 32, 3))
+h1 &lt;- inputs |&gt;
+  layer_conv_2d(4, 3, padding = &quot;same&quot;, activation = &quot;relu&quot;)
+x1 &lt;- layer_concatenate(list(inputs, h1))
+
+h2 &lt;- x1 |&gt;
+  layer_conv_2d(4, 3, padding = &quot;same&quot;, activation = &quot;relu&quot;)
+x2 &lt;- layer_concatenate(list(x1, h2))
+
+h3 &lt;- x2 |&gt;
+  layer_conv_2d(4, 3, padding = &quot;same&quot;, activation = &quot;relu&quot;)
+x3 &lt;- layer_concatenate(list(x2, h3)) |&gt;
+  layer_global_average_pooling_2d()
+
+outputs &lt;- x3 |&gt; layer_dense(2, activation = &quot;softmax&quot;)
+model &lt;- keras_model(inputs, outputs)
+model |&gt; compile(
+  optimizer = &quot;adam&quot;,
+  loss = &quot;sparse_categorical_crossentropy&quot;,
+  metrics = &quot;accuracy&quot;
+)
+summary(model)
+</code></pre></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>最终按患者级外部性能、校准和阈值解释，不以连接数量判断优劣。</li>
+<li>DenseNet 的某层可直接使用早期特征，但不说明每个通道都有独立临床语义。</li>
+<li>迁移学习需比较冻结、部分解冻和全量微调。</li>
+<li>多切片预测需先按患者聚合。</li>
+<li>热图和通道激活只用于行为诊断，不等于疾病机制。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>比较 DenseNet、ResNet 和浅 CNN 的同切分性能。</li>
+<li>记录各 block 通道数、显存和推理耗时。</li>
+<li>改变 growth rate/compression 检查容量敏感性。</li>
+<li>做患者级、检查级和近重复图像泄漏审计。</li>
+<li>按中心、设备、视角和病灶大小分层验证。</li>
+<li>多随机种子与预训练策略比较稳定性。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>dense block 的拼接连接图。</li>
+<li>通道数随深度增长曲线。</li>
+<li>不同 growth rate 的性能—显存图。</li>
+<li>浅层/深层特征图和 Grad-CAM。</li>
+<li>跨中心、设备与亚组性能图。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>特征复用充分。</li>
-<li>梯度传播顺畅。</li>
-<li>在部分医疗影像任务中迁移效果优秀。</li>
+<li>直接复用所有前层特征，梯度路径短。</li>
+<li>每层只需新增少量特征。</li>
+<li>常适合作为迁移学习图像骨干。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>内存占用较高。</li>
-<li>结构较复杂。</li>
-<li>解释性依然有限。</li>
+<li>拼接导致通道和激活内存增长。</li>
+<li>实现和部署复杂度高于简单顺序 CNN。</li>
+<li>特征复用不自动带来解释性。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>忽略 dense block 带来的显存压力。</li>
-<li>只比平均性能，不看罕见病灶类别。</li>
-<li>不检查数据集来源偏差。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="卷积神经网络是一类专门处理图像或局部空间结构数据的神经网络。它通过卷积核、激活函数和池化层，从原始像素中自动提取边缘、纹理和高级语义特征。">卷积神经网络（Convolutional Neural Network, CNN）</a> 的区别：DenseNet 是 CNN 的具体密集连接变体。</li>
-<li>和 <a class="xlink" href="m-residual-network-resnet.html" data-cn="残差网络" data-en="Residual Network, ResNet" data-def="ResNet 是在深层 CNN 中引入残差连接的网络架构。它通过快捷连接把输入直接加到后续层输出上，从而缓解深层网络训练中的退化与梯度传播困难。">残差网络（Residual Network, ResNet）</a> 的区别：ResNet 用逐块相加的残差连接，DenseNet 用跨层拼接复用特征。</li>
-<li>和 <a class="xlink" href="m-alexnet.html" data-cn="AlexNet" data-en="AlexNet" data-def="AlexNet 是深度学习图像识别史上的经典卷积神经网络架构。它通过较深的卷积层堆叠、ReLU、dropout 和大规模 GPU 训练，推动了现代深度视觉模型的发展。">AlexNet（AlexNet）</a> 的区别：AlexNet 更早、更浅，DenseNet 更强调深层特征复用。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>胸片和 CT 分类任务。</li>
-<li>迁移学习驱动的病理图像识别。</li>
-<li>作为医学影像表征骨干网络。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="卷积神经网络是一类专门处理图像或局部空间结构数据的神经网络。它通过卷积核、激活函数和池化层，从原始像素中自动提取边缘、纹理和高级语义特征。">卷积神经网络（Convolutional Neural Network, CNN）</a></li>
-<li><a class="xlink" href="m-residual-network-resnet.html" data-cn="残差网络" data-en="Residual Network, ResNet" data-def="ResNet 是在深层 CNN 中引入残差连接的网络架构。它通过快捷连接把输入直接加到后续层输出上，从而缓解深层网络训练中的退化与梯度传播困难。">残差网络（Residual Network, ResNet）</a></li>
-<li><a class="xlink" href="m-alexnet.html" data-cn="AlexNet" data-en="AlexNet" data-def="AlexNet 是深度学习图像识别史上的经典卷积神经网络架构。它通过较深的卷积层堆叠、ReLU、dropout 和大规模 GPU 训练，推动了现代深度视觉模型的发展。">AlexNet（AlexNet）</a></li>
-<li><a class="xlink" href="m-transformer.html" data-cn="Transformer" data-en="Transformer" data-def="Transformer 是以多头注意力为核心的序列建模架构。它不依赖传统递归结构，而是通过自注意力和位置编码并行建模序列中的全局依赖。">Transformer（Transformer）</a></li>
+<li>把“连接密集”误写成“每层都很宽”。</li>
+<li>混淆拼接与 ResNet 的逐元素相加。</li>
+<li>忘记 transition 层压缩和下采样。</li>
+<li>只按图像/切片随机切分。</li>
+<li>因训练集表现好就忽略外部域偏移。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Huang G, Liu Z, van der Maaten L, Weinberger KQ. Densely connected convolutional networks. <em>Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition</em>. 2017:4700-4708.</li>
+<li>与 ResNet：DenseNet 拼接并保留各层身份；ResNet 相加形成修正后的同维表示。</li>
+<li>与普通 CNN：DenseNet 每层直接访问所有先前输出。</li>
+<li>与 U-Net：U-Net 跨尺度连接编码器与解码器，DenseNet 在 block 内密集连接。</li>
+<li>与 AlexNet：DenseNet 更深、特征复用更充分，AlexNet 结构更简单。</li>
+<li>如何选择：显存允许且细粒度特征复用可能重要时比较 DenseNet；通用稳健基线优先 ResNet。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>胸片多标签异常识别。</li>
+<li>病理、眼底和皮肤图像分类。</li>
+<li>CT/MRI 影像表征提取。</li>
+<li>分割网络中的 dense block。</li>
+</ul>
+<p>应报告患者级切分、预训练来源、growth rate/版本、设备和中心分布、类别不平衡及外部验证。普通分类 DenseNet 不处理删失。</p></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>密集连接（Dense connectivity）</strong>：一层接收所有先前层输出。</li>
+<li><strong>拼接（Concatenation）</strong>：沿通道维保留并排列多个特征张量。</li>
+<li><strong>Growth rate</strong>：每层新增的特征通道数。</li>
+<li><strong>Dense block</strong>：空间尺寸不变、内部密集连接的一组层。</li>
+<li><strong>Transition layer</strong>：block 之间压缩通道和下采样的模块。</li>
+<li><strong>Compression</strong>：transition 减少通道的比例。</li>
+<li><strong>Bottleneck</strong>：用 $1\times1$ 卷积降低后续卷积成本。</li>
+<li><strong>特征复用（Feature reuse）</strong>：后层直接使用早层已有特征。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-residual-network-resnet.html" data-cn="残差网络" data-en="Residual Network, ResNet" data-def="ResNet 不要求每组层从头学习完整映射，而是学习“在输入基础上还要改多少”，并用快捷连接给信息和梯度提供一条直接通路。">残差网络（Residual Network, ResNet）</a></li>
+<li><a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="CNN 用同一个小型滤波器在整幅图像上滑动，把“局部模式可重复出现”写进网络结构，从而用远少于全连接层的参数学习空间特征。">卷积神经网络（Convolutional Neural Network, CNN）</a></li>
+<li><a class="xlink" href="m-alexnet.html" data-cn="AlexNet" data-en="AlexNet" data-def="AlexNet 用五层卷积逐步提取视觉特征，再用三层全连接分类，并以 ReLU、GPU 训练、数据增强和 dropout 证明深层 CNN 可在大规模图像任务上显著超越传统特征。">AlexNet（AlexNet）</a></li>
+<li><a class="xlink" href="m-transformer.html" data-cn="Transformer" data-en="Transformer" data-def="Transformer 让序列中每个位置用自注意力直接汇总其他位置，再通过残差、归一化和逐位置前馈网络反复加工，从而不依赖递归也能建模全局上下文。">Transformer（Transformer）</a></li>
+<li><a class="xlink" href="m-autoencoder.html" data-cn="自编码器" data-en="Autoencoder" data-def="自编码器强迫网络把输入经过受限的潜在表示再还原；若仍能重构，瓶颈中就必须保留数据的主要结构而舍弃部分冗余或噪声。">自编码器（Autoencoder）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Huang G, Liu Z, van der Maaten L, Weinberger KQ. Densely connected convolutional networks. <em>CVPR</em>. 2017:4700-4708. https://doi.org/10.1109/CVPR.2017.243</li>
+<li>Pleiss G, Chen D, Huang G, Li T, van der Maaten L, Weinberger KQ. Memory-efficient implementation of DenseNets. arXiv:1707.06990; 2017.</li>
 <li>Goodfellow I, Bengio Y, Courville A. <em>Deep Learning</em>. MIT Press; 2016.</li>
-<li>torchvision Developers. DenseNet models. <a href="https://pytorch.org/vision/stable/models/densenet.html">https://pytorch.org/vision/stable/models/densenet.html</a> （访问日期：2026-07-02）</li>
+<li>torchvision developers. DenseNet. https://pytorch.org/vision/stable/models/densenet.html</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-residual-network-resnet.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">残差网络</div></a><a class="pg pg-next" href="m-alexnet.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">AlexNet</div></a></div>

@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">术语表</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,236 +54,259 @@
     <div class="intro-note"><h1>主成分分析（Principal Component Analysis, PCA）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>PCA 旋转坐标轴，依次寻找样本投影方差最大的正交方向，用少数线性组合保留主要总变异。</p>
+<h3>1.2 定义</h3>
+<p>主成分分析是无监督线性降维方法。它将中心化数据投影到一组两两正交的主成分方向，并按解释方差从大到小排序；前若干方向提供低维表示和最小平方重构误差。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：如何用更少的综合变量表示高维连续特征。</li>
-<li>适用任务：降维、可视化、去冗余、建模前特征压缩。</li>
-<li>常见医学场景：组学数据探索、影像组学特征压缩、多个相关实验室指标综合表征。</li>
+<li>多个连续特征高度相关，信息重复。</li>
+<li>高维数据需要二维可视化、压缩或去噪。</li>
+<li>后续模型受共线性或计算成本影响。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>PCA 不直接挑选原始变量，而是把多个相关变量重新组合成新的坐标轴。第一主成分是数据变化最大的方向，第二主成分是在与第一主成分正交的条件下变化第二大的方向。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>一团斜着延伸的点云用横纵坐标描述很浪费。PCA 把第一根新轴沿点云最长方向放置，第二根轴与它垂直；若点几乎都在第一轴上，第二轴可以舍弃。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>设中心化后的数据矩阵为 $\tilde X\in\mathbb{R}^{n\times p}$，协方差矩阵为：</p>
-<p>$$
-S=\frac{1}{n-1}\tilde X^\top \tilde X
-$$</p>
-<p>PCA 寻找单位向量 $w$，使投影方差最大：</p>
-<p>$$
-\max_w w^\top S w,\quad \text{s.t. } w^\top w=1
-$$</p>
-<p>其解满足特征值方程：</p>
-<p>$$
-S w_j=\lambda_j w_j
-$$</p>
-<p>选择前 $k$ 个特征向量组成 $W_k$，降维后的表示为：</p>
-<p>$$
-Z=\tilde X W_k
-$$</p>
-<p>累计解释方差比例为：</p>
-<p>$$
-\frac{\sum_{j=1}^{k}\lambda_j}{\sum_{j=1}^{p}\lambda_j}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
-<ul>
-<li>主成分：原始变量的线性组合。</li>
-<li>载荷：每个原始变量在主成分中的权重。</li>
-<li>特征值 $\lambda_j$：第 $j$ 个主成分解释的方差。</li>
-<li><code>n_components</code>：保留的主成分数量。</li>
-<li>解释方差比例：每个主成分保留的信息比例。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>主要结构可由线性组合表示。</li>
-<li>方差较大的方向被视为更重要的信息来源。</li>
-<li>特征尺度会影响结果，通常需要标准化。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 最大方差与最小重构误差</h3>
+<p>在单位方向中，第一主成分使投影方差最大。保留前 $k$ 个主成分，也等价于寻找重构平方误差最小的 $k$ 维线性子空间。</p>
+<h3>2.2 无监督意味着什么</h3>
+<p>PCA 不看结局。方差最大的方向可能是批次效应、测量噪声或个体差异，而不一定最能预测疾病。</p>
+<h3>2.3 中心化与标准化</h3>
+<p>中心化是 PCA 的基本步骤。是否标准化取决于变量单位与研究问题：单位不同或方差不可比时通常标准化；同单位且方差大小有实际意义时可只中心化。</p></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：连续变量或标准化后的数值特征。</li>
-<li>因变量类型：PCA 本身不需要结局变量。</li>
-<li>数据结构：样本乘以特征矩阵。</li>
-<li>是否适合高维数据：适合，尤其适合相关特征较多的数据。</li>
-<li>是否适合缺失较多数据：需先插补或使用专门 PCA 变体。</li>
-<li>是否适合删失数据：PCA 不处理结局删失。</li>
-<li>是否适合重复测量数据：需先定义样本单位，或使用纵向降维方法。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>以代谢组学特征降维为例：</p>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 协方差矩阵</h3>
+<p>对中心化矩阵 $\widetilde X\in\mathbb R^{n\times p}$：</p>
+<p>$$
+S=\frac{1}{n-1}\widetilde X^\top\widetilde X
+$$</p>
+<h3>3.2 最大方差问题</h3>
+<p>$$
+w_1=
+\operatorname*{arg\,max}_{\|w\|=1}
+w^\top Sw
+$$</p>
+<p>解满足：</p>
+<p>$$
+Sw_j=\lambda_jw_j
+$$</p>
+<h3>3.3 得分与解释方差</h3>
+<p>$$
+Z=\widetilde XW_k
+$$</p>
+<p>$$
+\operatorname{EVR}_j=
+\frac{\lambda_j}{\sum_{\ell=1}^{p}\lambda_\ell}
+$$</p>
+<p>载荷方向的符号可整体翻转而不改变解。</p>
+<h3>3.4 关键条件</h3>
 <table>
 <thead>
 <tr>
-<th>Metab_1</th>
-<th>Metab_2</th>
-<th>Metab_3</th>
-<th>Metab_4</th>
-<th>Disease</th>
+<th>条件</th>
+<th>违反后果</th>
+<th>检查方式</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>0.84</td>
-<td>1.22</td>
-<td>-0.14</td>
-<td>0.31</td>
-<td>1</td>
+<td>主要结构近似线性</td>
+<td>弯曲流形被压坏</td>
+<td>与非线性方法比较</td>
 </tr>
 <tr>
-<td>-0.35</td>
-<td>-0.41</td>
-<td>0.28</td>
-<td>-0.19</td>
-<td>0</td>
+<td>高方差代表有用信息</td>
+<td>批次或噪声占主成分</td>
+<td>载荷与协变量检查</td>
 </tr>
 <tr>
-<td>1.10</td>
-<td>1.45</td>
-<td>-0.33</td>
-<td>0.52</td>
-<td>1</td>
+<td>尺度处理符合问题</td>
+<td>大方差变量支配</td>
+<td>标准化敏感性</td>
 </tr>
 <tr>
-<td>-0.72</td>
-<td>-0.60</td>
-<td>0.18</td>
-<td>-0.42</td>
-<td>0</td>
-</tr>
-<tr>
-<td>0.41</td>
-<td>0.80</td>
-<td>-0.09</td>
-<td>0.20</td>
-<td>1</td>
+<td>训练流程无泄漏</td>
+<td>测试信息进入变换</td>
+<td>在训练折内拟合 PCA</td>
 </tr>
 </tbody>
-</table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：数值型特征矩阵。</li>
-<li>关键变量：保留主成分数量、标准化方式。</li>
-<li>需要预处理的内容：缺失处理、异常值检查、中心化和标准化。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：主成分载荷、解释方差比例、主成分得分。</li>
-<li>参数估计：载荷矩阵和特征值。</li>
-<li>预测结果：PCA 本身不预测，可把主成分作为后续模型输入。</li>
-<li>不确定性指标：可用重采样评估主成分稳定性。</li>
-</ul></div>
+</table></div>
     </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：连续特征多、特征之间相关性强、需要可视化或降维的场景。</li>
-<li>不适合：希望保留原始变量解释、主要结构非线性、特征尺度不可比且不宜标准化的场景。</li>
-<li>使用前需要特别检查的点：是否标准化、主成分是否可解释、保留方差比例是否足够。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>四个已中心化的二维点：</p>
+<p>$$
+(-2,-2),\ (-1,-1),\ (1,1),\ (2,2)
+$$</p>
+<p><strong>Step 1：协方差矩阵。</strong> 两列平方和与乘积和均为 10：</p>
+<p>$$
+S=
+\frac13
+\begin{pmatrix}
+10&amp;10\\
+10&amp;10
+\end{pmatrix}
+$$</p>
+<p><strong>Step 2：特征值与方向。</strong></p>
+<p>$$
+\lambda_1=\frac{20}{3},\qquad
+w_1=\frac{1}{\sqrt2}(1,1)^\top
+$$</p>
+<p>$$
+\lambda_2=0,\qquad
+w_2=\frac{1}{\sqrt2}(-1,1)^\top
+$$</p>
+<p><strong>Step 3：主成分得分。</strong></p>
+<p>$$
+z_1=\widetilde Xw_1=
+(-2\sqrt2,-\sqrt2,\sqrt2,2\sqrt2)^\top
+$$</p>
+<p>第二主成分得分全部为 0。</p>
+<p><strong>Step 4：解释方差。</strong></p>
+<p>$$
+\operatorname{EVR}_1=
+\frac{20/3}{20/3+0}=1
+$$</p>
+<p><strong>结论：</strong> 所有点都在直线 $x_1=x_2$ 上，一个主成分即可无损表示二维数据。</p></div>
     </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="principal-component-analysis-pca" data-i="0">Python</button><button class="codetab" data-uid="principal-component-analysis-pca" data-i="1">R</button></div><div class="codepanel active" data-uid="principal-component-analysis-pca" data-i="0"><p>常用包：</p>
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 数据要求</h3>
 <ul>
-<li><code>scikit-learn</code></li>
+<li>连续数值特征或合理变换后的高维矩阵。</li>
+<li>缺失需预先处理；异常值会明显影响均值和协方差。</li>
+<li>重复测量应明确以患者还是访视为样本单位。</li>
 </ul>
-<pre><code class="language-python">import pandas as pd
-from sklearn.decomposition import PCA
+<h3>5.2 输入与产出</h3>
+<p>输入为矩阵、中心化/标准化方案和保留维度。输出为主成分得分、方向/载荷、特征值、解释方差比例及可选重构。</p></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>高相关连续特征压缩、可视化和去噪。</li>
+<li>组学、影像组学和多指标综合表征。</li>
+<li>不适合强非线性、需要原变量直接解释或低方差信号很重要的任务。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="principal-component-analysis-pca" data-i="0">Python</button><button class="codetab" data-uid="principal-component-analysis-pca" data-i="1">R</button></div><div class="codepanel active" data-uid="principal-component-analysis-pca" data-i="0"><pre><code class="language-python">from sklearn.decomposition import PCA
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv(&quot;metabolomics.csv&quot;)
-X = df[[&quot;Metab_1&quot;, &quot;Metab_2&quot;, &quot;Metab_3&quot;, &quot;Metab_4&quot;]]
-
-pca_pipe = make_pipeline(
+pipeline = make_pipeline(
     StandardScaler(),
-    PCA(n_components=0.90)
+    PCA(n_components=0.90, svd_solver=&quot;full&quot;),
+)
+Z_train = pipeline.fit_transform(X_train)
+Z_test = pipeline.transform(X_test)
+
+pca = pipeline.named_steps[&quot;pca&quot;]
+print(pca.n_components_)
+print(pca.explained_variance_ratio_)
+print(pca.components_)
+</code></pre></div><div class="codepanel" data-uid="principal-component-analysis-pca" data-i="1"><pre><code class="language-r">x_train &lt;- train[, feature_names]
+x_test &lt;- test[, feature_names]
+
+fit &lt;- prcomp(
+  x_train,
+  center = TRUE,
+  scale. = TRUE
 )
 
-Z = pca_pipe.fit_transform(X)
-pca = pca_pipe.named_steps[&quot;pca&quot;]
-
-print(&quot;Number of components:&quot;, pca.n_components_)
-print(&quot;Explained variance ratio:&quot;, pca.explained_variance_ratio_)
-</code></pre></div><div class="codepanel" data-uid="principal-component-analysis-pca" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>stats</code></li>
-</ul>
-<pre><code class="language-r">x &lt;- df[, c(&quot;Metab_1&quot;, &quot;Metab_2&quot;, &quot;Metab_3&quot;, &quot;Metab_4&quot;)]
-
-fit &lt;- prcomp(x, center = TRUE, scale. = TRUE)
+scores_train &lt;- fit$x
+scores_test &lt;- predict(fit, newdata = x_test)
+loadings &lt;- fit$rotation
 summary(fit)
-
-scores &lt;- fit$x[, 1:2]
-loadings &lt;- fit$rotation[, 1:2]
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：前几个主成分解释方差比例、载荷矩阵、样本在主成分空间的分布。</li>
-<li>每个主要参数如何解释：<code>n_components=0.90</code> 表示保留能解释 90% 方差的主成分。</li>
-<li>临床或医学意义如何表达：主成分是综合特征，不是单个原始变量；解释时需结合载荷较大的变量。</li>
-<li>常见误读：第一主成分解释方差最大，不代表它一定最能预测结局。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>Scree plot 碎石图。</li>
-<li>累计解释方差曲线。</li>
-<li>PC1-PC2 样本散点图。</li>
-<li>主成分载荷热图。</li>
-</ul></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>能压缩相关连续特征。</li>
-<li>主成分之间正交，缓解共线性。</li>
-<li>有助于高维数据可视化。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>新特征可解释性弱于原始变量。</li>
-<li>只捕捉线性结构。</li>
-<li>对尺度和异常值敏感。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>在训练测试划分之外先 fit PCA，造成信息泄露。</li>
-<li>不标准化就对量纲差异很大的变量做 PCA。</li>
-<li>把 PCA 当成“选择原始变量”的方法。</li>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>得分是患者在新轴上的坐标；载荷说明原变量如何组成该轴。</li>
+<li>解释方差大不等于临床预测能力强。</li>
+<li>载荷符号可整体翻转，解释应看相对方向与大小。</li>
+<li>二维图上的重叠或分离只是探索证据，不是显著性检验。</li>
 </ul></div>
     </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-correlation-based-feature-selection.html" data-cn="相关系数特征选择" data-en="Correlation-based Feature Selection" data-def="相关系数特征选择是一种基于变量间相关性的过滤方法。它通过计算特征之间，或特征与结局之间的相关系数，删除冗余特征或保留与结局关系更强的特征。">相关系数特征选择（Correlation-based Feature Selection）</a> 的区别：相关系数法删除冗余原始变量；PCA 构造新的综合变量。</li>
-<li>和 <a class="xlink" href="m-lasso-regression.html" data-cn="Lasso回归" data-en="Lasso Regression" data-def="Lasso 回归是在普通线性回归中加入 L1 正则化项的一种方法，它不仅能做回归拟合，还能自动把部分不重要特征的系数压缩到 0，从而实现变量选择。">Lasso回归（Lasso Regression）</a> 的区别：Lasso 做监督式稀疏选择；PCA 是无监督降维。</li>
-<li>和 <a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="高斯混合模型是假设观测数据由多个高斯分布按一定权重混合而成的概率模型。它既可以做密度估计，也可以用于软聚类，即给每个样本分配“属于各个簇的概率”。">高斯混合模型（Gaussian Mixture Model, GMM）</a> 的区别：PCA 用于降维和表征；GMM 用于软聚类和密度建模。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">诊断与稳健性</h2></div>
+      <div class="sec-body"><ol>
+<li>画 scree 和累计解释方差曲线。</li>
+<li>检查载荷是否由单一变量、批次或异常样本主导。</li>
+<li>比较中心化与标准化方案。</li>
+<li>bootstrap 后对齐符号，评估载荷稳定性。</li>
+<li>在交叉验证每个训练折内拟合 PCA，再评价下游任务。</li>
+</ol></div>
     </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
-<li>组学数据主结构探索和样本可视化。</li>
-<li>影像组学特征压缩后进入预测模型。</li>
-<li>多个相关实验室指标合成为少数综合表征。</li>
+<li>scree plot 与累计解释方差曲线。</li>
+<li>PC1-PC2 得分图。</li>
+<li>载荷热图或 biplot。</li>
+<li>重构误差随维度变化图。</li>
 </ul></div>
     </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-correlation-based-feature-selection.html" data-cn="相关系数特征选择" data-en="Correlation-based Feature Selection" data-def="相关系数特征选择是一种基于变量间相关性的过滤方法。它通过计算特征之间，或特征与结局之间的相关系数，删除冗余特征或保留与结局关系更强的特征。">相关系数特征选择（Correlation-based Feature Selection）</a></li>
-<li><a class="xlink" href="m-lasso-regression.html" data-cn="Lasso回归" data-en="Lasso Regression" data-def="Lasso 回归是在普通线性回归中加入 L1 正则化项的一种方法，它不仅能做回归拟合，还能自动把部分不重要特征的系数压缩到 0，从而实现变量选择。">Lasso回归（Lasso Regression）</a></li>
-<li><a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归是在普通线性回归的损失函数中加入 L2 正则化项的一种方法，用来缓解多重共线性、减少过拟合，并提升模型在新数据上的稳定性。">Ridge回归（Ridge Regression）</a></li>
-<li><a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="高斯混合模型是假设观测数据由多个高斯分布按一定权重混合而成的概率模型。它既可以做密度估计，也可以用于软聚类，即给每个样本分配“属于各个簇的概率”。">高斯混合模型（Gaussian Mixture Model, GMM）</a></li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p><strong>优势：</strong> 理论清晰、计算高效、正交去冗余，并给出最优线性低秩近似。</p>
+<p><strong>局限：</strong> 只捕捉线性总方差，对尺度和异常值敏感，成分可能难命名。</p>
+<p><strong>常见坑：</strong> 全数据先拟合造成泄漏；默认不标准化；把 PCA 当变量选择；把 PC1 叫疾病严重度却不看载荷；只凭二维图判定亚型。</p></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Jolliffe IT. <em>Principal Component Analysis</em>. 2nd ed. Springer; 2002.</li>
+<li><a class="xlink" href="m-singular-value-decomposition-svd.html" data-cn="奇异值分解" data-en="Singular Value Decomposition, SVD" data-def="SVD 把任意矩阵拆成样本方向、按强弱排序的奇异值和特征方向；保留前几项可得到最佳低秩近似。">奇异值分解（Singular Value Decomposition, SVD）</a>：PCA 常通过中心化矩阵 SVD 实现，SVD 本身不要求中心化。</li>
+<li><a class="xlink" href="m-factor-analysis.html" data-cn="因子分析" data-en="Factor Analysis" data-def="因子分析用少数不可观测公共因子解释多个指标为何相关，并把每个指标未被公共因子解释的变异单独留作特异误差。">因子分析（Factor Analysis）</a>：PCA 解释总方差，因子分析建模共同方差与特异误差。</li>
+<li><a class="xlink" href="m-independent-component-analysis-ica.html" data-cn="独立成分分析" data-en="Independent Component Analysis, ICA" data-def="ICA 假设观测信号是若干非高斯独立源的线性混合，并寻找反混合矩阵把这些来源尽可能分离。">独立成分分析（Independent Component Analysis, ICA）</a>：PCA 要不相关正交方向，ICA 要统计独立来源。</li>
+<li>选择经验：压缩和可视化先用 PCA；潜变量测量结构应考虑因子分析。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>组学样本结构、批次效应和主要变异探索。</li>
+<li>影像组学特征压缩后进入预测模型。</li>
+<li>多个相关实验室指标的综合表征。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">术语表</h2></div>
+      <div class="sec-body"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>score</td>
+<td>样本在主成分轴上的坐标</td>
+</tr>
+<tr>
+<td>loading</td>
+<td>原变量构成主成分方向的权重</td>
+</tr>
+<tr>
+<td>explained variance</td>
+<td>主成分承载的样本方差</td>
+</tr>
+<tr>
+<td>scree plot</td>
+<td>特征值或解释方差按成分排序图</td>
+</tr>
+<tr>
+<td>whitening</td>
+<td>将主成分进一步缩放到单位方差</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-singular-value-decomposition-svd.html" data-cn="奇异值分解" data-en="Singular Value Decomposition, SVD" data-def="SVD 把任意矩阵拆成样本方向、按强弱排序的奇异值和特征方向；保留前几项可得到最佳低秩近似。">奇异值分解（Singular Value Decomposition, SVD）</a></li>
+<li><a class="xlink" href="m-independent-component-analysis-ica.html" data-cn="独立成分分析" data-en="Independent Component Analysis, ICA" data-def="ICA 假设观测信号是若干非高斯独立源的线性混合，并寻找反混合矩阵把这些来源尽可能分离。">独立成分分析（Independent Component Analysis, ICA）</a></li>
+<li><a class="xlink" href="m-factor-analysis.html" data-cn="因子分析" data-en="Factor Analysis" data-def="因子分析用少数不可观测公共因子解释多个指标为何相关，并把每个指标未被公共因子解释的变异单独留作特异误差。">因子分析（Factor Analysis）</a></li>
+<li><a class="xlink" href="m-kernel-principal-component-analysis-kpca.html" data-cn="核主成分分析" data-en="Kernel Principal Component Analysis, KPCA" data-def="核 PCA 不显式生成大量非线性特征，而是只计算样本在隐式特征空间中的两两内积，再对中心化核矩阵做 PCA。">核主成分分析（Kernel Principal Component Analysis, KPCA）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
 <li>Pearson K. On lines and planes of closest fit to systems of points in space. <em>Philos Mag</em>. 1901;2(11):559-572.</li>
-<li>scikit-learn Developers. <code>sklearn.decomposition.PCA</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html">https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html</a> （访问日期：2026-07-02）</li>
+<li>Jolliffe IT, Cadima J. Principal component analysis: a review and recent developments. <em>Philos Trans A</em>. 2016;374:20150202.</li>
+<li>scikit-learn Developers. <code>PCA</code> API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html">https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html</a> （访问日期：2026-07-09）</li>
 </ul></div>
     </section>
     <div class="pager"><span></span><a class="pg pg-next" href="m-independent-component-analysis-ica.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">独立成分分析</div></a></div>

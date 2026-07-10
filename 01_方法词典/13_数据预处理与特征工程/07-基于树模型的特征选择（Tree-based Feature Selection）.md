@@ -19,216 +19,254 @@ r_packages: [ranger, randomForest, vip]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-基于树模型的特征选择利用决策树、随机森林、梯度提升树等模型产生的特征重要性，对特征进行排序或筛选。常用重要性包括不纯度减少、分裂次数、置换重要性和 SHAP 重要性。
+树模型选择按特征在分裂中减少多少预测误差或打乱后损失多少性能来排序，能捕捉非线性与交互，但重要性会受基数和相关性偏倚。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：哪些特征在树模型预测中贡献较大。
-- 适用任务：分类、回归、非线性预测、高维特征筛选。
-- 常见医学场景：临床风险预测变量筛选、影像组学特征排序、生物标志物优先级排序。
+它用决策树、随机森林或梯度提升拟合结局，再按 impurity decrease、gain 或 permutation importance 选择特征。属于嵌入式/模型后选择，结果与树算法、超参数和重要性定义绑定。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-树模型会反复选择能最好划分样本的特征。一个特征如果经常用于有效分裂，或打乱它会明显降低模型性能，就说明模型很依赖它。
+- 非线性、阈值和交互明显的表格数据选择。
+- 从大量混合类型变量中建立候选子集。
+- 医学场景：EHR、组学、影像组学与临床风险预测。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+树不断问问题来把患者分得更纯。一个变量若经常让错误大幅下降，就像一项高效分诊问题；但若两个问题答案相同，树只问其中一个，另一个可能被误判为“不重要”。
 
-以不纯度减少为例，节点 $t$ 的不纯度为 $i(t)$，分裂为左右子节点后，特征 $X_j$ 在该节点带来的减少量为：
+## 2. 核心思想与原理
+
+### 2.1 它到底在解决什么根本困难
+
+线性稀疏方法需要预先指定变换和交互。树通过阈值分裂自动发现“年龄大于 70 且乳酸高”等规则，选择标准与非线性预测直接对齐。
+
+### 2.2 关键洞察
+
+每个被选分裂都带来局部损失下降。把某特征在全树/全森林的下降加总，就是 MDI/gain；或在验证集打乱某列，性能下降越多，说明模型越依赖该列。
+
+### 2.3 与朴素/相邻做法的对比
+
+- MDI 计算快但偏爱连续、高基数特征，并在相关变量间任意分配。
+- permutation importance 更贴近验证性能，但相关特征互相替代时也会低估。
+- SHAP 可分解个体预测，不等同于稳定特征选择。
+
+## 3. 数学形式
+
+### 3.1 核心公式
+
+节点 $t$ 的加权不纯度下降：
 
 $$
-\Delta i(t)=i(t)-\frac{n_L}{n_t}i(t_L)-\frac{n_R}{n_t}i(t_R)
+\Delta I(t)
+=\frac{N_t}{N}I(t)
+-\frac{N_L}{N}I(L)
+-\frac{N_R}{N}I(R)
 $$
 
-特征重要性可写为该特征在所有相关节点上的加权累计：
+特征 $j$ 的 MDI：
 
 $$
-I_j=\sum_{t:v(t)=j}\frac{n_t}{n}\Delta i(t)
+\operatorname{Imp}(j)
+=\sum_{t:v(t)=j}\Delta I(t)
 $$
 
-随机森林或梯度提升树中，通常再对多棵树的重要性求和或平均。置换重要性则比较置换某特征前后的模型性能：
+置换重要性：
 
 $$
-PI_j=\mathrm{Score}(f,X,y)-\mathrm{Score}(f,X_{\pi(j)},y)
+\operatorname{PI}_j
+=M(\mathbf X,y)-M(\mathbf X_{\pi(j)},y)
 $$
 
-### 2.2 参数或统计量含义
+这个式子在说：分裂时累计“纯度收益”，或打乱一列后看验证性能损失。
 
-- $i(t)$：节点不纯度，如 Gini、熵或回归方差。
-- $\Delta i(t)$：一次分裂带来的不纯度减少。
-- $I_j$：特征 $j$ 的累计重要性。
-- 置换重要性：打乱某特征后模型性能下降幅度。
-- 阈值：选择特征的重要性下限，如均值、中位数或累计贡献率。
+### 3.2 推导脉络
 
-### 2.3 关键假设
+分类树选择最大 Gini/熵下降，回归树选择最大 SSE 下降。集成模型将许多树的贡献平均。选择阈值可用均值/中位数重要性、Top-k 或验证集性能决定。
 
-- 树模型适合当前数据结构。
-- 特征重要性可代表模型对该变量的依赖程度。
-- 重要性解释应限定在模型预测语境中，不能直接解释为因果效应。
+### 3.3 参数与统计量含义
 
-## 3. 数据形式与输入输出
+- $I(t)$：节点 Gini、熵或 SSE。
+- $N_t/N$：节点覆盖的总体比例。
+- MDI/gain：训练结构内部的重要性。
+- PI：依赖指定验证集和性能指标的模型依赖度。
+- selection threshold：把连续重要性转为保留/删除的阈值。
 
-### 3.1 适合的数据形式
+### 3.4 关键假设（含违反后果）
 
-- 自变量类型：连续、二分类、多分类变量。
-- 因变量类型：二分类、多分类或连续型。
-- 数据结构：监督学习宽表数据。
-- 是否适合高维数据：可用，但强相关特征会分散重要性。
-- 是否适合缺失较多数据：按树模型要求处理，部分实现支持缺失。
-- 是否适合删失数据：普通树模型不直接适合，需生存树或生存森林。
-- 是否适合重复测量数据：需分组验证或专门处理相关结构。
+| 假设 | 含义 | 违反后果 |
+| --- | --- | --- |
+| 树在独立数据上泛化 | 重要性来自真实模式 | 过拟合噪声 |
+| 变量机会公平 | 基数/缺失处理不偏 | MDI 偏向多切点变量 |
+| 相关替代被认识 | 低重要性可能因替代 | 错删冗余组全部 |
+| 选择嵌入训练折 | 测试不参与重要性 | 泄漏 |
 
-### 3.2 示例表格
+## 4. 手把手算例
 
-以住院患者恶化预测为例：
+8 人结局为 $(0,0,0,0,1,1,1,1)$。父节点：
 
-| Age | NEWS2 | Lactate | Albumin | WBC | Deterioration |
-| --- | --- | --- | --- | --- | --- |
-| 78 | 8 | 3.2 | 29 | 14.2 | 1 |
-| 49 | 2 | 1.1 | 41 | 6.3 | 0 |
-| 66 | 5 | 2.4 | 34 | 10.8 | 1 |
-| 37 | 1 | 0.8 | 43 | 5.8 | 0 |
-| 57 | 4 | 1.6 | 38 | 8.4 | 0 |
+$$
+Gini_P=1-(4/8)^2-(4/8)^2=0.5
+$$
 
-### 3.3 输入与产出
+特征 A 的阈值把前 4 个阴性与后 4 个阳性完全分开，两个子节点 Gini 都为 0：
 
-#### 输入
+$$
+\Delta Gini_A
+=0.5-\frac48(0)-\frac48(0)=0.5
+$$
 
-- 输入数据：特征矩阵和目标变量。
-- 关键变量：树模型类型、重要性类型、选择阈值。
-- 需要预处理的内容：缺失处理、类别编码、训练测试划分、重采样稳定性评估。
+若整棵树只有这个分裂，归一化重要性为 A=1、其他=0。
 
-#### 产出
+现在加入 B=2A。B 也能完美分裂，但贪心树先选 A 后已无需 B，于是 B 的 MDI=0。结论不是“B 无信息”，而是“在 A 已存在时树不再需要 B”。相关变量的 masking 是树选择必须报告的局限。
 
-- 模型对象/统计结果：树模型、特征重要性排序、保留特征集合。
-- 参数估计：重要性得分。
-- 预测结果：若直接使用树模型，也可输出预测。
-- 不确定性指标：交叉验证性能、置换重要性分布、bootstrap 入选频率。
+## 5. 数据形式与输入输出
 
-## 4. 适用场景
+### 5.1 适合的数据形式
 
-- 适合：非线性和交互明显、希望用树模型辅助筛选特征的任务。
-- 不适合：强因果解释、需要无模型偏倚变量筛选、样本量很小的任务。
-- 使用前需要特别检查的点：重要性指标类型、相关特征组、连续变量或高基数分类变量的重要性偏倚。
+- 数值/编码类别表格，分类或回归结局。
+- 缺失处理依具体实现；scikit-learn 多数树前需插补。
+- 生存结局需随机生存森林等专用模型。
+- 重复测量必须患者级切分。
 
-## 5. 实现
+### 5.2 示例表格
 
-### 5.1 Python
+| patient_id | marker_A | marker_B | noise | severe |
+| --- | ---: | ---: | ---: | ---: |
+| P01 | 1 | 2 | 0.3 | 0 |
+| P02 | 2 | 4 | 0.8 | 0 |
+| P05 | 5 | 10 | 0.1 | 1 |
 
-常用包：
+### 5.3 输入与产出
 
-- `scikit-learn`
+输入训练数据、树模型、重要性类型和阈值；产出拟合模型、重要性、支持集及其验证性能。
+
+## 6. 适用场景
+
+- 适合：复杂非线性、交互、混合尺度表格数据。
+- 不适合：需要稳定方向性系数、小样本高维且树易过拟合。
+- 最好比较 MDI、置换和跨折稳定性。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import pandas as pd
+from sklearn.datasets import load_breast_cancer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import SelectFromModel
 from sklearn.model_selection import train_test_split
+from sklearn.inspection import permutation_importance
 
-df = pd.read_csv("deterioration.csv")
-X = df[["Age", "NEWS2", "Lactate", "Albumin", "WBC"]]
-y = df["Deterioration"].astype(int)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
+X, y = load_breast_cancer(return_X_y=True, as_frame=True)
+Xtr, Xte, ytr, yte = train_test_split(
+    X, y, stratify=y, random_state=42
 )
-
 rf = RandomForestClassifier(
-    n_estimators=500,
-    min_samples_leaf=10,
-    random_state=42,
-    n_jobs=-1
-)
-rf.fit(X_train, y_train)
-
-selector = SelectFromModel(rf, threshold="mean", prefit=True)
-X_train_sel = selector.transform(X_train)
-X_test_sel = selector.transform(X_test)
-
-importance = pd.Series(rf.feature_importances_, index=X.columns).sort_values(ascending=False)
-print(importance)
+    n_estimators=500, min_samples_leaf=5,
+    random_state=42, n_jobs=-1
+).fit(Xtr, ytr)
+selector = SelectFromModel(rf, threshold="median", prefit=True)
 print(X.columns[selector.get_support()].tolist())
+pi = permutation_importance(rf, Xte, yte, n_repeats=20, random_state=42)
+print(pi.importances_mean)
 ```
 
-### 5.2 R
-
-常用包：
-
-- `ranger`
-- `vip`
+### 7.2 R
 
 ```r
 library(ranger)
 
+set.seed(42)
 fit <- ranger(
-  Deterioration ~ Age + NEWS2 + Lactate + Albumin + WBC,
-  data = df_train,
-  probability = TRUE,
+  Species ~ ., data = iris,
   num.trees = 500,
-  importance = "permutation"
+  importance = "permutation",
+  min.node.size = 5
 )
-
 sort(fit$variable.importance, decreasing = TRUE)
+selected <- names(fit$variable.importance)[
+  fit$variable.importance > median(fit$variable.importance)
+]
+selected
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解读
 
-- 核心结果看什么：重要性排序、不同重采样下是否稳定、筛选后模型性能。
-- 每个主要参数如何解释：阈值越高保留越少；置换重要性越大说明模型越依赖该变量。
-- 临床或医学意义如何表达：可以说模型预测中该变量贡献较大，不能直接说它是病因。
-- 常见误读：把 impurity importance 直接当作无偏变量贡献。
+高重要性表示当前树模型依赖该特征，不是因果效应。MDI 的单位是累计不纯度下降，PI 的单位是性能指标下降，二者不可直接混读。
 
-## 7. 推荐可视化
+## 9. 假设诊断与稳健性
 
-- 特征重要性条形图。
-- 置换重要性箱线图。
-- 不同重采样下 Top-K 特征入选频率图。
+- 在独立验证折计算 permutation importance。
+- 重复 CV/Bootstrap 报告入选频率。
+- 对相关特征做分组置换或聚类后选代表。
+- 比较不同深度、叶节点大小和随机种子。
+- 加入随机噪声列作为偶然重要性基线。
+- 检查亚组、中心和时间漂移。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
+
+- MDI 与 PI 并列排序图。
+- 各折重要性箱线图。
+- 相关特征组网络/热图。
+- 特征数—验证性能曲线。
+- PDP/SHAP 仅作行为补充。
+
+## 11. 优势、局限与常见坑
 
 ### 优势
 
-- 能捕捉非线性和交互。
-- 与树模型预测目标一致。
-- 可处理较多候选特征。
+- 自动捕捉非线性、阈值和交互。
+- 无需连续变量标准化。
 
 ### 局限
 
-- 重要性受模型和参数影响。
-- 强相关特征会共享或稀释重要性。
-- impurity importance 对连续变量和高基数特征可能有偏。
+- MDI 有基数偏倚，相关变量会相互遮蔽。
+- 支持集对超参数和样本波动敏感。
 
 ### 常见坑
 
-- 只报告一次训练得到的重要性，不评估稳定性。
-- 在全数据上选择特征后再评估模型。
-- 把特征重要性写成因果或独立效应。
+- 用训练集 PI 选择。
+- 将 gain 当因果效应。
+- 忽略患者级切分。
+- 一次随机森林支持集直接定稿。
 
-## 9. 与相近方法的区别
+## 12. 与相近方法的区别
 
-- 和 [[随机森林（Random Forest）]] 的区别：随机森林是建模方法；本卡强调用树模型输出做特征选择。
-- 和 [[梯度提升决策树（Gradient Boosting Decision Tree, GBDT）]] 的区别：GBDT 可作为基模型之一；本卡覆盖多类树模型选择流程。
-- 和 [[嵌入式特征选择（Embedded Feature Selection）]] 的区别：树模型选择是嵌入式特征选择的一个分支。
+- Lasso 偏向线性稀疏；树选择适合非线性。
+- 过滤式 MI 逐列评分；树重要性可反映交互中的使用。
+- SHAP 解释预测分摊，树选择决定保留列。
+- 如何选择：用任务结构决定模型，并以嵌套验证比较支持集。
 
-## 10. 医学研究中的典型应用
+## 13. 医学研究中的典型应用
 
-- EHR 表格数据中筛选关键风险预测变量。
-- 影像组学高维特征排序和降维。
-- 多生物标志物组合预测中的候选特征优先级评估。
+- EHR 风险因素筛选。
+- 影像组学和多组学预测变量压缩。
+- 临床评分候选变量优先级排序。
 
-## 11. 相关方法
+需报告重要性定义、阈值、相关组、缺失处理、患者级切分和外部稳定性。
 
-- [[嵌入式特征选择（Embedded Feature Selection）]]
+## 14. 关键术语
+
+- **MDI**：平均不纯度下降重要性。
+- **Permutation importance**：打乱特征后的性能损失。
+- **Gain**：提升树中分裂带来的目标下降。
+- **Masking**：相关特征使彼此重要性被低估。
+- **分组置换（Grouped permutation）**：同时打乱一组相关特征。
+- **支持集（Support）**：最终保留的变量集合。
+
+## 15. 相关方法
+
+- [[决策树（Decision Tree）]]
 - [[随机森林（Random Forest）]]
-- [[梯度提升决策树（Gradient Boosting Decision Tree, GBDT）]]
 - [[XGBoost（Extreme Gradient Boosting, XGBoost）]]
-- [[LightGBM（Light Gradient Boosting Machine）]]
+- [[嵌入式特征选择（Embedded Feature Selection）]]
+- [[SHAP（Shapley Additive Explanations, SHAP）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
-- Breiman L. Random forests. *Mach Learn*. 2001;45:5-32.
-- Strobl C, Boulesteix AL, Zeileis A, Hothorn T. Bias in random forest variable importance measures. *BMC Bioinformatics*. 2007;8:25.
-- scikit-learn Developers. Feature selection using SelectFromModel. scikit-learn User Guide. [https://scikit-learn.org/stable/modules/feature_selection.html#select-from-model](https://scikit-learn.org/stable/modules/feature_selection.html#select-from-model) （访问日期：2026-07-02）
+- Breiman L. Random forests. *Machine Learning*. 2001;45:5-32.
+- Strobl C, et al. Bias in random forest variable importance measures. *BMC Bioinformatics*. 2007;8:25.
+- scikit-learn developers. Feature importance evaluation. https://scikit-learn.org/stable/modules/permutation_importance.html

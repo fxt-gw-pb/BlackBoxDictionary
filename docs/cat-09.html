@@ -46,7 +46,7 @@
           <span class="entry-cn">高斯混合模型</span>
           <span class="entry-en">Gaussian Mixture Model, GMM</span>
         </div>
-        <p class="entry-def">高斯混合模型是假设观测数据由多个高斯分布按一定权重混合而成的概率模型。它既可以做密度估计，也可以用于软聚类，即给每个样本分配“属于各个簇的概率”。</p>
+        <p class="entry-def">GMM 把总体密度表示为若干高斯成分的加权和，并为每名患者给出属于各成分的后验概率。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -59,7 +59,7 @@
           <span class="entry-cn">K-means聚类</span>
           <span class="entry-en">K-means Clustering</span>
         </div>
-        <p class="entry-def">K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。</p>
+        <p class="entry-def">K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -72,7 +72,7 @@
           <span class="entry-cn">层次聚类</span>
           <span class="entry-en">Hierarchical Clustering</span>
         </div>
-        <p class="entry-def">层次聚类是一类把样本组织成树状层次结构的无监督方法。最常见的是凝聚式层次聚类：先把每个样本看作一个簇，再按相似性逐步合并，最终形成一棵树状图。</p>
+        <p class="entry-def">层次聚类按距离逐步合并或拆分样本，把从细到粗的分群过程保存为一棵树，而不是只给单一分组。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -85,7 +85,7 @@
           <span class="entry-cn">DBSCAN</span>
           <span class="entry-en">Density-Based Spatial Clustering of Applications with Noise</span>
         </div>
-        <p class="entry-def">DBSCAN 是一种基于密度的聚类方法。它把高密度区域连接成簇，并把低密度区域中的点标记为噪声或离群点。</p>
+        <p class="entry-def">DBSCAN 从局部邻居足够多的核心点向外扩展密度连通区域，并把无法连接到任何核心区域的点标记为噪声。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -98,7 +98,7 @@
           <span class="entry-cn">均值漂移聚类</span>
           <span class="entry-en">Mean Shift Clustering</span>
         </div>
-        <p class="entry-def">均值漂移聚类是一种基于密度峰的无监督方法。它通过不断把样本点移动到邻域内样本的加权均值位置，使点沿着密度上升方向收敛到局部密度峰，最终把收敛到同一峰的点归为一簇。</p>
+        <p class="entry-def">Mean Shift 让候选中心反复移动到局部邻域的加权均值，沿密度上升方向收敛到密度峰，并把到达同一峰的样本归为一簇。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -111,7 +111,7 @@
           <span class="entry-cn">谱聚类</span>
           <span class="entry-en">Spectral Clustering</span>
         </div>
-        <p class="entry-def">谱聚类是一种基于图的聚类方法。它先把样本表示成相似度图，再利用图拉普拉斯矩阵的特征向量把样本嵌入到低维空间，最后在该空间中进行聚类。</p>
+        <p class="entry-def">谱聚类把样本变成相似图，利用图拉普拉斯的低频特征向量寻找“内部连接强、彼此连接弱”的节点组。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -124,7 +124,7 @@
           <span class="entry-cn">Mini-Batch K-means聚类</span>
           <span class="entry-en">Mini-Batch K-means Clustering</span>
         </div>
-        <p class="entry-def">Mini-Batch K-means 是 [[K-means聚类（K-means Clustering）]] 的大规模近似版本。它每次只用一小批样本更新质心，从而显著降低计算成本。</p>
+        <p class="entry-def">Mini-Batch K-means 每次只抽一小批样本近似更新质心，以少量精度和随机波动换取速度、低内存与增量处理能力。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -137,7 +137,7 @@
           <span class="entry-cn">BIRCH聚类</span>
           <span class="entry-en">Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH</span>
         </div>
-        <p class="entry-def">BIRCH 是一种面向大规模数据的聚类算法。它通过簇特征树（CF tree）把大量样本压缩成可管理的微簇摘要，再对这些摘要进行聚类。</p>
+        <p class="entry-def">BIRCH 把相近样本在线压缩为可相加的 CF 微簇，再在微簇中心上做全局聚类，从而避免反复保存和比较全部原始点。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -150,7 +150,7 @@
           <span class="entry-cn">模糊C均值聚类</span>
           <span class="entry-en">Fuzzy C-Means Clustering, FCM</span>
         </div>
-        <p class="entry-def">模糊 C 均值聚类是一种软聚类方法。它不是把每个样本硬分配到单一簇，而是给出样本属于每个簇的隶属度。</p>
+        <p class="entry-def">FCM 用到各中心的相对距离为每个样本分配一组和为 1 的模糊隶属度，再用隶属度幂加权更新中心。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -163,7 +163,7 @@
           <span class="entry-cn">期望最大化算法</span>
           <span class="entry-en">Expectation-Maximization Algorithm, EM</span>
         </div>
-        <p class="entry-def">期望最大化算法是一种用于含隐变量或缺失数据模型的迭代最大似然估计算法。它交替执行 E 步和 M 步：先估计隐变量的条件期望，再在该期望下更新模型参数。</p>
+        <p class="entry-def">EM 在“根据当前参数推断隐藏信息”和“把推断出的软信息当作完整数据更新参数”之间交替，逐步提高观测数据似然。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>

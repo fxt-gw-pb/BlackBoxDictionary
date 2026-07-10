@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">术语表</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,232 +54,297 @@
     <div class="intro-note"><h1>期望最大化算法（Expectation-Maximization Algorithm, EM）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>期望最大化算法是一种用于含隐变量或缺失数据模型的迭代最大似然估计算法。它交替执行 E 步和 M 步：先估计隐变量的条件期望，再在该期望下更新模型参数。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>EM 在“根据当前参数推断隐藏信息”和“把推断出的软信息当作完整数据更新参数”之间交替，逐步提高观测数据似然。</p>
+<h3>1.2 定义</h3>
+<p>期望最大化算法是含隐变量、潜在类别或部分缺失数据模型的迭代最大似然方法。E 步计算完整数据对数似然关于隐变量后验的期望，M 步最大化该期望以更新参数。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：当模型中有看不见的类别、成分或缺失信息时，如何估计参数。</li>
-<li>适用任务：混合模型估计、软聚类、缺失数据模型、隐变量模型。</li>
-<li>常见医学场景：疾病潜在亚型建模，患者群体混合分布估计，带隐含类别的生物标志物模式分析。</li>
+<li>直接似然中含有“对隐藏状态求和后再取对数”，难以优化。</li>
+<li>成分标签、潜在状态或部分数据未观察。</li>
+<li>完整数据下参数更新简单，但隐变量未知。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>EM 像是在“猜标签”和“更新模型”之间反复来回。先根据当前参数猜每个样本属于各潜在成分的概率，再用这些软标签重新估计参数，直到似然稳定。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>像整理一叠来源标签脱落的化验单：先按当前各人群分布给每张单子分配软归属，再用这些分数重新估计各人群；新参数又会改变下一轮归属。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>设观测数据为 $X$，隐变量为 $Z$，参数为 $\theta$。目标是最大化观测数据似然：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 困难来自 log-sum</h3>
+<p>观测似然为 $\log\sum_zp(X,z\mid\theta)$。对数外的求和使直接分离各隐状态很困难；如果 $Z$ 已知，完整数据似然通常容易最大化。</p>
+<h3>2.2 E 步构造代理目标</h3>
+<p>用当前参数下的 $p(Z\mid X,\theta^{(t)})$ 对完整数据对数似然取期望，得到 $Q$ 函数。它把未知标签替换为软权重。</p>
+<h3>2.3 M 步与单调性</h3>
+<p>M 步最大化 $Q$。精确 E/M 步通常保证观测对数似然不下降，但只保证到达局部驻点，不保证全局最优，也不保证潜在类别具有真实医学含义。</p></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 观测与完整数据似然</h3>
 <p>$$
-\ell(\theta)=\log p(X\mid\theta)=\log\sum_Z p(X,Z\mid\theta)
+\ell(\theta)=
+\log p(X\mid\theta)
+=\log\sum_Zp(X,Z\mid\theta)
 $$</p>
-<p>E 步构造辅助函数：</p>
+<h3>3.2 E 步</h3>
 <p>$$
-Q(\theta\mid\theta^{(t)})=
-E_{Z\mid X,\theta^{(t)}}[\log p(X,Z\mid\theta)]
+Q(\theta\mid\theta^{(t)})
+=
+E_{Z\mid X,\theta^{(t)}}
+[\log p(X,Z\mid\theta)]
 $$</p>
-<p>M 步更新参数：</p>
+<h3>3.3 M 步</h3>
 <p>$$
-\theta^{(t+1)}=\arg\max_\theta Q(\theta\mid\theta^{(t)})
+\theta^{(t+1)}
+=
+\operatorname*{arg\,max}_{\theta}
+Q(\theta\mid\theta^{(t)})
 $$</p>
-<p>在 <a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="高斯混合模型是假设观测数据由多个高斯分布按一定权重混合而成的概率模型。它既可以做密度估计，也可以用于软聚类，即给每个样本分配“属于各个簇的概率”。">高斯混合模型（Gaussian Mixture Model, GMM）</a> 中，责任概率为：</p>
+<p>在 GMM 中，E 步责任概率为：</p>
 <p>$$
 \gamma_{ik}=
-\frac{\pi_k\mathcal{N}(x_i\mid \mu_k,\Sigma_k)}
-{\sum_{j=1}^{K}\pi_j\mathcal{N}(x_i\mid \mu_j,\Sigma_j)}
+\frac{\pi_k\mathcal N(x_i\mid\mu_k,\Sigma_k)}
+{\sum_j\pi_j\mathcal N(x_i\mid\mu_j,\Sigma_j)}
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
-<ul>
-<li>$X$：观测数据。</li>
-<li>$Z$：隐变量，如潜在类别或混合成分标签。</li>
-<li>$\theta$：待估计参数。</li>
-<li>$Q(\theta\mid\theta^{(t)})$：完整数据对数似然的条件期望。</li>
-<li>责任概率：样本属于各隐含成分的后验权重。</li>
-<li>log-likelihood：迭代过程中应非下降的目标函数。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>模型形式已指定，隐变量结构合理。</li>
-<li>E 步和 M 步可以计算或近似计算。</li>
-<li>似然函数可能有局部最优，需要多次初始化。</li>
-<li>收敛到的是驻点，不保证全局最优。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：取决于具体隐变量模型，可为连续、分类、计数或混合数据。</li>
-<li>因变量类型：通常用于无监督或半监督场景。</li>
-<li>数据结构：观测数据加隐含结构。</li>
-<li>是否适合高维数据：可用，但参数估计和局部最优问题会更突出。</li>
-<li>是否适合缺失较多数据：EM 可用于某些缺失数据模型，但需明确缺失机制和模型假设。</li>
-<li>是否适合删失数据：可扩展到删失或截断模型，但普通聚类实现不直接处理。</li>
-<li>是否适合重复测量数据：可用于隐马尔可夫模型、混合效应模型等扩展，但需专门建模。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>以潜在疾病亚型混合模型为例：</p>
+<h3>3.4 关键条件</h3>
 <table>
 <thead>
 <tr>
-<th>CRP</th>
-<th>IL6</th>
-<th>BMI</th>
-<th>FastingGlucose</th>
-<th>LatentSubtype</th>
+<th>条件</th>
+<th>违反后果</th>
+<th>检查方式</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>5.2</td>
-<td>8.1</td>
-<td>31.2</td>
-<td>7.8</td>
-<td>未观测</td>
+<td>模型与隐变量结构可识别</td>
+<td>多组参数给出同样分布</td>
+<td>约束、模拟与理论审查</td>
 </tr>
 <tr>
-<td>1.1</td>
-<td>2.0</td>
-<td>24.8</td>
-<td>5.2</td>
-<td>未观测</td>
+<td>E/M 步正确且数值稳定</td>
+<td>似然异常或不收敛</td>
+<td>监控每轮似然</td>
 </tr>
 <tr>
-<td>3.8</td>
-<td>5.5</td>
-<td>29.5</td>
-<td>6.9</td>
-<td>未观测</td>
+<td>多个初值得到稳定解</td>
+<td>陷入不同局部最优</td>
+<td>多初始化比较</td>
 </tr>
 <tr>
-<td>0.8</td>
-<td>1.5</td>
-<td>22.9</td>
-<td>4.9</td>
-<td>未观测</td>
+<td>缺失机制假设合理</td>
+<td>缺失数据估计偏倚</td>
+<td>明确 MCAR/MAR/MNAR</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>沿用 <a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="GMM 把总体密度表示为若干高斯成分的加权和，并为每名患者给出属于各成分的后验概率。">高斯混合模型（Gaussian Mixture Model, GMM）</a> 的一维两成分例子：</p>
+<p>$$
+x=(0,1,4),\quad
+\pi_1=\pi_2=0.5,\quad
+\mu_1=0,\quad\mu_2=4,\quad
+\sigma_1^2=\sigma_2^2=1
+$$</p>
+<p><strong>E 步：计算软标签。</strong> 根据贝叶斯公式得到：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">$x$</th>
+<th style="text-align: right;">$\gamma_{i1}$</th>
+<th style="text-align: right;">$\gamma_{i2}$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.9997</td>
+<td style="text-align: right;">0.0003</td>
+</tr>
+<tr>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.9820</td>
+<td style="text-align: right;">0.0180</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.0003</td>
+<td style="text-align: right;">0.9997</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：观测变量矩阵。</li>
-<li>关键变量：模型形式、隐变量数量、初始化、收敛阈值。</li>
-<li>需要预处理的内容：缺失机制判断、标准化、异常值检查、模型可识别性评估。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：参数估计、隐变量后验权重、对数似然、AIC/BIC。</li>
-<li>参数估计：取决于具体模型，如混合比例、均值、协方差。</li>
-<li>预测结果：隐类别软归属或硬标签。</li>
-<li>不确定性指标：后验权重、标准误、似然变化、多初始化稳定性。</li>
-</ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：模型中有潜在类别、混合成分或可建模缺失信息，且希望做最大似然估计的场景。</li>
-<li>不适合：模型形式不清楚、隐变量不可识别、似然面高度复杂且无稳定初始化的场景。</li>
-<li>使用前需要特别检查的点：初始化、局部最优、收敛标准、模型选择和隐变量解释。</li>
-</ul></div>
+<p>例如 $x=1$：</p>
+<p>$$
+\gamma_{1,1}
+=
+\frac{\exp(-0.5)}
+{\exp(-0.5)+\exp(-4.5)}
+\approx0.982
+$$</p>
+<p><strong>M 步：把软标签当权重。</strong></p>
+<p>$$
+N_1=\sum_i\gamma_{i1}\approx1.982,\qquad
+N_2\approx1.018
+$$</p>
+<p>更新混合比例：</p>
+<p>$$
+\pi_1^{new}=\frac{1.982}{3}\approx0.661,\qquad
+\pi_2^{new}\approx0.339
+$$</p>
+<p>更新均值：</p>
+<p>$$
+\mu_1^{new}
+=
+\frac{0(0.9997)+1(0.9820)+4(0.0003)}
+{1.982}
+\approx0.496
+$$</p>
+<p>$$
+\mu_2^{new}\approx3.946
+$$</p>
+<p>然后用新参数进入下一轮 E 步，直到对数似然变化足够小。</p>
+<p><strong>结论：</strong> E 步没有“填死”一个标签，而是传播不确定性；M 步用这些概率加权完成普通参数估计。</p></div>
     </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="expectation-maximization-algorithm-em" data-i="0">Python</button><button class="codetab" data-uid="expectation-maximization-algorithm-em" data-i="1">R</button></div><div class="codepanel active" data-uid="expectation-maximization-algorithm-em" data-i="0"><p>常用包：</p>
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 数据要求</h3>
 <ul>
-<li><code>scikit-learn</code></li>
+<li>EM 是算法而非特定数据模型，可用于连续、类别、计数、缺失或序列数据。</li>
+<li>可用性取决于完整数据似然、E 步后验与 M 步更新是否可计算。</li>
+<li>用于缺失数据时，不能绕过缺失机制假设。</li>
 </ul>
-<pre><code class="language-python">import pandas as pd
-from sklearn.mixture import GaussianMixture
-from sklearn.preprocessing import StandardScaler
-
-df = pd.read_csv(&quot;latent_subtype_features.csv&quot;)
-X = df[[&quot;CRP&quot;, &quot;IL6&quot;, &quot;BMI&quot;, &quot;FastingGlucose&quot;]]
-X_scaled = StandardScaler().fit_transform(X)
-
-fit = GaussianMixture(
-    n_components=3,
-    covariance_type=&quot;full&quot;,
-    n_init=20,
-    random_state=42
-)
-fit.fit(X_scaled)
-
-posterior = fit.predict_proba(X_scaled)
-cluster = fit.predict(X_scaled)
-print(&quot;BIC:&quot;, fit.bic(X_scaled))
-print(posterior[:5].round(3))
-</code></pre></div><div class="codepanel" data-uid="expectation-maximization-algorithm-em" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>mclust</code></li>
-</ul>
-<pre><code class="language-r">library(mclust)
-
-x &lt;- scale(df[, c(&quot;CRP&quot;, &quot;IL6&quot;, &quot;BMI&quot;, &quot;FastingGlucose&quot;)])
-fit &lt;- Mclust(x, G = 1:6)
-
-cluster &lt;- fit$classification
-posterior &lt;- fit$z
-fit$bic
-head(posterior)
-</code></pre></div></div></div>
+<h3>5.2 输入与产出</h3>
+<p>输入为概率模型、隐变量定义、初值与收敛阈值。输出为参数估计、后验隐状态、对数似然轨迹和收敛信息；具体含义由模型决定。</p></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：对数似然是否收敛、参数估计是否稳定、隐变量后验权重是否清晰。</li>
-<li>每个主要参数如何解释：在 GMM 中，混合比例表示潜在成分占比，责任概率表示样本对各成分的软归属。</li>
-<li>临床或医学意义如何表达：EM 只是估计算法，医学解释来自具体模型及其成分特征。</li>
-<li>常见误读：EM 不是一个单独的聚类模型；它是估计 GMM 等隐变量模型的算法。</li>
+<li>GMM、潜类别、隐马尔可夫、随机效应或某些缺失数据模型。</li>
+<li>完整数据估计简单、观测似然直接优化困难。</li>
+<li>不适合模型不可识别、E/M 步均无可行计算或多局部最优无法区分的场景。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>对数似然随迭代变化曲线。</li>
-<li>BIC/AIC 随成分数变化图。</li>
-<li>后验责任概率热图。</li>
-<li>混合成分在降维空间中的分布图。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="expectation-maximization-algorithm-em" data-i="0">Python</button><button class="codetab" data-uid="expectation-maximization-algorithm-em" data-i="1">R</button></div><div class="codepanel active" data-uid="expectation-maximization-algorithm-em" data-i="0"><pre><code class="language-python">from sklearn.mixture import GaussianMixture
+from sklearn.preprocessing import StandardScaler
+
+X_s = StandardScaler().fit_transform(X)
+model = GaussianMixture(
+    n_components=3,
+    covariance_type=&quot;full&quot;,
+    n_init=30,
+    max_iter=500,
+    tol=1e-5,
+    reg_covar=1e-6,
+    random_state=42,
+)
+model.fit(X_s)
+
+posterior = model.predict_proba(X_s)
+cluster = model.predict(X_s)
+print(&quot;converged:&quot;, model.converged_)
+print(&quot;iterations:&quot;, model.n_iter_)
+print(&quot;lower bound:&quot;, model.lower_bound_)
+</code></pre></div><div class="codepanel" data-uid="expectation-maximization-algorithm-em" data-i="1"><pre><code class="language-r">library(mclust)
+
+x &lt;- scale(df[, c(&quot;CRP&quot;, &quot;IL6&quot;, &quot;BMI&quot;, &quot;FastingGlucose&quot;)])
+fit &lt;- Mclust(
+  x,
+  G = 1:6,
+  modelNames = NULL,
+  control = emControl(tol = c(1e-5, 1e-5))
+)
+
+posterior &lt;- fit$z
+cluster &lt;- fit$classification
+fit$loglik
+fit$bic
+</code></pre>
+<p>软件通常封装了特定模型的 EM；不存在一个脱离模型、可对任意数据直接调用的通用 EM 聚类器。</p></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>适合含隐变量模型的最大似然估计。</li>
-<li>每次迭代通常保证观测似然不下降。</li>
-<li>能自然产生软归属或后验权重。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>可能陷入局部最优。</li>
-<li>对初始化敏感。</li>
-<li>收敛速度可能较慢，且依赖模型可识别性。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>只运行一次初始化就解释成分。</li>
-<li>把 EM 的收敛结果当作全局最优。</li>
-<li>忽略模型本身假设，只讨论算法步骤。</li>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li><code>converged</code> 只说明停止标准满足，不说明达到全局最大值。</li>
+<li>隐状态编号可交换，参数比较前需进行成分匹配。</li>
+<li>后验责任度是给定模型与参数的条件概率，不是亚型真实性概率。</li>
+<li>EM 本身没有医学结论，结论来自所拟合模型、数据和外部验证。</li>
 </ul></div>
     </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="高斯混合模型是假设观测数据由多个高斯分布按一定权重混合而成的概率模型。它既可以做密度估计，也可以用于软聚类，即给每个样本分配“属于各个簇的概率”。">高斯混合模型（Gaussian Mixture Model, GMM）</a> 的区别：GMM 是模型，EM 是常用的参数估计算法。</li>
-<li>和 <a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a> 的区别：K-means 可看作某些限制条件下的硬分配原型聚类，EM 在混合模型中进行软分配和参数更新。</li>
-<li>和 <a class="xlink" href="m-fuzzy-c-means-clustering-fcm.html" data-cn="模糊C均值聚类" data-en="Fuzzy C-Means Clustering, FCM" data-def="模糊 C 均值聚类是一种软聚类方法。它不是把每个样本硬分配到单一簇，而是给出样本属于每个簇的隶属度。">模糊C均值聚类（Fuzzy C-Means Clustering, FCM）</a> 的区别：FCM 的隶属度来自模糊目标函数，EM 的责任概率来自概率模型后验。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">诊断与稳健性</h2></div>
+      <div class="sec-body"><ol>
+<li>保存每轮对数似然，确认无异常下降并识别平台期。</li>
+<li>运行多个随机初值，比较最终似然和参数。</li>
+<li>检查极小成分、奇异协方差与参数边界。</li>
+<li>用模拟数据检验模型可识别性和恢复能力。</li>
+<li>比较成分数、模型约束及 bootstrap 稳定性。</li>
+</ol></div>
     </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
-<li>潜在疾病亚型或患者成分模型估计。</li>
-<li>生物标志物混合分布分解。</li>
-<li>隐变量模型、缺失数据模型或测量误差模型的参数估计。</li>
+<li>对数似然或下界随迭代变化图。</li>
+<li>不同初始化的最终似然分布。</li>
+<li>后验责任概率热图。</li>
+<li>BIC 随模型和成分数变化图。</li>
 </ul></div>
     </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p><strong>优势：</strong> 将困难的隐变量似然拆成可解释两步，常有闭式更新，精确迭代保证似然不降。</p>
+<p><strong>局限：</strong> 局部最优、初始化敏感、收敛可能慢，标准误与模型选择需额外处理。</p>
+<p><strong>常见坑：</strong> 把 EM 当聚类模型；把收敛当全局最优；只跑一次；忽略成分退化；认为 EM 自动解决 MNAR 缺失。</p></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="高斯混合模型是假设观测数据由多个高斯分布按一定权重混合而成的概率模型。它既可以做密度估计，也可以用于软聚类，即给每个样本分配“属于各个簇的概率”。">高斯混合模型（Gaussian Mixture Model, GMM）</a></li>
-<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a></li>
-<li><a class="xlink" href="m-fuzzy-c-means-clustering-fcm.html" data-cn="模糊C均值聚类" data-en="Fuzzy C-Means Clustering, FCM" data-def="模糊 C 均值聚类是一种软聚类方法。它不是把每个样本硬分配到单一簇，而是给出样本属于每个簇的隶属度。">模糊C均值聚类（Fuzzy C-Means Clustering, FCM）</a></li>
+<li><a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="GMM 把总体密度表示为若干高斯成分的加权和，并为每名患者给出属于各成分的后验概率。">高斯混合模型（Gaussian Mixture Model, GMM）</a>：GMM 是模型，EM 是其常用估计算法。</li>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a>：可视为特定极限下的硬分配迭代，但目标和概率解释不同。</li>
+<li><a class="xlink" href="m-fuzzy-c-means-clustering-fcm.html" data-cn="模糊C均值聚类" data-en="Fuzzy C-Means Clustering, FCM" data-def="FCM 用到各中心的相对距离为每个样本分配一组和为 1 的模糊隶属度，再用隶属度幂加权更新中心。">模糊C均值聚类（Fuzzy C-Means Clustering, FCM）</a>：隶属度来自模糊目标，不是后验概率。</li>
+<li>选择经验：先明确生成模型和隐变量，再判断 EM 是否是合适的估计器。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>潜在疾病亚型和生物标志物混合分布。</li>
+<li>隐马尔可夫疾病状态与纵向潜类别。</li>
+<li>某些 MAR 缺失数据、测量误差和随机效应模型估计。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">术语表</h2></div>
+      <div class="sec-body"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>latent variable</td>
+<td>模型中存在但未直接观察的变量</td>
+</tr>
+<tr>
+<td>complete-data likelihood</td>
+<td>假设隐变量已知时的似然</td>
+</tr>
+<tr>
+<td>E-step</td>
+<td>对隐变量后验取完整似然期望</td>
+</tr>
+<tr>
+<td>M-step</td>
+<td>最大化 E 步构造的期望目标</td>
+</tr>
+<tr>
+<td>local optimum</td>
+<td>只在邻域内最优而非全局最优的解</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="GMM 把总体密度表示为若干高斯成分的加权和，并为每名患者给出属于各成分的后验概率。">高斯混合模型（Gaussian Mixture Model, GMM）</a></li>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a></li>
+<li><a class="xlink" href="m-fuzzy-c-means-clustering-fcm.html" data-cn="模糊C均值聚类" data-en="Fuzzy C-Means Clustering, FCM" data-def="FCM 用到各中心的相对距离为每个样本分配一组和为 1 的模糊隶属度，再用隶属度幂加权更新中心。">模糊C均值聚类（Fuzzy C-Means Clustering, FCM）</a></li>
 <li><a class="xlink" href="m-bayesian-regression.html" data-cn="贝叶斯回归" data-en="Bayesian Regression" data-def="贝叶斯回归把回归系数当作有先验分布的随机量，用数据把先验更新成后验分布——输出不再是一个点估计加区间，而是参数与预测的整条概率分布，不确定性天然内建。">贝叶斯回归（Bayesian Regression）</a></li>
 </ul></div>
-    </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
-<li>Dempster AP, Laird NM, Rubin DB. Maximum likelihood from incomplete data via the EM algorithm. <em>Journal of the Royal Statistical Society: Series B</em>. 1977;39(1):1-38.</li>
+<li>Dempster AP, Laird NM, Rubin DB. Maximum likelihood from incomplete data via the EM algorithm. <em>J R Stat Soc Series B</em>. 1977;39(1):1-38.</li>
 <li>McLachlan GJ, Krishnan T. <em>The EM Algorithm and Extensions</em>. 2nd ed. Wiley; 2008.</li>
 <li>Bishop CM. <em>Pattern Recognition and Machine Learning</em>. Springer; 2006.</li>
 </ul></div>

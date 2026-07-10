@@ -19,218 +19,282 @@ r_packages: [caretEnsemble, stacks]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-Stacking 是一种两层或多层模型融合方法。第一层训练多个基础模型，第二层用这些基础模型的交叉验证预测作为新特征，训练一个元学习器来学习如何组合它们。
+Stacking 把多个基础模型的 out-of-fold 预测当作新特征，再训练一个元学习器决定何时、以多大程度相信每个模型。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：如何让不同类型模型的预测优势被一个元模型系统整合。
-- 适用任务：二分类、多分类、连续结局预测。
-- 常见医学场景：融合临床评分、机器学习模型、影像组学模型和组学模型的预测输出。
+Stacking 是两层或多层模型融合方法。第一层包含若干基础学习器，第二层元学习器根据第一层预测形成最终输出。训练元学习器时，必须让每个训练病例的一级预测来自未见过该病例的模型。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-如果投票集成是“每个模型一票”，Stacking 则是让一个总模型学习“什么时候该更相信哪个模型”。关键是元学习器必须用 out-of-fold 预测训练，否则很容易发生信息泄露。
+- 固定平均无法适应模型间系统性差异。
+- 不同算法或模态在不同数据区域各有优势。
+- 希望从多个预测器中学习数据驱动的组合规则。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+投票像固定会诊规则；Stacking 像训练一位总诊医生，根据过往“各专家在未见病例上的表现”学习组合。若总诊医生看的是专家对自己熟悉病例的答案，表现会被严重高估。
 
-设有 $M$ 个基础模型 $f_1,\dots,f_M$，元学习器为 $g$，最终预测为：
+## 2. 核心思想与原理
+
+### 2.1 OOF 预测是关键
+
+将训练集分为 $K$ 折。每次用 $K-1$ 折训练基础模型，对留出折预测；拼接后，每名患者都有一个由“未见过自己”的模型产生的预测，这才是元学习器合法的训练特征。
+
+### 2.2 为什么不能用拟合值
+
+复杂基础模型在训练集上的概率可能接近 0 或 1。若元模型学习这些拟合值，它学到的是过拟合能力，而非新患者上的预测能力，构成二层信息泄漏。
+
+### 2.3 元学习器选择
+
+Logistic、Ridge 或非负线性组合通常是稳健起点。元学习器越复杂，对样本量和嵌套验证要求越高。基础模型已很复杂时，第二层往往宜简单。
+
+## 3. 数学形式
+
+### 3.1 二层表示
+
+对第 $i$ 个病例，基础模型 $m$ 的 OOF 预测记为 $z_{im}$：
 
 $$
-\hat y = g(f_1(x), f_2(x), \dots, f_M(x))
+z_{im}=f_m^{(-k(i))}(x_i)
 $$
 
-若元学习器为线性模型，则：
+其中 $f_m^{(-k(i))}$ 未使用病例 $i$ 所在折训练。
+
+元学习器为：
 
 $$
-\hat y=\beta_0+\sum_{m=1}^{M}\beta_m \hat y_m
+\hat y_i=g(z_{i1},z_{i2},\ldots,z_{iM})
 $$
 
-其中 $\hat y_m=f_m(x)$ 是第 $m$ 个基础模型的预测。实际训练时，$\hat y_m$ 应来自交叉验证的 out-of-fold 预测。
+### 3.2 线性元学习器
 
-### 2.2 参数或统计量含义
+回归任务可写为：
 
-- 基础模型：第一层模型，如随机森林、SVM、GBDT、Logistic 回归。
-- 元学习器：第二层融合模型，如 Ridge、Logistic 回归、XGBoost。
-- out-of-fold 预测：每个训练样本由未见过该样本的基础模型产生的预测。
-- `cv`：生成元学习器训练数据的交叉验证折数。
+$$
+\hat y_i=\beta_0+\sum_{m=1}^{M}\beta_mz_{im}
+$$
 
-### 2.3 关键假设
+分类任务可用：
 
-- 基础模型之间有互补信息。
-- 元学习器训练过程严格避免信息泄露。
-- 样本量足以支持多模型训练和二层融合。
+$$
+\operatorname{logit}[P(Y_i=1)]
+=\beta_0+\sum_{m=1}^{M}\beta_mz_{im}
+$$
 
-## 3. 数据形式与输入输出
+### 3.3 完整训练流程
 
-### 3.1 适合的数据形式
+1. 生成所有训练病例的 OOF 预测矩阵 $Z$。
+2. 用 $(Z,y)$ 训练元学习器。
+3. 在全部训练数据上重训每个基础模型。
+4. 对新病例生成一级预测，再交给已训练的元学习器。
 
-- 自变量类型：取决于基础模型，可融合多种特征来源。
-- 因变量类型：二分类、多分类或连续型。
-- 数据结构：监督学习数据。
-- 是否适合高维数据：适合，但需要严格交叉验证和正则化。
-- 是否适合缺失较多数据：需在各基础模型流程中处理。
-- 是否适合删失数据：普通 Stacking 不直接适合，除非基础模型和元学习器均支持生存结局。
-- 是否适合重复测量数据：需按个体分组交叉验证，避免同一患者数据泄露。
+### 3.4 关键条件
 
-### 3.2 示例表格
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| OOF 预测严格无泄漏 | 性能虚高 | 保存每折索引与预测来源 |
+| 各模型使用相同折 | 二层特征不可比 | 固定共享重采样方案 |
+| 样本量支持二层学习 | 元学习器不稳定 | 重复嵌套交叉验证 |
+| 患者或中心分组正确 | 同一主体跨折泄漏 | Group/cluster split |
 
-以多模态住院死亡风险预测为例：
+## 4. 手把手算例
 
-| Age | SOFA | LabScore | RadiologyScore | NoteScore | Death30d |
-| --- | --- | --- | --- | --- | --- |
-| 74 | 10 | 0.81 | 0.72 | 0.69 | 1 |
-| 47 | 3 | 0.22 | 0.18 | 0.31 | 0 |
-| 66 | 7 | 0.64 | 0.58 | 0.62 | 1 |
-| 39 | 2 | 0.15 | 0.12 | 0.20 | 0 |
-| 58 | 5 | 0.43 | 0.36 | 0.41 | 0 |
+二分类任务有 4 名训练患者。模型 A、B 的 OOF 阳性概率与结局为：
 
-### 3.3 输入与产出
+| 患者 | $z_A$ | $z_B$ | $y$ |
+| --- | ---: | ---: | ---: |
+| 1 | 0.10 | 0.30 | 0 |
+| 2 | 0.40 | 0.20 | 0 |
+| 3 | 0.60 | 0.80 | 1 |
+| 4 | 0.90 | 0.70 | 1 |
 
-#### 输入
+为便于手算，令元模型为凸组合：
 
-- 输入数据：训练集特征、结局，以及多个基础模型配置。
-- 关键变量：基础模型集合、元学习器、交叉验证方案、是否传递原始特征。
-- 需要预处理的内容：分层或分组交叉验证、缺失处理、标准化、概率校准。
+$$
+\hat p=wz_A+(1-w)z_B
+$$
 
-#### 产出
+最小化平方误差时：
 
-- 模型对象/统计结果：基础模型、元学习器、二层融合模型。
-- 参数估计：若元学习器为线性模型，可解释为各基础模型预测的融合权重。
-- 预测结果：类别、概率或连续预测值。
-- 不确定性指标：交叉验证性能、外部测试性能、校准指标。
+$$
+w=
+\frac{\sum_i(z_{Ai}-z_{Bi})(y_i-z_{Bi})}
+{\sum_i(z_{Ai}-z_{Bi})^2}
+$$
 
-## 4. 适用场景
+分子为 $0.04$，分母为 $0.16$，所以 $w=0.25$。元模型给 A 权重 0.25、B 权重 0.75，预测为：
 
-- 适合：多模型性能相近但错误模式不同、且预测性能优先的任务。
-- 不适合：样本量小、计算资源有限、需要简单可解释模型的任务。
-- 使用前需要特别检查的点：out-of-fold 预测是否正确生成、是否按患者分组拆分、元学习器是否过强。
+$$
+\hat p=(0.25,0.25,0.75,0.75)
+$$
 
-## 5. 实现
+Brier 分数为：
 
-### 5.1 Python
+$$
+\frac{0.25^2+0.25^2+(1-0.75)^2+(1-0.75)^2}{4}
+=0.0625
+$$
 
-常用包：
+模型 A 的 Brier 为 0.085，模型 B 为 0.065，因此这个简单 Stack 略有改善。
 
-- `scikit-learn`
+**关键点：** 表中的 $z_A,z_B$ 必须是 OOF 预测。若是对训练集的拟合概率，这个权重和性能都不可信。
+
+## 5. 数据形式与输入输出
+
+### 5.1 数据要求
+
+- 分类或连续结局均可，但所有基础模型必须针对同一预测时点和结局。
+- 可融合不同特征模态，也可只融合不同算法。
+- 缺失处理、标准化、特征选择必须在各折内部完成。
+
+### 5.2 输入与产出
+
+输入包括基础模型、共享交叉验证方案、元学习器及是否传递原始特征。输出包括完整基础模型、元模型和最终预测。线性元模型权重表示一级预测的组合贡献，不是临床变量效应。
+
+## 6. 适用场景
+
+- 多个合格模型具有互补错误模式。
+- 多模态模型已分别开发，需要在预测层融合。
+- 不适合样本很小、计算资源有限或无法实施严格嵌套验证的任务。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import pandas as pd
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, StackingClassifier
+from sklearn.ensemble import (
+    GradientBoostingClassifier,
+    RandomForestClassifier,
+    StackingClassifier,
+)
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedKFold
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
-df = pd.read_csv("multimodal_mortality.csv")
-X = df[["Age", "SOFA", "LabScore", "RadiologyScore", "NoteScore"]]
-y = df["Death30d"].astype(int)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
-
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 base_models = [
-    ("rf", RandomForestClassifier(n_estimators=300, random_state=42)),
+    ("rf", RandomForestClassifier(
+        n_estimators=500, min_samples_leaf=5, random_state=42
+    )),
     ("gb", GradientBoostingClassifier(random_state=42)),
-    ("svm", SVC(probability=True, random_state=42))
+    ("svm", make_pipeline(
+        StandardScaler(),
+        SVC(C=1, probability=True, random_state=42)
+    )),
 ]
 
-fit = StackingClassifier(
+stack = StackingClassifier(
     estimators=base_models,
-    final_estimator=LogisticRegression(max_iter=1000),
+    final_estimator=LogisticRegression(max_iter=2000),
     stack_method="predict_proba",
-    cv=5
+    cv=cv,
+    passthrough=False,
+    n_jobs=-1,
 )
-fit.fit(X_train, y_train)
-
-pred_prob = fit.predict_proba(X_test)[:, 1]
+stack.fit(X_train, y_train)
+prob = stack.predict_proba(X_test)[:, 1]
 ```
 
-### 5.2 R
-
-常用包：
-
-- `caretEnsemble`
+### 7.2 R
 
 ```r
 library(caret)
 library(caretEnsemble)
 
+set.seed(42)
+fold_index <- createFolds(train$Death30d, k = 5, returnTrain = TRUE)
 ctrl <- trainControl(
   method = "cv",
-  number = 5,
+  index = fold_index,
+  classProbs = TRUE,
   savePredictions = "final",
-  classProbs = TRUE
+  summaryFunction = twoClassSummary
 )
 
 models <- caretList(
-  Death30d ~ Age + SOFA + LabScore + RadiologyScore + NoteScore,
-  data = df_train,
+  Death30d ~ .,
+  data = train,
   trControl = ctrl,
+  metric = "ROC",
   methodList = c("glm", "rf", "gbm")
 )
 
-stack <- caretStack(models, method = "glm", metric = "ROC", trControl = ctrl)
-pred <- predict(stack, newdata = df_test, type = "prob")
+stack <- caretStack(
+  models,
+  method = "glm",
+  metric = "ROC",
+  trControl = ctrl
+)
+prob <- predict(stack, newdata = test, type = "prob")
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：Stacking 是否优于最佳单模型、外部验证性能、概率校准。
-- 每个主要参数如何解释：元学习器权重可反映基础模型预测在融合中的贡献，但不等于原始变量重要性。
-- 临床或医学意义如何表达：适合描述为“融合多个数据源或模型的综合风险预测器”。
-- 常见误读：把元学习器权重解释为临床变量效应，或忽略信息泄露带来的虚高性能。
+- 先报告每个基础模型、简单平均与 Stacking 的独立测试性能。
+- 元模型权重反映基础预测的条件组合，不等于对应模态或变量的因果重要性。
+- 负权重可能抵消高度相关模型；是否允许应在建模方案中预先说明。
+- 分类模型仍须检查概率校准与临床阈值。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
 
-- 单模型与 Stacking 模型性能对比图。
-- 元学习器权重条形图。
-- 不同基础模型预测概率相关性热图。
+1. 审计每个 OOF 预测的训练索引，确认患者未被看见。
+2. 比较基础预测相关性和模型间分歧。
+3. 重复嵌套交叉验证，观察元权重与性能稳定性。
+4. 比较简单平均、受约束线性组合和复杂元学习器。
+5. 进行时间外、中心外、亚组与校准评估。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
 
-### 优势
+- 单模型、平均模型与 Stacking 的性能对比。
+- OOF 预测相关性热图和散点矩阵。
+- 元学习器权重图。
+- 校准曲线、决策曲线和折间性能分布。
 
-- 能利用异质模型的互补性。
-- 可融合不同模态或不同建模策略。
-- 通常能提升预测性能上限。
+## 11. 优势、局限与常见坑
 
-### 局限
+**优势：** 能融合异质模型和模态，可学习比固定平均更灵活的组合。
 
-- 计算成本较高。
-- 解释性较弱。
-- 对交叉验证设计非常敏感。
+**局限：** 计算成本高、解释复杂、对验证设计极敏感。
 
-### 常见坑
+**常见坑：** 用训练拟合值训练元模型；不同模型使用不同折；同一患者跨折；元学习器过强；调参后直接报告同一交叉验证性能。
 
-- 直接用基础模型在训练集上的拟合预测训练元学习器，造成信息泄露。
-- 元学习器过于复杂，在小样本中严重过拟合。
-- 同一患者多条记录被拆到不同折中，导致性能虚高。
+## 12. 与相近方法的区别
 
-## 9. 与相近方法的区别
+- [[投票集成（Voting Ensemble）]]：固定合并规则，简单且样本效率更高。
+- Blending：通常只用单个留出集训练元模型，浪费部分训练数据。
+- [[Bagging算法（Bootstrap Aggregating）]]：通过重抽样聚合同类模型，重点是降方差。
+- 选择经验：先建立简单平均基线；只有 OOF Stacking 在严格验证中稳定改善时才采用。
 
-- 和 [[投票集成（Voting Ensemble）]] 的区别：投票集成用固定规则合并预测；Stacking 用元学习器学习合并规则。
-- 和 [[Bagging算法（Bootstrap Aggregating）]] 的区别：Bagging 多为同类模型加重抽样；Stacking 强调不同模型的二层融合。
-- 和 Blending 的区别：Blending 通常用一个固定验证集训练元学习器，Stacking 通常使用交叉验证生成二层训练数据。
+## 13. 医学研究中的典型应用
 
-## 10. 医学研究中的典型应用
+- 融合结构化 EHR、影像、文本和组学模型。
+- 汇总传统风险评分、统计模型与机器学习模型。
+- 多中心或多设备预测器的二层融合。
 
-- 融合结构化 EHR、影像组学和文本模型输出。
-- 对多个传统模型与机器学习模型进行二层集成。
-- 疾病亚型或预后风险预测中的多数据源融合。
+## 14. 术语表
 
-## 11. 相关方法
+| 术语 | 含义 |
+| --- | --- |
+| base learner | 第一层基础模型 |
+| meta-learner | 学习如何组合一级预测的第二层模型 |
+| out-of-fold prediction | 由未见过该病例的折外模型生成的预测 |
+| passthrough | 将原始特征与一级预测一同交给元模型 |
+| Super Learner | 以交叉验证风险选择或组合学习器的框架 |
+
+## 15. 相关方法
 
 - [[投票集成（Voting Ensemble）]]
 - [[Bagging算法（Bootstrap Aggregating）]]
 - [[Boosting算法（Boosting）]]
 - [[随机森林（Random Forest）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
 - Wolpert DH. Stacked generalization. *Neural Netw*. 1992;5(2):241-259.
 - van der Laan MJ, Polley EC, Hubbard AE. Super learner. *Stat Appl Genet Mol Biol*. 2007;6(1):Article25.
-- scikit-learn Developers. `sklearn.ensemble.StackingClassifier`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.StackingClassifier.html](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.StackingClassifier.html) （访问日期：2026-07-02）
+- scikit-learn Developers. `StackingClassifier` API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.StackingClassifier.html](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.StackingClassifier.html) （访问日期：2026-07-09）

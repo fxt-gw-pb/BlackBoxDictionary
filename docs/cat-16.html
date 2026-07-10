@@ -46,7 +46,7 @@
           <span class="entry-cn">K近邻算法</span>
           <span class="entry-en">K-Nearest Neighbors, KNN</span>
         </div>
-        <p class="entry-def">K 近邻算法是一类基于实例的非参数方法。它不显式拟合一个全局模型，而是在预测时直接寻找距离目标样本最近的 $K$ 个训练样本，并用这些近邻的标签做多数投票或平均。</p>
+        <p class="entry-def">KNN 不学习显式方程，而是在标准化后的特征空间里寻找最相似的 $K$ 个历史样本，用局部多数票决定新样本类别。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -59,7 +59,7 @@
           <span class="entry-cn">K近邻回归</span>
           <span class="entry-en">K-Nearest Neighbors Regression</span>
         </div>
-        <p class="entry-def">K近邻回归是一种非参数回归方法，它通过寻找离目标样本最近的 $K$ 个邻居，并对这些邻居的目标值做平均或加权平均来完成预测。</p>
+        <p class="entry-def">K 近邻回归把新样本的连续结局估计为其局部邻域中已观察结局的平均或距离加权平均。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -72,7 +72,7 @@
           <span class="entry-cn">朴素贝叶斯</span>
           <span class="entry-en">Naive Bayes</span>
         </div>
-        <p class="entry-def">朴素贝叶斯是一类基于贝叶斯定理的概率分类方法。它假设在给定类别后，各特征彼此条件独立，因此可以把联合概率拆成一组一维条件概率的乘积。</p>
+        <p class="entry-def">朴素贝叶斯把每项特征提供的类条件证据相乘，再与类别先验结合，选择后验概率最大的类别。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -85,7 +85,7 @@
           <span class="entry-cn">线性判别分析</span>
           <span class="entry-en">Linear Discriminant Analysis, LDA</span>
         </div>
-        <p class="entry-def">线性判别分析是一种经典的监督式分类和降维方法。它寻找能让组间差异尽量大、组内差异尽量小的线性投影方向，并可在这些方向上进行分类。</p>
+        <p class="entry-def">LDA 寻找“类间中心尽量远、类内样本尽量紧”的线性投影，并在共享协方差假设下形成线性分类边界。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -98,7 +98,7 @@
           <span class="entry-cn">感知机</span>
           <span class="entry-en">Perceptron</span>
         </div>
-        <p class="entry-def">感知机是最早期、最简单的神经网络分类模型之一。它通过一个线性判别函数把样本分到两个类别，本质上是“能否用一个超平面把两类样本分开”的学习问题。</p>
+        <p class="entry-def">感知机从一个线性边界出发，每遇到误分类样本就把边界朝纠正该样本的方向移动。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>

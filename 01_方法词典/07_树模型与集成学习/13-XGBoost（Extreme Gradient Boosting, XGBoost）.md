@@ -19,234 +19,270 @@ r_packages: [xgboost]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-XGBoost 是一种基于梯度提升树的高性能集成学习方法。它在经典 GBDT 基础上加入了二阶优化、显式正则化、列采样、缺失值处理和工程级并行优化，因此在表格数据预测中非常常用。
+XGBoost 是带二阶近似、显式树复杂度惩罚、采样与高效实现的梯度提升树。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：如何在复杂非线性和高阶交互存在时，获得强预测性能且可扩展的表格数据模型。
-- 适用任务：二分类、多分类、连续结局预测、排序与特征筛选辅助分析。
-- 常见医学场景：死亡风险预测、再入院预测、并发症判别、生物标志物驱动的表格型建模。
+XGBoost 是 Extreme Gradient Boosting 的缩写。它延续 [[梯度提升决策树（Gradient Boosting Decision Tree, GBDT）]] 的逐轮加树思路，并利用损失的一阶和二阶导数评估叶节点与分裂，同时加入叶节点权重和叶数惩罚。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-XGBoost 像是在不断“补错题”。第一棵树先给出粗略判断，后面的树专门学习前面没学好的地方；与此同时，它还会主动惩罚过于复杂的树，让模型不至于只会死记训练集。
+- 在复杂表格数据上获得强预测性能。
+- 用正则化控制提升树复杂度。
+- 高效处理稀疏输入、缺失值、行列采样和大规模训练。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+普通梯度提升知道下坡方向；XGBoost 还利用坡面的弯曲程度判断步幅，并对“修太多枝叶”收费，因此每次分裂都要证明收益足以抵消复杂度成本。
 
-XGBoost 的目标函数写成：
+## 2. 核心思想与原理
 
-$$
-\mathcal{L}(\theta) = \sum_{i=1}^{n} l(y_i, \hat y_i) + \sum_{t=1}^{T}\Omega(f_t)
-$$
+### 2.1 二阶近似
 
-其中每棵树的正则化项为：
+每轮不直接反复求解原始目标，而是在当前预测附近做二阶泰勒展开。样本的一阶梯度 $g_i$ 表示下降方向，二阶梯度 $h_i$ 表示局部曲率。
 
-$$
-\Omega(f) = \gamma J + \frac{1}{2}\lambda \sum_{j=1}^{J} w_j^2
-$$
+### 2.2 显式树正则化
 
-在第 $t$ 轮，使用二阶泰勒展开得到近似目标：
+叶节点过多会增加 $\gamma T$，叶节点预测绝对值过大会增加 $\lambda\sum w_j^2/2$。因此分裂只有在损失下降足够大时才被接受。
 
-$$
-\mathcal{L}^{(t)} \approx \sum_{i=1}^{n}\left[g_i f_t(x_i) + \frac{1}{2} h_i f_t(x_i)^2\right] + \Omega(f_t)
-$$
+### 2.3 缺失与采样
 
-其中 $g_i$ 和 $h_i$ 分别是一阶梯度和二阶 Hessian。若第 $j$ 个叶节点的样本集合为 $I_j$，则最优叶子权重为：
+训练时可为缺失值学习默认分支方向；`subsample` 和 `colsample_bytree` 分别进行行、列采样。原生缺失处理并不等于理解了缺失机制，临床研究仍需检查缺失是否携带流程信息或造成偏倚。
+
+## 3. 数学形式
+
+### 3.1 正则化目标
 
 $$
-w_j^* = -\frac{G_j}{H_j + \lambda}
+\mathcal L=
+\sum_{i=1}^{n}l(y_i,\hat y_i)
++\sum_{t=1}^{K}\Omega(f_t)
 $$
 
-其中：
-
 $$
-G_j = \sum_{i \in I_j} g_i, \qquad H_j = \sum_{i \in I_j} h_i
+\Omega(f)=\gamma T+\frac12\lambda\sum_{j=1}^{T}w_j^2
 $$
 
-候选分裂的增益为：
+### 3.2 第 $t$ 轮二阶近似
 
 $$
-\text{Gain} = \frac{1}{2}\left(\frac{G_L^2}{H_L+\lambda} + \frac{G_R^2}{H_R+\lambda} - \frac{(G_L+G_R)^2}{H_L+H_R+\lambda}\right) - \gamma
+\widetilde{\mathcal L}^{(t)}=
+\sum_{i=1}^{n}
+\left[g_if_t(x_i)+\frac12h_if_t^2(x_i)\right]
++\Omega(f_t)
 $$
 
-### 2.2 参数或统计量含义
+对叶节点 $j$，令 $G_j=\sum_{i\in I_j}g_i$、$H_j=\sum_{i\in I_j}h_i$，最优叶权重为：
 
-- `n_estimators`：提升轮数。
-- `learning_rate`：每轮更新步长。
-- `max_depth`：单棵树复杂度上限。
-- `subsample`、`colsample_bytree`：样本和特征子采样比例。
-- `lambda`、`gamma`：控制叶子权重和分裂复杂度的正则化参数。
+$$
+w_j^*=-\frac{G_j}{H_j+\lambda}
+$$
 
-### 2.3 关键假设
+### 3.3 分裂增益
 
-- 表格数据中存在可被树模型捕捉的非线性与交互。
-- 最终目标更偏预测性能而非参数解释。
-- 若样本量较小或调参不当，模型仍可能过拟合。
+$$
+\operatorname{Gain}=
+\frac12\left[
+\frac{G_L^2}{H_L+\lambda}
++\frac{G_R^2}{H_R+\lambda}
+-\frac{(G_L+G_R)^2}{H_L+H_R+\lambda}
+\right]-\gamma
+$$
 
-## 3. 数据形式与输入输出
+增益为正才说明该分裂在正则化后值得保留。
 
-### 3.1 适合的数据形式
+### 3.4 关键参数
 
-- 自变量类型：连续、二分类、多分类变量均可，类别变量通常需编码。
-- 因变量类型：二分类、多分类或连续型。
-- 数据结构：宽表数据。
-- 是否适合高维数据：适合中高维表格数据。
-- 是否适合缺失较多数据：对缺失有一定原生处理能力，但仍建议先理解缺失机制。
-- 是否适合删失数据：原始 XGBoost 不直接适合删失结局。
-- 是否适合重复测量数据：不直接适合。
+- `learning_rate`、`n_estimators`：步长与轮数。
+- `max_depth`、`min_child_weight`、`gamma`：树结构约束。
+- `subsample`、`colsample_bytree`：行列采样。
+- `reg_alpha`、`reg_lambda`：L1 与 L2 正则。
 
-### 3.2 示例表格
+## 4. 手把手算例
 
-以 ICU 患者 30 天死亡风险预测为例：
+采用平方损失 $l=(\hat y-y)^2/2$。当前预测均为 0，4 个样本真实值为 $(1,2,4,5)$，因此：
 
-| Age | SOFA | Lactate | Creatinine | Vasopressor | Death30d |
-| --- | --- | --- | --- | --- | --- |
-| 73 | 9 | 3.1 | 2.0 | 1 | 1 |
-| 46 | 3 | 1.1 | 0.9 | 0 | 0 |
-| 65 | 7 | 2.4 | 1.5 | 1 | 1 |
-| 39 | 2 | 0.8 | 0.7 | 0 | 0 |
-| 58 | 5 | 1.6 | 1.2 | 0 | 0 |
+$$
+g=(-1,-2,-4,-5),\qquad h=(1,1,1,1)
+$$
 
-### 3.3 输入与产出
+取 $\lambda=1$、$\gamma=0.1$。候选分裂把前两人与后两人分开。
 
-#### 输入
+**Step 1：汇总梯度。**
 
-- 输入数据：目标变量和特征矩阵。
-- 关键变量：树数、学习率、树深、正则化参数、采样比例。
-- 需要预处理的内容：训练测试集划分、类别编码、可选的缺失和不平衡处理。
+$$
+G_L=-3,\ H_L=2,\qquad G_R=-9,\ H_R=2
+$$
 
-#### 产出
+父节点为 $G=-12,H=4$。
 
-- 模型对象/统计结果：树集成模型、特征重要性、训练/验证误差。
-- 参数估计：不提供传统线性系数。
-- 预测结果：类别、概率或连续预测值。
-- 不确定性指标：交叉验证性能、测试集 AUC / PR-AUC / MSE、概率校准结果。
+**Step 2：计算分裂增益。**
 
-## 4. 适用场景
+$$
+\begin{aligned}
+\operatorname{Gain}
+&=\frac12\left(
+\frac{9}{3}+\frac{81}{3}-\frac{144}{5}
+\right)-0.1\\
+&=\frac12(3+27-28.8)-0.1\\
+&=0.5
+\end{aligned}
+$$
 
-- 适合：表格数据预测、变量间关系复杂、以性能为导向的建模任务。
-- 不适合：极小样本、强可解释性或严格因果推断为主的场景。
-- 使用前需要特别检查的点：类别不平衡、概率校准、外部验证、早停设置。
+增益为正，分裂值得保留。
 
-## 5. 实现
+**Step 3：计算两个叶节点值。**
 
-### 5.1 Python
+$$
+w_L^*=-\frac{-3}{2+1}=1,\qquad
+w_R^*=-\frac{-9}{2+1}=3
+$$
 
-常用包：
+若学习率为 $0.1$，本轮实际给两组预测分别增加 $0.1$ 与 $0.3$。
 
-- `xgboost`
-- `scikit-learn`
+**结论：** XGBoost 同时用梯度、曲率和正则化判断“是否分裂”以及“叶节点修正多少”。
+
+## 5. 数据形式与输入输出
+
+### 5.1 数据要求
+
+- 连续、二分类、多分类和排序任务均有对应目标函数。
+- 输入通常为数值矩阵或稀疏矩阵；类别变量需按所用接口妥善处理。
+- 可原生学习缺失默认方向，但仍须分析缺失机制与数据泄漏。
+- 重复测量应按患者分组切分；删失结局需选择适当生存目标并明确估计对象。
+
+### 5.2 产出
+
+输出类别、概率、连续预测或排序分数，以及迭代记录和多种重要性。传统回归系数、标准误与因果效应不是其默认输出。
+
+## 6. 适用场景
+
+- 中大型表格数据，变量关系复杂且预测性能优先。
+- 稀疏特征、缺失较多或需细致正则化的任务。
+- 慎用于样本很小、外推要求高、强参数解释或因果推断任务。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import pandas as pd
-from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
+from sklearn.metrics import roc_auc_score, brier_score_loss
 
-df = pd.read_csv("icu_mortality.csv")
-X = df[["Age", "SOFA", "Lactate", "Creatinine", "Vasopressor"]]
-y = df["Death30d"].astype(int)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
-
-fit = XGBClassifier(
+model = XGBClassifier(
     objective="binary:logistic",
-    n_estimators=300,
-    learning_rate=0.05,
+    eval_metric="logloss",
+    tree_method="hist",
+    n_estimators=2000,
+    learning_rate=0.03,
     max_depth=4,
+    min_child_weight=5,
     subsample=0.8,
     colsample_bytree=0.8,
     reg_lambda=1.0,
+    early_stopping_rounds=50,
     random_state=42,
-    eval_metric="logloss"
 )
-fit.fit(X_train, y_train)
+model.fit(
+    X_train, y_train,
+    eval_set=[(X_valid, y_valid)],
+    verbose=False,
+)
 
-pred_prob = fit.predict_proba(X_test)[:, 1]
+prob = model.predict_proba(X_test)[:, 1]
+print(model.best_iteration)
+print(roc_auc_score(y_test, prob))
+print(brier_score_loss(y_test, prob))
 ```
 
-### 5.2 R
-
-常用包：
-
-- `xgboost`
+### 7.2 R
 
 ```r
 library(xgboost)
 
-X_mat <- as.matrix(df[, c("Age", "SOFA", "Lactate", "Creatinine", "Vasopressor")])
-y <- df$Death30d
+dtrain <- xgb.DMatrix(as.matrix(X_train), label = y_train)
+dvalid <- xgb.DMatrix(as.matrix(X_valid), label = y_valid)
+dtest <- xgb.DMatrix(as.matrix(X_test))
 
-fit <- xgboost(
-  data = X_mat,
-  label = y,
-  objective = "binary:logistic",
-  nrounds = 300,
-  eta = 0.05,
-  max_depth = 4,
-  subsample = 0.8,
-  colsample_bytree = 0.8,
+fit <- xgb.train(
+  params = list(
+    objective = "binary:logistic",
+    eval_metric = "logloss",
+    eta = 0.03,
+    max_depth = 4,
+    subsample = 0.8,
+    colsample_bytree = 0.8
+  ),
+  data = dtrain,
+  nrounds = 2000,
+  evals = list(valid = dvalid),
+  early_stopping_rounds = 50,
   verbose = 0
 )
+
+prob <- predict(fit, dtest)
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：验证集或外部测试集性能、早停轮数、特征重要性、校准表现。
-- 每个主要参数如何解释：学习率越小通常需要更多树；树越深越灵活但也更容易过拟合。
-- 临床或医学意义如何表达：更适合表达“模型对个体风险的判别能力和排序能力”，不适合直接把重要性当作独立因果效应。
-- 常见误读：特征重要性高不等于因果重要，也不等于临床上最值得干预。
+- `best_iteration` 是验证集早停选出的轮数，最终测试集不参与选择。
+- gain、cover、weight 等重要性定义不同，报告时应注明类型。
+- SHAP 值解释模型在给定数据分布下如何形成预测，不自动代表因果贡献。
+- 分类概率须在独立数据上检查校准，必要时再校准。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
 
-- ROC 曲线、PR 曲线。
-- 特征重要性条形图。
-- SHAP 总结图或局部解释图。
+1. 保存训练和验证指标，检查早停点。
+2. 先联合约束树深、叶节点最小 Hessian 与学习率，再调采样和正则。
+3. 比较随机种子和交叉验证折之间的性能及重要性稳定性。
+4. 审查缺失率、缺失默认方向和可能的数据流程泄漏。
+5. 做外部验证、亚组公平性、校准与决策曲线分析。
 
-### 7.1 图像示例
+## 10. 推荐可视化
 
-下图展示 XGBoost 案例在优化后的真实值与预测值对照关系，适合直观看模型拟合质量和误差分布。
+- 迭代轮数与训练/验证损失。
+- ROC、PR、校准和决策曲线。
+- gain 或 permutation importance 图。
+- SHAP 总结图与局部解释图。
+
+下图展示真实值与预测值的对照关系：
 
 ![](../../04_示例图像/xgboost_actual_vs_pred_optimized.png)
 
-## 8. 优势、局限与常见坑
+## 11. 优势、局限与常见坑
 
-### 优势
+**优势：** 表格性能强，正则化完整，支持稀疏和缺失输入，训练工具成熟。
 
-- 表格数据性能通常很强。
-- 二阶优化和正则化让训练更稳。
-- 支持缺失值和多种任务目标。
+**局限：** 超参数多、解释复杂、概率可能失准、分布漂移时性能会下降。
 
-### 局限
+**常见坑：** 用测试集早停；未设置验证集却声称早停；把默认重要性当因果；调参搜索后不做嵌套或独立评估。
 
-- 调参空间较大。
-- 可解释性弱于参数模型。
-- 概率输出常需要再校准。
+## 12. 与相近方法的区别
 
-### 常见坑
+- [[梯度提升决策树（Gradient Boosting Decision Tree, GBDT）]]：XGBoost 增加二阶近似与显式结构正则。
+- [[LightGBM（Light Gradient Boosting Machine）]]：两者目标相近，后者更强调直方图、leaf-wise、GOSS 与 EFB。
+- [[随机森林（Random Forest）]]：随机森林并行平均，XGBoost 串行优化损失。
+- [[AdaBoost（Adaptive Boosting）]]：AdaBoost 主要通过错分样本重加权。
 
-- 只看内部验证结果，不做外部验证。
-- 过度追求 AUC，忽略校准和临床阈值。
-- 让树太深或学习率太大导致过拟合。
+## 13. 医学研究中的典型应用
 
-## 9. 与相近方法的区别
+- ICU 死亡、败血症、再入院和术后并发症预测。
+- 临床变量与影像组学、组学特征融合。
+- 医疗费用、住院时长和连续生物标志物预测。
 
-- 和梯度提升回归的区别：XGBoost 是 GBDT 的增强实现，加入了二阶信息、显式正则化和工程优化。
-- 和 LightGBM 的区别：LightGBM 更强调直方图和 leaf-wise 生长，常在大样本场景更快。
-- 和随机森林的区别：随机森林是并行 bagging，XGBoost 是串行 boosting。
+## 14. 术语表
 
-## 10. 医学研究中的典型应用
+| 术语 | 含义 |
+| --- | --- |
+| gradient | 损失对当前预测的一阶导数 |
+| Hessian | 损失对当前预测的二阶导数 |
+| gain | 分裂带来的正则化目标改善 |
+| cover | 节点内二阶梯度总量等覆盖度量 |
+| default direction | 特征缺失时自动采用的分支方向 |
 
-- ICU 或住院患者短期死亡风险预测。
-- 再入院、败血症、并发症等二分类风险模型。
-- 多变量表格数据中的高性能预测基线。
-
-## 11. 相关方法
+## 15. 相关方法
 
 - [[Boosting算法（Boosting）]]
 - [[梯度提升决策树（Gradient Boosting Decision Tree, GBDT）]]
@@ -254,8 +290,8 @@ fit <- xgboost(
 - [[LightGBM（Light Gradient Boosting Machine）]]
 - [[随机森林（Random Forest）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
 - Chen T, Guestrin C. XGBoost: A scalable tree boosting system. In: *Proceedings of KDD 2016*. 2016:785-794.
-- XGBoost Contributors. XGBoost Documentation. [https://xgboost.readthedocs.io/](https://xgboost.readthedocs.io/) （访问日期：2026-07-02）
+- XGBoost Contributors. XGBoost Documentation. [https://xgboost.readthedocs.io/](https://xgboost.readthedocs.io/) （访问日期：2026-07-09）
 - Mitchell R, Frank E. Accelerating the XGBoost algorithm using GPU computing. *PeerJ Comput Sci*. 2017;3:e127.

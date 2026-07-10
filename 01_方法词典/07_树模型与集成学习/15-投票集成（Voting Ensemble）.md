@@ -19,145 +19,168 @@ r_packages: [caret, caretEnsemble]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-投票集成是一种把多个分类模型的预测结果合并为最终分类结果的模型融合方法。硬投票统计类别票数，软投票累加或加权平均类别概率。
+投票集成用固定规则合并多个分类模型：硬投票数类别票，软投票平均经过校准且可比较的类别概率。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：当多个分类模型各有优势时，如何得到更稳健的最终判断。
-- 适用任务：二分类、多分类预测。
-- 常见医学场景：多模型疾病诊断、风险分层、不同特征组模型的融合。
+投票集成是一种并行模型融合方法。各基模型独立训练，对同一患者产生类别或概率，再用多数票、平均概率或预先确定的权重得到最终结果。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-投票集成像让多个模型组成评审团。硬投票看“多数人选什么”，软投票看“综合置信度最高的是哪一类”。当模型错误模式互补时，集成结果往往比单个模型更稳。
+- 多个模型性能接近，却在不同患者上犯不同错误。
+- 希望用低复杂度规则提高预测稳定性。
+- 需要融合临床、影像或组学等不同建模管线的输出。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+像一个诊断会诊组：硬投票只看每位专家的最终结论；软投票还看每位专家给出的风险概率。若专家们错误互补，会诊可能更稳；若所有人依据相同信息犯同样错误，人多也无济于事。
 
-硬投票中，第 $m$ 个模型的分类结果为 $h_m(x)$，类别集合为 $\mathcal{C}$，最终预测为：
+## 2. 核心思想与原理
+
+### 2.1 集成收益来自哪里
+
+收益来自**准确性与多样性的共同作用**。基模型要有基本能力，预测误差又不能完全相关。加入一个与已有模型高度相似的模型，通常只是在重复计票。
+
+### 2.2 硬投票与软投票
+
+- 硬投票：只使用类别，简单但丢掉置信程度。
+- 软投票：使用概率，信息更多，但要求各模型概率含义与校准程度可比。
+- 加权投票：权重必须在训练数据内部通过交叉验证确定，不能看测试集后再调。
+
+### 2.3 为什么校准重要
+
+若一个过度自信的模型经常输出 0.99，另一个校准良好的模型只输出 0.70，直接平均会让前者获得不成比例的影响。软投票前应比较校准曲线、Brier 分数，必要时在训练流程内校准。
+
+## 3. 数学形式
+
+### 3.1 硬投票
 
 $$
-\hat y=\arg\max_{c\in\mathcal{C}}\sum_{m=1}^{M}I(h_m(x)=c)
+\hat y=
+\operatorname*{arg\,max}_{c\in\mathcal C}
+\sum_{m=1}^{M}w_mI\{h_m(x)=c\}
 $$
 
-软投票中，第 $m$ 个模型输出类别概率 $p_m(c\mid x)$，最终预测为：
+### 3.2 软投票
 
 $$
-\hat y=\arg\max_{c\in\mathcal{C}}\sum_{m=1}^{M}p_m(c\mid x)
+\bar p(c\mid x)=
+\frac{\sum_{m=1}^{M}w_mp_m(c\mid x)}
+{\sum_{m=1}^{M}w_m}
 $$
 
-若使用权重 $w_m$，则：
+$$
+\hat y=
+\operatorname*{arg\,max}_{c\in\mathcal C}\bar p(c\mid x)
+$$
+
+### 3.3 参数含义
+
+- $M$：基模型数。
+- $w_m$：第 $m$ 个模型的非负权重。
+- $p_m(c\mid x)$：模型对类别 $c$ 的概率。
+- 阈值：二分类时不必固定为 0.5，应由临床成本与验证数据决定。
+
+### 3.4 关键条件
+
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 基模型有基本预测能力 | 弱模型拖累集成 | 与最佳单模型比较 |
+| 错误具有互补性 | 集成几乎无收益 | 预测相关性与分歧率 |
+| 软投票概率可比较 | 过度自信模型支配结果 | 校准曲线、Brier 分数 |
+| 权重不使用测试集调节 | 测试性能乐观偏倚 | 固定嵌套验证流程 |
+
+## 4. 手把手算例
+
+三模型对某患者的阳性概率分别为：
+
+| 模型 | 阳性概率 | 以 0.5 分类 |
+| --- | ---: | ---: |
+| Logistic 回归 | 0.40 | 0 |
+| 随机森林 | 0.55 | 1 |
+| SVM | 0.90 | 1 |
+
+**Step 1：硬投票。** 两票阳性、一票阴性，所以最终类别为阳性。
+
+**Step 2：等权软投票。**
 
 $$
-\hat y=\arg\max_{c\in\mathcal{C}}\sum_{m=1}^{M}w_m p_m(c\mid x)
+\bar p=\frac{0.40+0.55+0.90}{3}=0.617
 $$
 
-### 2.2 参数或统计量含义
+仍判为阳性。
 
-- $M$：参与投票的基模型数量。
-- $p_m(c\mid x)$：第 $m$ 个模型给出的类别概率。
-- $w_m$：模型权重，常由交叉验证性能确定。
-- 硬投票：只使用类别标签。
-- 软投票：使用概率输出，依赖概率校准质量。
+**Step 3：加权软投票。** 若训练内验证后给 Logistic 回归权重 2，其余各 1：
 
-### 2.3 关键假设
+$$
+\bar p_w=
+\frac{2(0.40)+0.55+0.90}{2+1+1}
+=0.563
+$$
 
-- 基模型至少有一定预测能力。
-- 基模型之间存在互补信息，错误不完全相关。
-- 软投票要求概率输出具有可比性，最好经过校准。
+结果仍为阳性，但风险降低。
 
-## 3. 数据形式与输入输出
+**Step 4：看校准风险。** 若 SVM 的 0.90 来自明显过度自信的未校准分数，0.617 并非可靠临床概率。先校准再平均，才有概率解释。
 
-### 3.1 适合的数据形式
+## 5. 数据形式与输入输出
 
-- 自变量类型：取决于基模型，可包含表格、文本向量、影像特征等。
-- 因变量类型：二分类或多分类。
-- 数据结构：监督学习数据。
-- 是否适合高维数据：取决于基模型组合。
-- 是否适合缺失较多数据：需在各基模型前统一处理。
-- 是否适合删失数据：普通投票分类不直接适合。
-- 是否适合重复测量数据：需先构造个体级预测或使用适配基模型。
+### 5.1 数据要求
 
-### 3.2 示例表格
+- 二分类或多分类监督学习。
+- 基模型可使用相同或不同特征，但预测必须对应同一批患者与同一结局定义。
+- 所有预处理、特征选择和校准都必须包含在训练管线内。
 
-以肺结节良恶性分类为例：
+### 5.2 输入与产出
 
-| Age | NoduleSize | Spiculation | Smoking | RadiomicsScore | Malignant |
-| --- | --- | --- | --- | --- | --- |
-| 67 | 18 | 1 | 1 | 0.72 | 1 |
-| 45 | 6 | 0 | 0 | 0.18 | 0 |
-| 59 | 12 | 1 | 1 | 0.54 | 1 |
-| 52 | 8 | 0 | 1 | 0.31 | 0 |
-| 73 | 22 | 1 | 1 | 0.81 | 1 |
+输入为基模型、投票方式和预先定义的权重。输出为最终类别；软投票还输出平均概率。它不产生传统回归系数，也不自动给出预测不确定性。
 
-### 3.3 输入与产出
+## 6. 适用场景
 
-#### 输入
+- 已有多个性能合格且错误互补的分类模型。
+- 需要比 Stacking 更简单、可审计的融合规则。
+- 不适合所有基模型都弱、都来自几乎相同算法或概率严重失准的场景。
 
-- 输入数据：同一批样本的特征矩阵和分类标签。
-- 关键变量：基模型列表、投票方式、模型权重、交叉验证方案。
-- 需要预处理的内容：缺失处理、编码、缩放、概率校准、训练测试划分。
+## 7. 实现
 
-#### 产出
-
-- 模型对象/统计结果：投票集成分类器、各基模型表现、权重。
-- 参数估计：通常不输出传统系数。
-- 预测结果：最终类别和概率。
-- 不确定性指标：交叉验证性能、测试集 AUC / F1、校准曲线。
-
-## 4. 适用场景
-
-- 适合：已有多个互补模型，且希望快速融合分类结果的场景。
-- 不适合：所有基模型表现都很弱或错误高度相关的场景。
-- 使用前需要特别检查的点：软投票概率是否校准、权重是否仅在训练内部确定、是否发生验证集泄露。
-
-## 5. 实现
-
-### 5.1 Python
-
-常用包：
-
-- `scikit-learn`
+### 7.1 Python
 
 ```python
-import pandas as pd
-from sklearn.ensemble import VotingClassifier
+from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
-from sklearn.model_selection import train_test_split
+from sklearn.metrics import roc_auc_score, brier_score_loss
 
-df = pd.read_csv("lung_nodule.csv")
-X = df[["Age", "NoduleSize", "Spiculation", "Smoking", "RadiomicsScore"]]
-y = df["Malignant"].astype(int)
+models = [
+    ("lr", make_pipeline(
+        StandardScaler(),
+        LogisticRegression(max_iter=2000)
+    )),
+    ("rf", RandomForestClassifier(
+        n_estimators=500, min_samples_leaf=5, random_state=42
+    )),
+    ("svm", make_pipeline(
+        StandardScaler(),
+        SVC(C=1, probability=True, random_state=42)
+    )),
+]
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
-
-fit = VotingClassifier(
-    estimators=[
-        ("lr", LogisticRegression(max_iter=1000)),
-        ("rf", RandomForestClassifier(n_estimators=300, random_state=42)),
-        ("svm", SVC(probability=True, random_state=42))
-    ],
+ensemble = VotingClassifier(
+    estimators=models,
     voting="soft",
-    weights=[1, 2, 1]
+    weights=[2, 1, 1],
+    n_jobs=-1,
 )
-fit.fit(X_train, y_train)
-
-pred_prob = fit.predict_proba(X_test)[:, 1]
+ensemble.fit(X_train, y_train)
+prob = ensemble.predict_proba(X_test)[:, 1]
+print(roc_auc_score(y_test, prob))
+print(brier_score_loss(y_test, prob))
 ```
 
-### 5.2 R
-
-常用包：
-
-- `caret`
-- `caretEnsemble`
+### 7.2 R
 
 ```r
 library(caret)
@@ -166,75 +189,89 @@ library(caretEnsemble)
 ctrl <- trainControl(
   method = "cv",
   number = 5,
+  classProbs = TRUE,
   savePredictions = "final",
-  classProbs = TRUE
+  summaryFunction = twoClassSummary
 )
 
 models <- caretList(
-  Malignant ~ Age + NoduleSize + Spiculation + Smoking + RadiomicsScore,
-  data = df_train,
+  Malignant ~ .,
+  data = train,
   trControl = ctrl,
+  metric = "ROC",
   methodList = c("glm", "rf")
 )
 
-ens <- caretEnsemble(models, metric = "ROC")
-pred <- predict(ens, newdata = df_test)
+ensemble <- caretEnsemble(
+  models,
+  metric = "ROC",
+  trControl = ctrl
+)
+prob <- predict(ensemble, newdata = test)
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：集成模型是否优于最佳单模型、概率校准、不同阈值下的灵敏度和特异度。
-- 每个主要参数如何解释：权重越高，该模型对最终概率影响越大；软投票更依赖概率质量。
-- 临床或医学意义如何表达：可表达为“综合多个模型后得到的风险概率”，但仍需外部验证。
-- 常见误读：投票集成不是因果证据，也不自动保证比最佳单模型更好。
+- 先比较集成与最佳单模型的独立测试表现。
+- 软投票概率是加权平均，只有输入概率可信时才可作临床风险解释。
+- 权重表示模型在固定融合规则中的影响，不是原始变量的重要性。
+- 报告最终阈值、敏感度、特异度、PPV、NPV、校准和净获益。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
 
-- 单模型与集成模型 ROC / PR 曲线对比。
-- 校准曲线。
-- 各模型预测概率的相关性热图。
+1. 比较各模型与集成的 AUC、PR-AUC、Brier 和校准。
+2. 计算模型概率相关矩阵与病例级分歧。
+3. 做 leave-one-model-out 分析，观察移除某模型的影响。
+4. 用嵌套交叉验证选择权重，并只在最终测试集评估一次。
+5. 检查时间外、中心外和关键亚组表现。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
 
-### 优势
+- 单模型与集成的 ROC、PR 和校准曲线。
+- 基模型预测概率相关性热图。
+- 病例级预测分歧图。
+- 权重与 leave-one-model-out 性能图。
 
-- 思路简单、实现成本低。
-- 可以快速融合不同模型优势。
-- 基模型可并行训练。
+## 11. 优势、局限与常见坑
 
-### 局限
+**优势：** 简单、并行、易复现，可融合异质模型。
 
-- 不学习复杂的模型间交互。
-- 软投票依赖概率校准。
-- 权重选择容易过拟合验证集。
+**局限：** 不学习复杂组合关系，收益依赖多样性，软投票依赖校准。
 
-### 常见坑
+**常见坑：** 用测试集调权重；把决策分数当概率；让多个近乎相同的模型重复计票；只报告集成而不报告单模型。
 
-- 用测试集调投票权重。
-- 把未校准模型概率直接相加。
-- 基模型高度相似，导致集成收益有限。
+## 12. 与相近方法的区别
 
-## 9. 与相近方法的区别
+- [[Stacking集成（Stacked Generalization）]]：用元学习器学习组合规则，更灵活也更易过拟合。
+- [[Bagging算法（Bootstrap Aggregating）]]：通常聚合同类模型的重抽样版本。
+- [[Boosting算法（Boosting）]]：串行训练后续模型以纠正前序错误。
+- 选择经验：数据量有限、希望规则透明时先用投票；有足够样本和严格 OOF 流程时再考虑 Stacking。
 
-- 和 [[Stacking集成（Stacked Generalization）]] 的区别：Stacking 用元学习器学习如何融合预测，投票集成通常只做固定规则合并。
-- 和 [[Bagging算法（Bootstrap Aggregating）]] 的区别：Bagging 自动从重抽样数据训练多个同类模型；投票集成常融合不同模型。
-- 和 [[Boosting算法（Boosting）]] 的区别：Boosting 是串行纠错，投票集成没有逐轮纠错过程。
+## 13. 医学研究中的典型应用
 
-## 10. 医学研究中的典型应用
+- 融合临床、实验室与影像组学分类模型。
+- 汇总不同算法对肺结节、肿瘤亚型或并发症的判断。
+- 多中心模型的稳健预测融合。
 
-- 融合临床变量模型、影像组学模型和实验室指标模型。
-- 多中心模型集成，降低单中心模型偏差。
-- 对同一分类任务进行稳健模型平均。
+## 14. 术语表
 
-## 11. 相关方法
+| 术语 | 含义 |
+| --- | --- |
+| hard voting | 对预测类别计票 |
+| soft voting | 对类别概率求平均 |
+| calibration | 预测概率与真实发生率的一致程度 |
+| model diversity | 不同模型错误模式的差异程度 |
+| weighted voting | 按预定权重合并预测 |
+
+## 15. 相关方法
 
 - [[Stacking集成（Stacked Generalization）]]
 - [[Bagging算法（Bootstrap Aggregating）]]
 - [[Boosting算法（Boosting）]]
 - [[随机森林（Random Forest）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
 - Dietterich TG. Ensemble methods in machine learning. In: *Multiple Classifier Systems*. 2000:1-15.
 - Zhou ZH. *Ensemble Methods: Foundations and Algorithms*. Chapman and Hall/CRC; 2012.
-- scikit-learn Developers. `sklearn.ensemble.VotingClassifier`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.VotingClassifier.html](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.VotingClassifier.html) （访问日期：2026-07-02）
+- scikit-learn Developers. `VotingClassifier` API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.VotingClassifier.html](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.VotingClassifier.html) （访问日期：2026-07-09）

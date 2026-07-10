@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">术语表</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,242 +54,275 @@
     <div class="intro-note"><h1>多维尺度分析（Multidimensional Scaling, MDS）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>多维尺度分析是一类把样本间距离或不相似度表示为低维坐标的方法。它的目标是在二维或三维空间中尽量保留原始距离关系。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>MDS 只根据对象间不相似度寻找低维坐标，使图上点距尽量复现原始距离或距离顺序。</p>
+<h3>1.2 定义</h3>
+<p>多维尺度分析是一类距离表示方法。经典 MDS 对平方欧氏距离双中心化并做特征分解；度量 MDS 直接最小化距离差异，非度量 MDS 主要保持不相似度排序。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：只有样本间距离或相似度时，如何把对象放到低维空间中展示。</li>
-<li>适用任务：距离矩阵可视化、相似性结构探索、样本关系展示。</li>
-<li>常见医学场景：患者相似性网络可视化，微生物群落 beta 多样性展示，临床文本或表型相似度嵌入。</li>
+<li>只有患者间距离而没有可直接使用的坐标。</li>
+<li>距离定义比原始变量更符合研究问题。</li>
+<li>需要二维或三维展示对象相似性。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>MDS 像是在一张地图上摆放样本点：原始距离近的样本在图上也应靠近，原始距离远的样本在图上也应远离。不同 MDS 版本对“距离保留”的定义不同。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>已知城市两两路程，但没有地图坐标。MDS 尝试在纸上摆放城市，让纸面距离尽量符合路程；图形是否可信取决于原始距离和低维拟合误差。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>经典 MDS 从距离矩阵 $D=(d_{ij})$ 出发，对平方距离做双中心化：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 从距离恢复内积</h3>
+<p>欧氏点的平方距离可由内积矩阵计算。双中心化逆向恢复中心化 Gram 矩阵，再通过特征分解得到坐标。</p>
+<h3>2.2 经典、度量与非度量</h3>
+<ul>
+<li>经典 MDS：代数解，最自然地处理欧氏距离。</li>
+<li>度量 MDS：迭代最小化原距离与嵌入距离差。</li>
+<li>非度量 MDS：允许单调变换，只强调距离排序。</li>
+</ul>
+<h3>2.3 方向没有解释</h3>
+<p>嵌入整体平移、旋转或镜像都保持点间距离。因此 MDS1/MDS2 轴的正负和方向通常没有固定医学含义。</p></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 经典 MDS</h3>
+<p>设 $D^{(2)}$ 为逐元素平方距离矩阵：</p>
 <p>$$
-B=-\frac{1}{2}HD^{(2)}H
+H=I-\frac1n\mathbf1\mathbf1^\top
 $$</p>
-<p>其中：</p>
 <p>$$
-H=I-\frac{1}{n}\mathbf{1}\mathbf{1}^\top
+B=-\frac12HD^{(2)}H
 $$</p>
-<p>对 $B$ 做特征分解：</p>
+<h3>3.2 坐标恢复</h3>
 <p>$$
 B=V\Lambda V^\top
 $$</p>
-<p>取前 $k$ 个正特征值对应的坐标：</p>
+<p>取前 $k$ 个正特征值：</p>
 <p>$$
 Y=V_k\Lambda_k^{1/2}
 $$</p>
-<p>度量 MDS 常最小化 stress：</p>
+<h3>3.3 Stress</h3>
+<p>一个常见归一化 Stress-1 为：</p>
 <p>$$
-\operatorname{Stress}(Y)=
+\operatorname{Stress}_1=
 \sqrt{
-\frac{\sum_{i&lt;j}(d_{ij}-\|y_i-y_j\|)^2}
-{\sum_{i&lt;j}d_{ij}^2}
+\frac{\sum_{i\lt j}(d_{ij}-\widehat d_{ij})^2}
+{\sum_{i\lt j}d_{ij}^2}
 }
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
-<ul>
-<li>$D$：原始距离或不相似度矩阵。</li>
-<li>$B$：由距离矩阵恢复的内积矩阵。</li>
-<li>$Y$：低维坐标。</li>
-<li><code>n_components</code>：目标低维维度。</li>
-<li>stress：低维距离与原始距离不一致的程度。</li>
-<li>metric/nonmetric：是否保留距离数值，还是只保留距离排序。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>距离或不相似度能合理表达样本关系。</li>
-<li>低维空间足以近似原始距离结构。</li>
-<li>经典 MDS 对欧氏距离结构最自然，非欧氏距离可能出现负特征值。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：特征矩阵、距离矩阵或相似度转换后的不相似度矩阵。</li>
-<li>因变量类型：MDS 本身不需要结局变量。</li>
-<li>数据结构：样本乘以特征矩阵，或样本乘以样本距离矩阵。</li>
-<li>是否适合高维数据：适合基于距离降维，但大样本距离矩阵成本较高。</li>
-<li>是否适合缺失较多数据：需先能计算可靠距离。</li>
-<li>是否适合删失数据：不直接处理删失结局。</li>
-<li>是否适合重复测量数据：需定义合适的样本距离，普通 MDS 不建模相关性。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>以患者间距离矩阵为例：</p>
+<p>其中 $\widehat d_{ij}=\|y_i-y_j\|$。</p>
+<h3>3.4 关键条件</h3>
 <table>
 <thead>
 <tr>
-<th>Patient</th>
-<th>P001</th>
-<th>P002</th>
-<th>P003</th>
-<th>P004</th>
+<th>条件</th>
+<th>违反后果</th>
+<th>检查方式</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>P001</td>
-<td>0.00</td>
-<td>0.42</td>
-<td>1.10</td>
-<td>0.95</td>
+<td>不相似度定义合理</td>
+<td>图表达错误关系</td>
+<td>比较距离度量</td>
 </tr>
 <tr>
-<td>P002</td>
-<td>0.42</td>
-<td>0.00</td>
-<td>1.04</td>
-<td>0.88</td>
+<td>低维可近似原结构</td>
+<td>stress 高、视觉误导</td>
+<td>stress 与 Shepard 图</td>
 </tr>
 <tr>
-<td>P003</td>
-<td>1.10</td>
-<td>1.04</td>
-<td>0.00</td>
-<td>0.36</td>
+<td>经典 MDS 距离近似欧氏</td>
+<td>出现负特征值</td>
+<td>特征值谱</td>
 </tr>
 <tr>
-<td>P004</td>
-<td>0.95</td>
-<td>0.88</td>
-<td>0.36</td>
-<td>0.00</td>
+<td>样本量可承受距离矩阵</td>
+<td>二次存储过大</td>
+<td>子采样或近似</td>
 </tr>
 </tbody>
-</table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：距离矩阵或可计算距离的特征矩阵。</li>
-<li>关键变量：距离度量、MDS 类型、目标维度、随机种子。</li>
-<li>需要预处理的内容：标准化、距离矩阵检查、缺失处理、异常样本检查。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：低维坐标、stress、特征值或拟合优度。</li>
-<li>参数估计：经典 MDS 的特征向量坐标，或迭代优化得到的坐标。</li>
-<li>预测结果：不直接预测。</li>
-<li>不确定性指标：stress、重采样稳定性、不同距离度量下嵌入一致性。</li>
-</ul></div>
+</table></div>
     </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：核心输入是距离/相似度、希望展示样本关系、距离定义比原始变量更重要的场景。</li>
-<li>不适合：需要解释原始变量贡献、样本量很大导致距离矩阵不可承受、低维保距效果很差的场景。</li>
-<li>使用前需要特别检查的点：距离度量是否与研究问题匹配，stress 是否可接受，离群样本是否主导图形。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>三个对象的距离为：</p>
+<p>$$
+D=
+\begin{pmatrix}
+0&amp;1&amp;2\\
+1&amp;0&amp;1\\
+2&amp;1&amp;0
+\end{pmatrix}
+$$</p>
+<p>直觉上它们应排在一条直线上。</p>
+<p><strong>Step 1：平方距离。</strong></p>
+<p>$$
+D^{(2)}=
+\begin{pmatrix}
+0&amp;1&amp;4\\
+1&amp;0&amp;1\\
+4&amp;1&amp;0
+\end{pmatrix}
+$$</p>
+<p><strong>Step 2：双中心化。</strong> 使用 $B=-HD^{(2)}H/2$ 得：</p>
+<p>$$
+B=
+\begin{pmatrix}
+1&amp;0&amp;-1\\
+0&amp;0&amp;0\\
+-1&amp;0&amp;1
+\end{pmatrix}
+$$</p>
+<p><strong>Step 3：特征分解。</strong> 唯一正特征值为 $\lambda_1=2$，对应单位特征向量可取：</p>
+<p>$$
+v_1=\frac1{\sqrt2}(-1,0,1)^\top
+$$</p>
+<p>于是坐标：</p>
+<p>$$
+Y=v_1\sqrt{\lambda_1}=(-1,0,1)^\top
+$$</p>
+<p><strong>Step 4：核对距离。</strong> 新坐标距离为 1、1、2，与原矩阵完全一致，stress 为 0。</p></div>
     </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="multidimensional-scaling-mds" data-i="0">Python</button><button class="codetab" data-uid="multidimensional-scaling-mds" data-i="1">R</button></div><div class="codepanel active" data-uid="multidimensional-scaling-mds" data-i="0"><p>常用包：</p>
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 数据要求</h3>
 <ul>
-<li><code>scikit-learn</code></li>
+<li>对称、对角为 0 的不相似度矩阵，或可计算距离的特征矩阵。</li>
+<li>相似度需先有依据地转为不相似度。</li>
+<li>缺失距离需要专门方法，不能随意填 0。</li>
 </ul>
-<pre><code class="language-python">import pandas as pd
-from sklearn.manifold import MDS
+<h3>5.2 输入与产出</h3>
+<p>输入为距离矩阵、MDS 类型、维数与优化设置。输出为低维坐标、stress、距离拟合和经典 MDS 特征值。</p></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>微生物组 beta 多样性、患者相似性和非欧氏表型距离。</li>
+<li>需要直观展示距离关系。</li>
+<li>不适合超大样本、距离定义不可靠或要求轴有直接变量解释的任务。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="multidimensional-scaling-mds" data-i="0">Python</button><button class="codetab" data-uid="multidimensional-scaling-mds" data-i="1">R</button></div><div class="codepanel active" data-uid="multidimensional-scaling-mds" data-i="0"><pre><code class="language-python">from sklearn.manifold import MDS
 from sklearn.metrics import pairwise_distances
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv(&quot;patient_features.csv&quot;)
-features = [&quot;Age&quot;, &quot;BMI&quot;, &quot;CRP&quot;, &quot;LDL&quot;]
-X = StandardScaler().fit_transform(df[features])
+X_s = StandardScaler().fit_transform(X)
+dist = pairwise_distances(X_s, metric=&quot;euclidean&quot;)
 
-dist = pairwise_distances(X, metric=&quot;euclidean&quot;)
-mds = MDS(
+model = MDS(
     n_components=2,
-    dissimilarity=&quot;precomputed&quot;,
-    normalized_stress=&quot;auto&quot;,
-    random_state=42
+    metric_mds=True,
+    metric=&quot;precomputed&quot;,
+    normalized_stress=True,
+    n_init=8,
+    max_iter=500,
+    eps=1e-6,
+    random_state=42,
+    n_jobs=-1,
 )
-embedding = mds.fit_transform(dist)
+embedding = model.fit_transform(dist)
+print(model.stress_, model.n_iter_)
+</code></pre></div><div class="codepanel" data-uid="multidimensional-scaling-mds" data-i="1"><pre><code class="language-r">x &lt;- scale(df[, c(&quot;Age&quot;, &quot;BMI&quot;, &quot;CRP&quot;, &quot;LDL&quot;)])
+d &lt;- dist(x, method = &quot;euclidean&quot;)
 
-embedding_df = pd.DataFrame(embedding, columns=[&quot;MDS1&quot;, &quot;MDS2&quot;])
-print(&quot;Stress:&quot;, mds.stress_)
-print(embedding_df.head())
-</code></pre></div><div class="codepanel" data-uid="multidimensional-scaling-mds" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>stats</code></li>
-<li><code>smacof</code></li>
-</ul>
-<pre><code class="language-r">x &lt;- scale(df[, c(&quot;Age&quot;, &quot;BMI&quot;, &quot;CRP&quot;, &quot;LDL&quot;)])
-d &lt;- dist(x)
+classical &lt;- cmdscale(
+  d,
+  k = 2,
+  eig = TRUE,
+  add = FALSE
+)
+embedding &lt;- classical$points
+classical$eig
 
-fit &lt;- cmdscale(d, k = 2, eig = TRUE)
-embedding &lt;- fit$points
-head(embedding)
-
-# Metric MDS with stress diagnostics:
 # library(smacof)
-# fit2 &lt;- mds(d, ndim = 2, type = &quot;ratio&quot;)
-# fit2$stress
+# metric_fit &lt;- mds(d, ndim = 2, type = &quot;ratio&quot;)
+# metric_fit$stress
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：二维坐标中的距离关系、stress 或拟合优度、不同临床分组是否在距离意义下接近或分离。</li>
-<li>每个主要参数如何解释：<code>dissimilarity=&quot;precomputed&quot;</code> 表示输入已经是样本间距离矩阵。</li>
-<li>临床或医学意义如何表达：MDS 图反映的是所选距离度量下的样本关系，结论必须绑定距离定义。</li>
-<li>常见误读：坐标轴通常没有直接医学含义，点的绝对方向和旋转也不重要。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>MDS1-MDS2 样本散点图。</li>
-<li>stress 随维度变化曲线。</li>
-<li>原始距离与低维距离散点图。</li>
-<li>不同距离度量下的 MDS 图对比。</li>
-</ul></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>可直接处理距离或不相似度矩阵。</li>
-<li>结果直观，适合展示样本关系。</li>
-<li>经典 MDS 与距离几何关系清晰。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>大样本距离矩阵存储和计算成本高。</li>
-<li>坐标轴解释有限。</li>
-<li>距离度量选择会强烈影响结果。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>忽略 stress，直接解释保距效果很差的图。</li>
-<li>混用不同量纲变量而不标准化。</li>
-<li>把 MDS 图上的视觉分群当作正式聚类或分类证据。</li>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>点间相对距离比坐标轴方向更重要。</li>
+<li>stress 越低，低维距离越接近目标不相似度；必须注明 stress 定义。</li>
+<li>经典 MDS 的负特征值提示距离并非完全欧氏。</li>
+<li>图上视觉分群不能替代正式聚类和稳定性分析。</li>
 </ul></div>
     </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a> 的区别：PCA 从特征矩阵的线性方差结构出发，MDS 可直接从距离矩阵出发。</li>
-<li>和 <a class="xlink" href="m-isometric-mapping.html" data-cn="Isomap" data-en="Isometric Mapping" data-def="Isomap 是一种非线性流形学习方法。它通过近邻图上的最短路径近似流形测地距离，再用经典多维尺度分析把样本嵌入低维空间。">Isomap（Isometric Mapping）</a> 的区别：Isomap 先估计流形测地距离，再用经典 MDS；MDS 本身可用于任何合适距离矩阵。</li>
-<li>和 <a class="xlink" href="m-t-distributed-stochastic-neighbor-embedding.html" data-cn="t-SNE" data-en="t-Distributed Stochastic Neighbor Embedding" data-def="t-SNE 是一种用于高维数据可视化的非线性降维方法。它把高维空间和低维空间中的邻近关系都表示为概率分布，并让两个分布尽可能接近。">t-SNE（t-Distributed Stochastic Neighbor Embedding）</a> 的区别：t-SNE 强调局部概率邻域，MDS 更直接地优化距离保留。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">诊断与稳健性</h2></div>
+      <div class="sec-body"><ol>
+<li>画 Shepard 图：原不相似度对嵌入距离。</li>
+<li>比较 1、2、3 维 stress。</li>
+<li>检查经典 MDS 特征值和负值比例。</li>
+<li>改变距离度量并做 Procrustes/相关比较。</li>
+<li>bootstrap 样本后对齐嵌入，评估结构稳定性。</li>
+</ol></div>
     </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
-<li>微生物组 beta 多样性距离的样本可视化。</li>
-<li>患者相似性矩阵的二维展示。</li>
-<li>临床文本、症状或表型不相似度的结构探索。</li>
+<li>MDS1-MDS2 散点图。</li>
+<li>Shepard 图及拟合线。</li>
+<li>stress 随维度变化曲线。</li>
+<li>经典 MDS 特征值谱。</li>
 </ul></div>
     </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
-<li><a class="xlink" href="m-isometric-mapping.html" data-cn="Isomap" data-en="Isometric Mapping" data-def="Isomap 是一种非线性流形学习方法。它通过近邻图上的最短路径近似流形测地距离，再用经典多维尺度分析把样本嵌入低维空间。">Isomap（Isometric Mapping）</a></li>
-<li><a class="xlink" href="m-t-distributed-stochastic-neighbor-embedding.html" data-cn="t-SNE" data-en="t-Distributed Stochastic Neighbor Embedding" data-def="t-SNE 是一种用于高维数据可视化的非线性降维方法。它把高维空间和低维空间中的邻近关系都表示为概率分布，并让两个分布尽可能接近。">t-SNE（t-Distributed Stochastic Neighbor Embedding）</a></li>
-<li><a class="xlink" href="m-uniform-manifold-approximation-and-projection.html" data-cn="UMAP" data-en="Uniform Manifold Approximation and Projection" data-def="UMAP 是一种非线性降维和可视化方法，基于流形假设和近邻图构建高维数据的模糊拓扑结构，再在低维空间中寻找相似的结构。">UMAP（Uniform Manifold Approximation and Projection）</a></li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p><strong>优势：</strong> 可直接从距离矩阵出发，几何含义清晰，适合多种非原始特征距离。</p>
+<p><strong>局限：</strong> 二次存储，轴难解释，结果强依赖距离，低维可能严重失真。</p>
+<p><strong>常见坑：</strong> 不报告 stress；把方向当医学轴；将相似度直接当距离；忽略负特征值；凭二维视觉宣称分群。</p></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="PCA 旋转坐标轴，依次寻找样本投影方差最大的正交方向，用少数线性组合保留主要总变异。">主成分分析（Principal Component Analysis, PCA）</a>：对欧氏数据，经典 MDS 与 PCA 得分紧密相关；MDS 更自然地接收距离矩阵。</li>
+<li><a class="xlink" href="m-isometric-mapping.html" data-cn="Isomap" data-en="Isometric Mapping" data-def="Isomap 用近邻图上的最短路径近似流形测地距离，再用经典 MDS 把这些距离还原为低维坐标。">Isomap（Isometric Mapping）</a>：先估计近邻图测地距离，再调用经典 MDS。</li>
+<li><a class="xlink" href="m-t-distributed-stochastic-neighbor-embedding.html" data-cn="t-SNE" data-en="t-Distributed Stochastic Neighbor Embedding" data-def="t-SNE 把高维和低维的邻近关系都转成概率，并移动低维点，使真正的高维近邻在图上仍有较高相遇概率。">t-SNE（t-Distributed Stochastic Neighbor Embedding）</a>：更强调局部概率邻域，不追求全局距离数值。</li>
+<li>选择经验：研究对象由专门距离定义时考虑 MDS；原始连续特征线性压缩先用 PCA。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>微生物组 beta 多样性排序图。</li>
+<li>患者、症状或临床文本不相似度可视化。</li>
+<li>遗传距离、生态距离与医院间模式比较。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">术语表</h2></div>
+      <div class="sec-body"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>dissimilarity</td>
+<td>两对象差异程度，不一定是欧氏距离</td>
+</tr>
+<tr>
+<td>double centering</td>
+<td>从平方距离恢复中心化内积矩阵</td>
+</tr>
+<tr>
+<td>Gram matrix</td>
+<td>对象两两内积组成的矩阵</td>
+</tr>
+<tr>
+<td>stress</td>
+<td>原不相似度与嵌入距离的失配程度</td>
+</tr>
+<tr>
+<td>Shepard diagram</td>
+<td>不相似度与嵌入距离的散点图</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="PCA 旋转坐标轴，依次寻找样本投影方差最大的正交方向，用少数线性组合保留主要总变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
+<li><a class="xlink" href="m-isometric-mapping.html" data-cn="Isomap" data-en="Isometric Mapping" data-def="Isomap 用近邻图上的最短路径近似流形测地距离，再用经典 MDS 把这些距离还原为低维坐标。">Isomap（Isometric Mapping）</a></li>
+<li><a class="xlink" href="m-t-distributed-stochastic-neighbor-embedding.html" data-cn="t-SNE" data-en="t-Distributed Stochastic Neighbor Embedding" data-def="t-SNE 把高维和低维的邻近关系都转成概率，并移动低维点，使真正的高维近邻在图上仍有较高相遇概率。">t-SNE（t-Distributed Stochastic Neighbor Embedding）</a></li>
+<li><a class="xlink" href="m-uniform-manifold-approximation-and-projection.html" data-cn="UMAP" data-en="Uniform Manifold Approximation and Projection" data-def="UMAP 把高维近邻关系做成带置信度的模糊图，再优化低维点的位置，使高置信边靠近、缺失边保持分离。">UMAP（Uniform Manifold Approximation and Projection）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Torgerson WS. Multidimensional scaling: I. Theory and method. <em>Psychometrika</em>. 1952;17:401-419.</li>
 <li>Kruskal JB. Multidimensional scaling by optimizing goodness of fit to a nonmetric hypothesis. <em>Psychometrika</em>. 1964;29:1-27.</li>
-<li>Cox TF, Cox MAA. <em>Multidimensional Scaling</em>. 2nd ed. Chapman and Hall/CRC; 2000.</li>
-<li>scikit-learn Developers. <code>sklearn.manifold.MDS</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html">https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html</a> （访问日期：2026-07-02）</li>
+<li>scikit-learn Developers. <code>MDS</code> API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html">https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html</a> （访问日期：2026-07-09）</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-kernel-principal-component-analysis-kpca.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">核主成分分析</div></a><span></span></div>

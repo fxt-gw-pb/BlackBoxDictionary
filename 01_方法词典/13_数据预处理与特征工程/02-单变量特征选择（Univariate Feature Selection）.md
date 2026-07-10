@@ -19,201 +19,238 @@ r_packages: [FSelectorRcpp, caret]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-单变量特征选择是一类过滤式方法。它逐个评估每个特征与目标变量之间的关系，根据统计量、P 值或信息量得分选择排名靠前或达到阈值的特征。
+单变量特征选择让每个特征单独参加一次“与结局的考试”，再按得分或校正后的显著性筛选，但看不到联合效应和交互。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：如何在大量候选特征中快速筛出与结局有单独关联的变量。
-- 适用任务：分类、回归、高维数据初筛。
-- 常见医学场景：影像组学特征初筛、组学标志物候选筛选、临床预测模型建模前变量缩减。
+它是一组监督式过滤方法：对每列独立计算统计量、P 值或互信息，再选前 $k$ 个、前若干百分比或过阈值的特征。分类可用 ANOVA F、卡方或互信息，回归可用相关/F 检验。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-单变量特征选择像给每个候选变量单独面试：每次只看一个变量和结局的关系强不强。它快、直观，但看不到变量之间的组合效应和冗余关系。
+- 高维、小样本建模前的快速降维。
+- 从成千上万候选中建立初筛列表。
+- 医学场景：组学筛选、影像组学、候选生物标志物排序。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+像让每位候选人单独面试：能快速淘汰明显不合格者，却无法发现两人合作才有效，也无法识别“单独表现普通、加入模型后重要”的抑制变量。
 
-分类任务中，连续特征和分类结局常用 ANOVA F 统计量：
+## 2. 核心思想与原理
+
+### 2.1 它到底在解决什么根本困难
+
+$p$ 很大时直接拟合复杂模型不稳定、计算昂贵。逐列评分把多变量优化拆成大量廉价的一维问题，可作为第一道监督筛选。
+
+### 2.2 关键洞察
+
+如果某特征单独与结局完全无关，它通常不是优先候选；但“边际无关”不等于“条件无关”。因此单变量筛选是降维启发式，而不是混杂调整或因果发现。
+
+### 2.3 与朴素/相邻做法的对比
+
+- 比肉眼挑变量可重复、可嵌入交叉验证。
+- 比嵌入式选择更快、与最终模型无关。
+- 代价是忽略特征相关性、非线性形式与联合交互。
+
+## 3. 数学形式
+
+### 3.1 核心公式
+
+二分类连续特征的 ANOVA F 得分：
 
 $$
-F=\frac{\text{组间方差}}{\text{组内方差}}
+F_j=\frac{SSB_j/(G-1)}{SSW_j/(n-G)}
 $$
 
-分类特征和分类结局常用卡方统计量：
+其中
 
 $$
-\chi^2=\sum_{i,j}\frac{(O_{ij}-E_{ij})^2}{E_{ij}}
+SSB_j=\sum_g n_g(\bar x_{gj}-\bar x_j)^2,\qquad
+SSW_j=\sum_g\sum_{i\in g}(x_{ij}-\bar x_{gj})^2
 $$
 
-连续结局回归中，可使用单变量线性回归的 F 统计量或相关系数。也可使用互信息：
+这个式子在说：组间差异相对组内噪声越大，特征得分越高。
+
+### 3.2 推导脉络
+
+若各组均值相同，组间平方和只反映随机波动；若均值分开而组内紧凑，F 增大。对大量特征同时检验时，原始 P 值必须做 FDR 等多重校正。
+
+### 3.3 参数与统计量含义
+
+- $F_j$：第 $j$ 列边际组间区分度。
+- $k$：保留特征数量，是超参数。
+- P 值：零假设下出现当前或更极端得分的概率，不是效应大小。
+- q 值/FDR：多重检验后的错误发现控制指标。
+
+### 3.4 关键假设（含违反后果）
+
+| 评分 | 关键前提 | 违反风险 |
+| --- | --- | --- |
+| ANOVA F | 近似正态、组内方差合理 | 异常值/异方差影响排名 |
+| 卡方 | 非负频数、期望频数足够 | 连续值误用、稀疏不稳 |
+| 互信息 | 样本足够估计分布 | 小样本偏差大 |
+| 所有方法 | 筛选只在训练折 | 测试泄漏、性能虚高 |
+
+## 4. 手把手算例
+
+6 人结局 $y=(0,0,0,1,1,1)$。候选 A 为 $(1,2,3,4,5,6)$，候选 B 为 $(0,1,0,1,0,1)$。
+
+**特征 A：** 两组均值 2 和 5，总均值 3.5：
 
 $$
-I(X;Y)=\sum_x\sum_y p(x,y)\log\frac{p(x,y)}{p(x)p(y)}
+SSB=3(2-3.5)^2+3(5-3.5)^2=13.5
 $$
 
-### 2.2 参数或统计量含义
+组内平方和为 $2+2=4$：
 
-- 得分函数：如 `f_classif`、`chi2`、`f_regression`、`mutual_info_classif`。
-- $k$：选择得分最高的前 $k$ 个特征。
-- P 值阈值：按显著性筛选特征时使用。
-- 多重检验：当特征很多时需要控制 FDR 或 FWER。
+$$
+F_A=\frac{13.5/1}{4/4}=13.5
+$$
 
-### 2.3 关键假设
+**特征 B：** 两组均值 $1/3$ 和 $2/3$，总均值 $1/2$：
 
-- 每个特征可单独与结局评估。
-- 统计检验的适用前提基本满足，例如卡方检验要求频数合理。
-- 特征选择应在训练数据内部完成，避免信息泄露。
+$$
+SSB=\frac16,\qquad SSW=\frac43
+$$
 
-## 3. 数据形式与输入输出
+$$
+F_B=\frac{1/6}{(4/3)/4}=0.5
+$$
 
-### 3.1 适合的数据形式
+A 排在 B 前。但这只是该小样本中的边际排序；若 A 与另一个特征完全重复，两者都会高分。
 
-- 自变量类型：连续变量、分类变量、编码后的高维特征。
-- 因变量类型：二分类、多分类或连续型。
-- 数据结构：样本乘以特征矩阵。
-- 是否适合高维数据：适合初筛，但需多重检验控制。
-- 是否适合缺失较多数据：需先处理缺失。
-- 是否适合删失数据：普通实现不直接适合删失结局。
-- 是否适合重复测量数据：不直接适合，需避免同一患者信息泄露。
+## 5. 数据形式与输入输出
 
-### 3.2 示例表格
+### 5.1 适合的数据形式
 
-以心血管事件预测的候选特征初筛为例：
+- 表格/组学高维矩阵，分类或连续结局。
+- 需要为特征类型与结局选择匹配评分。
+- 缺失、删失和重复测量不能被普通评分自动处理。
 
-| Age | SBP | LDL | CRP | Smoking | Event |
-| --- | --- | --- | --- | --- | --- |
-| 71 | 158 | 3.8 | 4.1 | 1 | 1 |
-| 52 | 126 | 2.4 | 1.2 | 0 | 0 |
-| 63 | 144 | 3.1 | 2.8 | 1 | 1 |
-| 44 | 118 | 2.0 | 0.9 | 0 | 0 |
-| 68 | 152 | 3.5 | 3.6 | 0 | 1 |
+### 5.2 示例表格
 
-### 3.3 输入与产出
+| patient_id | marker_A | marker_B | severe |
+| --- | ---: | ---: | ---: |
+| P01 | 1 | 0 | 0 |
+| P02 | 2 | 1 | 0 |
+| P04 | 4 | 1 | 1 |
 
-#### 输入
+### 5.3 输入与产出
 
-- 输入数据：特征矩阵和目标变量。
-- 关键变量：得分函数、选择数量 $k$ 或阈值。
-- 需要预处理的内容：缺失处理、编码、必要时标准化、多重检验校正。
+输入 $X,y$、评分函数和 $k$/阈值；产出每列得分、P 值/排名和保留掩码。
 
-#### 产出
+## 6. 适用场景
 
-- 模型对象/统计结果：每个特征的分数、P 值或信息量。
-- 参数估计：无模型参数，只有特征得分。
-- 预测结果：无，输出筛选后的特征矩阵。
-- 不确定性指标：P 值、校正后 P 值或交叉验证性能。
+- 适合：快速初筛、极高维矩阵、需要模型无关排名。
+- 不适合：交互是核心、混杂严重、时间到事件结局未处理。
+- 最终性能必须在嵌套或严格训练折流水线中评估。
 
-## 4. 适用场景
+## 7. 实现
 
-- 适合：特征数量很多、需要快速初筛、希望保留可解释的单变量关联线索。
-- 不适合：变量间交互强、特征高度相关、需要寻找组合特征的场景。
-- 使用前需要特别检查的点：选择过程是否嵌入交叉验证；是否控制多重比较；是否把单变量显著性误解为因果证据。
-
-## 5. 实现
-
-### 5.1 Python
-
-常用包：
-
-- `scikit-learn`
+### 7.1 Python
 
 ```python
 import pandas as pd
 from sklearn.feature_selection import SelectKBest, f_classif
-from sklearn.model_selection import train_test_split
 
-df = pd.read_csv("cardio_event.csv")
-X = df[["Age", "SBP", "LDL", "CRP", "Smoking"]]
-y = df["Event"].astype(int)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
-
-selector = SelectKBest(score_func=f_classif, k=3)
-X_train_sel = selector.fit_transform(X_train, y_train)
-X_test_sel = selector.transform(X_test)
-
-selected_features = X.columns[selector.get_support()]
-scores = pd.Series(selector.scores_, index=X.columns).sort_values(ascending=False)
-print(selected_features.tolist())
-print(scores)
+X = pd.DataFrame({
+    "marker_A": [1, 2, 3, 4, 5, 6],
+    "marker_B": [0, 1, 0, 1, 0, 1],
+})
+y = [0, 0, 0, 1, 1, 1]
+selector = SelectKBest(score_func=f_classif, k=1).fit(X, y)
+print(pd.DataFrame({
+    "feature": X.columns,
+    "F": selector.scores_,
+    "p": selector.pvalues_,
+}))
 ```
 
-### 5.2 R
-
-常用包：
-
-- `FSelectorRcpp`
+### 7.2 R
 
 ```r
-library(FSelectorRcpp)
-
-scores <- information_gain(Event ~ Age + SBP + LDL + CRP + Smoking, data = df_train)
-scores <- scores[order(scores$importance, decreasing = TRUE), ]
-
-selected <- rownames(scores)[1:3]
-x_train_sel <- df_train[, selected]
+dat <- data.frame(
+  marker_A = 1:6,
+  marker_B = c(0, 1, 0, 1, 0, 1),
+  severe = factor(c(0, 0, 0, 1, 1, 1))
+)
+scores <- sapply(dat[1:2], function(x) {
+  summary(aov(x ~ dat$severe))[[1]][["F value"]][1]
+})
+sort(scores, decreasing = TRUE)
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解读
 
-- 核心结果看什么：特征得分排序、P 值或校正后 P 值、选择后的模型性能。
-- 每个主要参数如何解释：$k$ 越大保留越宽松；P 值阈值越小筛选越严格。
-- 临床或医学意义如何表达：可以说某特征与结局有单独关联，但不能说它是独立预测因子或因果因素。
-- 常见误读：单变量显著不代表多变量模型中仍重要；单变量不显著也不代表在组合模型中无用。
+高分表示单独关联更强，不表示独立贡献、因果效应或最终模型必需。P 值很小也可能效应很小；应同时看效应量、稳定性和外部验证。
 
-## 7. 推荐可视化
+## 9. 假设诊断与稳健性
 
-- 特征得分条形图。
-- P 值火山图或排序图。
-- 选择特征数量与交叉验证性能曲线。
+- 在每个训练折重做筛选，记录入选频率。
+- 比较 F、秩检验与互信息排名。
+- 对多重检验控制 FDR。
+- 检查异常值、类别不平衡、批次效应与亚组异质性。
+- 将 $k$ 作为流水线超参数调优。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
+
+- 得分/效应量排序图。
+- 火山图（效应量 vs 校正 P 值）。
+- 交叉验证入选频率图。
+- Top 特征按结局分组的箱线/小提琴图。
+
+## 11. 优势、局限与常见坑
 
 ### 优势
 
-- 简单、快速、易解释。
-- 适合高维数据第一轮筛选。
-- 可按特征类型选择不同统计检验。
+- 快速、可扩展、与最终模型解耦。
+- 每个得分易于初步解释。
 
 ### 局限
 
-- 忽略特征之间的相关性和交互。
-- 容易受多重检验影响。
-- 可能筛掉弱单变量但强组合效应的变量。
+- 忽略冗余、混杂和交互。
+- 小样本排名不稳定。
 
 ### 常见坑
 
-- 在全数据上做单变量筛选，再划分训练测试集。
-- 用未经校正的 P 值筛选大量特征。
-- 把单变量筛选结果写成“独立危险因素”。
+- 全数据筛选后再交叉验证。
+- 只按未校正 P 值筛选。
+- 把“单变量不显著”当作绝对无用。
+- 用普通检验处理删失/重复测量。
 
-## 9. 与相近方法的区别
+## 12. 与相近方法的区别
 
-- 和 [[方差阈值法（Variance Threshold）]] 的区别：单变量方法使用结局变量；方差阈值不使用结局。
-- 和 [[互信息特征选择（Mutual Information Feature Selection）]] 的区别：互信息是单变量特征选择的一种非线性得分函数。
-- 和 [[嵌入式特征选择（Embedded Feature Selection）]] 的区别：嵌入式方法在模型训练中选择特征。
+- 方差阈值不看结局；单变量选择看边际关联。
+- 相关过滤侧重删除特征间冗余。
+- 嵌入式选择在模型拟合中考虑联合条件贡献。
+- 如何选择：先做数据卫生，再把单变量初筛与联合模型比较。
 
-## 10. 医学研究中的典型应用
+## 13. 医学研究中的典型应用
 
-- 影像组学中从数百个纹理特征中初筛候选特征。
-- 组学数据中筛选与疾病状态相关的基因或蛋白。
-- 临床预测模型建模前的候选变量缩减。
+- 转录组/蛋白组候选标志物初筛。
+- 影像组学降维。
+- 大量实验室指标的风险预测预筛。
 
-## 11. 相关方法
+必须说明多重检验、缺失机制、批次效应、类别不平衡和筛选是否完全位于训练折。
 
-- [[互信息特征选择（Mutual Information Feature Selection）]]
+## 14. 关键术语
+
+- **边际关联（Marginal association）**：不控制其他变量时的关系。
+- **条件贡献（Conditional contribution）**：控制其他变量后的增量信息。
+- **多重检验（Multiple testing）**：同时检验大量假设。
+- **FDR**：所有发现中期望假阳性比例。
+- **SelectKBest**：按得分保留前 $k$ 列的策略。
+
+## 15. 相关方法
+
+- [[方差阈值法（Variance Threshold）]]
 - [[信息增益（Information Gain）]]
+- [[互信息特征选择（Mutual Information Feature Selection）]]
+- [[嵌入式特征选择（Embedded Feature Selection）]]
 - [[多重检验与错误率控制（Multiple Testing and Error Rate Control）]]
-- [[Benjamini-Hochberg程序（Benjamini-Hochberg Procedure）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
-- Guyon I, Elisseeff A. An introduction to variable and feature selection. *J Mach Learn Res*. 2003;3:1157-1182.
-- scikit-learn Developers. Univariate feature selection. scikit-learn User Guide. [https://scikit-learn.org/stable/modules/feature_selection.html#univariate-feature-selection](https://scikit-learn.org/stable/modules/feature_selection.html#univariate-feature-selection) （访问日期：2026-07-02）
-- Kuhn M, Johnson K. *Feature Engineering and Selection: A Practical Approach for Predictive Models*. Chapman and Hall/CRC; 2019.
+- Guyon I, Elisseeff A. An introduction to variable and feature selection. *JMLR*. 2003;3:1157-1182.
+- scikit-learn developers. Univariate feature selection. https://scikit-learn.org/stable/modules/feature_selection.html

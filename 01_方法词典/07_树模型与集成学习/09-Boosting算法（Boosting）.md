@@ -19,221 +19,245 @@ r_packages: [gbm, adabag]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-Boosting 是一类串行集成学习方法，它把多个弱学习器按顺序组合起来，每一轮都让新模型重点修正当前集成模型的错误。AdaBoost、GBDT、XGBoost 和 LightGBM 都属于 Boosting 家族。
+Boosting 让弱学习器依次上场，每一轮都针对当前模型尚未解决的错误做一次小修正，最后把这些修正相加成强模型。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：如何把多个略优于随机猜测的弱模型逐步组合成强预测模型。
-- 适用任务：二分类、多分类、连续结局预测和排序任务。
-- 常见医学场景：疾病风险预测、并发症预测、电子病历表格数据建模。
+Boosting 是一类串行集成学习框架。第一个弱学习器给出粗略预测，后续学习器根据错分样本、残差或损失函数负梯度继续学习，再按权重或学习率叠加。[[AdaBoost（Adaptive Boosting）]]、[[梯度提升决策树（Gradient Boosting Decision Tree, GBDT）]]、[[XGBoost（Extreme Gradient Boosting, XGBoost）]] 和 [[LightGBM（Light Gradient Boosting Machine）]] 都属于该家族。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-Boosting 像是连续改错：先用一个简单模型做初步预测，然后让后续模型专门学习前面没处理好的样本或残差。多轮之后，整体模型会比任何单个弱学习器更强。
+- 如何把多个仅略有预测能力的简单模型组合为高性能模型。
+- 如何逐步降低单个浅树难以解决的偏差。
+- 如何学习表格数据中的非线性、阈值效应与交互。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+它像连续批改同一份答卷：第一位老师标出主要问题，第二位专看第一位遗漏的错误，后面的人继续补漏。最终答案不是多数投票，而是“初稿加上一连串修订”。
 
-Boosting 通常写成加法模型：
+## 2. 核心思想与原理
 
-$$
-F_M(x)=\sum_{m=1}^{M}\alpha_m h_m(x)
-$$
+### 2.1 根本困难
 
-其中 $h_m(x)$ 是第 $m$ 个弱学习器，$\alpha_m$ 是其权重或步长。
+浅树稳定、易控制，却往往欠拟合；深树能拟合复杂模式，却容易高方差。Boosting 采用多棵浅树，每次只走一小步，在降低偏差的同时用学习率、树深和早停限制复杂度。
 
-以二分类 AdaBoost 为例，样本权重初始化为：
+### 2.2 三种“关注错误”的方式
 
-$$
-w_i^{(1)}=\frac{1}{n}
-$$
+- AdaBoost：提高错分样本的权重。
+- 梯度提升：拟合当前损失的负梯度；平方损失下就是残差。
+- 现代提升树：使用一阶或二阶梯度、正则化和采样策略选择分裂。
 
-第 $m$ 轮弱分类器的加权误差为：
+### 2.3 串行性为何重要
 
-$$
-\epsilon_m=\sum_{i=1}^{n}w_i^{(m)}I(h_m(x_i)\neq y_i)
-$$
+第 $m$ 个学习器依赖前 $m-1$ 个学习器的预测，因此不能像 [[Bagging算法（Bootstrap Aggregating）]] 那样完全独立训练。它通常更擅长降偏差，也更需要验证集监控。
 
-分类器权重为：
+## 3. 数学形式
+
+### 3.1 加法模型
 
 $$
-\alpha_m=\frac{1}{2}\log\frac{1-\epsilon_m}{\epsilon_m}
+F_M(x)=F_0(x)+\sum_{m=1}^{M}\nu\alpha_m h_m(x)
 $$
 
-最终分类器为：
+其中 $h_m$ 是第 $m$ 个弱学习器，$\alpha_m$ 是其权重或线搜索步长，$\nu$ 是学习率。
+
+### 3.2 逐轮优化
+
+一般形式是在每轮寻找一个弱学习器和步长，使经验损失下降：
 
 $$
-H(x)=\mathrm{sign}\left(\sum_{m=1}^{M}\alpha_m h_m(x)\right)
+(\alpha_m,h_m)=
+\operatorname*{arg\,min}_{\alpha,h}
+\sum_{i=1}^{n}
+L\left[y_i,F_{m-1}(x_i)+\alpha h(x_i)\right]
 $$
 
-### 2.2 参数或统计量含义
+再更新：
 
-- `n_estimators`：提升轮数或弱学习器数量。
-- `learning_rate`：每轮更新幅度，也称 shrinkage。
-- 弱学习器：通常是浅层决策树或树桩。
-- 样本权重/负梯度：决定下一轮模型重点学习哪里。
+$$
+F_m(x)=F_{m-1}(x)+\nu\alpha_mh_m(x)
+$$
 
-### 2.3 关键假设
+### 3.3 关键参数
 
-- 数据中存在弱学习器可逐步捕捉的结构。
-- 标注错误和异常值不过多，否则后续模型可能反复追逐噪声。
-- 需要通过验证集、早停或正则化控制过拟合。
+- `n_estimators`：最大提升轮数。
+- `learning_rate`：每轮修正幅度；越小通常需要更多轮。
+- 基学习器复杂度：浅树控制单轮自由度。
+- 损失函数：决定“错误”如何被度量。
+- 子采样与早停：用于抑制过拟合。
 
-## 3. 数据形式与输入输出
+### 3.4 关键假设(含违反后果)
 
-### 3.1 适合的数据形式
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 弱学习器能捕捉剩余结构 | 多轮后性能仍不改善 | 画验证损失曲线 |
+| 标签与测量误差可控 | 模型反复追逐噪声 | 审核高权重或大残差样本 |
+| 训练人群代表目标人群 | 外部性能明显下降 | 时间或外部验证 |
+| 损失与临床目标一致 | 指标提高但临床效用不佳 | 同时评估校准与决策曲线 |
 
-- 自变量类型：连续、二分类、多分类变量均可，类别变量常需编码。
-- 因变量类型：二分类、多分类或连续型。
-- 数据结构：宽表数据。
-- 是否适合高维数据：适合中高维表格数据，但需调参。
-- 是否适合缺失较多数据：取决于具体实现，XGBoost/LightGBM 有原生缺失处理能力。
-- 是否适合删失数据：普通 Boosting 不直接适合，需使用专门生存 Boosting。
-- 是否适合重复测量数据：不直接适合。
+## 4. 手把手算例
 
-### 3.2 示例表格
+预测 4 名患者的连续结局，真实值为 $y=(2,4,6,8)$。
 
-以败血症早期预警为例：
+**Step 1：初始化。** 平方损失下，最佳常数是均值：
 
-| Age | HR | SBP | Lactate | WBC | Sepsis |
-| --- | --- | --- | --- | --- | --- |
-| 76 | 118 | 88 | 3.4 | 16.2 | 1 |
-| 52 | 82 | 126 | 1.1 | 7.8 | 0 |
-| 69 | 105 | 94 | 2.6 | 12.4 | 1 |
-| 41 | 74 | 132 | 0.9 | 6.1 | 0 |
-| 63 | 96 | 108 | 1.8 | 10.2 | 0 |
+$$
+F_0=\bar y=5
+$$
 
-### 3.3 输入与产出
+初始残差为 $(-3,-1,1,3)$，均方误差为：
 
-#### 输入
+$$
+\operatorname{MSE}_0=\frac{9+1+1+9}{4}=5
+$$
 
-- 输入数据：目标变量和特征矩阵。
-- 关键变量：弱学习器数量、学习率、树深、损失函数、采样和正则化参数。
-- 需要预处理的内容：训练验证划分、类别编码、缺失机制判断、异常值检查。
+**Step 2：第一棵浅树。** 假设树把前两人与后两人分组，叶节点分别拟合残差均值 $-2$ 与 $2$。取 $\nu=0.5$：
 
-#### 产出
+$$
+F_1=(5,5,5,5)+0.5(-2,-2,2,2)=(4,4,6,6)
+$$
 
-- 模型对象/统计结果：Boosting 集成模型、训练/验证误差曲线、特征重要性。
-- 参数估计：一般不输出传统可解释系数。
-- 预测结果：类别、概率或连续预测值。
-- 不确定性指标：交叉验证性能、测试集 AUC / PR-AUC / MSE、校准指标。
+此时残差为 $(-2,0,0,2)$，$\operatorname{MSE}_1=2$。
 
-## 4. 适用场景
+**Step 3：第二棵树。** 假设新树拟合出 $h_2=(-2,0,0,2)$：
 
-- 适合：复杂非线性、交互较多、追求预测性能的表格数据任务。
-- 不适合：标签噪声很高、样本极小、强因果解释为主要目标的任务。
-- 使用前需要特别检查的点：学习率与树数平衡、过拟合、异常值、类别不平衡、概率校准。
+$$
+F_2=F_1+0.5h_2=(3,4,6,7)
+$$
 
-## 5. 实现
+于是 $\operatorname{MSE}_2=(1+0+0+1)/4=0.5$。
 
-### 5.1 Python
+**结论：** 每棵树都不必一次给出最终答案；只要持续拟合尚未解释的部分，集成误差就能逐轮下降。
 
-常用包：
+## 5. 数据形式与输入输出
 
-- `scikit-learn`
+### 5.1 适合的数据
+
+- 输入：数值特征、编码后的类别特征和目标变量。
+- 结局：二分类、多分类或连续型，取决于具体算法与损失。
+- 缺失：经典实现常需插补；XGBoost、LightGBM 可学习缺失默认方向。
+- 不直接处理：聚类结局、删失与重复测量相关性，除非使用专门扩展。
+
+### 5.2 输入与产出
+
+输入包括训练集、损失函数、弱学习器、轮数和学习率。产出包括预测值或概率、逐轮训练记录和变量重要性。传统标准误、置信区间和可直接解释的回归系数通常不是默认产物。
+
+## 6. 适用场景
+
+- 适合：非线性与交互明显、预测性能优先的表格数据。
+- 慎用：极小样本、标签噪声高、外推范围大或主要目标是因果效应估计。
+- 医学研究中应配合独立测试集、概率校准、临床阈值和外部验证。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import pandas as pd
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.model_selection import train_test_split
+from sklearn.metrics import roc_auc_score, brier_score_loss
 
-df = pd.read_csv("sepsis_alert.csv")
-X = df[["Age", "HR", "SBP", "Lactate", "WBC"]]
-y = df["Sepsis"].astype(int)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
+model = GradientBoostingClassifier(
+    n_estimators=500,
+    learning_rate=0.03,
+    max_depth=2,
+    n_iter_no_change=20,
+    validation_fraction=0.2,
+    random_state=42,
 )
+model.fit(X_train, y_train)
 
-fit = GradientBoostingClassifier(
-    n_estimators=200,
-    learning_rate=0.05,
-    max_depth=3,
-    random_state=42
-)
-fit.fit(X_train, y_train)
-
-pred_prob = fit.predict_proba(X_test)[:, 1]
+prob = model.predict_proba(X_test)[:, 1]
+print("trees:", model.n_estimators_)
+print("AUC:", roc_auc_score(y_test, prob))
+print("Brier:", brier_score_loss(y_test, prob))
 ```
 
-### 5.2 R
-
-常用包：
-
-- `gbm`
+### 7.2 R
 
 ```r
 library(gbm)
 
 fit <- gbm(
   Sepsis ~ Age + HR + SBP + Lactate + WBC,
-  data = df_train,
+  data = train,
   distribution = "bernoulli",
-  n.trees = 200,
-  interaction.depth = 3,
-  shrinkage = 0.05
+  n.trees = 500,
+  interaction.depth = 2,
+  shrinkage = 0.03,
+  bag.fraction = 0.8,
+  cv.folds = 5
 )
 
-pred <- predict(fit, newdata = df_test, n.trees = 200, type = "response")
+best_n <- gbm.perf(fit, method = "cv", plot.it = FALSE)
+prob <- predict(fit, newdata = test, n.trees = best_n, type = "response")
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：验证集性能、早停轮数、学习曲线、特征重要性、概率校准。
-- 每个主要参数如何解释：学习率越小通常需要更多轮数；树越深越能捕捉交互但越容易过拟合。
-- 临床或医学意义如何表达：适合表达模型区分高危个体的能力，不应把重要性排序直接解释为因果作用。
-- 常见误读：训练误差持续下降不代表泛化性能持续提升。
+- 首先报告独立验证集的判别、误差或校准，而不是训练损失。
+- 学习率与树数应成对解释：小学习率加较多树通常更平滑。
+- 特征重要性表示模型依赖程度，不是独立效应或因果效应。
+- 分类概率若用于临床决策，应检查校准截距、校准斜率和阈值净获益。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
 
-- 训练集和验证集损失随迭代轮数变化图。
-- ROC 曲线、PR 曲线和校准曲线。
-- 特征重要性图或 SHAP 总结图。
+1. 绘制训练和验证损失随轮数变化，确定早停点。
+2. 比较不同随机种子、树深和学习率下性能稳定性。
+3. 审查持续大残差或被反复错分的病例，区分困难样本与错误标签。
+4. 进行时间切分、中心外验证和亚组评估。
+5. 对概率模型检查校准曲线、Brier 分数和决策曲线。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
 
-### 优势
+- 训练/验证损失曲线。
+- ROC、PR 与校准曲线。
+- 预测值-真实值图和残差图。
+- permutation importance、部分依赖或 SHAP 图；解释时注明其非因果性质。
 
-- 能逐步降低偏差，预测性能通常较强。
-- 可灵活适配多种损失函数。
-- 对非线性和交互建模能力强。
+## 11. 优势、局限与常见坑
 
-### 局限
+**优势：** 表格数据性能强，能学习非线性与交互，损失函数灵活。
 
-- 对噪声和异常值较敏感。
-- 调参空间较大。
-- 训练过程串行，通常比 Bagging 更难并行。
+**局限：** 串行训练、调参维度多、对噪声与分布漂移敏感，可解释性弱于参数模型。
 
-### 常见坑
+**常见坑：** 学习率过大、树过深；用测试集早停；只报 AUC；把训练误差持续下降误认为泛化持续改善。
 
-- 学习率过大、树太深或轮数过多导致过拟合。
-- 只报告 AUC，忽略校准和临床阈值。
-- 在医学研究中把模型解释图误写成因果发现。
+## 12. 与相近方法的区别
 
-## 9. 与相近方法的区别
+- [[Bagging算法（Bootstrap Aggregating）]]：并行拟合后平均，主要降方差。
+- [[随机森林（Random Forest）]]：依靠 bootstrap 和随机特征去相关。
+- [[AdaBoost（Adaptive Boosting）]]：以错分样本重加权为代表。
+- [[梯度提升决策树（Gradient Boosting Decision Tree, GBDT）]]：以损失负梯度统一每轮修正。
 
-- 和 [[Bagging算法（Bootstrap Aggregating）]] 的区别：Bagging 并行降方差；Boosting 串行纠错，常能更强地降低偏差。
-- 和 [[AdaBoost（Adaptive Boosting）]] 的区别：AdaBoost 是经典 Boosting 实现，显式更新样本权重。
-- 和 [[梯度提升决策树（Gradient Boosting Decision Tree, GBDT）]] 的区别：GBDT 用负梯度统一描述每轮修正，是现代 Boosting 树模型的主线。
+## 13. 医学研究中的典型应用
 
-## 10. 医学研究中的典型应用
+- 败血症、死亡、再入院和术后并发症风险预测。
+- 住院时长、费用和连续生理指标预测。
+- 影像组学、组学与临床变量融合后的表格建模。
 
-- ICU 患者死亡或恶化风险预测。
-- 住院再入院、术后并发症、疾病复发等二分类预测。
-- 电子病历表格数据中的高性能预测基线。
+## 14. 术语表
 
-## 11. 相关方法
+| 术语 | 含义 |
+| --- | --- |
+| 弱学习器 | 单独表现有限、通常受复杂度约束的模型 |
+| 加法模型 | 预测函数由多个学习器加权相加 |
+| 学习率 | 缩小每轮更新幅度的系数 |
+| 伪残差 | 损失对当前预测的负梯度 |
+| 早停 | 验证性能不再改善时停止迭代 |
+
+## 15. 相关方法
 
 - [[AdaBoost（Adaptive Boosting）]]
 - [[梯度提升决策树（Gradient Boosting Decision Tree, GBDT）]]
+- [[梯度提升回归（Gradient Boosting Regression）]]
 - [[XGBoost（Extreme Gradient Boosting, XGBoost）]]
 - [[LightGBM（Light Gradient Boosting Machine）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
 - Schapire RE. The strength of weak learnability. *Mach Learn*. 1990;5:197-227.
 - Freund Y, Schapire RE. A decision-theoretic generalization of on-line learning and an application to boosting. *J Comput Syst Sci*. 1997;55(1):119-139.
 - Friedman JH. Greedy function approximation: a gradient boosting machine. *Ann Stat*. 2001;29(5):1189-1232.
+- Hastie T, Tibshirani R, Friedman J. *The Elements of Statistical Learning*. 2nd ed. Springer; 2009.

@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,228 +54,250 @@
     <div class="intro-note"><h1>相关系数特征选择（Correlation-based Feature Selection）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>相关系数特征选择是一种基于变量间相关性的过滤方法。它通过计算特征之间，或特征与结局之间的相关系数，删除冗余特征或保留与结局关系更强的特征。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>相关过滤把高度同步变化的特征视为重复测量，在每组冗余变量中保留代表，以降低共线性与重复信息。</p>
+<h3>1.2 定义</h3>
+<p>该方法计算特征—特征相关矩阵，按 $|r|$ 阈值删除高度相关列；有时也按特征—结局相关排序。两种用途必须区分：前者是无监督去冗余，后者是单变量监督筛选。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：如何识别高度相关、信息重复的特征。</li>
-<li>适用任务：建模前降冗余、缓解共线性、初步特征筛选。</li>
-<li>常见医学场景：实验室指标共线性处理、影像组学冗余特征删除、临床评分构建前变量整理。</li>
+<li>多个仪器读数、派生指标或组学特征表达几乎同一信号。</li>
+<li>减少线性模型系数不稳定和距离模型的重复计权。</li>
+<li>医学场景：影像组学、实验室同义指标、连续波形派生特征。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>如果两个特征几乎同步变化，它们可能携带类似信息。相关系数法会找出这些“重复表达”的变量，通常只保留其中一个，以降低模型复杂度。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>摄氏温度与华氏温度携带同一信息。把两者都送入模型不会增加知识，却可能让算法把“温度”重复计算两次；相关过滤保留其中一个代表。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>Pearson 相关系数定义为：</p>
-<p>$$
-r(X,Y)=
-\frac{\sum_{i=1}^{n}(x_i-\bar x)(y_i-\bar y)}
-{\sqrt{\sum_{i=1}^{n}(x_i-\bar x)^2}\sqrt{\sum_{i=1}^{n}(y_i-\bar y)^2}}
-$$</p>
-<p>设特征相关阈值为 $\theta$，当两个特征满足：</p>
-<p>$$
-|r(X_j,X_k)|\geq \theta
-$$</p>
-<p>则认为它们高度相关，可考虑删除其中一个。</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>高维特征工程会产生大量线性重复。回归系数可能在相关变量间任意分摊，重要性排名不稳；KNN/PCA 等也会让某个潜在概念因多列复制而权重过大。</p>
+<h3>2.2 关键洞察</h3>
+<p>若两个特征几乎可由线性变换互相预测，保留二者的增量信息很少。删除哪一个不应只看相关系数，还应看缺失率、测量成本、可解释性、与结局的关系及未来可获得性。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$r$：相关系数，范围为 $[-1,1]$。</li>
-<li>$\theta$：高相关阈值，常见取值为 0.8、0.9 或 0.95。</li>
-<li>Pearson 相关：衡量线性关系。</li>
-<li>Spearman 相关：衡量单调关系，更适合偏态或等级变量。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>Pearson 相关主要反映线性关系。</li>
-<li>高相关特征存在冗余，但不代表其中一个一定无医学意义。</li>
-<li>删除哪个特征应结合缺失率、测量成本、可解释性和与结局的关系。</li>
+<li>VIF 考察一列被其余所有列联合解释的程度；成对相关只看两两关系。</li>
+<li>Lasso/Elastic Net 在监督模型中处理共线性，但选择可能随样本波动。</li>
+<li>Spearman 可发现单调非线性冗余；Pearson 主要度量线性关系。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>Pearson 相关：</p>
+<p>$$
+r_{jk}=
+\frac{\sum_i(x_{ij}-\bar x_j)(x_{ik}-\bar x_k)}
+{\sqrt{\sum_i(x_{ij}-\bar x_j)^2
+\sum_i(x_{ik}-\bar x_k)^2}}
+$$</p>
+<p>简单删除规则：</p>
+<p>$$
+|r_{jk}|&gt;\tau\quad\Rightarrow\quad
+\text{从 }j,k\text{ 中删除一个}
+$$</p>
+<p>这个式子在说：两列标准化后的共同变化越接近完全同步或反向同步，冗余越高。</p>
+<h3>3.2 推导脉络</h3>
+<p>相关是标准化协方差，因此不受线性单位换算影响。绝对值处理正、负重复；但 $r\approx0$ 只表示无线性关系，不代表独立。</p>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：连续变量、等级变量、部分编码变量。</li>
-<li>因变量类型：可不使用结局，也可用于特征-结局相关筛选。</li>
-<li>数据结构：宽表数据。</li>
-<li>是否适合高维数据：适合，但相关矩阵计算和可视化需注意规模。</li>
-<li>是否适合缺失较多数据：需明确相关系数的缺失处理方式。</li>
-<li>是否适合删失数据：不直接处理删失结局。</li>
-<li>是否适合重复测量数据：普通相关矩阵不处理组内相关。</li>
+<li>$r_{jk}$：两特征线性冗余强度，范围 $[-1,1]$。</li>
+<li>$\tau$：常取 0.8–0.95，但应做敏感性分析。</li>
+<li>clustering/linkage：将相关矩阵转成距离后分组的规则。</li>
+<li>representative：每组最终保留的代表特征。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>以肾功能相关指标预处理为例：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>Creatinine</th>
-<th>eGFR</th>
-<th>BUN</th>
-<th>CystatinC</th>
-<th>Age</th>
-<th>CKD</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后果</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>1.8</td>
-<td>42</td>
-<td>29</td>
-<td>1.6</td>
-<td>71</td>
-<td>1</td>
+<td>相关估计稳定</td>
+<td>样本量足够、异常值可控</td>
+<td>错分冗余组</td>
 </tr>
 <tr>
-<td>0.8</td>
-<td>98</td>
-<td>12</td>
-<td>0.7</td>
-<td>45</td>
-<td>0</td>
+<td>线性/单调冗余是重点</td>
+<td>非线性重复不重要</td>
+<td>漏掉复杂冗余</td>
 </tr>
 <tr>
-<td>1.4</td>
-<td>58</td>
-<td>24</td>
-<td>1.2</td>
-<td>63</td>
-<td>1</td>
+<td>训练集拟合筛选</td>
+<td>测试不参与矩阵估计</td>
+<td>泄漏</td>
 </tr>
 <tr>
-<td>0.9</td>
-<td>91</td>
-<td>14</td>
-<td>0.8</td>
-<td>52</td>
-<td>0</td>
+<td>删除规则符合部署</td>
+<td>保留列未来可获得</td>
+<td>上线缺列或成本过高</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>6 人特征 A 为 $(1,2,3,4,5,6)$，B 为 $(2,4,6,8,10,12)=2A$，结局 $Y=(1,2,2,4,5,6)$。</p>
+<p>因为 B 是 A 的精确线性变换：</p>
+<p>$$
+r_{AB}=1
+$$</p>
+<p>A 的离均差平方和为 17.5；Y 的为 $19.333$，交叉乘积和为 18：</p>
+<p>$$
+r_{AY}=\frac{18}{\sqrt{17.5\times19.333}}=0.979
+$$</p>
+<p>线性缩放不改变相关，所以 $r_{BY}=0.979$。阈值 $\tau=0.9$ 时 A、B 属于同一冗余组；二者对结局排名完全相同。若 A 缺失率 2%、B 缺失率 20%，应保留 A，而不是随意删除第一列或最后一列。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>连续或有序表格特征；类别变量需专门关联度量。</li>
+<li>对缺失、批次、中心差异和重复测量需额外处理。</li>
+<li>不处理删失、混杂或因果关系。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>patient_id</th>
+<th style="text-align: right;">marker_A</th>
+<th style="text-align: right;">marker_B</th>
+<th style="text-align: right;">outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P01</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
 </tr>
 <tr>
-<td>2.2</td>
-<td>31</td>
-<td>35</td>
-<td>1.9</td>
-<td>77</td>
-<td>1</td>
+<td>P02</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr>
+<td>P03</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">2</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：候选特征矩阵，可选目标变量。</li>
-<li>关键变量：相关系数类型、阈值、删除规则。</li>
-<li>需要预处理的内容：缺失处理、异常值检查、变量变换、必要时标准化。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：相关矩阵、高相关特征对、保留特征集合。</li>
-<li>参数估计：无模型参数。</li>
-<li>预测结果：无。</li>
-<li>不确定性指标：相关系数置信区间或 P 值可作为辅助。</li>
-</ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：去除高度冗余变量、缓解共线性、提高模型训练效率。</li>
-<li>不适合：非线性依赖明显、变量间关系复杂、需要模型自动处理交互的场景。</li>
-<li>使用前需要特别检查的点：阈值是否过于激进；删除规则是否可解释；是否误删临床关键变量。</li>
-</ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="correlation-based-feature-selection" data-i="0">Python</button><button class="codetab" data-uid="correlation-based-feature-selection" data-i="1">R</button></div><div class="codepanel active" data-uid="correlation-based-feature-selection" data-i="0"><p>常用包：</p>
-<ul>
-<li><code>pandas</code></li>
-<li><code>numpy</code></li>
-</ul>
-<pre><code class="language-python">import numpy as np
-import pandas as pd
-
-df = pd.read_csv(&quot;kidney_features.csv&quot;)
-X = df[[&quot;Creatinine&quot;, &quot;eGFR&quot;, &quot;BUN&quot;, &quot;CystatinC&quot;, &quot;Age&quot;]]
-
-corr = X.corr(method=&quot;pearson&quot;).abs()
-upper = corr.where(np.triu(np.ones(corr.shape), k=1).astype(bool))
-
-threshold = 0.90
-to_drop = [col for col in upper.columns if any(upper[col] &gt; threshold)]
-X_selected = X.drop(columns=to_drop)
-
-print(&quot;Dropped:&quot;, to_drop)
-</code></pre></div><div class="codepanel" data-uid="correlation-based-feature-selection" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>caret</code></li>
-</ul>
-<pre><code class="language-r">library(caret)
-
-x &lt;- df[, c(&quot;Creatinine&quot;, &quot;eGFR&quot;, &quot;BUN&quot;, &quot;CystatinC&quot;, &quot;Age&quot;)]
-corr &lt;- cor(x, use = &quot;pairwise.complete.obs&quot;)
-drop_idx &lt;- findCorrelation(corr, cutoff = 0.90)
-
-x_selected &lt;- x[, -drop_idx]
-</code></pre></div></div></div>
+<h3>5.3 输入与产出</h3>
+<p>输入训练特征矩阵、相关类型、阈值与代表选择规则；产出相关矩阵、冗余组和保留列。</p></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：高相关特征对、被删除变量、保留变量的临床合理性。</li>
-<li>每个主要参数如何解释：阈值越低，删除越多；阈值越高，只删除极强冗余。</li>
-<li>临床或医学意义如何表达：相关系数法用于减少重复信息，不是判断变量是否有因果作用。</li>
-<li>常见误读：两个变量高度相关，不代表它们可在所有研究问题中互相替代。</li>
+<li>适合：影像组学、派生特征多、共线性明显。</li>
+<li>不适合：类别变量为主、非线性冗余核心、删除任一特征都会破坏解释组合。</li>
+<li>不应只按与结局相关大小决定一切，以免泄漏和过拟合。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>相关矩阵热图。</li>
-<li>高相关网络图。</li>
-<li>删除前后模型性能对比图。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="correlation-based-feature-selection" data-i="0">Python</button><button class="codetab" data-uid="correlation-based-feature-selection" data-i="1">R</button></div><div class="codepanel active" data-uid="correlation-based-feature-selection" data-i="0"><pre><code class="language-python">import numpy as np
+import pandas as pd
+
+X = pd.DataFrame({
+    &quot;A&quot;: [1, 2, 3, 4, 5, 6],
+    &quot;B&quot;: [2, 4, 6, 8, 10, 12],
+    &quot;C&quot;: [0, 1, 0, 1, 0, 1],
+})
+corr = X.corr(method=&quot;pearson&quot;).abs()
+upper = corr.where(np.triu(np.ones(corr.shape), k=1).astype(bool))
+drop = [col for col in upper.columns if (upper[col] &gt; 0.9).any()]
+print(corr, drop)
+</code></pre></div><div class="codepanel" data-uid="correlation-based-feature-selection" data-i="1"><pre><code class="language-r">library(caret)
+
+X &lt;- data.frame(
+  A = 1:6,
+  B = 2 * (1:6),
+  C = c(0, 1, 0, 1, 0, 1)
+)
+corr &lt;- cor(X, use = &quot;pairwise.complete.obs&quot;)
+drop_index &lt;- findCorrelation(corr, cutoff = 0.9)
+names(X)[drop_index]
+</code></pre></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><p>被删除表示可由保留列近似线性替代，不表示生物学无意义。应记录每组相关结构、删除规则和代表变量，保证训练与部署使用同一列集合。</p></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>用 bootstrap/交叉验证检查相关和保留列稳定性。</li>
+<li>比较 Pearson、Spearman 与 biweight midcorrelation。</li>
+<li>对异常值、批次和亚组分别画相关矩阵。</li>
+<li>扫描多个阈值并评估下游性能。</li>
+<li>相关过滤后仍可检查 VIF 或条件数。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>聚类相关热图。</li>
+<li>特征相关网络图。</li>
+<li>冗余组散点图与异常值标注。</li>
+<li>阈值—保留数量—验证性能曲线。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>简单直观。</li>
-<li>能快速识别冗余特征。</li>
-<li>有助于缓解线性模型共线性。</li>
+<li>简单快速，结果直观。</li>
+<li>与结局无关的去冗余可降低直接监督泄漏。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>主要捕捉线性或单调关系。</li>
-<li>不直接评估预测贡献。</li>
-<li>删除规则带有主观性。</li>
+<li>只捕捉选定相关类型的关系。</li>
+<li>删除代表规则可能任意且不稳定。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>只按相关性删变量，不看临床可解释性和测量质量。</li>
-<li>把 Pearson 相关用于明显非线性关系。</li>
-<li>在训练测试拆分外统一计算相关矩阵，导致预处理流程不严谨。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-spearman-rank-correlation.html" data-cn="Spearman秩相关" data-en="Spearman Rank Correlation" data-def="Spearman 相关就是「把数据换成名次后再算 Pearson 相关」：它衡量两个变量是否同增同减（单调关系），不要求关系是直线，且对异常值稳健。">Spearman秩相关（Spearman Rank Correlation）</a> 的区别：Spearman 是一种相关系数；本卡强调用相关矩阵做特征筛选流程。</li>
-<li>和 <a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归是在普通线性回归的损失函数中加入 L2 正则化项的一种方法，用来缓解多重共线性、减少过拟合，并提升模型在新数据上的稳定性。">Ridge回归（Ridge Regression）</a> 的区别：Ridge 保留相关变量并收缩系数；相关系数法直接删除部分冗余变量。</li>
-<li>和 <a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a> 的区别：PCA 把相关特征组合成新成分；相关系数法仍保留原始变量。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>从高度相关的实验室指标中保留更稳定或更常用的指标。</li>
-<li>影像组学建模前删除成对相关过高的纹理特征。</li>
-<li>临床预测模型中减少共线变量。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-spearman-rank-correlation.html" data-cn="Spearman秩相关" data-en="Spearman Rank Correlation" data-def="Spearman 相关就是「把数据换成名次后再算 Pearson 相关」：它衡量两个变量是否同增同减（单调关系），不要求关系是直线，且对异常值稳健。">Spearman秩相关（Spearman Rank Correlation）</a></li>
-<li><a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归是在普通线性回归的损失函数中加入 L2 正则化项的一种方法，用来缓解多重共线性、减少过拟合，并提升模型在新数据上的稳定性。">Ridge回归（Ridge Regression）</a></li>
-<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
-<li><a class="xlink" href="m-variance-threshold.html" data-cn="方差阈值法" data-en="Variance Threshold" data-def="方差阈值法是一种过滤式特征选择方法。它计算每个特征在样本中的方差，并删除方差低于预设阈值的特征，用来去掉几乎不变化、信息量很低的变量。">方差阈值法（Variance Threshold）</a></li>
+<li>在全数据上计算相关矩阵。</li>
+<li>忽略负相关而不用绝对值。</li>
+<li>用 pairwise complete 造成每对样本基础不同。</li>
+<li>把低相关当独立或因果无关。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Guyon I, Elisseeff A. An introduction to variable and feature selection. <em>J Mach Learn Res</em>. 2003;3:1157-1182.</li>
-<li>Kuhn M, Johnson K. <em>Feature Engineering and Selection: A Practical Approach for Predictive Models</em>. Chapman and Hall/CRC; 2019.</li>
-<li>Kuhn M. Building predictive models in R using the caret package. <em>J Stat Softw</em>. 2008;28(5):1-26.</li>
+<li>方差阈值删除单列无变化；相关过滤删除列间重复。</li>
+<li>单变量选择按结局排序，可能同时保留多个冗余列。</li>
+<li>PCA 用线性组合压缩，相关过滤保留原变量语义。</li>
+<li>如何选择：重视解释时优先相关分组留代表；重视压缩可比较 PCA。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>影像组学纹理特征去冗余。</li>
+<li>高相关实验室指标和生命体征摘要。</li>
+<li>组学共表达特征的代表选择。</li>
+</ul>
+<p>应说明缺失处理、批次/中心、阈值、代表规则和患者级切分。</p></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>冗余（Redundancy）</strong>：一个特征可被另一个近似替代。</li>
+<li><strong>共线性（Collinearity）</strong>：预测变量间存在强线性关系。</li>
+<li><strong>Pearson 相关</strong>：线性共同变化的标准化度量。</li>
+<li><strong>Spearman 相关</strong>：基于秩的单调关系度量。</li>
+<li><strong>VIF</strong>：一列被其余列联合解释的膨胀程度。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-pearson-correlation.html" data-cn="Pearson相关" data-en="Pearson Correlation" data-def="Pearson 相关系数 $r$ 是「标准化的协方差」：把两个变量各自的单位除掉，得到一个 $-1$ 到 $1$ 之间、无量纲的数，衡量它们线性关系的方向与强度。">Pearson相关（Pearson Correlation）</a></li>
+<li><a class="xlink" href="m-spearman-rank-correlation.html" data-cn="Spearman秩相关" data-en="Spearman Rank Correlation" data-def="Spearman 相关就是「把数据换成名次后再算 Pearson 相关」：它衡量两个变量是否同增同减（单调关系），不要求关系是直线，且对异常值稳健。">Spearman秩相关（Spearman Rank Correlation）</a></li>
+<li><a class="xlink" href="m-variance-threshold.html" data-cn="方差阈值法" data-en="Variance Threshold" data-def="方差阈值法删除在训练样本中几乎不变化的特征，因为一个近似常数很难区分样本，却会增加存储、计算和数值负担。">方差阈值法（Variance Threshold）</a></li>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="PCA 旋转坐标轴，依次寻找样本投影方差最大的正交方向，用少数线性组合保留主要总变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
+<li><a class="xlink" href="m-lasso-regression.html" data-cn="Lasso回归" data-en="Lasso Regression" data-def="Lasso 回归一边拟合连续结局，一边用 L1 惩罚把弱变量的系数直接压到 0，从而得到稀疏模型。">Lasso回归（Lasso Regression）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Kuhn M, Johnson K. <em>Applied Predictive Modeling</em>. Springer; 2013.</li>
+<li>Guyon I, Elisseeff A. An introduction to variable and feature selection. <em>JMLR</em>. 2003;3:1157-1182.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-univariate-feature-selection.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">单变量特征选择</div></a><a class="pg pg-next" href="m-information-gain.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">信息增益</div></a></div>

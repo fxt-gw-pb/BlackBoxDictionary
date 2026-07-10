@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,234 +54,255 @@
     <div class="intro-note"><h1>单变量特征选择（Univariate Feature Selection）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>单变量特征选择是一类过滤式方法。它逐个评估每个特征与目标变量之间的关系，根据统计量、P 值或信息量得分选择排名靠前或达到阈值的特征。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>单变量特征选择让每个特征单独参加一次“与结局的考试”，再按得分或校正后的显著性筛选，但看不到联合效应和交互。</p>
+<h3>1.2 定义</h3>
+<p>它是一组监督式过滤方法：对每列独立计算统计量、P 值或互信息，再选前 $k$ 个、前若干百分比或过阈值的特征。分类可用 ANOVA F、卡方或互信息，回归可用相关/F 检验。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：如何在大量候选特征中快速筛出与结局有单独关联的变量。</li>
-<li>适用任务：分类、回归、高维数据初筛。</li>
-<li>常见医学场景：影像组学特征初筛、组学标志物候选筛选、临床预测模型建模前变量缩减。</li>
+<li>高维、小样本建模前的快速降维。</li>
+<li>从成千上万候选中建立初筛列表。</li>
+<li>医学场景：组学筛选、影像组学、候选生物标志物排序。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>单变量特征选择像给每个候选变量单独面试：每次只看一个变量和结局的关系强不强。它快、直观，但看不到变量之间的组合效应和冗余关系。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>像让每位候选人单独面试：能快速淘汰明显不合格者，却无法发现两人合作才有效，也无法识别“单独表现普通、加入模型后重要”的抑制变量。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>分类任务中，连续特征和分类结局常用 ANOVA F 统计量：</p>
-<p>$$
-F=\frac{\text{组间方差}}{\text{组内方差}}
-$$</p>
-<p>分类特征和分类结局常用卡方统计量：</p>
-<p>$$
-\chi^2=\sum_{i,j}\frac{(O_{ij}-E_{ij})^2}{E_{ij}}
-$$</p>
-<p>连续结局回归中，可使用单变量线性回归的 F 统计量或相关系数。也可使用互信息：</p>
-<p>$$
-I(X;Y)=\sum_x\sum_y p(x,y)\log\frac{p(x,y)}{p(x)p(y)}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>$p$ 很大时直接拟合复杂模型不稳定、计算昂贵。逐列评分把多变量优化拆成大量廉价的一维问题，可作为第一道监督筛选。</p>
+<h3>2.2 关键洞察</h3>
+<p>如果某特征单独与结局完全无关，它通常不是优先候选；但“边际无关”不等于“条件无关”。因此单变量筛选是降维启发式，而不是混杂调整或因果发现。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>得分函数：如 <code>f_classif</code>、<code>chi2</code>、<code>f_regression</code>、<code>mutual_info_classif</code>。</li>
-<li>$k$：选择得分最高的前 $k$ 个特征。</li>
-<li>P 值阈值：按显著性筛选特征时使用。</li>
-<li>多重检验：当特征很多时需要控制 FDR 或 FWER。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>每个特征可单独与结局评估。</li>
-<li>统计检验的适用前提基本满足，例如卡方检验要求频数合理。</li>
-<li>特征选择应在训练数据内部完成，避免信息泄露。</li>
+<li>比肉眼挑变量可重复、可嵌入交叉验证。</li>
+<li>比嵌入式选择更快、与最终模型无关。</li>
+<li>代价是忽略特征相关性、非线性形式与联合交互。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>二分类连续特征的 ANOVA F 得分：</p>
+<p>$$
+F_j=\frac{SSB_j/(G-1)}{SSW_j/(n-G)}
+$$</p>
+<p>其中</p>
+<p>$$
+SSB_j=\sum_g n_g(\bar x_{gj}-\bar x_j)^2,\qquad
+SSW_j=\sum_g\sum_{i\in g}(x_{ij}-\bar x_{gj})^2
+$$</p>
+<p>这个式子在说：组间差异相对组内噪声越大，特征得分越高。</p>
+<h3>3.2 推导脉络</h3>
+<p>若各组均值相同，组间平方和只反映随机波动；若均值分开而组内紧凑，F 增大。对大量特征同时检验时，原始 P 值必须做 FDR 等多重校正。</p>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：连续变量、分类变量、编码后的高维特征。</li>
-<li>因变量类型：二分类、多分类或连续型。</li>
-<li>数据结构：样本乘以特征矩阵。</li>
-<li>是否适合高维数据：适合初筛，但需多重检验控制。</li>
-<li>是否适合缺失较多数据：需先处理缺失。</li>
-<li>是否适合删失数据：普通实现不直接适合删失结局。</li>
-<li>是否适合重复测量数据：不直接适合，需避免同一患者信息泄露。</li>
+<li>$F_j$：第 $j$ 列边际组间区分度。</li>
+<li>$k$：保留特征数量，是超参数。</li>
+<li>P 值：零假设下出现当前或更极端得分的概率，不是效应大小。</li>
+<li>q 值/FDR：多重检验后的错误发现控制指标。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>以心血管事件预测的候选特征初筛为例：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>Age</th>
-<th>SBP</th>
-<th>LDL</th>
-<th>CRP</th>
-<th>Smoking</th>
-<th>Event</th>
+<th>评分</th>
+<th>关键前提</th>
+<th>违反风险</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>71</td>
-<td>158</td>
-<td>3.8</td>
-<td>4.1</td>
-<td>1</td>
-<td>1</td>
+<td>ANOVA F</td>
+<td>近似正态、组内方差合理</td>
+<td>异常值/异方差影响排名</td>
 </tr>
 <tr>
-<td>52</td>
-<td>126</td>
-<td>2.4</td>
-<td>1.2</td>
-<td>0</td>
-<td>0</td>
+<td>卡方</td>
+<td>非负频数、期望频数足够</td>
+<td>连续值误用、稀疏不稳</td>
 </tr>
 <tr>
-<td>63</td>
-<td>144</td>
-<td>3.1</td>
-<td>2.8</td>
-<td>1</td>
-<td>1</td>
+<td>互信息</td>
+<td>样本足够估计分布</td>
+<td>小样本偏差大</td>
 </tr>
 <tr>
-<td>44</td>
-<td>118</td>
-<td>2.0</td>
-<td>0.9</td>
-<td>0</td>
-<td>0</td>
+<td>所有方法</td>
+<td>筛选只在训练折</td>
+<td>测试泄漏、性能虚高</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>6 人结局 $y=(0,0,0,1,1,1)$。候选 A 为 $(1,2,3,4,5,6)$，候选 B 为 $(0,1,0,1,0,1)$。</p>
+<p><strong>特征 A：</strong> 两组均值 2 和 5，总均值 3.5：</p>
+<p>$$
+SSB=3(2-3.5)^2+3(5-3.5)^2=13.5
+$$</p>
+<p>组内平方和为 $2+2=4$：</p>
+<p>$$
+F_A=\frac{13.5/1}{4/4}=13.5
+$$</p>
+<p><strong>特征 B：</strong> 两组均值 $1/3$ 和 $2/3$，总均值 $1/2$：</p>
+<p>$$
+SSB=\frac16,\qquad SSW=\frac43
+$$</p>
+<p>$$
+F_B=\frac{1/6}{(4/3)/4}=0.5
+$$</p>
+<p>A 排在 B 前。但这只是该小样本中的边际排序；若 A 与另一个特征完全重复，两者都会高分。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>表格/组学高维矩阵，分类或连续结局。</li>
+<li>需要为特征类型与结局选择匹配评分。</li>
+<li>缺失、删失和重复测量不能被普通评分自动处理。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>patient_id</th>
+<th style="text-align: right;">marker_A</th>
+<th style="text-align: right;">marker_B</th>
+<th style="text-align: right;">severe</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P01</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr>
-<td>68</td>
-<td>152</td>
-<td>3.5</td>
-<td>3.6</td>
-<td>0</td>
-<td>1</td>
+<td>P02</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>P04</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：特征矩阵和目标变量。</li>
-<li>关键变量：得分函数、选择数量 $k$ 或阈值。</li>
-<li>需要预处理的内容：缺失处理、编码、必要时标准化、多重检验校正。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：每个特征的分数、P 值或信息量。</li>
-<li>参数估计：无模型参数，只有特征得分。</li>
-<li>预测结果：无，输出筛选后的特征矩阵。</li>
-<li>不确定性指标：P 值、校正后 P 值或交叉验证性能。</li>
-</ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：特征数量很多、需要快速初筛、希望保留可解释的单变量关联线索。</li>
-<li>不适合：变量间交互强、特征高度相关、需要寻找组合特征的场景。</li>
-<li>使用前需要特别检查的点：选择过程是否嵌入交叉验证；是否控制多重比较；是否把单变量显著性误解为因果证据。</li>
-</ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="univariate-feature-selection" data-i="0">Python</button><button class="codetab" data-uid="univariate-feature-selection" data-i="1">R</button></div><div class="codepanel active" data-uid="univariate-feature-selection" data-i="0"><p>常用包：</p>
-<ul>
-<li><code>scikit-learn</code></li>
-</ul>
-<pre><code class="language-python">import pandas as pd
-from sklearn.feature_selection import SelectKBest, f_classif
-from sklearn.model_selection import train_test_split
-
-df = pd.read_csv(&quot;cardio_event.csv&quot;)
-X = df[[&quot;Age&quot;, &quot;SBP&quot;, &quot;LDL&quot;, &quot;CRP&quot;, &quot;Smoking&quot;]]
-y = df[&quot;Event&quot;].astype(int)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
-
-selector = SelectKBest(score_func=f_classif, k=3)
-X_train_sel = selector.fit_transform(X_train, y_train)
-X_test_sel = selector.transform(X_test)
-
-selected_features = X.columns[selector.get_support()]
-scores = pd.Series(selector.scores_, index=X.columns).sort_values(ascending=False)
-print(selected_features.tolist())
-print(scores)
-</code></pre></div><div class="codepanel" data-uid="univariate-feature-selection" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>FSelectorRcpp</code></li>
-</ul>
-<pre><code class="language-r">library(FSelectorRcpp)
-
-scores &lt;- information_gain(Event ~ Age + SBP + LDL + CRP + Smoking, data = df_train)
-scores &lt;- scores[order(scores$importance, decreasing = TRUE), ]
-
-selected &lt;- rownames(scores)[1:3]
-x_train_sel &lt;- df_train[, selected]
-</code></pre></div></div></div>
+<h3>5.3 输入与产出</h3>
+<p>输入 $X,y$、评分函数和 $k$/阈值；产出每列得分、P 值/排名和保留掩码。</p></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：特征得分排序、P 值或校正后 P 值、选择后的模型性能。</li>
-<li>每个主要参数如何解释：$k$ 越大保留越宽松；P 值阈值越小筛选越严格。</li>
-<li>临床或医学意义如何表达：可以说某特征与结局有单独关联，但不能说它是独立预测因子或因果因素。</li>
-<li>常见误读：单变量显著不代表多变量模型中仍重要；单变量不显著也不代表在组合模型中无用。</li>
+<li>适合：快速初筛、极高维矩阵、需要模型无关排名。</li>
+<li>不适合：交互是核心、混杂严重、时间到事件结局未处理。</li>
+<li>最终性能必须在嵌套或严格训练折流水线中评估。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>特征得分条形图。</li>
-<li>P 值火山图或排序图。</li>
-<li>选择特征数量与交叉验证性能曲线。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="univariate-feature-selection" data-i="0">Python</button><button class="codetab" data-uid="univariate-feature-selection" data-i="1">R</button></div><div class="codepanel active" data-uid="univariate-feature-selection" data-i="0"><pre><code class="language-python">import pandas as pd
+from sklearn.feature_selection import SelectKBest, f_classif
+
+X = pd.DataFrame({
+    &quot;marker_A&quot;: [1, 2, 3, 4, 5, 6],
+    &quot;marker_B&quot;: [0, 1, 0, 1, 0, 1],
+})
+y = [0, 0, 0, 1, 1, 1]
+selector = SelectKBest(score_func=f_classif, k=1).fit(X, y)
+print(pd.DataFrame({
+    &quot;feature&quot;: X.columns,
+    &quot;F&quot;: selector.scores_,
+    &quot;p&quot;: selector.pvalues_,
+}))
+</code></pre></div><div class="codepanel" data-uid="univariate-feature-selection" data-i="1"><pre><code class="language-r">dat &lt;- data.frame(
+  marker_A = 1:6,
+  marker_B = c(0, 1, 0, 1, 0, 1),
+  severe = factor(c(0, 0, 0, 1, 1, 1))
+)
+scores &lt;- sapply(dat[1:2], function(x) {
+  summary(aov(x ~ dat$severe))[[1]][[&quot;F value&quot;]][1]
+})
+sort(scores, decreasing = TRUE)
+</code></pre></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><p>高分表示单独关联更强，不表示独立贡献、因果效应或最终模型必需。P 值很小也可能效应很小；应同时看效应量、稳定性和外部验证。</p></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>在每个训练折重做筛选，记录入选频率。</li>
+<li>比较 F、秩检验与互信息排名。</li>
+<li>对多重检验控制 FDR。</li>
+<li>检查异常值、类别不平衡、批次效应与亚组异质性。</li>
+<li>将 $k$ 作为流水线超参数调优。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>得分/效应量排序图。</li>
+<li>火山图（效应量 vs 校正 P 值）。</li>
+<li>交叉验证入选频率图。</li>
+<li>Top 特征按结局分组的箱线/小提琴图。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>简单、快速、易解释。</li>
-<li>适合高维数据第一轮筛选。</li>
-<li>可按特征类型选择不同统计检验。</li>
+<li>快速、可扩展、与最终模型解耦。</li>
+<li>每个得分易于初步解释。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>忽略特征之间的相关性和交互。</li>
-<li>容易受多重检验影响。</li>
-<li>可能筛掉弱单变量但强组合效应的变量。</li>
+<li>忽略冗余、混杂和交互。</li>
+<li>小样本排名不稳定。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>在全数据上做单变量筛选，再划分训练测试集。</li>
-<li>用未经校正的 P 值筛选大量特征。</li>
-<li>把单变量筛选结果写成“独立危险因素”。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-variance-threshold.html" data-cn="方差阈值法" data-en="Variance Threshold" data-def="方差阈值法是一种过滤式特征选择方法。它计算每个特征在样本中的方差，并删除方差低于预设阈值的特征，用来去掉几乎不变化、信息量很低的变量。">方差阈值法（Variance Threshold）</a> 的区别：单变量方法使用结局变量；方差阈值不使用结局。</li>
-<li>和 <a class="xlink" href="m-mutual-information-feature-selection.html" data-cn="互信息特征选择" data-en="Mutual Information Feature Selection" data-def="互信息特征选择用互信息衡量每个特征与目标变量之间共享的信息量，并据此筛选特征。它可以捕捉非线性依赖，不局限于线性相关。">互信息特征选择（Mutual Information Feature Selection）</a> 的区别：互信息是单变量特征选择的一种非线性得分函数。</li>
-<li>和 <a class="xlink" href="m-embedded-feature-selection.html" data-cn="嵌入式特征选择" data-en="Embedded Feature Selection" data-def="嵌入式特征选择是在模型训练过程中同步完成特征评价或筛选的方法。常见形式包括 L1 正则化模型、树模型特征重要性和基于模型系数的 SelectFromModel。">嵌入式特征选择（Embedded Feature Selection）</a> 的区别：嵌入式方法在模型训练中选择特征。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>影像组学中从数百个纹理特征中初筛候选特征。</li>
-<li>组学数据中筛选与疾病状态相关的基因或蛋白。</li>
-<li>临床预测模型建模前的候选变量缩减。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-mutual-information-feature-selection.html" data-cn="互信息特征选择" data-en="Mutual Information Feature Selection" data-def="互信息特征选择用互信息衡量每个特征与目标变量之间共享的信息量，并据此筛选特征。它可以捕捉非线性依赖，不局限于线性相关。">互信息特征选择（Mutual Information Feature Selection）</a></li>
-<li><a class="xlink" href="m-information-gain.html" data-cn="信息增益" data-en="Information Gain" data-def="信息增益是基于信息熵的特征评价指标，用来衡量使用某个特征划分数据后，类别不确定性减少了多少。它是 ID3 决策树和许多过滤式分类特征选择方法的核心思想。">信息增益（Information Gain）</a></li>
-<li><a class="xlink" href="m-multiple-testing-and-error-rate-control.html" data-cn="多重检验与错误率控制" data-en="Multiple Testing and Error Rate Control" data-def="多重检验与错误率控制关注的是：当同时进行很多次假设检验时，如何控制整体假阳性风险或错误发现比例。">多重检验与错误率控制（Multiple Testing and Error Rate Control）</a></li>
-<li><a class="xlink" href="m-benjamini-hochberg-procedure.html" data-cn="Benjamini-Hochberg程序" data-en="Benjamini-Hochberg Procedure" data-def="Benjamini-Hochberg（BH）程序是控制 FDR 的经典方法，特别适合高维发现型研究。">Benjamini-Hochberg程序（Benjamini-Hochberg Procedure）</a></li>
+<li>全数据筛选后再交叉验证。</li>
+<li>只按未校正 P 值筛选。</li>
+<li>把“单变量不显著”当作绝对无用。</li>
+<li>用普通检验处理删失/重复测量。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Guyon I, Elisseeff A. An introduction to variable and feature selection. <em>J Mach Learn Res</em>. 2003;3:1157-1182.</li>
-<li>scikit-learn Developers. Univariate feature selection. scikit-learn User Guide. <a href="https://scikit-learn.org/stable/modules/feature_selection.html#univariate-feature-selection">https://scikit-learn.org/stable/modules/feature_selection.html#univariate-feature-selection</a> （访问日期：2026-07-02）</li>
-<li>Kuhn M, Johnson K. <em>Feature Engineering and Selection: A Practical Approach for Predictive Models</em>. Chapman and Hall/CRC; 2019.</li>
+<li>方差阈值不看结局；单变量选择看边际关联。</li>
+<li>相关过滤侧重删除特征间冗余。</li>
+<li>嵌入式选择在模型拟合中考虑联合条件贡献。</li>
+<li>如何选择：先做数据卫生，再把单变量初筛与联合模型比较。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>转录组/蛋白组候选标志物初筛。</li>
+<li>影像组学降维。</li>
+<li>大量实验室指标的风险预测预筛。</li>
+</ul>
+<p>必须说明多重检验、缺失机制、批次效应、类别不平衡和筛选是否完全位于训练折。</p></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>边际关联（Marginal association）</strong>：不控制其他变量时的关系。</li>
+<li><strong>条件贡献（Conditional contribution）</strong>：控制其他变量后的增量信息。</li>
+<li><strong>多重检验（Multiple testing）</strong>：同时检验大量假设。</li>
+<li><strong>FDR</strong>：所有发现中期望假阳性比例。</li>
+<li><strong>SelectKBest</strong>：按得分保留前 $k$ 列的策略。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-variance-threshold.html" data-cn="方差阈值法" data-en="Variance Threshold" data-def="方差阈值法删除在训练样本中几乎不变化的特征，因为一个近似常数很难区分样本，却会增加存储、计算和数值负担。">方差阈值法（Variance Threshold）</a></li>
+<li><a class="xlink" href="m-information-gain.html" data-cn="信息增益" data-en="Information Gain" data-def="信息增益衡量知道某特征后，类别的不确定性平均减少了多少；减少越多，特征越能把不同类别分开。">信息增益（Information Gain）</a></li>
+<li><a class="xlink" href="m-mutual-information-feature-selection.html" data-cn="互信息特征选择" data-en="Mutual Information Feature Selection" data-def="互信息衡量知道一个特征后，结局的不确定性平均减少多少，因此能发现不限于线性或均值差异的边际依赖。">互信息特征选择（Mutual Information Feature Selection）</a></li>
+<li><a class="xlink" href="m-embedded-feature-selection.html" data-cn="嵌入式特征选择" data-en="Embedded Feature Selection" data-def="嵌入式选择把“哪些变量留下”写进模型训练目标或结构，让预测拟合与特征取舍同时完成。">嵌入式特征选择（Embedded Feature Selection）</a></li>
+<li><a class="xlink" href="m-multiple-testing-and-error-rate-control.html" data-cn="多重检验与错误率控制" data-en="Multiple Testing and Error Rate Control" data-def="多重检验校正不是“让 P 值更难显著”，而是把单次检验的错误承诺升级为对整组发现的错误承诺。">多重检验与错误率控制（Multiple Testing and Error Rate Control）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Guyon I, Elisseeff A. An introduction to variable and feature selection. <em>JMLR</em>. 2003;3:1157-1182.</li>
+<li>scikit-learn developers. Univariate feature selection. https://scikit-learn.org/stable/modules/feature_selection.html</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-variance-threshold.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">方差阈值法</div></a><a class="pg pg-next" href="m-correlation-based-feature-selection.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">相关系数特征选择</div></a></div>

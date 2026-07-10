@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,222 +54,266 @@
     <div class="intro-note"><h1>信息增益（Information Gain）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>信息增益是基于信息熵的特征评价指标，用来衡量使用某个特征划分数据后，类别不确定性减少了多少。它是 ID3 决策树和许多过滤式分类特征选择方法的核心思想。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>信息增益衡量知道某特征后，类别的不确定性平均减少了多少；减少越多，特征越能把不同类别分开。</p>
+<h3>1.2 定义</h3>
+<p>信息增益是分类目标熵与按特征分组后的条件熵之差。它既用于 ID3 决策树选择分裂，也可作为过滤式特征排序。对连续特征需离散化、搜索阈值或改用互信息估计。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：哪个特征最能减少分类结局的不确定性。</li>
-<li>适用任务：离散特征筛选、分类树分裂特征选择、分类任务初筛。</li>
-<li>常见医学场景：症状、分型、分组变量对疾病分类的信息量评估。</li>
+<li>评价离散特征对分类结局的信息量。</li>
+<li>捕捉不限于线性或均值差异的依赖。</li>
+<li>医学场景：症状/检查阳性、基因型、分箱生物标志物的初筛。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>一个好特征能把混杂的样本分成更纯的组。信息增益衡量的就是“用了这个特征之后，我们对类别更确定了多少”。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>未看检查前，阳性/阴性各半像抛硬币；若看到检查结果后每组几乎都是同一结局，猜测难度大幅下降。信息增益就是“少猜了多少”。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>数据集 $D$ 的类别熵为：</p>
-<p>$$
-H(D)=-\sum_{k=1}^{K}p_k\log_2 p_k
-$$</p>
-<p>若特征 $A$ 有 $V$ 个取值，并将 $D$ 划分为 $D_1,\dots,D_V$，条件熵为：</p>
-<p>$$
-H(D\mid A)=\sum_{v=1}^{V}\frac{|D_v|}{|D|}H(D_v)
-$$</p>
-<p>信息增益为：</p>
-<p>$$
-IG(D,A)=H(D)-H(D\mid A)
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>相关和 F 检验偏向线性或均值差异，分类关系可能是非线性、离散或多类别的。熵只依赖概率分布，可统一衡量分组前后纯度。</p>
+<h3>2.2 关键洞察</h3>
+<p>一个有用特征应让每个取值内的类别更纯。条件熵是各组剩余不确定性的加权平均；从原熵中减去它，便得到特征提供的信息。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$H(D)$：划分前类别不确定性。</li>
-<li>$H(D\mid A)$：按特征 $A$ 划分后的剩余不确定性。</li>
-<li>$IG(D,A)$：不确定性减少量。</li>
-<li>多值偏倚：取值很多的特征容易得到较高信息增益。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>目标变量为分类变量。</li>
-<li>特征通常需要是离散变量；连续变量需先离散化或寻找切分点。</li>
-<li>每个特征单独评价，不考虑多特征组合。</li>
+<li>与卡方检验都衡量离散依赖，但信息增益以 bit 表示不确定性减少。</li>
+<li>与互信息在离散情形等价。</li>
+<li>原始信息增益偏爱取值多的特征，患者 ID 可获得虚高满分；增益率或最小叶样本约束可缓解。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>类别熵：</p>
+<p>$$
+H(Y)=-\sum_{k=1}^{K}p_k\log_2p_k
+$$</p>
+<p>条件熵与信息增益：</p>
+<p>$$
+H(Y\mid X)=\sum_{v\in\mathcal V}
+p(X=v)H(Y\mid X=v)
+$$</p>
+<p>$$
+IG(Y;X)=H(Y)-H(Y\mid X)
+$$</p>
+<p>这个式子在说：特征分组后剩余不确定性越小，提供的信息越多。</p>
+<h3>3.2 推导脉络</h3>
+<p>熵是编码类别所需的平均最短信息量。观察 $X$ 后编码长度降为条件熵，两者之差就是互信息；因此 $IG\ge0$，且完全确定结局时等于 $H(Y)$。</p>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：离散特征、分箱后的连续特征。</li>
-<li>因变量类型：二分类或多分类。</li>
-<li>数据结构：分类监督学习数据。</li>
-<li>是否适合高维数据：可用于高维离散特征筛选。</li>
-<li>是否适合缺失较多数据：需设定缺失类别或先插补。</li>
-<li>是否适合删失数据：不直接适合。</li>
-<li>是否适合重复测量数据：不直接适合。</li>
+<li>$p_k$：第 $k$ 类比例。</li>
+<li>$H(Y)$：观察特征前的不确定性，单位 bit。</li>
+<li>$H(Y\mid X)$：观察特征后仍剩的不确定性。</li>
+<li>split information：特征自身取值熵；增益率用 $IG/H(X)$ 惩罚高基数。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>以症状组合预测感染类型为例：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>Fever</th>
-<th>Cough</th>
-<th>CRP_high</th>
-<th>WBC_high</th>
-<th>Bacterial</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后果</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
+<td>频率能估计概率</td>
+<td>各取值样本足够</td>
+<td>小样本 IG 向上偏</td>
 </tr>
 <tr>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
+<td>离散化合理</td>
+<td>切点保留真实结构</td>
+<td>排名依赖任意分箱</td>
 </tr>
 <tr>
-<td>0</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
+<td>训练折内估计</td>
+<td>测试标签不可见</td>
+<td>监督泄漏</td>
 </tr>
 <tr>
-<td>1</td>
-<td>0</td>
-<td>1</td>
-<td>1</td>
-<td>1</td>
+<td>高基数受控制</td>
+<td>ID/时间戳不应取巧</td>
+<td>记忆样本、泛化差</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>6 人结局 $Y=(0,0,0,1,1,1)$，所以</p>
+<p>$$
+H(Y)=-0.5\log_2 0.5-0.5\log_2 0.5=1\text{ bit}
+$$</p>
+<p><strong>强特征 A：</strong> 取值 $(L,L,L,H,H,H)$，L 组全为 0、H 组全为 1：</p>
+<p>$$
+H(Y\mid A)=0,\qquad IG(Y;A)=1
+$$</p>
+<p><strong>弱特征 B：</strong> 取值 $(0,1,0,1,0,1)$。B=0 组结局为 $(0,0,1)$，B=1 组为 $(0,1,1)$；两组熵均为</p>
+<p>$$
+H(1/3,2/3)=0.918
+$$</p>
+<p>因此</p>
+<p>$$
+IG(Y;B)=1-\left(\frac36 0.918+\frac36 0.918\right)=0.082
+$$</p>
+<p>但“患者 ID”每人一个取值，也会使每组熵为 0、IG=1。这揭示高基数偏倚：满分不一定可泛化。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>离散特征与二/多分类结局。</li>
+<li>连续特征需分箱或连续互信息估计。</li>
+<li>缺失可作为一类但可能把诊疗流程当信号。</li>
+<li>不直接处理删失、重复测量或混杂。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>patient_id</th>
+<th>marker_group</th>
+<th style="text-align: right;">alternating_flag</th>
+<th style="text-align: right;">severe</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P01</td>
+<td>L</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr>
-<td>0</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
+<td>P02</td>
+<td>L</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>P04</td>
+<td>H</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：离散特征矩阵和分类标签。</li>
-<li>关键变量：特征取值、类别分布、离散化策略。</li>
-<li>需要预处理的内容：连续变量分箱、缺失处理、低频类别合并。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：每个特征的信息增益得分。</li>
-<li>参数估计：无。</li>
-<li>预测结果：无，除非用于决策树模型。</li>
-<li>不确定性指标：通常不提供置信区间，可用重采样评估稳定性。</li>
-</ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：离散特征、分类目标、需要快速排序特征信息量的场景。</li>
-<li>不适合：连续变量未合理分箱、多值特征很多、强交互主导的场景。</li>
-<li>使用前需要特别检查的点：多值特征偏倚、分箱方式、类别不平衡。</li>
-</ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="information-gain" data-i="0">Python</button><button class="codetab" data-uid="information-gain" data-i="1">R</button></div><div class="codepanel active" data-uid="information-gain" data-i="0"><p>常用包：</p>
-<ul>
-<li><code>pandas</code></li>
-<li><code>scikit-learn</code></li>
-</ul>
-<pre><code class="language-python">import pandas as pd
-from sklearn.feature_selection import mutual_info_classif
-
-df = pd.read_csv(&quot;infection_features.csv&quot;)
-X = df[[&quot;Fever&quot;, &quot;Cough&quot;, &quot;CRP_high&quot;, &quot;WBC_high&quot;]]
-y = df[&quot;Bacterial&quot;].astype(int)
-
-# 对离散变量，互信息得分可作为信息论特征排序的常用实现。
-scores = mutual_info_classif(X, y, discrete_features=True, random_state=42)
-ig_like = pd.Series(scores, index=X.columns).sort_values(ascending=False)
-
-print(ig_like)
-</code></pre></div><div class="codepanel" data-uid="information-gain" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>FSelectorRcpp</code></li>
-</ul>
-<pre><code class="language-r">library(FSelectorRcpp)
-
-scores &lt;- information_gain(
-  Bacterial ~ Fever + Cough + CRP_high + WBC_high,
-  data = df_train
-)
-
-scores[order(scores$importance, decreasing = TRUE), ]
-</code></pre></div></div></div>
+<h3>5.3 输入与产出</h3>
+<p>输入训练特征、分类结局和离散化规则；产出每列 IG/互信息、排名和保留掩码。</p></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：哪些特征能最大幅度减少类别熵。</li>
-<li>每个主要参数如何解释：信息增益越大，单独按该特征划分后类别越纯。</li>
-<li>临床或医学意义如何表达：该特征对分类标签的信息量较高，但不代表因果作用。</li>
-<li>常见误读：信息增益高可能只是因为取值很多或分箱过细。</li>
+<li>适合：离散/非线性分类关系的快速筛选。</li>
+<li>不适合：极高基数 ID、小样本稀疏类别、需要条件/因果效应。</li>
+<li>应配合交叉验证稳定性和高基数惩罚。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>信息增益得分条形图。</li>
-<li>特征取值与类别分布堆叠条形图。</li>
-<li>不同分箱方案下得分稳定性图。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="information-gain" data-i="0">Python</button><button class="codetab" data-uid="information-gain" data-i="1">R</button></div><div class="codepanel active" data-uid="information-gain" data-i="0"><pre><code class="language-python">import pandas as pd
+from sklearn.feature_selection import mutual_info_classif
+
+X = pd.DataFrame({
+    &quot;strong&quot;: [0, 0, 0, 1, 1, 1],
+    &quot;weak&quot;: [0, 1, 0, 1, 0, 1],
+})
+y = [0, 0, 0, 1, 1, 1]
+scores = mutual_info_classif(
+    X, y, discrete_features=True, random_state=42
+)
+print(pd.Series(scores, index=X.columns).sort_values(ascending=False))
+</code></pre></div><div class="codepanel" data-uid="information-gain" data-i="1"><pre><code class="language-r">entropy &lt;- function(x) {
+  p &lt;- prop.table(table(x))
+  -sum(p * log2(p))
+}
+information_gain &lt;- function(x, y) {
+  h_cond &lt;- sum(sapply(split(y, x), function(g) {
+    length(g) / length(y) * entropy(g)
+  }))
+  entropy(y) - h_cond
+}
+y &lt;- c(0, 0, 0, 1, 1, 1)
+strong &lt;- c(&quot;L&quot;, &quot;L&quot;, &quot;L&quot;, &quot;H&quot;, &quot;H&quot;, &quot;H&quot;)
+weak &lt;- c(0, 1, 0, 1, 0, 1)
+c(strong = information_gain(strong, y),
+  weak = information_gain(weak, y))
+</code></pre></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><p>IG=0 表示在样本分布下未减少类别不确定性；IG=1 bit 的含义取决于原始熵。高分不是因果效应，也可能来自过细分组、缺失模式或 ID 泄漏。</p></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>用交叉验证/Bootstrap 记录排名稳定性。</li>
+<li>合并稀疏类别，限制最小组大小。</li>
+<li>比较不同分箱与连续互信息估计。</li>
+<li>排除 ID、时间戳、未来编码等高基数泄漏列。</li>
+<li>对大量特征用置换基线或嵌套验证。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>IG 排序条形图。</li>
+<li>特征取值 × 类别比例堆积图。</li>
+<li>分箱阈值—IG 曲线。</li>
+<li>各折入选频率图。</li>
+<li>特征基数与 IG 散点图。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>信息论基础清楚。</li>
-<li>对离散分类任务直观。</li>
-<li>可解释为不确定性减少。</li>
+<li>能捕捉一般离散依赖，不限线性。</li>
+<li>单位清晰、适合分类排序。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>偏向取值多的特征。</li>
-<li>连续变量需离散化。</li>
-<li>忽略特征间冗余和交互。</li>
+<li>有限样本估计偏差和高基数偏好。</li>
+<li>忽略特征间冗余、交互和混杂。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>对连续变量随意分箱导致结果不稳定。</li>
-<li>用信息增益筛出的特征直接当作独立危险因素。</li>
-<li>不处理低频类别，导致熵估计不稳。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-mutual-information-feature-selection.html" data-cn="互信息特征选择" data-en="Mutual Information Feature Selection" data-def="互信息特征选择用互信息衡量每个特征与目标变量之间共享的信息量，并据此筛选特征。它可以捕捉非线性依赖，不局限于线性相关。">互信息特征选择（Mutual Information Feature Selection）</a> 的区别：信息增益可视为目标熵减少量；互信息是更一般的两个变量共享信息量度。</li>
-<li>和 <a class="xlink" href="m-id3-decision-tree.html" data-cn="ID3决策树" data-en="ID3 Decision Tree" data-def="ID3 是 Ross Quinlan 提出的经典决策树构建算法。它用信息增益作为特征选择标准，递归地挑选最能降低类别不确定性的特征来生成分类树。">ID3决策树（ID3 Decision Tree）</a> 的区别：ID3 用信息增益选择树节点，本卡强调特征选择指标本身。</li>
-<li>和 <a class="xlink" href="m-univariate-feature-selection.html" data-cn="单变量特征选择" data-en="Univariate Feature Selection" data-def="单变量特征选择是一类过滤式方法。它逐个评估每个特征与目标变量之间的关系，根据统计量、P 值或信息量得分选择排名靠前或达到阈值的特征。">单变量特征选择（Univariate Feature Selection）</a> 的区别：信息增益是单变量特征选择的一种信息论得分。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>离散症状、体征、检查阳性指标的分类信息量排序。</li>
-<li>临床规则树构建前的候选变量评估。</li>
-<li>高维离散编码特征的初筛。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-mutual-information-feature-selection.html" data-cn="互信息特征选择" data-en="Mutual Information Feature Selection" data-def="互信息特征选择用互信息衡量每个特征与目标变量之间共享的信息量，并据此筛选特征。它可以捕捉非线性依赖，不局限于线性相关。">互信息特征选择（Mutual Information Feature Selection）</a></li>
-<li><a class="xlink" href="m-univariate-feature-selection.html" data-cn="单变量特征选择" data-en="Univariate Feature Selection" data-def="单变量特征选择是一类过滤式方法。它逐个评估每个特征与目标变量之间的关系，根据统计量、P 值或信息量得分选择排名靠前或达到阈值的特征。">单变量特征选择（Univariate Feature Selection）</a></li>
-<li><a class="xlink" href="m-id3-decision-tree.html" data-cn="ID3决策树" data-en="ID3 Decision Tree" data-def="ID3 是 Ross Quinlan 提出的经典决策树构建算法。它用信息增益作为特征选择标准，递归地挑选最能降低类别不确定性的特征来生成分类树。">ID3决策树（ID3 Decision Tree）</a></li>
-<li><a class="xlink" href="m-c4-5-decision-tree.html" data-cn="C4.5决策树" data-en="C4.5 Decision Tree" data-def="C4.5 是 ID3 的改进版本。它用信息增益率代替单纯的信息增益，并支持连续特征、缺失值处理和后剪枝，因此比 ID3 更接近实际应用环境。">C4.5决策树（C4.5 Decision Tree）</a></li>
+<li>把连续变量随意分太多箱。</li>
+<li>患者 ID 获得高分仍保留。</li>
+<li>全数据计算 IG 后交叉验证。</li>
+<li>把信息量解释为临床效应大小。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Quinlan JR. Induction of decision trees. <em>Mach Learn</em>. 1986;1:81-106.</li>
-<li>Cover TM, Thomas JA. <em>Elements of Information Theory</em>. 2nd ed. Wiley; 2006.</li>
-<li>FSelectorRcpp Contributors. FSelectorRcpp package documentation. <a href="https://cran.r-project.org/package=FSelectorRcpp">https://cran.r-project.org/package=FSelectorRcpp</a> （访问日期：2026-07-02）</li>
+<li>互信息是更一般名称，离散情形与 IG 等价。</li>
+<li>卡方给假设检验量；IG 给不确定性减少。</li>
+<li>C4.5 增益率惩罚高基数，ID3 使用原始 IG。</li>
+<li>如何选择：离散分类初筛可用 IG，但需控制基数并检查稳定性。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>症状、基因型、检查阳性与诊断类别筛选。</li>
+<li>分箱生物标志物的分类信息量评估。</li>
+<li>决策树分裂候选比较。</li>
+</ul>
+<p>必须审计类别不平衡、稀疏取值、缺失机制、患者级切分和高基数泄漏。</p></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>熵（Entropy）</strong>：类别不确定性的平均信息量。</li>
+<li><strong>条件熵（Conditional entropy）</strong>：知道特征后剩余的不确定性。</li>
+<li><strong>互信息（Mutual information）</strong>：两个变量共享的信息。</li>
+<li><strong>Bit</strong>：以 2 为对数底的信息单位。</li>
+<li><strong>高基数偏倚（High-cardinality bias）</strong>：取值多的特征更易获得虚高增益。</li>
+<li><strong>增益率（Gain ratio）</strong>：信息增益除以特征自身熵。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-mutual-information-feature-selection.html" data-cn="互信息特征选择" data-en="Mutual Information Feature Selection" data-def="互信息衡量知道一个特征后，结局的不确定性平均减少多少，因此能发现不限于线性或均值差异的边际依赖。">互信息特征选择（Mutual Information Feature Selection）</a></li>
+<li><a class="xlink" href="m-id3-decision-tree.html" data-cn="ID3决策树" data-en="ID3 Decision Tree" data-def="ID3 每一步都选择「最能减少类别不确定性」的离散特征来分裂节点。">ID3决策树（ID3 Decision Tree）</a></li>
+<li><a class="xlink" href="m-c4-5-decision-tree.html" data-cn="C4.5决策树" data-en="C4.5 Decision Tree" data-def="C4.5 是 ID3 的实用升级版：它用信息增益率惩罚「把数据切得过碎」的特征，并支持连续变量、缺失处理和剪枝。">C4.5决策树（C4.5 Decision Tree）</a></li>
+<li><a class="xlink" href="m-univariate-feature-selection.html" data-cn="单变量特征选择" data-en="Univariate Feature Selection" data-def="单变量特征选择让每个特征单独参加一次“与结局的考试”，再按得分或校正后的显著性筛选，但看不到联合效应和交互。">单变量特征选择（Univariate Feature Selection）</a></li>
+<li><a class="xlink" href="m-pearson-chi-squared-test-of-independence.html" data-cn="Pearson卡方独立性检验" data-en="Pearson Chi-Squared Test of Independence" data-def="卡方检验把列联表里「实际观测到的频数」和「假如两变量毫无关系时本该出现的期望频数」逐格相比：两者差得越大，越说明两个分类变量之间存在关联。">Pearson卡方独立性检验（Pearson Chi-Squared Test of Independence）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Cover TM, Thomas JA. <em>Elements of Information Theory</em>. Wiley; 2006.</li>
+<li>Quinlan JR. Induction of decision trees. <em>Machine Learning</em>. 1986;1:81-106.</li>
+<li>scikit-learn developers. Mutual information feature selection. https://scikit-learn.org/stable/modules/feature_selection.html</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-correlation-based-feature-selection.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">相关系数特征选择</div></a><a class="pg pg-next" href="m-mutual-information-feature-selection.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">互信息特征选择</div></a></div>

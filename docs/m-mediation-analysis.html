@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,203 +54,385 @@
     <div class="intro-note"><h1>中介分析（Mediation Analysis）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>中介分析把暴露对结局的总效应分解为「经由某中介变量传递的间接效应」与「不经该中介的直接效应」，用于揭示作用机制而非仅仅是否有效。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>中介分析把「暴露是否影响结局」进一步拆成「有多少影响是通过某个机制变量传过去的」。</p>
+<h3>1.2 定义</h3>
+<p>中介分析研究暴露 $X$ 对结局 $Y$ 的总效应中，有多少经由中介变量 $M$ 传递，多少不经该中介而直接作用。它既可以用经典线性路径模型表示，也可以在反事实框架下定义自然直接效应和自然间接效应。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：暴露/治疗是「通过什么」影响结局，中介占多少。</li>
-<li>适用任务：机制分解、间接效应估计、干预靶点识别。</li>
-<li>常见医学场景：药物→降血压→降低卒中；肥胖→炎症因子→糖尿病；社会经济地位→行为→结局。</li>
+<li>研究问题：治疗、暴露或社会因素是通过什么机制影响结局的。</li>
+<li>适用任务：机制分解、间接效应估计、中介比例估计、干预靶点探索。</li>
+<li>常见医学场景：降压药是否通过降低血压减少卒中；肥胖是否通过炎症因子增加糖尿病风险；社会经济状态是否通过健康行为影响死亡风险。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>知道治疗有效还不够，我们常想知道它「怎么起效」。中介分析把总效应拆成两条路径：一条经过中介变量（间接），一条绕过它（直接），从而定位机制与潜在干预点。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>如果总效应像一条河，中介分析就是把水流分成两条支流：一条经过中介变量，另一条绕过它。知道治疗有效只是知道河水到了下游；中介分析想知道水是主要从哪条支流流过去的。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>以线性模型为例，暴露 $X$、中介 $M$、结局 $Y$：</p>
-<p>$$
-M=\alpha_0+aX+\epsilon_M,\qquad
-Y=\beta_0+cX+bM+\epsilon_Y
-$$</p>
-<p>间接效应为 $a\cdot b$，直接效应为 $c$，总效应 $=ab+c$。反事实框架下更一般地定义自然直接效应（NDE）与自然间接效应（NIE）：</p>
-<p>$$
-\text{总效应}=\underbrace{\text{NDE}}_{\text{直接}}+\underbrace{\text{NIE}}_{\text{间接}}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>普通因果效应只回答「有没有用」和「有多大」。但医学研究常常还想知道「为什么有用」，因为机制决定能否优化治疗、寻找替代靶点和解释亚组差异。根本困难是：中介 $M$ 不是随机出现的，它通常也受暴露、混杂和测量误差影响；直接把 $M$ 放进回归模型，可能把因果路径、混杂路径和碰撞偏倚混在一起。</p>
+<h3>2.2 关键洞察</h3>
+<p>中介分析的关键洞察是把总效应拆成两种反事实比较：一类固定中介在「未暴露世界」会取的值，改变暴露，得到直接效应；另一类固定暴露状态，让中介从未暴露世界的值变为暴露世界的值，得到间接效应。这样定义后，「通过 M」不再只是回归系数变化，而是明确的因果路径效应。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$a$：暴露对中介的效应；$b$：调整暴露后中介对结局的效应。</li>
-<li>$ab$：间接（中介）效应；$c$：直接效应。</li>
-<li>中介比例 = 间接效应 / 总效应。</li>
-<li>NDE/NIE：反事实定义，可含暴露-中介交互，适用于非线性结局。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>无未测混杂：暴露-结局、中介-结局、暴露-中介三组关系均无未测混杂。</li>
-<li>中介的时序在暴露之后、结局之前，且测量可靠。</li>
-<li>无「暴露影响的中介-结局混杂」；必要时建模暴露-中介交互。</li>
+<li>相对单一回归：中介分析至少需要暴露到中介、中介到结局两部分信息。</li>
+<li>相对 Baron-Kenny 步骤：现代因果中介分析不要求总效应显著，也能处理暴露-中介交互和非线性结局。</li>
+<li>相对调节分析：中介问「怎么起效」，调节问「对谁更强」。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>在线性、无交互、无未测混杂的简化情形下：</p>
+<p>$$
+\begin{aligned}
+M_i &amp;= \alpha_0+aX_i+\boldsymbol\alpha^\top C_i+\varepsilon_{Mi} \\
+Y_i &amp;= \beta_0+c'X_i+bM_i+\boldsymbol\beta^\top C_i+\varepsilon_{Yi}
+\end{aligned}
+$$</p>
+<p>间接效应、直接效应和总效应为：</p>
+<p>$$
+\text{间接效应}=ab,\qquad \text{直接效应}=c',\qquad \text{总效应}=c'+ab
+$$</p>
+<p>反事实框架中，若 $Y(x,m)$ 表示把暴露设为 $x$ 且中介设为 $m$ 时的结局，$M(x)$ 表示暴露设为 $x$ 时的中介，则：</p>
+<p>$$
+\mathrm{NIE}=E\{Y(1,M(1))-Y(1,M(0))\}
+$$</p>
+<p>$$
+\mathrm{NDE}=E\{Y(1,M(0))-Y(0,M(0))\}
+$$</p>
+<p>这个式子在说：NIE 只让中介沿着暴露改变而改变，NDE 则把中介固定在未暴露世界，只改变暴露本身。</p>
+<h3>3.2 推导脉络</h3>
+<ol>
+<li>先估计暴露对中介的影响 $a$，即 $X$ 改变时 $M$ 改变多少。</li>
+<li>再估计在固定 $X$ 和混杂 $C$ 后，中介对结局的影响 $b$。</li>
+<li>在线性无交互模型里，一单位 $X$ 造成的中介变化是 $a$，每单位中介造成的结局变化是 $b$，所以经中介传递的效应是 $ab$。</li>
+<li>若结局为二分类、生存结局或存在暴露-中介交互，应使用反事实中介分析或专门模型，不能机械套用「系数相乘」。</li>
+</ol>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：暴露、中介、混杂协变量。</li>
-<li>因变量类型：连续或二分类结局（中介与结局各有对应模型）。</li>
-<li>数据结构：每行一个体，含 X、M、Y 与混杂。</li>
-<li>是否适合高维数据：多中介需专门方法。</li>
-<li>是否适合缺失较多数据：需谨慎处理缺失。</li>
-<li>是否适合删失数据：可扩展到生存结局中介。</li>
-<li>是否适合重复测量数据：需纵向中介模型。</li>
+<li>$X$：暴露、治疗或政策变量。</li>
+<li>$M$：中介变量，位于暴露之后、结局之前。</li>
+<li>$Y$：结局变量。</li>
+<li>$C$：处理前混杂变量，可能同时影响 $X$、$M$ 和 $Y$。</li>
+<li>$a$：暴露对中介的效应；$b$：控制暴露后中介对结局的效应。</li>
+<li>$ab$：间接效应；$c'$：直接效应；$c'+ab$：总效应。</li>
+<li>ACME/NIE：平均因果中介效应；ADE/NDE：平均直接效应。</li>
 </ul>
-<h3>3.2 示例表格</h3>
+<h3>3.4 关键假设(含违反后果)</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>暴露-结局无未测混杂</td>
+<td>调整后 $X$ 到 $Y$ 可交换</td>
+<td>总效应和直接效应偏倚</td>
+<td>DAG、基线平衡、敏感性分析</td>
+</tr>
+<tr>
+<td>暴露-中介无未测混杂</td>
+<td>调整后 $X$ 到 $M$ 可交换</td>
+<td>$a$ 路径偏倚</td>
+<td>检查处理前共同原因</td>
+</tr>
+<tr>
+<td>中介-结局无未测混杂</td>
+<td>调整后 $M$ 到 $Y$ 可交换</td>
+<td>$b$ 路径和间接效应偏倚</td>
+<td>DAG、负对照、敏感性分析</td>
+</tr>
+<tr>
+<td>无暴露诱导的中介-结局混杂</td>
+<td>没有被 $X$ 影响且同时影响 $M$ 和 $Y$ 的变量</td>
+<td>自然效应难以识别</td>
+<td>画时间轴，识别处理后变量</td>
+</tr>
+<tr>
+<td>时序清楚</td>
+<td>$X$ 先于 $M$，$M$ 先于 $Y$</td>
+<td>机制解释不可信</td>
+<td>研究设计和测量时间</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>研究一个治疗 $X$ 是否通过「血压下降幅度」$M$ 改善风险评分 $Y$。为方便手算，$Y$ 越大表示改善越多。</p>
 <table>
 <thead>
 <tr>
 <th>个体</th>
-<th>治疗X</th>
-<th>血压M</th>
-<th>卒中Y</th>
-<th>年龄</th>
+<th>治疗 X</th>
+<th>血压下降 M</th>
+<th>风险评分改善 Y</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0</td>
+<td>2</td>
+<td>5</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1</td>
+<td>4</td>
+<td>9</td>
+</tr>
+<tr>
+<td>4</td>
+<td>1</td>
+<td>6</td>
+<td>12</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Step 1：算暴露到中介的路径 $a$。</strong></p>
+<p>治疗组平均血压下降 $(4+6)/2=5$，对照组为 $(0+2)/2=1$，所以：</p>
+<p>$$
+a=5-1=4
+$$</p>
+<p><strong>Step 2：算总效应。</strong></p>
+<p>治疗组平均改善 $(9+12)/2=10.5$，对照组为 $(2+5)/2=3.5$，所以：</p>
+<p>$$
+\text{总效应}=10.5-3.5=7
+$$</p>
+<p><strong>Step 3：算中介到结局的路径 $b$。</strong></p>
+<p>在同一治疗状态内，$M$ 增加 2，$Y$ 增加 3；两个治疗状态下都如此，所以：</p>
+<p>$$
+b=\frac{3}{2}=1.5
+$$</p>
+<p><strong>Step 4：分解效应。</strong></p>
+<p>$$
+\text{间接效应}=ab=4\times 1.5=6
+$$</p>
+<p>$$
+\text{直接效应}=7-6=1
+$$</p>
+<p>$$
+\text{中介比例}=\frac{6}{7}=0.857
+$$</p>
+<p><strong>结论：</strong> 在这个线性简化例子中，治疗带来的 7 分改善里约 6 分经由血压下降传递，中介比例约 86%。这只说明「在无未测混杂、时序正确、线性无交互等假设下」的机制分解，不能仅凭这张表证明血压就是唯一机制。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：暴露/治疗、中介、处理前混杂。</li>
+<li>因变量类型：连续或二分类最常见；可扩展到计数和生存结局。</li>
+<li>数据结构：每行一个个体，且有清楚时间顺序。</li>
+<li>是否适合高维数据：多中介或高维中介需专门方法和多重检验控制。</li>
+<li>是否适合缺失较多数据：不直接适合；中介缺失尤其会影响机制解释。</li>
+<li>是否适合删失数据：可扩展，但需生存中介方法和删失处理。</li>
+<li>是否适合重复测量数据：可做纵向中介，但需明确时间变化路径。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>treatment</th>
+<th>sbp_change</th>
+<th>stroke_1y</th>
+<th>age</th>
+<th>baseline_sbp</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>1</td>
 <td>1</td>
-<td>128</td>
+<td>18</td>
 <td>0</td>
 <td>61</td>
+<td>156</td>
 </tr>
 <tr>
 <td>2</td>
 <td>0</td>
-<td>150</td>
+<td>4</td>
 <td>1</td>
 <td>70</td>
+<td>162</td>
 </tr>
 <tr>
 <td>3</td>
 <td>1</td>
-<td>132</td>
+<td>12</td>
 <td>0</td>
 <td>58</td>
+<td>148</td>
 </tr>
 <tr>
 <td>4</td>
 <td>0</td>
-<td>145</td>
-<td>1</td>
+<td>2</td>
+<td>0</td>
 <td>66</td>
+<td>151</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：暴露、中介、结局、混杂变量。</li>
-<li>关键变量：X、M、Y 及其时序、需调整的混杂集合。</li>
-<li>需要预处理的内容：确认时序、设定中介与结局模型、是否含交互。</li>
+<li>输入数据：暴露 $X$、中介 $M$、结局 $Y$、处理前混杂 $C$。</li>
+<li>关键变量：中介测量时间、结局随访时间、是否允许暴露-中介交互。</li>
+<li>需要预处理的内容：缺失处理、变量尺度统一、DAG、模型形式设定。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：直接效应、间接效应、总效应、中介比例。</li>
-<li>参数估计：NDE、NIE 及其区间。</li>
-<li>预测结果：无。</li>
-<li>不确定性指标：bootstrap 或蒙特卡洛置信区间、敏感性分析。</li>
+<li>模型对象/统计结果：中介模型、结局模型、ACME/NIE、ADE/NDE、总效应、中介比例。</li>
+<li>参数估计：直接效应、间接效应及区间。</li>
+<li>预测结果：通常不是核心产出。</li>
+<li>不确定性指标：bootstrap 或模拟置信区间、敏感性分析曲线。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：已知或假设存在机制路径、且中介测量可靠、时序清晰。</li>
-<li>不适合：中介-结局存在未测混杂、时序不清、中介测量误差大。</li>
-<li>使用前需要特别检查的点：三组无未测混杂假设、暴露-中介交互、对未测混杂的敏感性分析。</li>
+<li>适合：有明确机制假设、暴露先于中介、中介先于结局，且关键混杂可测量。</li>
+<li>不适合：横断面数据中时序不清、中介测量误差大、中介-结局未测混杂严重、存在复杂反馈关系。</li>
+<li>使用前需要特别检查的点：DAG、测量时间、暴露-中介交互、未测混杂敏感性、中介比例是否有意义。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="mediation-analysis" data-i="0">Python</button><button class="codetab" data-uid="mediation-analysis" data-i="1">R</button></div><div class="codepanel active" data-uid="mediation-analysis" data-i="0"><p>常用包：</p>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="mediation-analysis" data-i="0">Python</button><button class="codetab" data-uid="mediation-analysis" data-i="1">R</button></div><div class="codepanel active" data-uid="mediation-analysis" data-i="0"><p>常用包:</p>
 <ul>
 <li><code>statsmodels</code></li>
 </ul>
-<pre><code class="language-python">import statsmodels.api as sm
+<pre><code class="language-python">import statsmodels.formula.api as smf
 from statsmodels.stats.mediation import Mediation
-import statsmodels.formula.api as smf
 
-y_model = smf.logit(&quot;Y ~ X + M + age&quot;, data=df)
-m_model = smf.ols(&quot;M ~ X + age&quot;, data=df)
-med = Mediation(y_model, m_model, &quot;X&quot;, &quot;M&quot;).fit(n_rep=1000)
-print(med.summary())   # 直接/间接/总效应与中介比例
-</code></pre></div><div class="codepanel" data-uid="mediation-analysis" data-i="1"><p>常用包：</p>
+# 连续中介 M，二分类结局 Y 的示例
+m_model = smf.ols(&quot;sbp_change ~ treatment + age + baseline_sbp&quot;, data=df)
+y_model = smf.logit(
+    &quot;stroke_1y ~ treatment + sbp_change + age + baseline_sbp&quot;,
+    data=df
+)
+
+med = Mediation(y_model, m_model, &quot;treatment&quot;, &quot;sbp_change&quot;).fit(n_rep=1000)
+print(med.summary())
+</code></pre></div><div class="codepanel" data-uid="mediation-analysis" data-i="1"><p>常用包:</p>
 <ul>
 <li><code>mediation</code></li>
 </ul>
 <pre><code class="language-r">library(mediation)
-m_model &lt;- lm(M ~ X + age, data = df)
-y_model &lt;- glm(Y ~ X + M + age, data = df, family = binomial)
-med &lt;- mediate(m_model, y_model, treat = &quot;X&quot;, mediator = &quot;M&quot;,
-               boot = TRUE, sims = 1000)
-summary(med)          # ACME(间接)、ADE(直接)、总效应、中介比例
+
+m_model &lt;- lm(sbp_change ~ treatment + age + baseline_sbp, data = df)
+y_model &lt;- glm(stroke_1y ~ treatment + sbp_change + age + baseline_sbp,
+               data = df, family = binomial())
+
+med &lt;- mediate(
+  m_model,
+  y_model,
+  treat = &quot;treatment&quot;,
+  mediator = &quot;sbp_change&quot;,
+  boot = TRUE,
+  sims = 1000
+)
+
+summary(med)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：间接效应（ACME/NIE）、直接效应（ADE/NDE）、中介比例及区间。</li>
-<li>每个主要参数如何解释：间接效应显著说明存在经该中介的机制；中介比例反映其重要性。</li>
-<li>临床或医学意义如何表达：如「治疗降卒中风险中约 60% 由血压下降介导」。</li>
-<li>常见误读：把中介当成已证实的因果机制；忽视未测混杂使中介比例有偏。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>路径图（X→M→Y 与 X→Y）。</li>
-<li>直接/间接/总效应的森林图。</li>
-<li>对未测混杂的敏感性分析曲线。</li>
-</ul></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：间接效应、直接效应、总效应、中介比例及其区间。</li>
+<li>每个主要参数如何解读：ACME/NIE 表示经中介传递的平均效应；ADE/NDE 表示不经该中介的平均效应。</li>
+<li>临床或医学意义如何表达：例如「在假设成立时，治疗降低卒中风险的效应中，有多少由收缩压下降介导」。</li>
+<li>常见误读：间接效应显著不等于机制已被生物学证实；中介比例不适合在总效应接近 0 或直接/间接效应方向相反时简单解读。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>时序诊断：确认暴露、中介、结局的测量顺序；横断面中介分析通常只适合探索。</li>
+<li>混杂诊断：分别画 $X$ 到 $M$、$M$ 到 $Y$、$X$ 到 $Y$ 的 DAG，明确处理前和处理后变量。</li>
+<li>暴露-中介交互：比较含交互与不含交互的模型；有交互时不要机械使用 $ab$。</li>
+<li>未测混杂敏感性：报告中介-结局未测混杂需要多强才会推翻结论。</li>
+<li>测量误差：中介测量误差会削弱或扭曲间接效应，可做重复测量或误差校正。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>路径图：展示暴露、中介、结局和混杂变量。</li>
+<li>直接/间接/总效应森林图：显示点估计和置信区间。</li>
+<li>中介比例图：适合总效应方向明确且不接近 0 的场景。</li>
+<li>敏感性分析曲线：展示未测混杂强度变化下 ACME 的稳定性。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>揭示作用机制，超越「是否有效」。</li>
-<li>反事实框架可处理交互与非线性结局。</li>
-<li>可识别潜在干预靶点。</li>
+<li>从「是否有效」推进到「如何起效」，有助于机制理解。</li>
+<li>能量化不同路径的相对贡献，辅助选择干预靶点。</li>
+<li>反事实框架能处理非线性、交互和不同结局类型。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>强依赖不可完全验证的无未测混杂假设。</li>
-<li>中介测量误差会严重偏倚估计。</li>
-<li>多中介与时变中介需更复杂方法。</li>
+<li>对无未测混杂、时序和中介测量质量要求很高。</li>
+<li>多中介、反馈和时间变化路径会显著增加复杂度。</li>
+<li>中介比例在非线性模型或效应方向相反时不总是直观。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>用横断面数据做时序不清的中介分析。</li>
-<li>忽略暴露-中介交互直接用 Baron-Kenny。</li>
-<li>不做未测混杂敏感性分析就下机制结论。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-causal-inference.html" data-cn="因果推断" data-en="Causal Inference" data-def="因果推断是一组用于估计干预或暴露对结局影响的方法框架。它关注的是“如果我们改变处理状态，结局会怎样变化”，而不是单纯描述变量之间是否相关。">因果推断（Causal Inference）</a> 的关系：中介分析是因果推断在「机制分解」上的专门分支。</li>
-<li>和 <a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a> 的区别:中介分析用多个回归组合并在反事实框架下定义效应，而非单一回归系数。</li>
-<li>和调节（moderation）分析的区别:中介问「怎么起效」，调节问「对谁效应更强」。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>治疗通过生理指标（血压、血脂）介导对硬结局的效应分解。</li>
-<li>暴露→炎症/代谢标志物→疾病的机制研究。</li>
-<li>社会决定因素经行为路径影响健康结局。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-causal-inference.html" data-cn="因果推断" data-en="Causal Inference" data-def="因果推断是一组用于估计干预或暴露对结局影响的方法框架。它关注的是“如果我们改变处理状态，结局会怎样变化”，而不是单纯描述变量之间是否相关。">因果推断（Causal Inference）</a></li>
-<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a></li>
-<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
+<li>用横断面数据直接下机制结论。</li>
+<li>只做 Baron-Kenny 三步，不估计间接效应区间。</li>
+<li>把处理后混杂变量随意调整进模型。</li>
+<li>忽略暴露-中介交互和未测混杂敏感性。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-causal-inference.html" data-cn="因果推断" data-en="Causal Inference" data-def="因果推断不是问「谁和谁相关」，而是问：如果把同一批人放进另一个干预世界，结局会不会改变、会改变多少。">因果推断（Causal Inference）</a> 的关系：中介分析是因果推断在机制分解上的专门分支。</li>
+<li>和 <a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a> 的区别：线性回归只给条件关联；中介分析把多个模型放进因果路径假设下解释。</li>
+<li>和 <a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a> 的区别：Logistic 可作为二分类结局模型，但中介分析还要估计间接和直接路径。</li>
+<li>如何选择：若只问治疗有没有效，用总效应模型；若有明确时间顺序和机制假设，才做中介分析。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>降压治疗通过血压下降介导对卒中、肾病或心衰的影响。</li>
+<li>肥胖通过胰岛素抵抗、炎症指标或脂代谢改变影响糖尿病。</li>
+<li>社会经济状态通过吸烟、饮食、就医可及性影响健康结局。</li>
+<li>康复干预通过体能改善或心理状态改善影响生活质量。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>中介变量（Mediator）</strong>：暴露之后、结局之前，位于作用路径上的变量。</li>
+<li><strong>间接效应（Indirect Effect）</strong>：经由中介传递的那部分效应。</li>
+<li><strong>直接效应（Direct Effect）</strong>：不经指定中介传递的那部分效应。</li>
+<li><strong>总效应（Total Effect）</strong>：暴露对结局的总体影响，包含直接和间接路径。</li>
+<li><strong>ACME（Average Causal Mediation Effect）</strong>：平均因果中介效应，常对应自然间接效应。</li>
+<li><strong>ADE（Average Direct Effect）</strong>：平均直接效应，常对应自然直接效应。</li>
+<li><strong>中介比例（Proportion Mediated）</strong>：间接效应占总效应的比例。</li>
+<li><strong>暴露-中介交互（Exposure-Mediator Interaction）</strong>：暴露效应会随中介水平改变，或中介效应会随暴露状态改变。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-causal-inference.html" data-cn="因果推断" data-en="Causal Inference" data-def="因果推断不是问「谁和谁相关」，而是问：如果把同一批人放进另一个干预世界，结局会不会改变、会改变多少。">因果推断（Causal Inference）</a></li>
+<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a></li>
+<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
+<li><a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 用「从手上的样本里有放回地反复重抽」来模拟「把整个研究重做很多遍」，从而不靠任何公式，就能估计任意统计量的抽样波动、标准误和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Baron RM, Kenny DA. The moderator-mediator variable distinction in social psychological research. <em>J Pers Soc Psychol</em>. 1986;51(6):1173-1182.</li>
 <li>VanderWeele TJ. <em>Explanation in Causal Inference: Methods for Mediation and Interaction</em>. Oxford University Press; 2015.</li>
 <li>Imai K, Keele L, Tingley D. A general approach to causal mediation analysis. <em>Psychol Methods</em>. 2010;15(4):309-334.</li>
+<li>Pearl J. Direct and indirect effects. <em>Proceedings of the Seventeenth Conference on Uncertainty in Artificial Intelligence</em>. 2001:411-420.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-inverse-probability-of-treatment-weighting-iptw.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">逆概率处理加权</div></a><span></span></div>

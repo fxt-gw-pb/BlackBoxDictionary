@@ -19,225 +19,267 @@ r_packages: [stats, smacof]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-多维尺度分析是一类把样本间距离或不相似度表示为低维坐标的方法。它的目标是在二维或三维空间中尽量保留原始距离关系。
+MDS 只根据对象间不相似度寻找低维坐标，使图上点距尽量复现原始距离或距离顺序。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：只有样本间距离或相似度时，如何把对象放到低维空间中展示。
-- 适用任务：距离矩阵可视化、相似性结构探索、样本关系展示。
-- 常见医学场景：患者相似性网络可视化，微生物群落 beta 多样性展示，临床文本或表型相似度嵌入。
+多维尺度分析是一类距离表示方法。经典 MDS 对平方欧氏距离双中心化并做特征分解；度量 MDS 直接最小化距离差异，非度量 MDS 主要保持不相似度排序。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-MDS 像是在一张地图上摆放样本点：原始距离近的样本在图上也应靠近，原始距离远的样本在图上也应远离。不同 MDS 版本对“距离保留”的定义不同。
+- 只有患者间距离而没有可直接使用的坐标。
+- 距离定义比原始变量更符合研究问题。
+- 需要二维或三维展示对象相似性。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+已知城市两两路程，但没有地图坐标。MDS 尝试在纸上摆放城市，让纸面距离尽量符合路程；图形是否可信取决于原始距离和低维拟合误差。
 
-经典 MDS 从距离矩阵 $D=(d_{ij})$ 出发，对平方距离做双中心化：
+## 2. 核心思想与原理
+
+### 2.1 从距离恢复内积
+
+欧氏点的平方距离可由内积矩阵计算。双中心化逆向恢复中心化 Gram 矩阵，再通过特征分解得到坐标。
+
+### 2.2 经典、度量与非度量
+
+- 经典 MDS：代数解，最自然地处理欧氏距离。
+- 度量 MDS：迭代最小化原距离与嵌入距离差。
+- 非度量 MDS：允许单调变换，只强调距离排序。
+
+### 2.3 方向没有解释
+
+嵌入整体平移、旋转或镜像都保持点间距离。因此 MDS1/MDS2 轴的正负和方向通常没有固定医学含义。
+
+## 3. 数学形式
+
+### 3.1 经典 MDS
+
+设 $D^{(2)}$ 为逐元素平方距离矩阵：
 
 $$
-B=-\frac{1}{2}HD^{(2)}H
+H=I-\frac1n\mathbf1\mathbf1^\top
 $$
 
-其中：
-
 $$
-H=I-\frac{1}{n}\mathbf{1}\mathbf{1}^\top
+B=-\frac12HD^{(2)}H
 $$
 
-对 $B$ 做特征分解：
+### 3.2 坐标恢复
 
 $$
 B=V\Lambda V^\top
 $$
 
-取前 $k$ 个正特征值对应的坐标：
+取前 $k$ 个正特征值：
 
 $$
 Y=V_k\Lambda_k^{1/2}
 $$
 
-度量 MDS 常最小化 stress：
+### 3.3 Stress
+
+一个常见归一化 Stress-1 为：
 
 $$
-\operatorname{Stress}(Y)=
+\operatorname{Stress}_1=
 \sqrt{
-\frac{\sum_{i<j}(d_{ij}-\|y_i-y_j\|)^2}
-{\sum_{i<j}d_{ij}^2}
+\frac{\sum_{i\lt j}(d_{ij}-\widehat d_{ij})^2}
+{\sum_{i\lt j}d_{ij}^2}
 }
 $$
 
-### 2.2 参数或统计量含义
+其中 $\widehat d_{ij}=\|y_i-y_j\|$。
 
-- $D$：原始距离或不相似度矩阵。
-- $B$：由距离矩阵恢复的内积矩阵。
-- $Y$：低维坐标。
-- `n_components`：目标低维维度。
-- stress：低维距离与原始距离不一致的程度。
-- metric/nonmetric：是否保留距离数值，还是只保留距离排序。
+### 3.4 关键条件
 
-### 2.3 关键假设
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 不相似度定义合理 | 图表达错误关系 | 比较距离度量 |
+| 低维可近似原结构 | stress 高、视觉误导 | stress 与 Shepard 图 |
+| 经典 MDS 距离近似欧氏 | 出现负特征值 | 特征值谱 |
+| 样本量可承受距离矩阵 | 二次存储过大 | 子采样或近似 |
 
-- 距离或不相似度能合理表达样本关系。
-- 低维空间足以近似原始距离结构。
-- 经典 MDS 对欧氏距离结构最自然，非欧氏距离可能出现负特征值。
+## 4. 手把手算例
 
-## 3. 数据形式与输入输出
+三个对象的距离为：
 
-### 3.1 适合的数据形式
+$$
+D=
+\begin{pmatrix}
+0&1&2\\
+1&0&1\\
+2&1&0
+\end{pmatrix}
+$$
 
-- 自变量类型：特征矩阵、距离矩阵或相似度转换后的不相似度矩阵。
-- 因变量类型：MDS 本身不需要结局变量。
-- 数据结构：样本乘以特征矩阵，或样本乘以样本距离矩阵。
-- 是否适合高维数据：适合基于距离降维，但大样本距离矩阵成本较高。
-- 是否适合缺失较多数据：需先能计算可靠距离。
-- 是否适合删失数据：不直接处理删失结局。
-- 是否适合重复测量数据：需定义合适的样本距离，普通 MDS 不建模相关性。
+直觉上它们应排在一条直线上。
 
-### 3.2 示例表格
+**Step 1：平方距离。**
 
-以患者间距离矩阵为例：
+$$
+D^{(2)}=
+\begin{pmatrix}
+0&1&4\\
+1&0&1\\
+4&1&0
+\end{pmatrix}
+$$
 
-| Patient | P001 | P002 | P003 | P004 |
-| --- | --- | --- | --- | --- |
-| P001 | 0.00 | 0.42 | 1.10 | 0.95 |
-| P002 | 0.42 | 0.00 | 1.04 | 0.88 |
-| P003 | 1.10 | 1.04 | 0.00 | 0.36 |
-| P004 | 0.95 | 0.88 | 0.36 | 0.00 |
+**Step 2：双中心化。** 使用 $B=-HD^{(2)}H/2$ 得：
 
-### 3.3 输入与产出
+$$
+B=
+\begin{pmatrix}
+1&0&-1\\
+0&0&0\\
+-1&0&1
+\end{pmatrix}
+$$
 
-#### 输入
+**Step 3：特征分解。** 唯一正特征值为 $\lambda_1=2$，对应单位特征向量可取：
 
-- 输入数据：距离矩阵或可计算距离的特征矩阵。
-- 关键变量：距离度量、MDS 类型、目标维度、随机种子。
-- 需要预处理的内容：标准化、距离矩阵检查、缺失处理、异常样本检查。
+$$
+v_1=\frac1{\sqrt2}(-1,0,1)^\top
+$$
 
-#### 产出
+于是坐标：
 
-- 模型对象/统计结果：低维坐标、stress、特征值或拟合优度。
-- 参数估计：经典 MDS 的特征向量坐标，或迭代优化得到的坐标。
-- 预测结果：不直接预测。
-- 不确定性指标：stress、重采样稳定性、不同距离度量下嵌入一致性。
+$$
+Y=v_1\sqrt{\lambda_1}=(-1,0,1)^\top
+$$
 
-## 4. 适用场景
+**Step 4：核对距离。** 新坐标距离为 1、1、2，与原矩阵完全一致，stress 为 0。
 
-- 适合：核心输入是距离/相似度、希望展示样本关系、距离定义比原始变量更重要的场景。
-- 不适合：需要解释原始变量贡献、样本量很大导致距离矩阵不可承受、低维保距效果很差的场景。
-- 使用前需要特别检查的点：距离度量是否与研究问题匹配，stress 是否可接受，离群样本是否主导图形。
+## 5. 数据形式与输入输出
 
-## 5. 实现
+### 5.1 数据要求
 
-### 5.1 Python
+- 对称、对角为 0 的不相似度矩阵，或可计算距离的特征矩阵。
+- 相似度需先有依据地转为不相似度。
+- 缺失距离需要专门方法，不能随意填 0。
 
-常用包：
+### 5.2 输入与产出
 
-- `scikit-learn`
+输入为距离矩阵、MDS 类型、维数与优化设置。输出为低维坐标、stress、距离拟合和经典 MDS 特征值。
+
+## 6. 适用场景
+
+- 微生物组 beta 多样性、患者相似性和非欧氏表型距离。
+- 需要直观展示距离关系。
+- 不适合超大样本、距离定义不可靠或要求轴有直接变量解释的任务。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import pandas as pd
 from sklearn.manifold import MDS
 from sklearn.metrics import pairwise_distances
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv("patient_features.csv")
-features = ["Age", "BMI", "CRP", "LDL"]
-X = StandardScaler().fit_transform(df[features])
+X_s = StandardScaler().fit_transform(X)
+dist = pairwise_distances(X_s, metric="euclidean")
 
-dist = pairwise_distances(X, metric="euclidean")
-mds = MDS(
+model = MDS(
     n_components=2,
-    dissimilarity="precomputed",
-    normalized_stress="auto",
-    random_state=42
+    metric_mds=True,
+    metric="precomputed",
+    normalized_stress=True,
+    n_init=8,
+    max_iter=500,
+    eps=1e-6,
+    random_state=42,
+    n_jobs=-1,
 )
-embedding = mds.fit_transform(dist)
-
-embedding_df = pd.DataFrame(embedding, columns=["MDS1", "MDS2"])
-print("Stress:", mds.stress_)
-print(embedding_df.head())
+embedding = model.fit_transform(dist)
+print(model.stress_, model.n_iter_)
 ```
 
-### 5.2 R
-
-常用包：
-
-- `stats`
-- `smacof`
+### 7.2 R
 
 ```r
 x <- scale(df[, c("Age", "BMI", "CRP", "LDL")])
-d <- dist(x)
+d <- dist(x, method = "euclidean")
 
-fit <- cmdscale(d, k = 2, eig = TRUE)
-embedding <- fit$points
-head(embedding)
+classical <- cmdscale(
+  d,
+  k = 2,
+  eig = TRUE,
+  add = FALSE
+)
+embedding <- classical$points
+classical$eig
 
-# Metric MDS with stress diagnostics:
 # library(smacof)
-# fit2 <- mds(d, ndim = 2, type = "ratio")
-# fit2$stress
+# metric_fit <- mds(d, ndim = 2, type = "ratio")
+# metric_fit$stress
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：二维坐标中的距离关系、stress 或拟合优度、不同临床分组是否在距离意义下接近或分离。
-- 每个主要参数如何解释：`dissimilarity="precomputed"` 表示输入已经是样本间距离矩阵。
-- 临床或医学意义如何表达：MDS 图反映的是所选距离度量下的样本关系，结论必须绑定距离定义。
-- 常见误读：坐标轴通常没有直接医学含义，点的绝对方向和旋转也不重要。
+- 点间相对距离比坐标轴方向更重要。
+- stress 越低，低维距离越接近目标不相似度；必须注明 stress 定义。
+- 经典 MDS 的负特征值提示距离并非完全欧氏。
+- 图上视觉分群不能替代正式聚类和稳定性分析。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
 
-- MDS1-MDS2 样本散点图。
+1. 画 Shepard 图：原不相似度对嵌入距离。
+2. 比较 1、2、3 维 stress。
+3. 检查经典 MDS 特征值和负值比例。
+4. 改变距离度量并做 Procrustes/相关比较。
+5. bootstrap 样本后对齐嵌入，评估结构稳定性。
+
+## 10. 推荐可视化
+
+- MDS1-MDS2 散点图。
+- Shepard 图及拟合线。
 - stress 随维度变化曲线。
-- 原始距离与低维距离散点图。
-- 不同距离度量下的 MDS 图对比。
+- 经典 MDS 特征值谱。
 
-## 8. 优势、局限与常见坑
+## 11. 优势、局限与常见坑
 
-### 优势
+**优势：** 可直接从距离矩阵出发，几何含义清晰，适合多种非原始特征距离。
 
-- 可直接处理距离或不相似度矩阵。
-- 结果直观，适合展示样本关系。
-- 经典 MDS 与距离几何关系清晰。
+**局限：** 二次存储，轴难解释，结果强依赖距离，低维可能严重失真。
 
-### 局限
+**常见坑：** 不报告 stress；把方向当医学轴；将相似度直接当距离；忽略负特征值；凭二维视觉宣称分群。
 
-- 大样本距离矩阵存储和计算成本高。
-- 坐标轴解释有限。
-- 距离度量选择会强烈影响结果。
+## 12. 与相近方法的区别
 
-### 常见坑
+- [[主成分分析（Principal Component Analysis, PCA）]]：对欧氏数据，经典 MDS 与 PCA 得分紧密相关；MDS 更自然地接收距离矩阵。
+- [[Isomap（Isometric Mapping）]]：先估计近邻图测地距离，再调用经典 MDS。
+- [[t-SNE（t-Distributed Stochastic Neighbor Embedding）]]：更强调局部概率邻域，不追求全局距离数值。
+- 选择经验：研究对象由专门距离定义时考虑 MDS；原始连续特征线性压缩先用 PCA。
 
-- 忽略 stress，直接解释保距效果很差的图。
-- 混用不同量纲变量而不标准化。
-- 把 MDS 图上的视觉分群当作正式聚类或分类证据。
+## 13. 医学研究中的典型应用
 
-## 9. 与相近方法的区别
+- 微生物组 beta 多样性排序图。
+- 患者、症状或临床文本不相似度可视化。
+- 遗传距离、生态距离与医院间模式比较。
 
-- 和 [[主成分分析（Principal Component Analysis, PCA）]] 的区别：PCA 从特征矩阵的线性方差结构出发，MDS 可直接从距离矩阵出发。
-- 和 [[Isomap（Isometric Mapping）]] 的区别：Isomap 先估计流形测地距离，再用经典 MDS；MDS 本身可用于任何合适距离矩阵。
-- 和 [[t-SNE（t-Distributed Stochastic Neighbor Embedding）]] 的区别：t-SNE 强调局部概率邻域，MDS 更直接地优化距离保留。
+## 14. 术语表
 
-## 10. 医学研究中的典型应用
+| 术语 | 含义 |
+| --- | --- |
+| dissimilarity | 两对象差异程度，不一定是欧氏距离 |
+| double centering | 从平方距离恢复中心化内积矩阵 |
+| Gram matrix | 对象两两内积组成的矩阵 |
+| stress | 原不相似度与嵌入距离的失配程度 |
+| Shepard diagram | 不相似度与嵌入距离的散点图 |
 
-- 微生物组 beta 多样性距离的样本可视化。
-- 患者相似性矩阵的二维展示。
-- 临床文本、症状或表型不相似度的结构探索。
-
-## 11. 相关方法
+## 15. 相关方法
 
 - [[主成分分析（Principal Component Analysis, PCA）]]
 - [[Isomap（Isometric Mapping）]]
 - [[t-SNE（t-Distributed Stochastic Neighbor Embedding）]]
 - [[UMAP（Uniform Manifold Approximation and Projection）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
+- Torgerson WS. Multidimensional scaling: I. Theory and method. *Psychometrika*. 1952;17:401-419.
 - Kruskal JB. Multidimensional scaling by optimizing goodness of fit to a nonmetric hypothesis. *Psychometrika*. 1964;29:1-27.
-- Cox TF, Cox MAA. *Multidimensional Scaling*. 2nd ed. Chapman and Hall/CRC; 2000.
-- scikit-learn Developers. `sklearn.manifold.MDS`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html) （访问日期：2026-07-02）
+- scikit-learn Developers. `MDS` API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html) （访问日期：2026-07-09）

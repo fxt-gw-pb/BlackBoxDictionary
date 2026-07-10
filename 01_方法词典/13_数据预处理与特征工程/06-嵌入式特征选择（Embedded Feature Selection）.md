@@ -19,217 +19,254 @@ r_packages: [glmnet, caret]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-嵌入式特征选择是在模型训练过程中同步完成特征评价或筛选的方法。常见形式包括 L1 正则化模型、树模型特征重要性和基于模型系数的 `SelectFromModel`。
+嵌入式选择把“哪些变量留下”写进模型训练目标或结构，让预测拟合与特征取舍同时完成。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：如何让模型在学习预测规律的同时自动判断哪些特征重要。
-- 适用任务：分类、回归、高维特征筛选、预测建模。
-- 常见医学场景：Lasso 影像组学特征筛选、树模型变量重要性筛选、临床风险模型候选变量压缩。
+嵌入式方法在模型拟合过程中产生稀疏系数、分裂使用或重要性，再据此选特征。典型包括 Lasso/Elastic Net、树模型重要性和带稀疏约束的神经网络。本卡讲通用框架，树模型另见专卡。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-过滤法是建模前先筛一遍特征，嵌入式方法则是“边建模边筛选”。它更贴近最终模型目标，但也更依赖所选模型本身的偏好。
+- 在考虑其他变量后选择有联合预测贡献的特征。
+- 避免过滤法完全脱离最终模型。
+- 医学场景：高维风险预测、组学签名、可部署变量面板压缩。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+过滤法先海选、再组队；嵌入式方法让候选人在真实比赛中竞争位置。Lasso 还对每个非零系数收费，贡献不足以抵消费用的变量被压到 0。
 
-以 L1 正则化为例，嵌入式选择通过稀疏化系数实现：
+## 2. 核心思想与原理
+
+### 2.1 它到底在解决什么根本困难
+
+单变量高分特征可能互相重复，单独弱的特征在控制混杂后可能重要。特征选择若与最终模型分离，筛选标准和预测目标会错位。
+
+### 2.2 关键洞察
+
+在损失中加入稀疏惩罚，或使用天然按特征分裂的模型，让“拟合改善”和“复杂度成本”直接权衡。选择结果因此依赖模型家族：Lasso 偏好线性稀疏，树模型偏好可分裂的非线性。
+
+### 2.3 与朴素/相邻做法的对比
+
+- 比过滤法考虑联合条件贡献，但计算更高。
+- 比 wrapper 的逐子集搜索高效，但不保证全局最优子集。
+- Ridge 只收缩不清零，不能直接产生稀疏支持集。
+
+## 3. 数学形式
+
+### 3.1 核心公式
+
+以 Lasso 为例：
 
 $$
-\hat\beta
-=
-\arg\min_{\beta}
+\hat{\boldsymbol\beta}
+=\underset{\boldsymbol\beta}{\operatorname{arg\,min}}
 \left[
-L(y,X\beta)+\lambda\sum_{j=1}^{p}|\beta_j|
+\frac{1}{2n}\|\mathbf y-\mathbf X\boldsymbol\beta\|_2^2
++\lambda\|\boldsymbol\beta\|_1
 \right]
 $$
 
-选择规则可写为：
+选择集合：
 
 $$
-\text{keep}(X_j)=I(\hat\beta_j\neq 0)
+\widehat{\mathcal S}
+=\{j:|\hat\beta_j|>\epsilon\}
 $$
 
-对基于模型重要性的选择，若模型给出重要性 $I_j$，阈值为 $\theta$：
+这个式子在说：每个系数带来拟合收益，也要支付绝对值惩罚；收益不足的系数被压到 0。
+
+### 3.2 推导脉络
+
+在标准化、正交设计下，Lasso 解是对 OLS 系数做软阈值：
 
 $$
-\text{keep}(X_j)=I(I_j\geq \theta)
+\hat\beta_j^{Lasso}
+=\operatorname{sign}(\hat\beta_j^{OLS})
+\max(|\hat\beta_j^{OLS}|-\lambda,0)
 $$
 
-### 2.2 参数或统计量含义
+$L_1$ 球有尖角，最优解容易落在坐标轴上，从而产生精确 0。
 
-- $\lambda$：正则化强度。
-- $\hat\beta_j$：模型估计的第 $j$ 个特征系数。
-- $I_j$：模型给出的特征重要性。
-- 阈值 $\theta$：保留特征的重要性或系数阈值。
-- 基模型：用于选择特征的模型，如 Lasso、随机森林、梯度提升树。
+### 3.3 参数与统计量含义
 
-### 2.3 关键假设
+- $\lambda$：稀疏强度，越大保留越少。
+- $\epsilon$：把数值近零视为未选的容差。
+- coefficient path：系数随 $\lambda$ 变化的轨迹。
+- support：非零特征集合。
+- cross-validation：选择 $\lambda$ 的常用方法，必须嵌套在外层评估内。
 
-- 所选模型适合当前任务和数据结构。
-- 模型的系数或重要性可作为特征价值的代理。
-- 选择过程必须嵌入交叉验证或训练流程，避免信息泄露。
+### 3.4 关键假设（含违反后果）
 
-## 3. 数据形式与输入输出
+| 假设 | 含义 | 违反后果 |
+| --- | --- | --- |
+| 模型家族近似正确 | 线性/树结构能表达信号 | 选择错位 |
+| 预处理在训练折拟合 | 缩放、插补不看测试 | 泄漏 |
+| 样本支撑稀疏度 | 有足够事件/样本 | 选择不稳定 |
+| 高相关组被合理处理 | Lasso 可任意选一个 | 生物解释不稳 |
 
-### 3.1 适合的数据形式
+## 4. 手把手算例
 
-- 自变量类型：连续、分类编码变量、高维特征。
-- 因变量类型：二分类、多分类或连续型。
-- 数据结构：监督学习特征矩阵。
-- 是否适合高维数据：适合，尤其是 L1/Elastic Net。
-- 是否适合缺失较多数据：需按基模型要求处理。
-- 是否适合删失数据：需使用支持删失结局的嵌入式模型。
-- 是否适合重复测量数据：需使用分组验证或相应纵向模型。
+设特征已标准化且正交，OLS 系数为
 
-### 3.2 示例表格
+$$
+\hat{\boldsymbol\beta}^{OLS}=(3,\;0.8,\;0.3)
+$$
 
-以影像组学特征筛选为例：
+取 $\lambda=1$，逐项软阈值：
 
-| Age | Radiomics_1 | Radiomics_2 | Radiomics_3 | Radiomics_4 | Recurrence |
-| --- | --- | --- | --- | --- | --- |
-| 64 | 0.28 | 1.42 | -0.12 | 0.88 | 1 |
-| 52 | -0.31 | 0.40 | 0.05 | -0.22 | 0 |
-| 70 | 0.76 | 1.91 | -0.41 | 1.12 | 1 |
-| 47 | -0.22 | 0.15 | 0.11 | -0.34 | 0 |
-| 61 | 0.33 | 0.98 | -0.18 | 0.55 | 1 |
+$$
+\hat\beta_1=3-1=2
+$$
 
-### 3.3 输入与产出
+$$
+\hat\beta_2=\max(0.8-1,0)=0,\qquad
+\hat\beta_3=\max(0.3-1,0)=0
+$$
 
-#### 输入
+因此选择集合为 $\{1\}$。若 $\lambda=0.5$，结果为 $(2.5,0.3,0)$，选择 $\{1,2\}$。可见特征集合不是数据的固定真相，而由惩罚和验证目标共同决定。
 
-- 输入数据：特征矩阵和目标变量。
-- 关键变量：基模型、正则化强度或重要性阈值、交叉验证方案。
-- 需要预处理的内容：缺失处理、标准化、类别编码、训练测试拆分。
+## 5. 数据形式与输入输出
 
-#### 产出
+### 5.1 适合的数据形式
 
-- 模型对象/统计结果：选择器、基模型、特征系数或重要性。
-- 参数估计：模型系数、重要性得分或正则化参数。
-- 预测结果：若直接使用该模型，也可输出预测。
-- 不确定性指标：交叉验证性能、特征选择稳定性、测试集表现。
+- 数值化表格、高维组学，分类/回归结局。
+- Lasso 前通常标准化；类别变量需成组选择时考虑 group lasso。
+- 缺失需在同一 pipeline 内插补。
+- 生存结局需 penalized Cox，而非普通回归。
 
-## 4. 适用场景
+### 5.2 示例表格
 
-- 适合：希望特征选择服务于最终预测模型的场景。
-- 不适合：只想做模型无关初筛，或需要与具体模型无关的变量解释。
-- 使用前需要特别检查的点：是否标准化、基模型是否稳定、选择结果是否随重采样变化很大。
+| patient_id | marker_1 | marker_2 | marker_3 | severe |
+| --- | ---: | ---: | ---: | ---: |
+| P01 | -1.2 | 0.4 | 0.1 | 0 |
+| P02 | 0.2 | -0.3 | 1.1 | 0 |
+| P03 | 1.5 | 0.8 | -0.2 | 1 |
 
-## 5. 实现
+### 5.3 输入与产出
 
-### 5.1 Python
+输入训练矩阵、结局、模型、惩罚网格和选择规则；产出拟合模型、非零支持、系数/重要性路径与验证性能。
 
-常用包：
+## 6. 适用场景
 
-- `scikit-learn`
+- 适合：预测与选择需要对齐、候选多、期望稀疏模型。
+- 不适合：选择稳定性比预测更重要但样本极小，或真实关系严重偏离模型家族。
+- 需嵌套验证并报告选择频率。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import pandas as pd
-from sklearn.feature_selection import SelectFromModel
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
+from sklearn.datasets import load_breast_cancer
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegressionCV
 
-df = pd.read_csv("radiomics_recurrence.csv")
-X = df[["Age", "Radiomics_1", "Radiomics_2", "Radiomics_3", "Radiomics_4"]]
-y = df["Recurrence"].astype(int)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
-
-lasso_logit = LogisticRegression(
-    penalty="l1",
-    solver="liblinear",
-    C=0.2,
-    random_state=42
-)
-
-selector = make_pipeline(
+X, y = load_breast_cancer(return_X_y=True, as_frame=True)
+model = make_pipeline(
     StandardScaler(),
-    SelectFromModel(lasso_logit)
+    LogisticRegressionCV(
+        Cs=20, cv=5, penalty="l1", solver="liblinear",
+        scoring="roc_auc", max_iter=5000, random_state=42
+    ),
 )
-X_train_sel = selector.fit_transform(X_train, y_train)
-X_test_sel = selector.transform(X_test)
+model.fit(X, y)
+coef = model[-1].coef_[0]
+selected = X.columns[abs(coef) > 1e-8]
+print(selected.tolist())
 ```
 
-### 5.2 R
-
-常用包：
-
-- `glmnet`
+### 7.2 R
 
 ```r
 library(glmnet)
 
-x <- model.matrix(Recurrence ~ Age + Radiomics_1 + Radiomics_2 + Radiomics_3 + Radiomics_4 - 1, data = df_train)
-y <- df_train$Recurrence
-
-fit <- cv.glmnet(x, y, family = "binomial", alpha = 1)
-coef_fit <- coef(fit, s = "lambda.min")
-selected <- rownames(coef_fit)[as.vector(coef_fit != 0)]
-selected <- setdiff(selected, "(Intercept)")
+x <- model.matrix(Species ~ ., iris)[, -1]
+y <- as.integer(iris$Species == "setosa")
+set.seed(42)
+cv <- cv.glmnet(
+  x, y, family = "binomial", alpha = 1,
+  type.measure = "auc"
+)
+b <- coef(cv, s = "lambda.1se")
+rownames(b)[as.vector(b != 0)]
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解读
 
-- 核心结果看什么：被保留特征、模型性能、选择稳定性。
-- 每个主要参数如何解释：正则化越强或阈值越高，保留特征越少。
-- 临床或医学意义如何表达：保留特征是当前模型认为有预测贡献的变量，不等于独立危险因素或因果变量。
-- 常见误读：把模型重要性当作无条件通用的重要性。
+非零表示在当前模型、惩罚和数据下被保留，不等于因果或独立生物效应。系数需在标准化尺度解释；相关特征间的选择可任意交换。
 
-## 7. 推荐可视化
+## 9. 假设诊断与稳健性
 
-- 正则化路径图。
-- 特征重要性或系数条形图。
-- 重采样下特征入选频率图。
+- 画系数路径与 CV 曲线，比较 $\lambda_{min}$ 和 $\lambda_{1se}$。
+- 外层交叉验证中重做全部选择，报告入选频率。
+- bootstrap stability selection。
+- 比较 Lasso、Elastic Net 和树模型支持集。
+- 检查校准、亚组、外部中心与删减后的性能损失。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
+
+- 系数路径图。
+- CV 性能—$\log\lambda$ 曲线。
+- 特征入选频率图。
+- 相关组内系数交换图。
+- 特征数—性能—成本曲线。
+
+## 11. 优势、局限与常见坑
 
 ### 优势
 
-- 与模型目标一致。
-- 可利用正则化控制复杂度。
-- 常比纯过滤法更贴近最终预测性能。
+- 选择与训练目标一致。
+- 比穷举子集高效，可处理高维。
 
 ### 局限
 
-- 依赖基模型选择。
-- 选择结果可能不稳定。
-- 解释性受模型偏倚影响。
+- 支持集依赖模型和超参数。
+- 高相关、小样本下不稳定。
 
 ### 常见坑
 
-- 在交叉验证外先做嵌入式选择。
-- 用 Lasso 但不标准化特征。
-- 把树模型 impurity importance 当作完全无偏的重要性。
+- 外层测试数据参与调 $\lambda$。
+- 未标准化就比较 Lasso 系数。
+- 把 Ridge 当稀疏选择。
+- 只报告一次支持集，不报告稳定性。
 
-## 9. 与相近方法的区别
+## 12. 与相近方法的区别
 
-- 和 [[单变量特征选择（Univariate Feature Selection）]] 的区别：单变量方法先独立打分；嵌入式方法在模型训练中打分或稀疏化。
-- 和 [[Lasso回归（Lasso Regression）]] 的区别：Lasso 是嵌入式特征选择的典型实现之一。
-- 和 [[基于树模型的特征选择（Tree-based Feature Selection）]] 的区别：树模型选择是嵌入式方法中的一个重要分支。
+- 过滤法先评分后建模；嵌入式方法在拟合中选。
+- wrapper 反复评估子集，计算更昂贵。
+- Elastic Net 比 Lasso 更倾向成组保留相关特征。
+- 如何选择：线性稀疏用 Lasso/Elastic Net，复杂非线性比较树选择。
 
-## 10. 医学研究中的典型应用
+## 13. 医学研究中的典型应用
 
-- Lasso 选择影像组学或组学特征。
-- 随机森林筛选非线性预测变量。
-- Elastic Net 在高相关生物标志物中做稳定筛选。
+- 多组学预后签名。
+- 影像组学变量压缩。
+- 从大量 EHR 指标选择可部署风险面板。
 
-## 11. 相关方法
+需报告缺失、标准化、事件数、嵌套验证、选择稳定性与外部校准。
+
+## 14. 关键术语
+
+- **嵌入式方法（Embedded method）**：训练过程中完成选择。
+- **稀疏性（Sparsity）**：多数系数为 0。
+- **软阈值（Soft thresholding）**：先减阈值，再将越界内系数清零。
+- **支持集（Support）**：非零系数对应的特征。
+- **稳定性选择（Stability selection）**：重复抽样统计入选频率。
+- **嵌套交叉验证（Nested CV）**：外层评估，内层调参与选择。
+
+## 15. 相关方法
 
 - [[Lasso回归（Lasso Regression）]]
-- [[Ridge回归（Ridge Regression）]]
 - [[弹性网络回归（Elastic Net Regression）]]
+- [[Ridge回归（Ridge Regression）]]
 - [[基于树模型的特征选择（Tree-based Feature Selection）]]
+- [[交叉验证（Cross-Validation）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
-- Guyon I, Elisseeff A. An introduction to variable and feature selection. *J Mach Learn Res*. 2003;3:1157-1182.
-- Tibshirani R. Regression shrinkage and selection via the lasso. *J R Stat Soc Series B*. 1996;58(1):267-288.
-- scikit-learn Developers. `SelectFromModel`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectFromModel.html](https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectFromModel.html) （访问日期：2026-07-02）
+- Tibshirani R. Regression shrinkage and selection via the lasso. *JRSS B*. 1996;58(1):267-288.
+- Zou H, Hastie T. Regularization and variable selection via the elastic net. *JRSS B*. 2005;67(2):301-320.
+- Kuhn M, Johnson K. *Feature Engineering and Selection*. CRC Press; 2019.

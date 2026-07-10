@@ -19,225 +19,361 @@ r_packages: [nnet]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-多层感知机分类器是一类前馈神经网络模型。它通过若干隐藏层和非线性激活函数，把输入特征映射到输出类别概率，适合学习复杂的非线性判别边界。
+MLP 把多次“线性组合 + 非线性激活”串起来，将原本不能用一条直线分开的类别，在逐层变换后的表示空间中分开。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：当特征与类别之间关系复杂、难以用简单线性或树规则表达时，如何学习更灵活的分类函数。
-- 适用任务：二分类、多分类、向量化图像或表格数据分类。
-- 常见医学场景：病人风险分层、多指标诊断分类、结构化生理信号或向量化图像特征分类。
+多层感知机分类器是一类前馈人工神经网络：信息从输入层经一个或多个隐藏层流向输出层，不形成时间上的反馈环。每个神经元先对上一层输出做加权求和，再经过激活函数；模型用反向传播计算梯度，用梯度下降更新全部权重。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-MLP 可以理解成一层层“特征变换器”。前面几层先把原始输入组合成更有判别力的中间表示，最后一层再根据这些表示给出属于各个类别的概率。
+- 研究问题：多个指标以复杂、非线性和交互方式共同决定类别时，如何学习灵活的判别边界。
+- 适用任务：二分类、多分类和多标签分类。
+- 常见医学场景：基于结构化 EHR 的重症风险分层、多个生物标志物联合诊断、向量化影像特征分类。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+把隐藏层想成几组会自动学习的“组合指标”。第一层可能把年龄、血压和肌酐组合成若干风险模式；下一层再组合这些模式；输出层才把最终表示翻译成疾病概率。关键不在“层数多”，而在激活函数打破纯线性：若每层都没有非线性，无论堆多少层，整体仍等价于一次线性变换。
 
-第 $l$ 层的前向传播可写为：
+## 2. 核心思想与原理
+
+### 2.1 它到底在解决什么根本困难
+
+Logistic 回归只有一个线性预测子，天然偏好平面型决策边界。现实中“高龄且高肌酐才危险”“某指标只在女性中有效”都属于弯曲边界或交互效应。手工枚举所有交互和非线性变换既困难又容易漏掉；MLP 让隐藏单元从数据中学习这些中间表示。
+
+### 2.2 关键洞察
+
+一层隐藏单元各自切出一个简单区域，多层网络再把许多简单区域拼成复杂边界。训练时，链式法则把最终预测误差逐层传回去：某个权重对损失影响越大，更新幅度就越大。这就是反向传播的本质——高效重复使用中间导数，而不是一种新的统计准则。
+
+### 2.3 与朴素/相邻做法的对比
+
+- 相比 Logistic 回归：MLP 自动学习非线性和交互，但参数更多、解释更弱，也更需要样本量与正则化。
+- 相比单层感知机：MLP 的隐藏层和可微激活能处理非线性可分问题，并可输出连续概率。
+- 相比树模型：MLP 的函数通常更平滑且便于端到端学习；树对表格数据、缺失模式和小样本往往更省心。
+
+## 3. 数学形式
+
+### 3.1 核心公式
+
+以一层隐藏层的二分类 MLP 为例：
 
 $$
-z^{[l]} = W^{[l]} a^{[l-1]} + b^{[l]}
+\mathbf h=\phi(\mathbf W_1\mathbf x+\mathbf b_1),\qquad
+z=\mathbf w_2^\top\mathbf h+b_2,\qquad
+\hat p=\sigma(z)=\frac{1}{1+\exp(-z)}
 $$
 
 $$
-a^{[l]} = \phi^{[l]}(z^{[l]})
+\mathcal L=-\left[y\log(\hat p)+(1-y)\log(1-\hat p)\right]
 $$
 
-其中 $a^{[0]} = x$ 为输入。对多分类任务，输出层常用 softmax：
+这个式子在说：先把输入变成隐藏表示，再把表示压成一个 logit，最后用 sigmoid 得到阳性概率，并用交叉熵惩罚与真实标签不一致的预测。
+
+多分类时通常使用 softmax：
 
 $$
-\hat y_k = \frac{\exp(z_k^{[L]})}{\sum_{j=1}^{K}\exp(z_j^{[L]})}
+\hat p_k=\frac{\exp(z_k)}{\sum_{j=1}^{K}\exp(z_j)}
 $$
 
-损失函数常用交叉熵：
+### 3.2 推导脉络
+
+1. 线性组合 $\mathbf W_1\mathbf x+\mathbf b_1$ 汇总输入证据。
+2. 激活函数 $\phi$ 引入非线性；ReLU 的形式是 $\max(0,a)$。
+3. 二分类需要 $0$ 到 $1$ 的输出，因此用 sigmoid；多分类用 softmax 让各类概率和为 1。
+4. 对 Bernoulli 或 categorical 似然取负对数，就得到二元或多类交叉熵。
+5. 由链式法则，输出层的关键误差信号为 $\partial\mathcal L/\partial z=\hat p-y$，再逐层乘局部导数得到每个权重的梯度。
+
+### 3.3 参数与统计量含义
+
+- $\mathbf x$：一个样本的输入特征向量，训练前通常需要标准化。
+- $\mathbf W_1,\mathbf w_2$：连接权重，决定信息以多大方向和强度传播。
+- $\mathbf b_1,b_2$：偏置，使激活阈值不必经过原点。
+- $\mathbf h$：隐藏表示，不是直接观测到的临床变量。
+- $\hat p$：模型估计的类别概率；它是否可信还取决于校准。
+- $\mathcal L$：交叉熵损失；训练优化的是平均损失加正则项，不是直接优化准确率。
+
+### 3.4 关键假设（含违反后果）
+
+| 假设 | 含义 | 违反后会怎样 | 如何粗查 |
+| --- | --- | --- | --- |
+| 训练与应用同分布 | 未来患者与训练患者的采集流程、谱系近似 | 外部性能和校准下降 | 按时间、中心和设备做外部验证 |
+| 切分后样本独立 | 同一患者的多次记录不能跨训练集和测试集 | 数据泄漏，性能虚高 | 按 patient_id 分组切分 |
+| 标签定义可靠 | 阳性和阴性的判定标准一致 | 网络会拟合标注噪声 | 抽样复核、报告一致性 |
+| 信息量足以支撑复杂度 | 有效样本量与参数量、类别数相匹配 | 严重过拟合 | 比较训练/验证学习曲线 |
+| 缺失机制被妥善处理 | 缺失值不能未经处理直接输入 | 训练失败或学到就医流程偏差 | 绘制缺失模式并做敏感性分析 |
+
+## 4. 手把手算例
+
+设患者有两个已标准化特征 $\mathbf x=(2,1)^\top$，真实标签 $y=1$。一个有两个 ReLU 隐藏单元的网络参数为：
 
 $$
-\mathcal{L} = -\sum_{k=1}^{K} y_k \log \hat y_k
+\mathbf W_1=
+\begin{pmatrix}
+0.5&0.5\\
+-0.5&1
+\end{pmatrix},
+\quad
+\mathbf b_1=
+\begin{pmatrix}
+-1\\
+0.5
+\end{pmatrix},
+\quad
+\mathbf w_2=
+\begin{pmatrix}
+1.2\\
+-0.8
+\end{pmatrix},
+\quad b_2=0.1
 $$
 
-模型参数通过反向传播和梯度下降类优化器更新。
+**第 1 步：隐藏层前向传播。**
 
-### 2.2 参数或统计量含义
+$$
+a_1=0.5\times2+0.5\times1-1=0.5
+$$
 
-- `hidden_layer_sizes`：每个隐藏层的神经元数量。
-- `activation`：激活函数，如 `relu`、`tanh`、`logistic`。
-- `alpha`：L2 正则化强度。
-- `learning_rate_init`：初始学习率。
-- `max_iter` 或训练轮数：优化迭代次数。
+$$
+a_2=-0.5\times2+1\times1+0.5=0.5
+$$
 
-### 2.3 关键假设
+两者都大于 0，所以 ReLU 后 $\mathbf h=(0.5,0.5)^\top$。
 
-- 非线性映射对分类有帮助。
-- 训练数据量、特征表示和优化设置足以支撑网络学习。
-- 特征通常需要标准化，且训练稳定性受超参数影响较大。
+**第 2 步：输出概率。**
 
-## 3. 数据形式与输入输出
+$$
+z=1.2\times0.5-0.8\times0.5+0.1=0.3
+$$
 
-### 3.1 适合的数据形式
+$$
+\hat p=\frac{1}{1+\exp(-0.3)}=0.574
+$$
 
-- 自变量类型：数值化特征、嵌入向量、图像展开向量等。
-- 因变量类型：二分类或多分类。
-- 数据结构：宽表数据，或已向量化后的高维输入。
-- 是否适合高维数据：适合，但更依赖样本量和正则化。
-- 是否适合缺失较多数据：通常需先处理缺失。
-- 是否适合删失数据：不适合。
-- 是否适合重复测量数据：基础 MLP 不直接利用时间结构。
+模型给出 57.4% 的阳性概率。
 
-### 3.2 示例表格
+**第 3 步：计算损失。**
 
-以急诊患者分诊等级分类为例：
+$$
+\mathcal L=-\log(0.574)=0.555
+$$
 
-| Age | HR | RR | SBP | Lactate | TriageClass |
-| --- | --- | --- | --- | --- | --- |
-| 71 | 118 | 28 | 92 | 3.0 | high |
-| 34 | 78 | 16 | 124 | 1.0 | low |
-| 59 | 102 | 22 | 104 | 2.1 | medium |
-| 42 | 81 | 18 | 130 | 1.2 | low |
-| 67 | 110 | 26 | 96 | 2.8 | high |
+**第 4 步：看一次反向传播。** 输出误差信号为
 
-### 3.3 输入与产出
+$$
+\delta_z=\hat p-y=0.574-1=-0.426
+$$
+
+因此输出权重梯度为
+
+$$
+\frac{\partial\mathcal L}{\partial\mathbf w_2}
+=\delta_z\mathbf h
+=(-0.213,-0.213)^\top
+$$
+
+若学习率为 0.1，第一条输出权重从 1.2 更新为 $1.2-0.1(-0.213)=1.2213$；朝着提高阳性概率的方向移动。这个例子把“前向得到预测、损失衡量错误、反向把错误分给权重”连成了一条完整链。
+
+## 5. 数据形式与输入输出
+
+### 5.1 适合的数据形式
+
+- 自变量类型：连续、二元或编码后的类别变量；量纲通常需要统一。
+- 因变量类型：二分类、多分类或多标签结局。
+- 数据结构：每行一个独立分析单位，每列一个输入特征。
+- 是否适合高维数据：可以，但需正则化、降维或足够样本量。
+- 是否适合缺失较多数据：不直接适合，需插补并保留缺失指示。
+- 是否适合删失数据：普通分类损失不处理删失；需改用生存神经网络。
+- 是否适合重复测量数据：可将序列汇总为特征；原始时序更适合 RNN、LSTM 或 Transformer。
+
+### 5.2 示例表格
+
+| patient_id | age_z | creatinine_z | diabetes | severe_30d |
+| --- | ---: | ---: | ---: | ---: |
+| P01 | -0.8 | -0.4 | 0 | 0 |
+| P02 | 0.2 | 0.1 | 1 | 0 |
+| P03 | 1.1 | 1.8 | 1 | 1 |
+| P04 | 0.7 | -0.2 | 0 | 1 |
+
+### 5.3 输入与产出
 
 #### 输入
 
-- 输入数据：特征矩阵和类别标签。
-- 关键变量：网络结构、激活函数、正则化、学习率、批大小。
-- 需要预处理的内容：标准化、训练验证划分、类别不平衡处理。
+- 输入数据：数值矩阵 $\mathbf X$ 与类别标签 $\mathbf y$。
+- 关键设置：隐藏层宽度、层数、激活函数、学习率、批大小和正则化强度。
+- 预处理：按训练集参数标准化、编码类别变量、处理缺失并按患者切分。
 
 #### 产出
 
-- 模型对象/统计结果：训练好的网络权重、损失曲线、验证集指标。
-- 参数估计：权重矩阵和偏置，不适合逐个直接解释。
-- 预测结果：类别标签和类别概率。
-- 不确定性指标：测试集准确率、宏平均 F1、AUC、概率校准情况。
+- 模型对象：已学习的权重、偏置与预处理流程。
+- 预测结果：每类概率与按阈值得到的类别。
+- 训练过程：训练/验证损失、迭代次数和早停点。
+- 不确定性：普通 MLP 不自动给出置信区间，可用 bootstrap、深度集成或贝叶斯近似。
 
-## 4. 适用场景
+## 6. 适用场景
 
-- 适合：中到大型数据集、非线性关系明显、特征经过良好数值化的分类问题。
-- 不适合：样本很小、需要强解释性或明确规则输出的场景。
-- 使用前需要特别检查的点：标准化、过拟合、类别不平衡、早停和正则化设置。
+- 适合：关系明显非线性、交互复杂、样本量足够且重点是预测。
+- 不适合：样本极少、主要目标是参数的因果/临床解释、存在未处理删失，或表格数据上简单模型已足够。
+- 使用前特别检查：患者级切分、类别不平衡、标准化、过拟合、概率校准和外部可迁移性。
 
-## 5. 实现
+## 7. 实现
 
-### 5.1 Python
+### 7.1 Python
 
-常用包：
-
-- `scikit-learn`
+常用包：scikit-learn。
 
 ```python
-import pandas as pd
+from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import roc_auc_score, log_loss
 
-df = pd.read_csv("triage_classification.csv")
-X = df[["Age", "HR", "RR", "SBP", "Lactate"]]
-y = df["TriageClass"]
-
+X, y = load_breast_cancer(return_X_y=True)
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
+    X, y, test_size=0.25, stratify=y, random_state=42
 )
 
-fit = make_pipeline(
+model = make_pipeline(
     StandardScaler(),
     MLPClassifier(
-        hidden_layer_sizes=(64, 32),
+        hidden_layer_sizes=(16, 8),
         activation="relu",
-        alpha=1e-4,
-        learning_rate_init=1e-3,
-        max_iter=300,
-        random_state=42
-    )
+        alpha=1e-3,
+        early_stopping=True,
+        max_iter=1000,
+        random_state=42,
+    ),
 )
-fit.fit(X_train, y_train)
+model.fit(X_train, y_train)
+prob = model.predict_proba(X_test)[:, 1]
+print("AUC:", roc_auc_score(y_test, prob))
+print("log loss:", log_loss(y_test, prob))
 ```
 
-### 5.2 R
+真实 EHR 中应把随机切分替换成按患者、中心或时间的分组切分。
 
-常用包：
+### 7.2 R
 
-- `nnet`
+常用包：nnet。
 
 ```r
 library(nnet)
 
-fit <- nnet(
-  TriageClass ~ Age + HR + RR + SBP + Lactate,
-  data = df,
-  size = 10,
-  decay = 1e-4,
-  maxit = 300,
-  trace = FALSE
-)
+set.seed(42)
+idx <- sample(seq_len(nrow(iris)), size = 0.75 * nrow(iris))
+train <- iris[idx, ]
+test <- iris[-idx, ]
 
-pred <- predict(fit, newdata = df_test, type = "class")
+# 仅用训练集均值和标准差缩放，避免信息泄漏
+mu <- sapply(train[, 1:4], mean)
+sdv <- sapply(train[, 1:4], sd)
+train_x <- scale(train[, 1:4], center = mu, scale = sdv)
+test_x <- scale(test[, 1:4], center = mu, scale = sdv)
+
+fit <- nnet(
+  x = train_x, y = class.ind(train$Species),
+  size = 8, softmax = TRUE, decay = 1e-3,
+  maxit = 1000, trace = FALSE
+)
+prob <- predict(fit, test_x, type = "raw")
+pred <- colnames(prob)[max.col(prob)]
+mean(pred == test$Species)
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解读
 
-- 核心结果看什么：验证集性能、损失曲线、过拟合迹象、概率校准。
-- 每个主要参数如何解释：隐藏层越大模型越灵活，但也更容易过拟合；正则化越强，参数越受约束。
-- 临床或医学意义如何表达：更适合强调复杂模式识别能力，而不是对单变量方向和大小做直接解释。
-- 常见误读：神经网络性能高不代表一定更稳，需要严格外部验证和可重复训练。
+- 首先看独立验证集的区分度、校准和临床效用，而不是训练准确率。
+- 例如 AUC 为 0.86 说明随机抽取一名阳性和一名阴性时，阳性风险分数更高的概率约为 86%；它不说明概率已经校准。
+- 概率 0.70 表示模型在当前训练分布下给出 70% 风险，不等于该患者“有 70% 的确定性患病”。
+- 阈值应根据漏诊与误诊代价、患病率和应用流程预先选择，不能默认使用 0.5。
+- 单个权重通常不能像回归系数那样独立解释；可辅以置换重要性、SHAP、部分依赖和敏感性分析，但解释仍是关联性的。
 
-## 7. 推荐可视化
+## 9. 假设诊断与稳健性
 
-- 训练与验证损失曲线。
-- 混淆矩阵。
-- 降维后的分类边界或嵌入可视化。
+- 学习曲线：训练损失下降而验证损失上升提示过拟合，可早停、增大 weight decay、dropout 或缩小网络。
+- 优化稳定性：用多个随机种子重复训练；结果差异很大说明结论依赖初始化。
+- 概率校准：画校准曲线并报告 Brier score；必要时在独立校准集上做 Platt 或 isotonic calibration。
+- 类别不平衡：同时报告 PR-AUC、灵敏度和阳性预测值；可用类别权重或重采样，但测试集保持原患病率。
+- 分布漂移：按时间、医院、设备和人群亚组评估；外部验证优先于内部随机切分。
+- 缺失稳健性：比较合理插补方案，并检查“缺失指示”是否只是代理了就医强度。
 
-### 7.1 图像示例
+## 10. 推荐可视化
 
-下图展示 MLP 分类器训练过程中的损失曲线，可帮助判断模型是否稳定收敛以及是否还存在继续训练的空间。
+- 训练与验证损失曲线：观察收敛、过拟合和早停位置。
+- ROC、PR 与校准曲线：分别观察区分度、不平衡场景表现和概率可信度。
+- 不同阈值的混淆矩阵或决策曲线：连接模型性能与临床代价。
+- 特征归因图：用于提出模型行为假设，不将其当作因果解释。
+
+### 10.1 图像示例
+
+下图展示训练损失随迭代下降；若同时绘制验证损失，更容易发现过拟合拐点。
 
 ![](../../04_示例图像/mlp_training_loss_curve.png)
 
-## 8. 优势、局限与常见坑
+## 11. 优势、局限与常见坑
 
 ### 优势
 
-- 能学习复杂非线性关系。
-- 对高维向量输入有较强表达能力。
-- 适合作为更深层网络的入门基线。
+- 能自动学习复杂非线性与交互。
+- 可统一处理二分类、多分类和多标签任务。
+- 可与图像、文本等表征端到端连接。
 
 ### 局限
 
-- 可解释性较弱。
-- 对标准化和超参数较敏感。
-- 小样本时容易不稳定或过拟合。
+- 对缩放、超参数、样本量和优化过程较敏感。
+- 参数可辨识性和直接解释性弱。
+- 在中小型表格数据上不一定优于正则化回归或梯度提升树。
 
 ### 常见坑
 
-- 不做标准化直接训练。
-- 网络过大但缺少正则化或早停。
-- 只看准确率，不看召回率、校准和类别不平衡。
+- 标准化在全数据上拟合，造成测试信息泄漏。
+- 同一患者的多条记录跨数据集切分。
+- 只报告准确率，忽略患病率、校准和阈值代价。
+- 把高维、少样本网络的训练拟合当作泛化能力。
+- 把解释算法给出的重要性误写成因果效应。
 
-## 9. 与相近方法的区别
+## 12. 与相近方法的区别
 
-- 和 Logistic 回归的区别：Logistic 回归是单层线性判别；MLP 通过隐藏层学习非线性表示。
-- 和支持向量机的区别：SVM 依赖 margin 和核技巧；MLP 依赖多层表示学习和梯度优化。
-- 和随机森林的区别：随机森林通过树分裂做局部规则判别；MLP 通过连续参数学习全局非线性映射。
+- 与人工神经网络：ANN 是总称，MLP 是其中最经典的前馈全连接结构；本卡聚焦分类。
+- 与 Logistic 回归：当线性和少量预设交互足够时，Logistic 更稳定、更易审计。
+- 与 CNN：图像有局部空间结构时，CNN 的局部连接和权重共享比展平后输入 MLP 更高效。
+- 与树集成：结构化表格、中小样本或缺失较多时，应把 XGBoost/随机森林作为强基线。
+- 如何选择：先建立正则化 Logistic 与树模型基线；只有在样本量、非线性收益和验证证据都支持时再采用 MLP。
 
-## 10. 医学研究中的典型应用
+## 13. 医学研究中的典型应用
 
-- 临床多指标风险分类。
-- 向量化心电、影像或文本特征分类。
-- 作为更复杂深度学习系统前的基线神经网络。
+- 用人口学、检验和生命体征预测 30 天再入院或院内恶化。
+- 用多组学或影像组学特征进行肿瘤分型。
+- 将多个已提取的影像、文本和结构化特征做晚期融合。
 
-## 11. 相关方法
+必须说明结局定义、预测时点、特征可用时点、缺失处理、类别不平衡、患者级切分和外部验证；普通 MLP 不处理时间到事件结局中的删失。
 
-- [[感知机（Perceptron）]]
+## 14. 关键术语
+
+- **前馈（Feedforward）**：信息只从输入向输出传播，不把后一步状态传回前一步。
+- **隐藏层（Hidden layer）**：位于输入和输出之间、学习中间表示的神经元层。
+- **激活函数（Activation function）**：为线性组合加入非线性的函数，如 ReLU、sigmoid。
+- **Logit**：概率的对数优势 $\log[p/(1-p)]$，二分类输出层在 sigmoid 前的数值。
+- **交叉熵（Cross-entropy）**：衡量预测概率与真实类别不一致程度的损失。
+- **反向传播（Backpropagation）**：用链式法则从输出向前高效计算每个参数梯度。
+- **Epoch**：模型完整看过一次训练集。
+- **批大小（Batch size）**：每次参数更新所用的样本数。
+- **早停（Early stopping）**：验证性能不再改善时停止训练，以减少过拟合。
+
+## 15. 相关方法
+
 - [[人工神经网络（Artificial Neural Network, ANN）]]
+- [[感知机（Perceptron）]]
 - [[Logistic回归（Logistic Regression）]]
-- [[支持向量机（Support Vector Machine, SVM）]]
+- [[卷积神经网络（Convolutional Neural Network, CNN）]]
+- [[交叉验证（Cross-Validation）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
-- Goodfellow I, Bengio Y, Courville A. *Deep Learning*. MIT Press; 2016.
-- scikit-learn Developers. `sklearn.neural_network.MLPClassifier`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html) （访问日期：2026-07-02）
-- Venables WN, Ripley BD. *Modern Applied Statistics with S*. 4th ed. Springer; 2002.
+- Goodfellow I, Bengio Y, Courville A. *Deep Learning*. MIT Press; 2016. https://www.deeplearningbook.org/
+- Rumelhart DE, Hinton GE, Williams RJ. Learning representations by back-propagating errors. *Nature*. 1986;323:533-536. https://doi.org/10.1038/323533a0
+- Pedregosa F, et al. Scikit-learn: Machine learning in Python. *Journal of Machine Learning Research*. 2011;12:2825-2830.
+- scikit-learn developers. Neural network models (supervised). https://scikit-learn.org/stable/modules/neural_networks_supervised.html

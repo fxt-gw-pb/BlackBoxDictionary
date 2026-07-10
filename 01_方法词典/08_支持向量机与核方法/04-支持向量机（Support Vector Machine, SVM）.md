@@ -19,209 +19,269 @@ r_packages: [e1071]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-支持向量机是一类通过最大化分类间隔来学习判别边界的监督学习方法。它最经典的用途是二分类，也可以扩展到多分类和非线性分类。
+SVM 不只寻找能分开两类的边界，还寻找离最近训练点尽可能远的边界，并允许用惩罚换取少量违例。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：如何在高维特征空间中找到一条泛化能力较强的分类边界。
-- 适用任务：二分类、多分类、小到中等样本高维分类、核方法建模。
-- 常见医学场景：基因表达谱分类、影像特征判别、文本病历标签分类。
+支持向量机是最大间隔监督分类方法。线性 SVM 在原空间寻找超平面；核 SVM 通过核函数在隐式特征空间寻找线性边界，从原空间看可形成非线性决策面。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-SVM 不只想把两类样本分开，它还想把它们“分得尽可能远”。真正决定边界位置的，往往只是那些最靠近边界的支持向量。
+- 小到中等样本、高维特征的二分类。
+- 类别边界复杂但可由核相似度表达的任务。
+- 希望让边界主要由最困难的邻界病例决定。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+两类病例之间可能有很多分割线。SVM 选择中间“走廊”最宽的一条；最贴近走廊边缘的病例是支持向量，远处病例移动一点通常不会改变边界。
 
-线性软间隔 SVM 的优化问题为：
+## 2. 核心思想与原理
+
+### 2.1 最大间隔为何有用
+
+在可分数据中，仅要求训练集零错误会得到很多边界。最大化最近点到边界的距离，相当于选择对小扰动更稳健的分隔面。
+
+### 2.2 软间隔
+
+医学数据通常不可完全分开。松弛变量允许病例落入间隔甚至被错分，$C$ 控制违例代价。大 $C$ 更重视训练误差，小 $C$ 更重视宽间隔。
+
+### 2.3 核化
+
+决策只依赖训练点内积。将内积替换为核 $K(x_i,x)$，就能在不显式映射的情况下学习非线性边界。
+
+## 3. 数学形式
+
+### 3.1 软间隔原始问题
+
+设 $y_i\in\{-1,+1\}$：
 
 $$
-\min_{w, b, \xi} \frac{1}{2}\|w\|^2 + C \sum_{i=1}^{n}\xi_i
+\operatorname*{minimize}_{w,b,\xi}
+\quad
+\frac12\|w\|^2+C\sum_{i=1}^{n}\xi_i
 $$
 
 满足：
 
 $$
-y_i(w^\top x_i + b) \ge 1 - \xi_i, \quad \xi_i \ge 0
+y_i(w^\top x_i+b)\ge1-\xi_i,\qquad \xi_i\ge0
 $$
 
-核化后的决策函数为：
+### 3.2 间隔与 hinge loss
+
+规范化后，点到超平面的单侧间隔为：
 
 $$
-f(x) = \operatorname{sign}\left(\sum_{i=1}^{n}\alpha_i y_i K(x_i, x) + b\right)
+\frac{1}{\|w\|}
 $$
 
-### 2.2 参数或统计量含义
+两条支持超平面之间的完整宽度为 $2/\|w\|$。hinge loss 为：
 
-- $w, b$：线性分类超平面的参数。
-- $C$：误分类惩罚强度。
-- $\xi_i$：第 $i$ 个样本的松弛变量。
-- $K(x_i, x)$：核函数，常见有线性核、多项式核和 RBF 核。
+$$
+L(y,f)=\max[0,1-yf(x)]
+$$
 
-### 2.3 关键假设
+### 3.3 核决策函数
 
-- 分类边界可由最大间隔思想刻画。
-- 特征经过适当变换后可在某个空间中更好地区分。
-- 特征缩放通常很重要。
+$$
+f(x)=
+\sum_{i=1}^{n}\alpha_iy_iK(x_i,x)+b
+$$
 
-## 3. 数据形式与输入输出
+$$
+\hat y=\operatorname{sign}[f(x)]
+$$
 
-### 3.1 适合的数据形式
+### 3.4 关键条件
 
-- 自变量类型：连续变量或向量化特征为主。
-- 因变量类型：二分类或多分类。
-- 数据结构：宽表数据或向量化高维特征。
-- 是否适合高维数据：适合中高维，但样本极大时训练成本高。
-- 是否适合缺失较多数据：需先处理缺失。
-- 是否适合删失数据：不适合。
-- 是否适合重复测量数据：不直接适合。
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 特征合理缩放 | 大量纲变量支配距离 | 管线内标准化 |
+| 核与超参数适当 | 欠拟合或边界过度曲折 | 嵌套交叉验证 |
+| 类别与采样机制明确 | 准确率掩盖少数类失败 | PR、敏感度、类别权重 |
+| 样本规模可计算 | 核 SVM 训练过慢 | 线性 SVM 或核近似 |
 
-### 3.2 示例表格
+## 4. 手把手算例
 
-以肿瘤分子分型为例：
+一维数据有 4 个点：
 
-| Gene1 | Gene2 | Gene3 | Gene4 | Stage | TumorSubtype |
-| --- | --- | --- | --- | --- | --- |
-| 2.31 | 0.84 | 4.12 | 1.03 | 3 | A |
-| 0.91 | 1.25 | 2.08 | 0.72 | 1 | B |
-| 1.88 | 0.97 | 3.41 | 1.11 | 2 | A |
-| 0.65 | 1.56 | 1.72 | 0.58 | 1 | B |
-| 1.44 | 1.02 | 2.95 | 0.93 | 2 | A |
+| $x$ | $y$ |
+| ---: | ---: |
+| -2 | -1 |
+| -1 | -1 |
+| 1 | +1 |
+| 2 | +1 |
 
-### 3.3 输入与产出
+选择决策函数 $f(x)=wx+b=x$，即 $w=1,b=0$。
 
-#### 输入
+**Step 1：检查约束。**
 
-- 输入数据：类别标签和特征矩阵。
-- 关键变量：核函数、`C`、`gamma`、类别权重。
-- 需要预处理的内容：标准化、训练测试集划分、类别不平衡处理。
+四点的函数间隔 $y_if(x_i)$ 分别为：
 
-#### 产出
+$$
+(2,1,1,2)
+$$
 
-- 模型对象/统计结果：支持向量、超参数、决策函数。
-- 参数估计：支持向量权重和核参数，不是线性可解释系数。
-- 预测结果：类别标签、决策值、可选的概率输出。
-- 不确定性指标：交叉验证性能、测试集 AUC / F1、概率校准结果。
+均至少为 1，所以无需松弛变量。
 
-## 4. 适用场景
+**Step 2：找支持向量。** $x=-1$ 与 $x=1$ 恰好满足 $y_if(x_i)=1$，它们是支持向量；$x=-2,2$ 距边界更远。
 
-- 适合：小到中等样本、高维特征、边界清晰或经核映射后可分的分类问题。
-- 不适合：超大规模数据、强可解释性要求、需要天然概率模型的场景。
-- 使用前需要特别检查的点：标准化、核函数选择、`C` 与 `gamma` 调参、类别不平衡。
+**Step 3：算间隔。**
 
-## 5. 实现
+$$
+\text{单侧间隔}=\frac{1}{|w|}=1
+$$
 
-### 5.1 Python
+$$
+\text{完整间隔宽度}=\frac{2}{|w|}=2
+$$
 
-常用包：
+决策边界为 $x=0$，支持超平面为 $x=-1$ 与 $x=1$。
 
-- `scikit-learn`
+**Step 4：加入违例。** 若新增负类点 $x=0.2,y=-1$，则 $yf(x)=-0.2$：
+
+$$
+\xi\ge1-(-0.2)=1.2
+$$
+
+该点被错分且深入错误侧。大 $C$ 会强迫边界迁就它，小 $C$ 更可能接受这次违例以保留宽间隔。
+
+## 5. 数据形式与输入输出
+
+### 5.1 数据要求
+
+- 二分类最自然；多分类通常由 one-vs-one 或 one-vs-rest 组合。
+- 连续或向量化特征通常需标准化。
+- 缺失需预先处理；普通 SVM 不直接处理删失或重复测量。
+
+### 5.2 输入与产出
+
+输入为特征、类别、核、$C$、$\gamma$ 和类别权重。输出为类别、决策分数、支持向量及可选概率。SVM 本身是判别边界模型，不是天然概率模型。
+
+## 6. 适用场景
+
+- 高维小中样本，如组学、影像组学和文本向量。
+- 类别边界相对清晰或核映射后可分。
+- 不适合超大样本、需直接系数解释或必须快速更新的任务。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
+from sklearn.metrics import roc_auc_score, brier_score_loss
 
-df = pd.read_csv("tumor_subtype.csv")
-X = df.drop(columns=["TumorSubtype"])
-y = df["TumorSubtype"]
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
-
-fit = make_pipeline(
+base = make_pipeline(
     StandardScaler(),
-    SVC(kernel="rbf", C=1.0, gamma="scale", probability=True)
+    SVC(
+        kernel="rbf",
+        C=1.0,
+        gamma="scale",
+        class_weight="balanced",
+        probability=False,
+    ),
 )
-fit.fit(X_train, y_train)
+model = CalibratedClassifierCV(base, method="sigmoid", cv=5)
+model.fit(X_train, y_train)
+
+prob = model.predict_proba(X_test)[:, 1]
+print(roc_auc_score(y_test, prob))
+print(brier_score_loss(y_test, prob))
 ```
 
-### 5.2 R
-
-常用包：
-
-- `e1071`
+### 7.2 R
 
 ```r
 library(e1071)
 
 fit <- svm(
   TumorSubtype ~ .,
-  data = df,
+  data = train,
   kernel = "radial",
   cost = 1,
+  gamma = 0.1,
+  class.weights = c(A = 1, B = 2),
+  scale = TRUE,
   probability = TRUE
 )
 
-pred <- predict(fit, newdata = df_test, probability = TRUE)
+pred <- predict(fit, newdata = test, probability = TRUE)
+prob <- attr(pred, "probabilities")
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：测试集分类性能、支持向量数量、核参数和概率校准。
-- 每个主要参数如何解释：`C` 越大越强调训练集拟合；`gamma` 越大边界越局部、越复杂。
-- 临床或医学意义如何表达：更适合强调“判别性能”和“样本分离能力”，不适合直接做系数级效应解释。
-- 常见误读：SVM 的默认概率输出通常需要额外校准，不能把它当作天然概率模型。
+- 决策函数正负决定类别，绝对值表示离边界的函数尺度，不是概率。
+- $C$ 越大通常边界越迁就训练点；RBF 的 $\gamma$ 越大，单点影响越局部。
+- 支持向量多说明更多病例参与定义边界，不自动意味着模型更好或更差。
+- 概率用于临床决策前必须在独立数据上检查校准。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
 
-- ROC 曲线或 PR 曲线。
-- 降维后的决策边界示意图。
-- 支持向量数量或类别间间隔示意图。
+1. 在嵌套交叉验证中联合调节 $C$ 与 $\gamma$。
+2. 比较线性核与 RBF 核，避免无必要的非线性。
+3. 报告支持向量比例、类别别敏感度、PR-AUC 和校准。
+4. 按患者、中心或时间正确拆分数据。
+5. 做外部验证、亚组评估和阈值敏感性分析。
 
-### 7.1 图像示例
+## 10. 推荐可视化
 
-下图展示支持向量机在降维后三维空间中的分类边界示意，可帮助理解 margin 和支持向量附近的分离结构。
+- 二维降维后的边界、间隔和支持向量示意。
+- ROC、PR、校准和决策曲线。
+- $C$-$\gamma$ 验证性能热图。
+- 决策分数按类别的分布。
+
+下图展示降维后三维空间中的 SVM 决策边界：
 
 ![](../../04_示例图像/svm_decision_boundary_3d.png)
 
-## 8. 优势、局限与常见坑
+## 11. 优势、局限与常见坑
 
-### 优势
+**优势：** 高维小样本中常有竞争力，最大间隔有清晰几何意义，核方法灵活。
 
-- 在高维小样本问题上常有竞争力。
-- 核方法能处理复杂非线性边界。
-- 关注边界样本，泛化能力常较好。
+**局限：** 大样本训练慢，调参敏感，非线性模型难解释，概率需额外处理。
 
-### 局限
+**常见坑：** 不标准化；只看准确率；在测试集选 $C,\gamma$；把决策分数当概率；高维小样本先全数据筛特征再交叉验证。
 
-- 参数调优较敏感。
-- 大样本计算成本高。
-- 结果解释性一般。
+## 12. 与相近方法的区别
 
-### 常见坑
+- [[Logistic回归（Logistic Regression）]]：直接建模概率，系数更易解释；SVM 优化间隔。
+- [[支持向量回归（Support Vector Regression, SVR）]]：把分类间隔改为连续结局的 $\epsilon$ 管。
+- [[随机森林（Random Forest）]]：树通过局部切分形成边界，SVM 通过核相似度形成边界。
+- 选择经验：需要概率解释时先考虑 Logistic；高维小样本、判别优先时将线性 SVM 作为强基线。
 
-- 不标准化特征。
-- 样本量很大时仍直接使用复杂核。
-- 把概率输出当作天然校准后的概率。
+## 13. 医学研究中的典型应用
 
-## 9. 与相近方法的区别
+- 基因表达、代谢组和蛋白组疾病分类。
+- 影像组学良恶性判别与病理亚型预测。
+- 临床文本、波形或编码向量分类。
 
-- 和 Logistic 回归的区别：Logistic 回归是概率模型，SVM 是 margin-based 判别模型。
-- 和支持向量回归的区别：SVR 处理连续结局，SVM 主要处理分类。
-- 和随机森林的区别：SVM 更依赖核与间隔，随机森林更依赖局部切分和集成。
+## 14. 术语表
 
-## 10. 医学研究中的典型应用
+| 术语 | 含义 |
+| --- | --- |
+| hyperplane | 线性决策边界 |
+| margin | 边界与最近训练点之间的距离 |
+| support vector | 决定最优边界的邻界或违例样本 |
+| slack variable | 允许进入间隔或错分的程度 |
+| hinge loss | 只惩罚函数间隔不足 1 的损失 |
 
-- 基因表达或代谢组特征驱动的肿瘤亚型分类。
-- 影像组学特征判别。
-- 病历文本或病种编码分类。
-
-## 11. 相关方法
+## 15. 相关方法
 
 - [[支持向量回归（Support Vector Regression, SVR）]]
+- [[多项式核回归（Polynomial Kernel Regression）]]
 - [[Logistic回归（Logistic Regression）]]
 - [[随机森林（Random Forest）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
 - Cortes C, Vapnik V. Support-vector networks. *Mach Learn*. 1995;20:273-297.
+- Schölkopf B, Smola AJ. *Learning with Kernels*. MIT Press; 2002.
 - Hastie T, Tibshirani R, Friedman J. *The Elements of Statistical Learning*. 2nd ed. Springer; 2009.
-- scikit-learn Developers. `sklearn.svm.SVC`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html](https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html) （访问日期：2026-07-02）
+- scikit-learn Developers. Support Vector Machines User Guide. [https://scikit-learn.org/stable/modules/svm.html](https://scikit-learn.org/stable/modules/svm.html) （访问日期：2026-07-09）

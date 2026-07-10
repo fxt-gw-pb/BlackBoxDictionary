@@ -19,217 +19,243 @@ r_packages: [gbm]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-梯度提升决策树是以决策树为基学习器的梯度提升方法。它通过逐轮拟合损失函数的负梯度或伪残差，把多棵浅树叠加成一个强预测模型。
+GBDT 把“拟合残差”推广为“拟合损失函数的负梯度”，让浅决策树在函数空间中逐步走向更低损失。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：如何用一系列浅层决策树逐步逼近复杂非线性预测函数。
-- 适用任务：二分类、多分类、连续结局预测。
-- 常见医学场景：临床风险预测、住院时长或费用预测、疾病复发和死亡风险建模。
+梯度提升决策树是以回归树为基学习器的梯度提升方法。每轮计算当前预测的伪残差，用一棵新树拟合它，再把新树乘以学习率后加入现有模型。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-GBDT 每一轮都问：“当前模型还错在哪里？”然后训练一棵新树去拟合这些错误方向。新树不是独立投票，而是作为对已有模型的一小步修正。
+- 用统一框架处理回归、二分类和多分类。
+- 捕捉表格数据中的阈值、非线性和变量交互。
+- 通过多轮浅树修正降低单棵浅树的偏差。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+若把损失看作山坡高度，当前模型站在山坡上。负梯度指出下降最快的方向，新树负责近似这个方向，学习率决定每一步走多远。
 
-GBDT 的加法模型为：
+## 2. 核心思想与原理
 
-$$
-F_M(x)=F_0(x)+\sum_{m=1}^{M}\nu h_m(x)
-$$
+### 2.1 从数值参数到函数空间
 
-其中 $h_m(x)$ 是第 $m$ 棵决策树，$\nu$ 是学习率。
+普通梯度下降更新参数向量；GBDT 更新的是预测函数 $F(x)$。因为任意方向很难直接表示，所以用一棵浅树去近似每轮最需要的函数修正。
 
-初始化常数模型：
+### 2.2 伪残差
 
-$$
-F_0(x)=\arg\min_{\gamma}\sum_{i=1}^{n}L(y_i,\gamma)
-$$
+平方损失的负梯度正好是 $y-\hat y$，所以看起来像拟合残差。对二项偏差、绝对误差等损失，负梯度不再是普通残差，因此“拟合负梯度”是更准确的总括。
 
-第 $m$ 轮计算负梯度，也称伪残差：
+### 2.3 正则化方式
 
-$$
-r_{im}=-\left[\frac{\partial L(y_i,F(x_i))}{\partial F(x_i)}\right]_{F=F_{m-1}}
-$$
+小学习率、浅树、叶节点最小样本数、子采样和早停共同决定有效复杂度。树数本身不是孤立的复杂度指标。
 
-用决策树拟合 $\{(x_i,r_{im})\}$，再更新：
+## 3. 数学形式
+
+### 3.1 初始化
 
 $$
-F_m(x)=F_{m-1}(x)+\nu h_m(x)
+F_0(x)=
+\operatorname*{arg\,min}_{c}
+\sum_{i=1}^{n}L(y_i,c)
 $$
 
-对于平方误差损失，伪残差就是普通残差：
+### 3.2 伪残差与更新
 
 $$
-r_{im}=y_i-F_{m-1}(x_i)
+r_{im}=
+-\left.
+\frac{\partial L[y_i,F(x_i)]}{\partial F(x_i)}
+\right|_{F=F_{m-1}}
 $$
 
-### 2.2 参数或统计量含义
+用回归树拟合 $(x_i,r_{im})$。若第 $m$ 棵树有叶区域 $R_{jm}$，可在各叶内求步长：
 
-- `n_estimators`：树的数量。
-- `learning_rate`：每棵树对最终模型的贡献。
-- `max_depth`：单棵树的最大深度。
-- `subsample`：每轮训练使用的样本比例，形成随机梯度提升。
-- 伪残差：每轮新树要拟合的目标。
+$$
+\gamma_{jm}=
+\operatorname*{arg\,min}_{\gamma}
+\sum_{x_i\in R_{jm}}
+L[y_i,F_{m-1}(x_i)+\gamma]
+$$
 
-### 2.3 关键假设
+$$
+F_m(x)=F_{m-1}(x)+
+\nu\sum_j\gamma_{jm}I(x\in R_{jm})
+$$
 
-- 数据中存在树模型可捕捉的非线性和交互。
-- 损失函数与任务目标匹配。
-- 学习率、树深和树数需要共同控制，以避免过拟合。
+### 3.3 参数含义
 
-## 3. 数据形式与输入输出
+- $\nu$：学习率。
+- $M$：最大树数。
+- 树深或叶节点数：单轮可表达的交互复杂度。
+- `subsample`：每轮抽取的样本比例。
+- 损失函数：定义优化目标与异常值敏感性。
 
-### 3.1 适合的数据形式
+### 3.4 关键条件
 
-- 自变量类型：连续、二分类、多分类变量均可，类别变量通常需编码。
-- 因变量类型：二分类、多分类或连续型。
-- 数据结构：宽表数据。
-- 是否适合高维数据：适合中高维表格数据。
-- 是否适合缺失较多数据：经典 scikit-learn GBDT 通常需先处理缺失。
-- 是否适合删失数据：普通 GBDT 不直接适合。
-- 是否适合重复测量数据：不直接适合。
+| 条件 | 违反后果 | 检查 |
+| --- | --- | --- |
+| 损失匹配研究目标 | 优化指标与临床目标脱节 | 同时报告多类指标 |
+| 负梯度可被浅树近似 | 多轮改善缓慢 | 调整树深与特征 |
+| 早停数据独立于测试集 | 测试性能乐观 | 固定训练/验证/测试三部分 |
+| 树复杂度受控 | 训练集过拟合 | 学习曲线与外部验证 |
 
-### 3.2 示例表格
+## 4. 手把手算例
 
-以慢病患者年度医疗费用预测为例：
+考虑 4 名患者的二分类结局 $y=(0,0,1,1)$。使用 logistic 损失，模型输出 logit $F$，概率为 $p=1/(1+\exp(-F))$。
 
-| Age | Charlson | HbA1c | eGFR | PriorCost | AnnualCost |
-| --- | --- | --- | --- | --- | --- |
-| 71 | 4 | 8.9 | 48 | 18300 | 24600 |
-| 52 | 1 | 6.7 | 92 | 4200 | 5100 |
-| 63 | 3 | 7.8 | 55 | 11200 | 15100 |
-| 44 | 0 | 6.1 | 101 | 1800 | 2300 |
-| 68 | 2 | 7.1 | 60 | 9500 | 12800 |
+**Step 1：初始化。** 阳性率为 $0.5$，故初始 logit 为：
 
-### 3.3 输入与产出
+$$
+F_0=\log\left(\frac{0.5}{0.5}\right)=0
+$$
 
-#### 输入
+所有人的初始概率均为 $0.5$，平均 log loss 为 $-\log(0.5)=0.693$。
 
-- 输入数据：特征矩阵和目标变量。
-- 关键变量：损失函数、树数、学习率、树深、叶节点最小样本数、采样比例。
-- 需要预处理的内容：缺失处理、类别编码、训练验证划分、异常值检查。
+**Step 2：计算负梯度。** 二分类 logistic 损失对 logit 的负梯度为：
 
-#### 产出
+$$
+r_i=y_i-p_i
+$$
 
-- 模型对象/统计结果：梯度提升树模型、训练/验证误差、特征重要性。
-- 参数估计：不输出传统回归系数。
-- 预测结果：类别、概率或连续预测值。
-- 不确定性指标：交叉验证性能、测试集 AUC / MSE、校准指标。
+所以 $r=(-0.5,-0.5,0.5,0.5)$。
 
-## 4. 适用场景
+**Step 3：拟合一棵树。** 假设某特征把前两人与后两人分开，新树输出 $h=(-0.5,-0.5,0.5,0.5)$。取 $\nu=0.4$：
 
-- 适合：表格数据、非线性和交互明显、预测性能优先的任务。
-- 不适合：样本极小、强可解释性或因果解释优先、缺失机制复杂但未处理的任务。
-- 使用前需要特别检查的点：学习率和树数是否匹配、是否需要早停、是否过拟合、概率是否校准。
+$$
+F_1=0+0.4h=(-0.2,-0.2,0.2,0.2)
+$$
 
-## 5. 实现
+新概率约为 $(0.450,0.450,0.550,0.550)$。
 
-### 5.1 Python
+**Step 4：看损失。** 每名患者对真实类别的预测概率均约为 $0.550$：
 
-常用包：
+$$
+\operatorname{LogLoss}_1=-\log(0.550)\approx0.598
+$$
 
-- `scikit-learn`
+**结论：** 新树拟合的不是最终标签，而是当前模型应向哪个方向移动。
+
+## 5. 数据形式与输入输出
+
+### 5.1 数据要求
+
+- 适用于连续、二分类和多分类结局。
+- 经典实现通常要求类别特征编码并提前处理缺失。
+- 不直接建模删失、聚类或重复测量相关性，需采用专用损失或扩展。
+
+### 5.2 产出
+
+输出预测值或概率、逐轮损失、树集成及特征重要性。它不直接提供传统回归系数与标准误。
+
+## 6. 适用场景
+
+- 表格数据中非线性和交互明显。
+- 需要比单棵树更高性能，又希望用浅树控制复杂度。
+- 不适合以变量效应估计或因果解释为首要目的的研究。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import pandas as pd
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.model_selection import train_test_split
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import roc_auc_score, brier_score_loss
 
-df = pd.read_csv("annual_cost.csv")
-X = df[["Age", "Charlson", "HbA1c", "eGFR", "PriorCost"]]
-y = df["AnnualCost"]
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
-
-fit = GradientBoostingRegressor(
-    n_estimators=300,
+model = GradientBoostingClassifier(
+    loss="log_loss",
+    n_estimators=600,
     learning_rate=0.03,
-    max_depth=3,
+    max_depth=2,
     min_samples_leaf=20,
     subsample=0.8,
-    random_state=42
+    n_iter_no_change=30,
+    validation_fraction=0.2,
+    random_state=42,
 )
-fit.fit(X_train, y_train)
+model.fit(X_train, y_train)
 
-y_pred = fit.predict(X_test)
+prob = model.predict_proba(X_test)[:, 1]
+print(roc_auc_score(y_test, prob))
+print(brier_score_loss(y_test, prob))
 ```
 
-### 5.2 R
-
-常用包：
-
-- `gbm`
+### 7.2 R
 
 ```r
 library(gbm)
 
 fit <- gbm(
-  AnnualCost ~ Age + Charlson + HbA1c + eGFR + PriorCost,
-  data = df_train,
-  distribution = "gaussian",
-  n.trees = 300,
-  interaction.depth = 3,
+  Death30d ~ Age + SOFA + Lactate + Creatinine,
+  data = train,
+  distribution = "bernoulli",
+  n.trees = 600,
+  interaction.depth = 2,
+  n.minobsinnode = 20,
   shrinkage = 0.03,
-  bag.fraction = 0.8
+  bag.fraction = 0.8,
+  cv.folds = 5
 )
 
-pred <- predict(fit, newdata = df_test, n.trees = 300)
+best_n <- gbm.perf(fit, method = "cv", plot.it = FALSE)
+prob <- predict(fit, test, n.trees = best_n, type = "response")
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：验证集性能、学习曲线、特征重要性、残差分布或校准表现。
-- 每个主要参数如何解释：学习率越小，每棵树贡献越小，通常需要更多树；树深决定可捕捉的交互阶数。
-- 临床或医学意义如何表达：适合表达“模型捕捉到复杂非线性风险模式”，不适合直接解释为可干预原因。
-- 常见误读：把 GBDT 的特征重要性当作变量独立效应或因果效应。
+- 最佳迭代轮数是验证损失最低附近的轮数，不是树越多越好。
+- 树深为 1 主要表达加性阈值效应；更深的树可表达更高阶交互。
+- 预测概率需要在独立数据上检查校准。
+- 重要性、部分依赖和 SHAP 描述模型行为，不自动等于生物机制。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
 
-- 训练/验证损失曲线。
-- 真实值 vs 预测值散点图或分类 ROC 曲线。
-- 特征重要性图和部分依赖图。
+1. 比较训练与验证偏差曲线。
+2. 检查不同学习率和树数的组合，而非单独调一个参数。
+3. 用重复交叉验证评估调参不稳定性。
+4. 对分类模型检查 ROC、PR、Brier、校准斜率和决策曲线。
+5. 进行时间外、中心外及关键亚组验证。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
 
-### 优势
+- 训练/验证损失随迭代变化图。
+- ROC、PR、校准与决策曲线。
+- 回归任务的真实值-预测值和残差图。
+- permutation importance、部分依赖或 SHAP 图。
 
-- 表格数据预测能力强。
-- 能处理复杂非线性和交互。
-- 损失函数灵活，可用于分类和回归。
+## 11. 优势、局限与常见坑
 
-### 局限
+**优势：** 损失函数统一、预测能力强、自动学习非线性与交互。
 
-- 调参较多。
-- 对异常值和噪声较敏感。
-- 训练通常比随机森林更依赖验证策略。
+**局限：** 调参较多、串行训练、对噪声敏感、参数解释不直观。
 
-### 常见坑
+**常见坑：** 把伪残差一律称为普通残差；用测试集选轮数；学习率过大且树过深；忽视校准。
 
-- 学习率过大且树过深导致过拟合。
-- 只做内部交叉验证，不做外部验证。
-- 忽略概率校准和临床决策阈值。
+## 12. 与相近方法的区别
 
-## 9. 与相近方法的区别
+- [[梯度提升回归（Gradient Boosting Regression）]]：GBDT 是总框架，后者专门针对连续结局。
+- [[AdaBoost（Adaptive Boosting）]]：AdaBoost 以样本权重与指数损失为代表。
+- [[XGBoost（Extreme Gradient Boosting, XGBoost）]]：加入二阶近似、显式树正则化和工程优化。
+- [[LightGBM（Light Gradient Boosting Machine）]]：以直方图、leaf-wise 等策略提高大规模训练效率。
 
-- 和 [[梯度提升回归（Gradient Boosting Regression）]] 的区别：本卡是 GBDT 总论；梯度提升回归是连续结局场景的具体变体。
-- 和 [[XGBoost（Extreme Gradient Boosting, XGBoost）]] 的区别：XGBoost 在 GBDT 基础上加入二阶优化、显式正则化和工程优化。
-- 和 [[LightGBM（Light Gradient Boosting Machine）]] 的区别：LightGBM 强调直方图分箱、leaf-wise 生长和大规模数据效率。
+## 13. 医学研究中的典型应用
 
-## 10. 医学研究中的典型应用
+- 死亡、感染、再入院和并发症风险预测。
+- 费用、住院时长和连续风险评分预测。
+- 临床、实验室、影像组学特征的非线性融合。
 
-- 慢病管理中的费用、住院天数或连续风险评分预测。
-- 住院死亡、再入院、感染、并发症等分类风险模型。
-- 多变量临床表格数据中的非线性基线模型。
+## 14. 术语表
 
-## 11. 相关方法
+| 术语 | 含义 |
+| --- | --- |
+| 函数空间梯度下降 | 直接逐步更新预测函数 |
+| 伪残差 | 当前损失关于预测的负梯度 |
+| shrinkage | 用学习率缩小每棵树贡献 |
+| stochastic boosting | 每轮只用一部分样本拟合 |
+| deviance | 分类中常用的负对数似然型损失 |
+
+## 15. 相关方法
 
 - [[Boosting算法（Boosting）]]
 - [[梯度提升回归（Gradient Boosting Regression）]]
@@ -237,8 +263,9 @@ pred <- predict(fit, newdata = df_test, n.trees = 300)
 - [[XGBoost（Extreme Gradient Boosting, XGBoost）]]
 - [[LightGBM（Light Gradient Boosting Machine）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
 - Friedman JH. Greedy function approximation: a gradient boosting machine. *Ann Stat*. 2001;29(5):1189-1232.
+- Friedman JH. Stochastic gradient boosting. *Comput Stat Data Anal*. 2002;38(4):367-378.
 - Hastie T, Tibshirani R, Friedman J. *The Elements of Statistical Learning*. 2nd ed. Springer; 2009.
-- scikit-learn Developers. `sklearn.ensemble.GradientBoostingRegressor`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingRegressor.html](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingRegressor.html) （访问日期：2026-07-02）
+- scikit-learn Developers. Gradient Boosting User Guide. [https://scikit-learn.org/stable/modules/ensemble.html#gradient-boosting](https://scikit-learn.org/stable/modules/ensemble.html#gradient-boosting) （访问日期：2026-07-09）

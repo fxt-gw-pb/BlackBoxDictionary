@@ -46,7 +46,7 @@
           <span class="entry-cn">决策树</span>
           <span class="entry-en">Decision Tree</span>
         </div>
-        <p class="entry-def">决策树是一类通过递归划分特征空间来完成分类或回归的树状模型。对于分类任务，它把样本一步步分到更“纯”的叶节点中，再用叶节点中的多数类别作为预测结果。</p>
+        <p class="entry-def">决策树把复杂分类问题拆成一连串「如果满足某条件，就往左；否则往右」的问题，最后在叶节点用多数类别做预测。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -59,7 +59,7 @@
           <span class="entry-cn">ID3决策树</span>
           <span class="entry-en">ID3 Decision Tree</span>
         </div>
-        <p class="entry-def">ID3 是 Ross Quinlan 提出的经典决策树构建算法。它用信息增益作为特征选择标准，递归地挑选最能降低类别不确定性的特征来生成分类树。</p>
+        <p class="entry-def">ID3 每一步都选择「最能减少类别不确定性」的离散特征来分裂节点。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -72,7 +72,7 @@
           <span class="entry-cn">C4.5决策树</span>
           <span class="entry-en">C4.5 Decision Tree</span>
         </div>
-        <p class="entry-def">C4.5 是 ID3 的改进版本。它用信息增益率代替单纯的信息增益，并支持连续特征、缺失值处理和后剪枝，因此比 ID3 更接近实际应用环境。</p>
+        <p class="entry-def">C4.5 是 ID3 的实用升级版：它用信息增益率惩罚「把数据切得过碎」的特征，并支持连续变量、缺失处理和剪枝。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -85,7 +85,7 @@
           <span class="entry-cn">决策树回归</span>
           <span class="entry-en">Decision Tree Regression</span>
         </div>
-        <p class="entry-def">决策树回归是一种通过递归划分特征空间，把连续结局映射到一系列区域均值上的非参数回归方法。</p>
+        <p class="entry-def">决策树回归把连续结局分成一块块区域，每个叶节点用该区域的平均值作为预测。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -98,7 +98,7 @@
           <span class="entry-cn">Bagging算法</span>
           <span class="entry-en">Bootstrap Aggregating</span>
         </div>
-        <p class="entry-def">Bagging 是 Bootstrap Aggregating 的缩写，是一种通过自助抽样生成多个训练子集、分别训练基学习器、再对预测结果投票或平均的集成学习方法。它主要用于降低不</p>
+        <p class="entry-def">Bagging 让许多个「看过不同重抽样训练集」的模型各自预测，再投票或平均，以抵消单个模型的偶然波动。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -111,7 +111,7 @@
           <span class="entry-cn">随机森林</span>
           <span class="entry-en">Random Forest</span>
         </div>
-        <p class="entry-def">随机森林是一类基于 bagging 的树集成方法。它通过对样本做 bootstrap 抽样、对特征做随机子采样，训练许多彼此不同的决策树，再把它们的结果投票或平均起来。</p>
+        <p class="entry-def">随机森林是在 Bagging 多棵树的基础上，再让每个节点只看一部分随机特征，从而让树与树更不相似、投票更稳。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -124,7 +124,7 @@
           <span class="entry-cn">随机森林回归</span>
           <span class="entry-en">Random Forest Regression</span>
         </div>
-        <p class="entry-def">随机森林回归通过训练多棵带有随机性的回归树，并对它们的预测结果取平均，从而获得更稳定、更鲁棒的连续结局预测模型。</p>
+        <p class="entry-def">随机森林回归训练许多带随机性的回归树，再把它们的连续预测取平均，得到比单棵树更稳定的预测值。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -137,7 +137,7 @@
           <span class="entry-cn">极端随机树</span>
           <span class="entry-en">Extremely Randomized Trees</span>
         </div>
-        <p class="entry-def">极端随机树，也称 Extra Trees，是一种树集成方法。它和随机森林相似，但在节点分裂时不仅随机抽取特征，还随机生成候选切分点，再从这些随机候选中选择较优切分。</p>
+        <p class="entry-def">极端随机树比随机森林更随机：每个节点不仅随机抽特征，还随机抽切分阈值，再从随机候选中挑一个较好的。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -150,7 +150,7 @@
           <span class="entry-cn">Boosting算法</span>
           <span class="entry-en">Boosting</span>
         </div>
-        <p class="entry-def">Boosting 是一类串行集成学习方法，它把多个弱学习器按顺序组合起来，每一轮都让新模型重点修正当前集成模型的错误。AdaBoost、GBDT、XGBoost 和 LightGB</p>
+        <p class="entry-def">Boosting 让弱学习器依次上场，每一轮都针对当前模型尚未解决的错误做一次小修正，最后把这些修正相加成强模型。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -163,7 +163,7 @@
           <span class="entry-cn">AdaBoost</span>
           <span class="entry-en">Adaptive Boosting</span>
         </div>
-        <p class="entry-def">AdaBoost 是 Adaptive Boosting 的缩写，是一种经典 Boosting 算法。它通过反复调整样本权重，让后续弱分类器更关注前一轮错分的样本，并把多个弱分类器</p>
+        <p class="entry-def">AdaBoost 通过提高错分样本的权重，让后一轮弱分类器更关注“难题”，最后按弱分类器质量加权投票。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -176,7 +176,7 @@
           <span class="entry-cn">梯度提升决策树</span>
           <span class="entry-en">Gradient Boosting Decision Tree, GBDT</span>
         </div>
-        <p class="entry-def">梯度提升决策树是以决策树为基学习器的梯度提升方法。它通过逐轮拟合损失函数的负梯度或伪残差，把多棵浅树叠加成一个强预测模型。</p>
+        <p class="entry-def">GBDT 把“拟合残差”推广为“拟合损失函数的负梯度”，让浅决策树在函数空间中逐步走向更低损失。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -189,7 +189,7 @@
           <span class="entry-cn">梯度提升回归</span>
           <span class="entry-en">Gradient Boosting Regression</span>
         </div>
-        <p class="entry-def">梯度提升回归是一类通过逐步叠加弱学习器来逼近目标函数的集成回归方法，常见实现是以浅层回归树作为基学习器。</p>
+        <p class="entry-def">梯度提升回归用一连串浅回归树逐步拟合当前损失的负梯度，从而不断修正连续结局预测。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -202,7 +202,7 @@
           <span class="entry-cn">XGBoost</span>
           <span class="entry-en">Extreme Gradient Boosting, XGBoost</span>
         </div>
-        <p class="entry-def">XGBoost 是一种基于梯度提升树的高性能集成学习方法。它在经典 GBDT 基础上加入了二阶优化、显式正则化、列采样、缺失值处理和工程级并行优化，因此在表格数据预测中非常常用。</p>
+        <p class="entry-def">XGBoost 是带二阶近似、显式树复杂度惩罚、采样与高效实现的梯度提升树。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -215,7 +215,7 @@
           <span class="entry-cn">LightGBM</span>
           <span class="entry-en">Light Gradient Boosting Machine</span>
         </div>
-        <p class="entry-def">LightGBM 是一种高效的梯度提升树实现。它在传统 GBDT 基础上引入直方图分桶、leaf-wise 生长策略，以及大样本场景常用的 GOSS 和 EFB 等优化，使其在大规</p>
+        <p class="entry-def">LightGBM 用直方图近似分裂搜索，并优先分裂全树中收益最大的叶节点，以较低内存和较高速度训练梯度提升树。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -228,7 +228,7 @@
           <span class="entry-cn">投票集成</span>
           <span class="entry-en">Voting Ensemble</span>
         </div>
-        <p class="entry-def">投票集成是一种把多个分类模型的预测结果合并为最终分类结果的模型融合方法。硬投票统计类别票数，软投票累加或加权平均类别概率。</p>
+        <p class="entry-def">投票集成用固定规则合并多个分类模型：硬投票数类别票，软投票平均经过校准且可比较的类别概率。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -241,7 +241,7 @@
           <span class="entry-cn">Stacking集成</span>
           <span class="entry-en">Stacked Generalization</span>
         </div>
-        <p class="entry-def">Stacking 是一种两层或多层模型融合方法。第一层训练多个基础模型，第二层用这些基础模型的交叉验证预测作为新特征，训练一个元学习器来学习如何组合它们。</p>
+        <p class="entry-def">Stacking 把多个基础模型的 out-of-fold 预测当作新特征，再训练一个元学习器决定何时、以多大程度相信每个模型。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>

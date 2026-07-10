@@ -19,209 +19,264 @@ r_packages: [base, irlba]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-奇异值分解是一种基础矩阵分解方法，可以把任意矩阵分解为左奇异向量、奇异值和右奇异向量三部分。截断 SVD 使用最大的若干奇异值构造低秩近似，从而实现降维、压缩和去噪。
+SVD 把任意矩阵拆成样本方向、按强弱排序的奇异值和特征方向；保留前几项可得到最佳低秩近似。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：如何用低秩结构近似一个高维数据矩阵。
-- 适用任务：特征压缩、矩阵降噪、潜在语义分析、图像压缩、稀疏矩阵降维。
-- 常见医学场景：影像矩阵压缩，组学矩阵低秩表示，临床文本词频矩阵潜在主题探索。
+奇异值分解是基础矩阵分解。任意实矩阵都可写为 $U\Sigma V^\top$；截断 SVD 只保留最大的 $k$ 个奇异值和对应向量，用于压缩、去噪和潜在表示。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-SVD 把数据矩阵拆成一组按重要性排序的“基础模式”。最大的奇异值对应最主要的变化模式，只保留前几个模式就能近似原矩阵，并丢掉一部分噪声和冗余。
+- 高维矩阵是否近似由少数模式生成。
+- 如何获得最优平方误差低秩近似。
+- 如何高效处理稀疏词频、图像和组学矩阵。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+一张复杂影像可看成多层基础图案叠加。奇异值是各层“能量”，先保留最强图案，再逐层补充细节；小奇异值常对应细节或噪声。
 
-任意矩阵 $X\in\mathbb{R}^{n\times p}$ 可分解为：
+## 2. 核心思想与原理
+
+### 2.1 左右两个空间
+
+$U$ 描述样本/行方向，$V$ 描述特征/列方向，$\Sigma$ 将两者按一一对应的强度连接。SVD 不要求矩阵方阵或对称。
+
+### 2.2 最优低秩近似
+
+Eckart-Young-Mirsky 定理说明，截断前 $k$ 项在 Frobenius 范数和谱范数下给出最佳秩 $k$ 近似。
+
+### 2.3 与 PCA 的联系
+
+对中心化矩阵做 SVD，右奇异向量就是 PCA 方向，$\sigma_j^2/(n-1)$ 是协方差特征值。`TruncatedSVD` 默认不中心化，特别适合保持稀疏性。
+
+## 3. 数学形式
+
+### 3.1 完整分解
 
 $$
 X=U\Sigma V^\top
 $$
 
-其中 $U^\top U=I$，$V^\top V=I$，$\Sigma$ 为非负奇异值构成的对角矩阵。截断到前 $k$ 个奇异值：
-
 $$
-X_k=U_k\Sigma_k V_k^\top
+U^\top U=I,\qquad V^\top V=I
 $$
 
-根据 Eckart-Young 定理，$X_k$ 是 Frobenius 范数意义下最优的秩 $k$ 近似：
+### 3.2 截断分解
 
 $$
-X_k=\arg\min_{\operatorname{rank}(B)=k}\|X-B\|_F
+X_k=
+U_k\Sigma_kV_k^\top
+=\sum_{j=1}^{k}\sigma_ju_jv_j^\top
 $$
 
-累计能量比例常写为：
+### 3.3 最优性与误差
 
 $$
-\frac{\sum_{j=1}^{k}\sigma_j^2}{\sum_{j=1}^{r}\sigma_j^2}
+X_k=
+\operatorname*{arg\,min}_{\operatorname{rank}(B)\le k}
+\|X-B\|_F
 $$
 
-### 2.2 参数或统计量含义
+$$
+\|X-X_k\|_F^2=
+\sum_{j\gt k}\sigma_j^2
+$$
 
-- $U$：左奇异向量，表示样本方向的正交基。
-- $\Sigma$：奇异值，表示每个模式的重要性。
-- $V$：右奇异向量，表示特征方向的正交基。
-- $k$：保留的低秩维度。
-- 截断误差：原矩阵与低秩近似之间的差异。
+保留能量比例为：
 
-### 2.3 关键假设
+$$
+\frac{\sum_{j=1}^{k}\sigma_j^2}
+{\sum_{j=1}^{r}\sigma_j^2}
+$$
 
-- 数据矩阵存在可利用的低秩结构。
-- 主要信息集中在较大的奇异值对应的方向上。
-- 输入尺度会影响分解结果，通常需根据场景决定是否中心化或标准化。
+### 3.4 关键条件
 
-## 3. 数据形式与输入输出
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 矩阵近似低秩 | 奇异值衰减慢，压缩损失大 | 奇异值谱 |
+| 大奇异值承载有用信息 | 批次或背景主导 | 方向与协变量检查 |
+| 中心化策略合适 | SVD 与 PCA 含义混淆 | 对照中心化结果 |
+| 训练流程无泄漏 | 测试结构进入表示 | 训练折内拟合 |
 
-### 3.1 适合的数据形式
+## 4. 手把手算例
 
-- 自变量类型：连续特征矩阵、稀疏计数矩阵、图像像素矩阵。
-- 因变量类型：SVD 本身不需要结局变量。
-- 数据结构：样本乘以特征矩阵，或任意二维矩阵。
-- 是否适合高维数据：适合，尤其适合稀疏高维矩阵的截断分解。
-- 是否适合缺失较多数据：普通 SVD 不直接处理缺失。
-- 是否适合删失数据：不直接处理删失结局。
-- 是否适合重复测量数据：可分解整理后的矩阵，但不建模相关结构。
+考虑矩阵：
 
-### 3.2 示例表格
+$$
+X=
+\begin{pmatrix}
+3&0\\
+0&1
+\end{pmatrix}
+$$
 
-以临床文本词频矩阵为例：
+它已经是对角形式，因此：
 
-| PatientID | fever | cough | pain | tumor | treatment |
-| --- | --- | --- | --- | --- | --- |
-| P001 | 2 | 4 | 0 | 0 | 1 |
-| P002 | 0 | 1 | 3 | 2 | 4 |
-| P003 | 3 | 5 | 0 | 0 | 0 |
-| P004 | 0 | 0 | 4 | 3 | 5 |
+$$
+U=I,\quad
+\Sigma=
+\begin{pmatrix}
+3&0\\
+0&1
+\end{pmatrix},
+\quad V=I
+$$
 
-### 3.3 输入与产出
+奇异值为 $\sigma_1=3,\sigma_2=1$。
 
-#### 输入
+**Step 1：秩 1 近似。**
 
-- 输入数据：数值矩阵或稀疏矩阵。
-- 关键变量：保留维度 $k$、是否中心化、是否使用随机化 SVD。
-- 需要预处理的内容：缺失处理、标准化或归一化、稀疏矩阵构造。
+$$
+X_1=
+\sigma_1u_1v_1^\top=
+\begin{pmatrix}
+3&0\\
+0&0
+\end{pmatrix}
+$$
 
-#### 产出
+**Step 2：保留能量。**
 
-- 模型对象/统计结果：奇异值、左右奇异向量、低维表示、低秩重构矩阵。
-- 参数估计：$U_k$、$\Sigma_k$、$V_k$。
-- 预测结果：不直接预测，可作为后续模型输入。
-- 不确定性指标：可用重采样、重构误差或交叉验证选择 $k$。
+$$
+\frac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}
+=\frac9{10}=0.90
+$$
 
-## 4. 适用场景
+**Step 3：重构误差。**
 
-- 适合：矩阵存在低秩结构、需要压缩或去噪、输入为稀疏高维矩阵的场景。
-- 不适合：主要结构强非线性、缺失值大量存在且未建模、需要直接解释原始变量效应的场景。
-- 使用前需要特别检查的点：是否中心化，奇异值衰减是否明显，低秩近似是否保留任务相关信息。
+$$
+\|X-X_1\|_F
+=
+\left\|
+\begin{pmatrix}
+0&0\\
+0&1
+\end{pmatrix}
+\right\|_F
+=1
+$$
 
-## 5. 实现
+**结论：** 用一个秩 1 模式保留 90% 矩阵能量，丢失的恰是第二奇异值对应的强度 1。
 
-### 5.1 Python
+## 5. 数据形式与输入输出
 
-常用包：
+### 5.1 数据要求
 
-- `numpy`
-- `scikit-learn`
+- 任意数值矩阵，尤其是高维稀疏矩阵、图像或样本-特征矩阵。
+- 普通 SVD 不直接处理缺失。
+- 中心化会破坏稀疏性，应按应用选择 PCA 或 Truncated SVD。
+
+### 5.2 输入与产出
+
+输入为矩阵、保留秩和求解器。输出为奇异值、左右奇异向量、低维得分、重构和误差。
+
+## 6. 适用场景
+
+- 低秩压缩、去噪、潜在语义分析和矩阵近似。
+- 稀疏文本、组学和影像数据。
+- 不适合主要结构非线性或必须直接解释原始变量效应的任务。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import pandas as pd
 from sklearn.decomposition import TruncatedSVD
-from sklearn.preprocessing import Normalizer
-from sklearn.pipeline import make_pipeline
 
-df = pd.read_csv("clinical_term_matrix.csv")
-X = df[["fever", "cough", "pain", "tumor", "treatment"]]
-
-svd_pipe = make_pipeline(
-    TruncatedSVD(n_components=2, random_state=42),
-    Normalizer(copy=False)
+svd = TruncatedSVD(
+    n_components=50,
+    algorithm="randomized",
+    n_iter=7,
+    random_state=42,
 )
+Z_train = svd.fit_transform(X_train)
+Z_test = svd.transform(X_test)
 
-Z = svd_pipe.fit_transform(X)
-svd = svd_pipe.named_steps["truncatedsvd"]
-
-print("Explained variance ratio:", svd.explained_variance_ratio_)
-print(pd.DataFrame(Z, columns=["SVD1", "SVD2"]).head())
+energy = svd.explained_variance_ratio_.sum()
+print(energy)
+print(svd.singular_values_)
 ```
 
-### 5.2 R
-
-常用包：
-
-- `irlba`
+### 7.2 R
 
 ```r
 library(irlba)
 
-x <- as.matrix(df[, c("fever", "cough", "pain", "tumor", "treatment")])
-fit <- irlba(x, nv = 2, nu = 2)
+fit <- irlba(
+  X_train,
+  nv = 50,
+  nu = 50
+)
 
-scores <- fit$u %*% diag(fit$d)
-loadings <- fit$v
-head(scores)
-fit$d
+scores_train <- fit$u %*% diag(fit$d)
+scores_test <- X_test %*% fit$v
+singular_values <- fit$d
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：奇异值谱、累计能量比例、低维得分、右奇异向量中的主要变量贡献。
-- 每个主要参数如何解释：`n_components=2` 表示只保留前两个主导低秩模式。
-- 临床或医学意义如何表达：低维成分是原始变量的线性组合，需要结合载荷较大的变量和业务背景命名。
-- 常见误读：奇异值最大只表示矩阵能量最大，不一定表示最能预测临床结局。
+- 奇异值越大，该秩 1 模式对矩阵能量贡献越大。
+- 右奇异向量是特征组合，左奇异向量是样本模式。
+- 符号可整体翻转，不改变重构。
+- 大能量模式不一定最能预测临床结局。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
 
-- 奇异值谱图。
-- 累计能量比例曲线。
-- 前两个 SVD 维度散点图。
-- 重构误差随 $k$ 变化曲线。
+1. 画奇异值谱和累计能量。
+2. 用重构误差或下游交叉验证选择 $k$。
+3. 检查前几个方向与批次、测序深度等技术变量的关联。
+4. 比较中心化、归一化和不同随机种子。
+5. 在训练折拟合，再转换验证与测试数据。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
 
-### 优势
+- 奇异值 scree 图。
+- 累计能量与重构误差曲线。
+- 前两个低维得分散点图。
+- 低秩重构前后图像或矩阵热图。
 
-- 适用于任意矩阵，理论基础清晰。
-- 截断 SVD 能提供最优低秩近似。
-- 对稀疏高维矩阵特别实用。
+## 11. 优势、局限与常见坑
 
-### 局限
+**优势：** 适用任意矩阵，最优低秩近似有严格理论，稀疏大矩阵可高效计算。
 
-- 成分可解释性有限。
-- 线性低秩结构不能表达复杂非线性流形。
-- 对尺度和中心化策略敏感。
+**局限：** 线性、方向难解释、尺度与中心化敏感，缺失需专门处理。
 
-### 常见坑
+**常见坑：** 把未中心化 Truncated SVD 等同 PCA；全数据先分解；只看二维图；按能量选 $k$ 却忽略下游任务。
 
-- 把 SVD 和 PCA 完全等同，忽略中心化和应用场景差异。
-- 在全数据上做 SVD 后再划分训练测试集。
-- 只看二维图，不检查保留能量和重构误差。
+## 12. 与相近方法的区别
 
-## 9. 与相近方法的区别
+- [[主成分分析（Principal Component Analysis, PCA）]]：中心化 SVD 对应 PCA，Truncated SVD 通常不中心化。
+- [[因子分析（Factor Analysis）]]：因子分析包含特异误差与潜变量模型。
+- [[核主成分分析（Kernel Principal Component Analysis, KPCA）]]：在核特征空间处理非线性。
+- 选择经验：稀疏矩阵保稀疏降维用 Truncated SVD；连续密集数据方差分析用 PCA。
 
-- 和 [[主成分分析（Principal Component Analysis, PCA）]] 的区别：PCA 通常对中心化数据的协方差结构做降维，SVD 是更一般的矩阵分解工具。
-- 和 [[因子分析（Factor Analysis）]] 的区别：因子分析是带误差结构和潜变量解释的统计模型，SVD 更偏代数低秩近似。
-- 和 [[核主成分分析（Kernel Principal Component Analysis, KPCA）]] 的区别：KPCA 通过核矩阵处理非线性结构，SVD 本身是线性分解。
+## 13. 医学研究中的典型应用
 
-## 10. 医学研究中的典型应用
+- 临床文本词频和诊断编码矩阵的潜在语义。
+- 影像矩阵压缩与低秩去噪。
+- 组学表达矩阵的主要模式提取。
 
-- 影像矩阵或影像组学特征压缩。
-- 临床文本词频矩阵的潜在语义降维。
-- 组学表达矩阵的低秩去噪和主要模式提取。
+## 14. 术语表
 
-## 11. 相关方法
+| 术语 | 含义 |
+| --- | --- |
+| singular value | 每个秩 1 模式的强度 |
+| left singular vector | 样本/行空间中的正交方向 |
+| right singular vector | 特征/列空间中的正交方向 |
+| rank-k approximation | 只保留前 $k$ 个奇异模式的矩阵 |
+| Frobenius norm | 矩阵所有元素平方和开根号 |
+
+## 15. 相关方法
 
 - [[主成分分析（Principal Component Analysis, PCA）]]
 - [[因子分析（Factor Analysis）]]
 - [[核主成分分析（Kernel Principal Component Analysis, KPCA）]]
 - [[多维尺度分析（Multidimensional Scaling, MDS）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
-- Golub GH, Van Loan CF. *Matrix Computations*. 4th ed. Johns Hopkins University Press; 2013.
 - Eckart C, Young G. The approximation of one matrix by another of lower rank. *Psychometrika*. 1936;1:211-218.
-- scikit-learn Developers. `sklearn.decomposition.TruncatedSVD`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html) （访问日期：2026-07-02）
+- Golub GH, Van Loan CF. *Matrix Computations*. 4th ed. Johns Hopkins University Press; 2013.
+- scikit-learn Developers. `TruncatedSVD` API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html) （访问日期：2026-07-09）

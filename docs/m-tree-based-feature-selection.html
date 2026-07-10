@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,249 +54,276 @@
     <div class="intro-note"><h1>基于树模型的特征选择（Tree-based Feature Selection）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>基于树模型的特征选择利用决策树、随机森林、梯度提升树等模型产生的特征重要性，对特征进行排序或筛选。常用重要性包括不纯度减少、分裂次数、置换重要性和 SHAP 重要性。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>树模型选择按特征在分裂中减少多少预测误差或打乱后损失多少性能来排序，能捕捉非线性与交互，但重要性会受基数和相关性偏倚。</p>
+<h3>1.2 定义</h3>
+<p>它用决策树、随机森林或梯度提升拟合结局，再按 impurity decrease、gain 或 permutation importance 选择特征。属于嵌入式/模型后选择，结果与树算法、超参数和重要性定义绑定。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：哪些特征在树模型预测中贡献较大。</li>
-<li>适用任务：分类、回归、非线性预测、高维特征筛选。</li>
-<li>常见医学场景：临床风险预测变量筛选、影像组学特征排序、生物标志物优先级排序。</li>
+<li>非线性、阈值和交互明显的表格数据选择。</li>
+<li>从大量混合类型变量中建立候选子集。</li>
+<li>医学场景：EHR、组学、影像组学与临床风险预测。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>树模型会反复选择能最好划分样本的特征。一个特征如果经常用于有效分裂，或打乱它会明显降低模型性能，就说明模型很依赖它。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>树不断问问题来把患者分得更纯。一个变量若经常让错误大幅下降，就像一项高效分诊问题；但若两个问题答案相同，树只问其中一个，另一个可能被误判为“不重要”。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>以不纯度减少为例，节点 $t$ 的不纯度为 $i(t)$，分裂为左右子节点后，特征 $X_j$ 在该节点带来的减少量为：</p>
-<p>$$
-\Delta i(t)=i(t)-\frac{n_L}{n_t}i(t_L)-\frac{n_R}{n_t}i(t_R)
-$$</p>
-<p>特征重要性可写为该特征在所有相关节点上的加权累计：</p>
-<p>$$
-I_j=\sum_{t:v(t)=j}\frac{n_t}{n}\Delta i(t)
-$$</p>
-<p>随机森林或梯度提升树中，通常再对多棵树的重要性求和或平均。置换重要性则比较置换某特征前后的模型性能：</p>
-<p>$$
-PI_j=\mathrm{Score}(f,X,y)-\mathrm{Score}(f,X_{\pi(j)},y)
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>线性稀疏方法需要预先指定变换和交互。树通过阈值分裂自动发现“年龄大于 70 且乳酸高”等规则，选择标准与非线性预测直接对齐。</p>
+<h3>2.2 关键洞察</h3>
+<p>每个被选分裂都带来局部损失下降。把某特征在全树/全森林的下降加总，就是 MDI/gain；或在验证集打乱某列，性能下降越多，说明模型越依赖该列。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$i(t)$：节点不纯度，如 Gini、熵或回归方差。</li>
-<li>$\Delta i(t)$：一次分裂带来的不纯度减少。</li>
-<li>$I_j$：特征 $j$ 的累计重要性。</li>
-<li>置换重要性：打乱某特征后模型性能下降幅度。</li>
-<li>阈值：选择特征的重要性下限，如均值、中位数或累计贡献率。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>树模型适合当前数据结构。</li>
-<li>特征重要性可代表模型对该变量的依赖程度。</li>
-<li>重要性解释应限定在模型预测语境中，不能直接解释为因果效应。</li>
+<li>MDI 计算快但偏爱连续、高基数特征，并在相关变量间任意分配。</li>
+<li>permutation importance 更贴近验证性能，但相关特征互相替代时也会低估。</li>
+<li>SHAP 可分解个体预测，不等同于稳定特征选择。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>节点 $t$ 的加权不纯度下降：</p>
+<p>$$
+\Delta I(t)
+=\frac{N_t}{N}I(t)
+-\frac{N_L}{N}I(L)
+-\frac{N_R}{N}I(R)
+$$</p>
+<p>特征 $j$ 的 MDI：</p>
+<p>$$
+\operatorname{Imp}(j)
+=\sum_{t:v(t)=j}\Delta I(t)
+$$</p>
+<p>置换重要性：</p>
+<p>$$
+\operatorname{PI}_j
+=M(\mathbf X,y)-M(\mathbf X_{\pi(j)},y)
+$$</p>
+<p>这个式子在说：分裂时累计“纯度收益”，或打乱一列后看验证性能损失。</p>
+<h3>3.2 推导脉络</h3>
+<p>分类树选择最大 Gini/熵下降，回归树选择最大 SSE 下降。集成模型将许多树的贡献平均。选择阈值可用均值/中位数重要性、Top-k 或验证集性能决定。</p>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：连续、二分类、多分类变量。</li>
-<li>因变量类型：二分类、多分类或连续型。</li>
-<li>数据结构：监督学习宽表数据。</li>
-<li>是否适合高维数据：可用，但强相关特征会分散重要性。</li>
-<li>是否适合缺失较多数据：按树模型要求处理，部分实现支持缺失。</li>
-<li>是否适合删失数据：普通树模型不直接适合，需生存树或生存森林。</li>
-<li>是否适合重复测量数据：需分组验证或专门处理相关结构。</li>
+<li>$I(t)$：节点 Gini、熵或 SSE。</li>
+<li>$N_t/N$：节点覆盖的总体比例。</li>
+<li>MDI/gain：训练结构内部的重要性。</li>
+<li>PI：依赖指定验证集和性能指标的模型依赖度。</li>
+<li>selection threshold：把连续重要性转为保留/删除的阈值。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>以住院患者恶化预测为例：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>Age</th>
-<th>NEWS2</th>
-<th>Lactate</th>
-<th>Albumin</th>
-<th>WBC</th>
-<th>Deterioration</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后果</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>78</td>
-<td>8</td>
-<td>3.2</td>
-<td>29</td>
-<td>14.2</td>
-<td>1</td>
+<td>树在独立数据上泛化</td>
+<td>重要性来自真实模式</td>
+<td>过拟合噪声</td>
 </tr>
 <tr>
-<td>49</td>
-<td>2</td>
-<td>1.1</td>
-<td>41</td>
-<td>6.3</td>
-<td>0</td>
+<td>变量机会公平</td>
+<td>基数/缺失处理不偏</td>
+<td>MDI 偏向多切点变量</td>
 </tr>
 <tr>
-<td>66</td>
-<td>5</td>
-<td>2.4</td>
-<td>34</td>
-<td>10.8</td>
-<td>1</td>
+<td>相关替代被认识</td>
+<td>低重要性可能因替代</td>
+<td>错删冗余组全部</td>
 </tr>
 <tr>
-<td>37</td>
-<td>1</td>
-<td>0.8</td>
-<td>43</td>
-<td>5.8</td>
-<td>0</td>
+<td>选择嵌入训练折</td>
+<td>测试不参与重要性</td>
+<td>泄漏</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>8 人结局为 $(0,0,0,0,1,1,1,1)$。父节点：</p>
+<p>$$
+Gini_P=1-(4/8)^2-(4/8)^2=0.5
+$$</p>
+<p>特征 A 的阈值把前 4 个阴性与后 4 个阳性完全分开，两个子节点 Gini 都为 0：</p>
+<p>$$
+\Delta Gini_A
+=0.5-\frac48(0)-\frac48(0)=0.5
+$$</p>
+<p>若整棵树只有这个分裂，归一化重要性为 A=1、其他=0。</p>
+<p>现在加入 B=2A。B 也能完美分裂，但贪心树先选 A 后已无需 B，于是 B 的 MDI=0。结论不是“B 无信息”，而是“在 A 已存在时树不再需要 B”。相关变量的 masking 是树选择必须报告的局限。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>数值/编码类别表格，分类或回归结局。</li>
+<li>缺失处理依具体实现；scikit-learn 多数树前需插补。</li>
+<li>生存结局需随机生存森林等专用模型。</li>
+<li>重复测量必须患者级切分。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>patient_id</th>
+<th style="text-align: right;">marker_A</th>
+<th style="text-align: right;">marker_B</th>
+<th style="text-align: right;">noise</th>
+<th style="text-align: right;">severe</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P01</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.3</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr>
-<td>57</td>
-<td>4</td>
-<td>1.6</td>
-<td>38</td>
-<td>8.4</td>
-<td>0</td>
+<td>P02</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.8</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>P05</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.1</td>
+<td style="text-align: right;">1</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：特征矩阵和目标变量。</li>
-<li>关键变量：树模型类型、重要性类型、选择阈值。</li>
-<li>需要预处理的内容：缺失处理、类别编码、训练测试划分、重采样稳定性评估。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：树模型、特征重要性排序、保留特征集合。</li>
-<li>参数估计：重要性得分。</li>
-<li>预测结果：若直接使用树模型，也可输出预测。</li>
-<li>不确定性指标：交叉验证性能、置换重要性分布、bootstrap 入选频率。</li>
-</ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+<h3>5.3 输入与产出</h3>
+<p>输入训练数据、树模型、重要性类型和阈值；产出拟合模型、重要性、支持集及其验证性能。</p></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：非线性和交互明显、希望用树模型辅助筛选特征的任务。</li>
-<li>不适合：强因果解释、需要无模型偏倚变量筛选、样本量很小的任务。</li>
-<li>使用前需要特别检查的点：重要性指标类型、相关特征组、连续变量或高基数分类变量的重要性偏倚。</li>
+<li>适合：复杂非线性、交互、混合尺度表格数据。</li>
+<li>不适合：需要稳定方向性系数、小样本高维且树易过拟合。</li>
+<li>最好比较 MDI、置换和跨折稳定性。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="tree-based-feature-selection" data-i="0">Python</button><button class="codetab" data-uid="tree-based-feature-selection" data-i="1">R</button></div><div class="codepanel active" data-uid="tree-based-feature-selection" data-i="0"><p>常用包：</p>
-<ul>
-<li><code>scikit-learn</code></li>
-</ul>
-<pre><code class="language-python">import pandas as pd
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="tree-based-feature-selection" data-i="0">Python</button><button class="codetab" data-uid="tree-based-feature-selection" data-i="1">R</button></div><div class="codepanel active" data-uid="tree-based-feature-selection" data-i="0"><pre><code class="language-python">from sklearn.datasets import load_breast_cancer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import SelectFromModel
 from sklearn.model_selection import train_test_split
+from sklearn.inspection import permutation_importance
 
-df = pd.read_csv(&quot;deterioration.csv&quot;)
-X = df[[&quot;Age&quot;, &quot;NEWS2&quot;, &quot;Lactate&quot;, &quot;Albumin&quot;, &quot;WBC&quot;]]
-y = df[&quot;Deterioration&quot;].astype(int)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
+X, y = load_breast_cancer(return_X_y=True, as_frame=True)
+Xtr, Xte, ytr, yte = train_test_split(
+    X, y, stratify=y, random_state=42
 )
-
 rf = RandomForestClassifier(
-    n_estimators=500,
-    min_samples_leaf=10,
-    random_state=42,
-    n_jobs=-1
-)
-rf.fit(X_train, y_train)
-
-selector = SelectFromModel(rf, threshold=&quot;mean&quot;, prefit=True)
-X_train_sel = selector.transform(X_train)
-X_test_sel = selector.transform(X_test)
-
-importance = pd.Series(rf.feature_importances_, index=X.columns).sort_values(ascending=False)
-print(importance)
+    n_estimators=500, min_samples_leaf=5,
+    random_state=42, n_jobs=-1
+).fit(Xtr, ytr)
+selector = SelectFromModel(rf, threshold=&quot;median&quot;, prefit=True)
 print(X.columns[selector.get_support()].tolist())
-</code></pre></div><div class="codepanel" data-uid="tree-based-feature-selection" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>ranger</code></li>
-<li><code>vip</code></li>
-</ul>
-<pre><code class="language-r">library(ranger)
+pi = permutation_importance(rf, Xte, yte, n_repeats=20, random_state=42)
+print(pi.importances_mean)
+</code></pre></div><div class="codepanel" data-uid="tree-based-feature-selection" data-i="1"><pre><code class="language-r">library(ranger)
 
+set.seed(42)
 fit &lt;- ranger(
-  Deterioration ~ Age + NEWS2 + Lactate + Albumin + WBC,
-  data = df_train,
-  probability = TRUE,
+  Species ~ ., data = iris,
   num.trees = 500,
-  importance = &quot;permutation&quot;
+  importance = &quot;permutation&quot;,
+  min.node.size = 5
 )
-
 sort(fit$variable.importance, decreasing = TRUE)
+selected &lt;- names(fit$variable.importance)[
+  fit$variable.importance &gt; median(fit$variable.importance)
+]
+selected
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：重要性排序、不同重采样下是否稳定、筛选后模型性能。</li>
-<li>每个主要参数如何解释：阈值越高保留越少；置换重要性越大说明模型越依赖该变量。</li>
-<li>临床或医学意义如何表达：可以说模型预测中该变量贡献较大，不能直接说它是病因。</li>
-<li>常见误读：把 impurity importance 直接当作无偏变量贡献。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>特征重要性条形图。</li>
-<li>置换重要性箱线图。</li>
-<li>不同重采样下 Top-K 特征入选频率图。</li>
-</ul></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><p>高重要性表示当前树模型依赖该特征，不是因果效应。MDI 的单位是累计不纯度下降，PI 的单位是性能指标下降，二者不可直接混读。</p></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>在独立验证折计算 permutation importance。</li>
+<li>重复 CV/Bootstrap 报告入选频率。</li>
+<li>对相关特征做分组置换或聚类后选代表。</li>
+<li>比较不同深度、叶节点大小和随机种子。</li>
+<li>加入随机噪声列作为偶然重要性基线。</li>
+<li>检查亚组、中心和时间漂移。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>MDI 与 PI 并列排序图。</li>
+<li>各折重要性箱线图。</li>
+<li>相关特征组网络/热图。</li>
+<li>特征数—验证性能曲线。</li>
+<li>PDP/SHAP 仅作行为补充。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>能捕捉非线性和交互。</li>
-<li>与树模型预测目标一致。</li>
-<li>可处理较多候选特征。</li>
+<li>自动捕捉非线性、阈值和交互。</li>
+<li>无需连续变量标准化。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>重要性受模型和参数影响。</li>
-<li>强相关特征会共享或稀释重要性。</li>
-<li>impurity importance 对连续变量和高基数特征可能有偏。</li>
+<li>MDI 有基数偏倚，相关变量会相互遮蔽。</li>
+<li>支持集对超参数和样本波动敏感。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>只报告一次训练得到的重要性，不评估稳定性。</li>
-<li>在全数据上选择特征后再评估模型。</li>
-<li>把特征重要性写成因果或独立效应。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是一类基于 bagging 的树集成方法。它通过对样本做 bootstrap 抽样、对特征做随机子采样，训练许多彼此不同的决策树，再把它们的结果投票或平均起来。">随机森林（Random Forest）</a> 的区别：随机森林是建模方法；本卡强调用树模型输出做特征选择。</li>
-<li>和 <a class="xlink" href="m-gradient-boosting-decision-tree-gbdt.html" data-cn="梯度提升决策树" data-en="Gradient Boosting Decision Tree, GBDT" data-def="梯度提升决策树是以决策树为基学习器的梯度提升方法。它通过逐轮拟合损失函数的负梯度或伪残差，把多棵浅树叠加成一个强预测模型。">梯度提升决策树（Gradient Boosting Decision Tree, GBDT）</a> 的区别：GBDT 可作为基模型之一；本卡覆盖多类树模型选择流程。</li>
-<li>和 <a class="xlink" href="m-embedded-feature-selection.html" data-cn="嵌入式特征选择" data-en="Embedded Feature Selection" data-def="嵌入式特征选择是在模型训练过程中同步完成特征评价或筛选的方法。常见形式包括 L1 正则化模型、树模型特征重要性和基于模型系数的 SelectFromModel。">嵌入式特征选择（Embedded Feature Selection）</a> 的区别：树模型选择是嵌入式特征选择的一个分支。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>EHR 表格数据中筛选关键风险预测变量。</li>
-<li>影像组学高维特征排序和降维。</li>
-<li>多生物标志物组合预测中的候选特征优先级评估。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-embedded-feature-selection.html" data-cn="嵌入式特征选择" data-en="Embedded Feature Selection" data-def="嵌入式特征选择是在模型训练过程中同步完成特征评价或筛选的方法。常见形式包括 L1 正则化模型、树模型特征重要性和基于模型系数的 SelectFromModel。">嵌入式特征选择（Embedded Feature Selection）</a></li>
-<li><a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是一类基于 bagging 的树集成方法。它通过对样本做 bootstrap 抽样、对特征做随机子采样，训练许多彼此不同的决策树，再把它们的结果投票或平均起来。">随机森林（Random Forest）</a></li>
-<li><a class="xlink" href="m-gradient-boosting-decision-tree-gbdt.html" data-cn="梯度提升决策树" data-en="Gradient Boosting Decision Tree, GBDT" data-def="梯度提升决策树是以决策树为基学习器的梯度提升方法。它通过逐轮拟合损失函数的负梯度或伪残差，把多棵浅树叠加成一个强预测模型。">梯度提升决策树（Gradient Boosting Decision Tree, GBDT）</a></li>
-<li><a class="xlink" href="m-extreme-gradient-boosting-xgboost.html" data-cn="XGBoost" data-en="Extreme Gradient Boosting, XGBoost" data-def="XGBoost 是一种基于梯度提升树的高性能集成学习方法。它在经典 GBDT 基础上加入了二阶优化、显式正则化、列采样、缺失值处理和工程级并行优化，因此在表格数据预测中非常常用。">XGBoost（Extreme Gradient Boosting, XGBoost）</a></li>
-<li><a class="xlink" href="m-light-gradient-boosting-machine.html" data-cn="LightGBM" data-en="Light Gradient Boosting Machine" data-def="LightGBM 是一种高效的梯度提升树实现。它在传统 GBDT 基础上引入直方图分桶、leaf-wise 生长策略，以及大样本场景常用的 GOSS 和 EFB 等优化，使其在大规模表格数据上训练更快、内存占用更低。">LightGBM（Light Gradient Boosting Machine）</a></li>
+<li>用训练集 PI 选择。</li>
+<li>将 gain 当因果效应。</li>
+<li>忽略患者级切分。</li>
+<li>一次随机森林支持集直接定稿。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Breiman L. Random forests. <em>Mach Learn</em>. 2001;45:5-32.</li>
-<li>Strobl C, Boulesteix AL, Zeileis A, Hothorn T. Bias in random forest variable importance measures. <em>BMC Bioinformatics</em>. 2007;8:25.</li>
-<li>scikit-learn Developers. Feature selection using SelectFromModel. scikit-learn User Guide. <a href="https://scikit-learn.org/stable/modules/feature_selection.html#select-from-model">https://scikit-learn.org/stable/modules/feature_selection.html#select-from-model</a> （访问日期：2026-07-02）</li>
+<li>Lasso 偏向线性稀疏；树选择适合非线性。</li>
+<li>过滤式 MI 逐列评分；树重要性可反映交互中的使用。</li>
+<li>SHAP 解释预测分摊，树选择决定保留列。</li>
+<li>如何选择：用任务结构决定模型，并以嵌套验证比较支持集。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>EHR 风险因素筛选。</li>
+<li>影像组学和多组学预测变量压缩。</li>
+<li>临床评分候选变量优先级排序。</li>
+</ul>
+<p>需报告重要性定义、阈值、相关组、缺失处理、患者级切分和外部稳定性。</p></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>MDI</strong>：平均不纯度下降重要性。</li>
+<li><strong>Permutation importance</strong>：打乱特征后的性能损失。</li>
+<li><strong>Gain</strong>：提升树中分裂带来的目标下降。</li>
+<li><strong>Masking</strong>：相关特征使彼此重要性被低估。</li>
+<li><strong>分组置换（Grouped permutation）</strong>：同时打乱一组相关特征。</li>
+<li><strong>支持集（Support）</strong>：最终保留的变量集合。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-decision-tree.html" data-cn="决策树" data-en="Decision Tree" data-def="决策树把复杂分类问题拆成一连串「如果满足某条件，就往左；否则往右」的问题，最后在叶节点用多数类别做预测。">决策树（Decision Tree）</a></li>
+<li><a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是在 Bagging 多棵树的基础上，再让每个节点只看一部分随机特征，从而让树与树更不相似、投票更稳。">随机森林（Random Forest）</a></li>
+<li><a class="xlink" href="m-extreme-gradient-boosting-xgboost.html" data-cn="XGBoost" data-en="Extreme Gradient Boosting, XGBoost" data-def="XGBoost 是带二阶近似、显式树复杂度惩罚、采样与高效实现的梯度提升树。">XGBoost（Extreme Gradient Boosting, XGBoost）</a></li>
+<li><a class="xlink" href="m-embedded-feature-selection.html" data-cn="嵌入式特征选择" data-en="Embedded Feature Selection" data-def="嵌入式选择把“哪些变量留下”写进模型训练目标或结构，让预测拟合与特征取舍同时完成。">嵌入式特征选择（Embedded Feature Selection）</a></li>
+<li><a class="xlink" href="m-shapley-additive-explanations-shap.html" data-cn="SHAP" data-en="Shapley Additive Explanations, SHAP" data-def="SHAP 把一次预测与参考基线之间的差额，按特征在所有可能加入顺序中的平均边际贡献进行分账。">SHAP（Shapley Additive Explanations, SHAP）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Breiman L. Random forests. <em>Machine Learning</em>. 2001;45:5-32.</li>
+<li>Strobl C, et al. Bias in random forest variable importance measures. <em>BMC Bioinformatics</em>. 2007;8:25.</li>
+<li>scikit-learn developers. Feature importance evaluation. https://scikit-learn.org/stable/modules/permutation_importance.html</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-embedded-feature-selection.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">嵌入式特征选择</div></a><a class="pg pg-next" href="m-multiple-imputation.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">多重插补</div></a></div>

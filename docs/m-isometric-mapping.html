@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,231 +54,336 @@
     <div class="intro-note"><h1>Isomap（Isometric Mapping）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>Isomap 是一种非线性流形学习方法。它通过近邻图上的最短路径近似流形测地距离，再用经典多维尺度分析把样本嵌入低维空间。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>Isomap 用近邻图上的最短路径近似流形测地距离，再用经典 MDS 把这些距离还原为低维坐标。</p>
+<h3>1.2 定义</h3>
+<p>Isomap 是一种非线性流形学习方法。它把欧氏距离的使用限制在局部近邻内，通过全局最短路径连接局部距离，目标是在低维中保持沿流形行走的距离。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：高维数据在弯曲流形上分布时，如何保持沿流形的全局距离关系。</li>
-<li>适用任务：非线性降维、流形展开、探索性可视化。</li>
-<li>常见医学场景：影像表型连续谱展示，单细胞发育轨迹探索，复杂临床表型的非线性结构观察。</li>
+<li>高维样本沿弯曲曲面分布，直线距离会穿过曲面而低估真实间隔。</li>
+<li>希望展开流形并兼顾较大尺度的几何关系。</li>
+<li>需要从高维影像、组学或表型数据获得探索性坐标。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>在弯曲表面上，两点的直线距离可能穿过“空气”，并不代表沿数据流形真正要走的距离。Isomap 先用近邻图把样本连成道路网，再用最短路径近似沿流形行走的距离。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>地图上隔山相望的两家医院直线距离很近，但实际道路很远。Isomap 不穿山测直线，而是把局部可通行道路连成网络，再按最短路绘制一张低维地图。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>先为每个样本 $x_i$ 构建近邻图 $G$，边权为欧氏距离：</p>
-<p>$$
-d_G(i,j)=\|x_i-x_j\|_2,\quad j\in N(i)
-$$</p>
-<p>再用最短路径得到测地距离近似：</p>
-<p>$$
-d_{\mathcal{M}}(i,j)\approx \operatorname{shortest\_path}_G(i,j)
-$$</p>
-<p>令 $D^{(2)}$ 为平方距离矩阵，经典 MDS 的双中心化矩阵为：</p>
-<p>$$
-B=-\frac{1}{2} H D^{(2)} H
-$$</p>
-<p>其中：</p>
-<p>$$
-H=I-\frac{1}{n}\mathbf{1}\mathbf{1}^\top
-$$</p>
-<p>对 $B$ 做特征分解，取前 $k$ 个正特征值和特征向量得到低维坐标：</p>
-<p>$$
-Y=V_k \Lambda_k^{1/2}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
-<ul>
-<li>$G$：近邻图。</li>
-<li>$d_G(i,j)$：近邻图边权。</li>
-<li>$d_{\mathcal{M}}(i,j)$：流形上的测地距离近似。</li>
-<li><code>n_neighbors</code>：构图时每个样本连接的近邻数。</li>
-<li><code>n_components</code>：低维嵌入维度。</li>
-<li>residual variance：原始测地距离与低维距离不一致的程度。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>数据位于低维流形附近。</li>
-<li>近邻图足以近似流形局部结构。</li>
-<li>图连通且没有由噪声边造成的严重短路。</li>
-<li>样本密度足够覆盖流形。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 根本困难</h3>
+<p>原空间欧氏距离只在流形的很小邻域内近似真实距离。直接对全局欧氏距离做 MDS，容易把弯曲结构压扁或折叠。</p>
+<h3>2.2 关键洞察</h3>
+<p>如果样本沿流形采样足够密，近邻之间的短线段可近似局部测地线；把这些短线段的最短路径相加，就能近似远距离样本之间的流形距离。</p>
+<h3>2.3 三步算法</h3>
+<ol>
+<li>建立 $k$ 近邻图或半径近邻图，以局部距离为边权。</li>
+<li>用 Dijkstra 或 Floyd-Warshall 算法求所有点对最短路径。</li>
+<li>对测地距离矩阵执行经典 MDS，得到低维坐标。</li>
+</ol></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：连续型高维特征。</li>
-<li>因变量类型：Isomap 本身不需要结局变量。</li>
-<li>数据结构：样本乘以特征矩阵。</li>
-<li>是否适合高维数据：适合探索，但距离计算和最短路径在大样本下成本较高。</li>
-<li>是否适合缺失较多数据：需先处理缺失。</li>
-<li>是否适合删失数据：不直接处理删失结局。</li>
-<li>是否适合重复测量数据：需先定义距离或样本单位，普通 Isomap 不建模时间相关性。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>以单细胞表达特征为例：</p>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 近邻图</h3>
+<p>对局部相邻的 $i,j$ 设置：</p>
+<p>$$
+G_{ij}=d(x_i,x_j)
+$$</p>
+<p>非邻接点暂不直接连边。</p>
+<h3>3.2 测地距离近似</h3>
+<p>图上最短路径距离为：</p>
+<p>$$
+d_G(i,j)=
+\min_{\pi:i\rightsquigarrow j}
+\sum_{(u,v)\in\pi}G_{uv}
+$$</p>
+<p>这个式子在所有连接 $i$ 与 $j$ 的路径中选择总边长最小的一条。</p>
+<h3>3.3 经典 MDS</h3>
+<p>令 $D_G^{(2)}$ 为 $d_G(i,j)^2$ 组成的矩阵，$H=I-\mathbf1\mathbf1^\top/n$：</p>
+<p>$$
+B=-\frac12HD_G^{(2)}H
+$$</p>
+<p>若 $B=V\Lambda V^\top$，取前 $q$ 个正特征值：</p>
+<p>$$
+Y=V_q\Lambda_q^{1/2}
+$$</p>
+<h3>3.4 关键条件</h3>
 <table>
 <thead>
 <tr>
-<th>GeneSet_1</th>
-<th>GeneSet_2</th>
-<th>GeneSet_3</th>
-<th>GeneSet_4</th>
-<th>CellType</th>
+<th>条件</th>
+<th>违反后果</th>
+<th>检查方式</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>1.20</td>
-<td>0.33</td>
-<td>-0.42</td>
-<td>0.91</td>
-<td>Progenitor</td>
+<td>样本密集覆盖流形</td>
+<td>最短路径绕行或断裂</td>
+<td>第 $k$ 近邻距离分布</td>
 </tr>
 <tr>
-<td>1.05</td>
-<td>0.40</td>
-<td>-0.35</td>
-<td>0.82</td>
-<td>Progenitor</td>
+<td>近邻图连通</td>
+<td>无穷测地距离</td>
+<td>连通分量</td>
 </tr>
 <tr>
-<td>-0.21</td>
-<td>1.44</td>
-<td>0.18</td>
-<td>0.12</td>
-<td>Mature</td>
+<td>图没有跨折叠捷径</td>
+<td>低估测地距离</td>
+<td>检查可疑长边</td>
 </tr>
 <tr>
-<td>-0.33</td>
-<td>1.30</td>
-<td>0.22</td>
-<td>0.20</td>
-<td>Mature</td>
+<td>流形近似等距嵌入</td>
+<td>MDS 残差较大</td>
+<td>residual variance</td>
+</tr>
+<tr>
+<td>距离度量符合问题</td>
+<td>图结构无医学意义</td>
+<td>多种距离敏感性分析</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>三个点形成一条弯折路径：</p>
+<p>$$
+A=(0,0),\qquad B=(1,0),\qquad C=(1,1)
+$$</p>
+<p>设近邻图只保留 $A-B$ 和 $B-C$。</p>
+<p><strong>Step 1：比较直线距离。</strong></p>
+<p>$$
+d_E(A,C)=\sqrt{(1-0)^2+(1-0)^2}=\sqrt2
+$$</p>
+<p>直线会斜穿弯折内部。</p>
+<p><strong>Step 2：计算图上测地距离。</strong></p>
+<p>$$
+d_G(A,B)=1,\qquad d_G(B,C)=1
+$$</p>
+<p>$$
+d_G(A,C)=d_G(A,B)+d_G(B,C)=2
+$$</p>
+<p>因此测地距离矩阵为：</p>
+<p>$$
+D_G=
+\begin{pmatrix}
+0&amp;1&amp;2\\
+1&amp;0&amp;1\\
+2&amp;1&amp;0
+\end{pmatrix}
+$$</p>
+<p><strong>Step 3：经典 MDS 展开。</strong></p>
+<p>双中心化得到：</p>
+<p>$$
+B=
+\begin{pmatrix}
+1&amp;0&amp;-1\\
+0&amp;0&amp;0\\
+-1&amp;0&amp;1
+\end{pmatrix}
+$$</p>
+<p>唯一正特征值为 2，对应坐标可取：</p>
+<p>$$
+Y=(-1,0,1)^\top
+$$</p>
+<p>低维距离重新变成 1、1、2。也就是说，Isomap 把二维弯折路径展开为一条直线，同时保留沿路径行走的距离。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>输入为样本乘特征矩阵，或可定义成对距离的数据。</li>
+<li>连续特征通常需要标准化；高维数据可先 PCA 去噪。</li>
+<li>缺失值需先处理；删失结局不是 Isomap 的直接输入。</li>
+<li>对混合变量、序列或组学计数应选择有依据的距离，而非机械使用欧氏距离。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>Patient</th>
+<th style="text-align: right;">Imaging_1</th>
+<th style="text-align: right;">Imaging_2</th>
+<th style="text-align: right;">Imaging_3</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P01</td>
+<td style="text-align: right;">0.1</td>
+<td style="text-align: right;">1.4</td>
+<td style="text-align: right;">2.1</td>
+<td>stable</td>
+</tr>
+<tr>
+<td>P02</td>
+<td style="text-align: right;">0.4</td>
+<td style="text-align: right;">1.2</td>
+<td style="text-align: right;">1.8</td>
+<td>stable</td>
+</tr>
+<tr>
+<td>P03</td>
+<td style="text-align: right;">1.3</td>
+<td style="text-align: right;">0.7</td>
+<td style="text-align: right;">0.9</td>
+<td>progress</td>
+</tr>
+<tr>
+<td>P04</td>
+<td style="text-align: right;">1.8</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">0.3</td>
+<td>progress</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：连续型特征矩阵。</li>
-<li>关键变量：近邻数、嵌入维度、距离度量。</li>
-<li>需要预处理的内容：缺失处理、标准化、异常值检查、近邻图连通性检查。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：低维嵌入坐标、近邻图、重构误差。</li>
-<li>参数估计：测地距离矩阵和 MDS 嵌入。</li>
-<li>预测结果：通常不直接预测，可用于探索或后续建模输入。</li>
-<li>不确定性指标：参数敏感性、邻域保持指标、重采样嵌入稳定性。</li>
-</ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+<p><code>Outcome</code> 可用于嵌入后验证，不应在无监督拟合前决定展示参数。</p>
+<h3>5.3 输入与产出</h3>
+<p>输入包括特征、近邻规则、距离度量和目标维数。输出包括嵌入坐标、近邻图、测地距离矩阵及重构误差；内存和计算通常随样本对数量快速增长。</p></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：全局流形距离有意义、数据可能呈弯曲低维结构、样本覆盖较均匀的场景。</li>
-<li>不适合：样本量很大且距离计算昂贵、近邻图容易断裂、噪声造成跨流形捷径的场景。</li>
-<li>使用前需要特别检查的点：近邻图是否连通，近邻数选择是否稳定，二维嵌入是否过度解释。</li>
+<li>连续、低维、近似等距且采样充分的弯曲流形。</li>
+<li>影像姿态、连续生理状态或疾病演进轨迹探索。</li>
+<li>不适合流形有分支、孔洞被稀疏采样、噪声很高或样本规模极大的场景。</li>
+<li>若只关注局部可视化而不要求全局距离，UMAP 或 t-SNE 往往更实用。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="isometric-mapping" data-i="0">Python</button><button class="codetab" data-uid="isometric-mapping" data-i="1">R</button></div><div class="codepanel active" data-uid="isometric-mapping" data-i="0"><p>常用包：</p>
-<ul>
-<li><code>scikit-learn</code></li>
-</ul>
-<pre><code class="language-python">import pandas as pd
-from sklearn.manifold import Isomap
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="isometric-mapping" data-i="0">Python</button><button class="codetab" data-uid="isometric-mapping" data-i="1">R</button></div><div class="codepanel active" data-uid="isometric-mapping" data-i="0"><pre><code class="language-python">import pandas as pd
+from sklearn.manifold import Isomap, trustworthiness
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv(&quot;single_cell_features.csv&quot;)
-features = [&quot;GeneSet_1&quot;, &quot;GeneSet_2&quot;, &quot;GeneSet_3&quot;, &quot;GeneSet_4&quot;]
-X = df[features]
+X = df[[&quot;Imaging_1&quot;, &quot;Imaging_2&quot;, &quot;Imaging_3&quot;]]
 
-isomap_pipe = make_pipeline(
+model = make_pipeline(
     StandardScaler(),
-    Isomap(n_neighbors=10, n_components=2)
+    Isomap(
+        n_neighbors=10,
+        n_components=2,
+        metric=&quot;euclidean&quot;,
+        path_method=&quot;auto&quot;,
+        n_jobs=-1,
+    ),
 )
+embedding = model.fit_transform(X)
 
-embedding = isomap_pipe.fit_transform(X)
-embedding_df = pd.DataFrame(embedding, columns=[&quot;Iso1&quot;, &quot;Iso2&quot;])
-print(embedding_df.head())
-</code></pre></div><div class="codepanel" data-uid="isometric-mapping" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>vegan</code></li>
-</ul>
-<pre><code class="language-r">library(vegan)
+iso = model.named_steps[&quot;isomap&quot;]
+X_scaled = model.named_steps[&quot;standardscaler&quot;].transform(X)
+score = trustworthiness(X_scaled, embedding, n_neighbors=10)
+result = pd.DataFrame(embedding, columns=[&quot;ISO1&quot;, &quot;ISO2&quot;])
+print(iso.reconstruction_error(), score)
+</code></pre></div><div class="codepanel" data-uid="isometric-mapping" data-i="1"><pre><code class="language-r">library(vegan)
 
-x &lt;- scale(df[, c(&quot;GeneSet_1&quot;, &quot;GeneSet_2&quot;, &quot;GeneSet_3&quot;, &quot;GeneSet_4&quot;)])
-dist_mat &lt;- dist(x)
-fit &lt;- isomap(dist_mat, ndim = 2, k = 10)
+x &lt;- scale(df[, c(&quot;Imaging_1&quot;, &quot;Imaging_2&quot;, &quot;Imaging_3&quot;)])
+d &lt;- dist(x, method = &quot;euclidean&quot;)
 
-embedding &lt;- scores(fit)
+fit &lt;- isomap(
+  d,
+  ndim = 2,
+  k = 10
+)
+embedding &lt;- scores(fit, choices = 1:2)
 head(embedding)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：低维嵌入中样本沿流形的排列、全局距离是否被合理保留、分组或连续指标是否沿嵌入变化。</li>
-<li>每个主要参数如何解释：<code>n_neighbors</code> 决定测地距离估计的局部尺度。</li>
-<li>临床或医学意义如何表达：Isomap 坐标适合描述样本相对关系和潜在连续谱，不宜直接命名为临床指标。</li>
-<li>常见误读：图上距离近不一定代表所有原始特征都相似，而是算法定义的流形距离近。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>Isomap 二维嵌入散点图。</li>
-<li>不同近邻数下的嵌入对比图。</li>
-<li>残差方差随嵌入维度变化曲线。</li>
-<li>近邻图连通性或最短路径距离诊断图。</li>
-</ul></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>能捕捉非线性流形上的全局距离结构。</li>
-<li>算法思路清晰，连接近邻图和经典 MDS。</li>
-<li>对某些弯曲流形的展开效果直观。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>对近邻数和噪声边敏感。</li>
-<li>大样本下计算测地距离矩阵成本高。</li>
-<li>离群点可能破坏近邻图和最短路径。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>近邻图不连通时仍直接解释嵌入。</li>
-<li>把 Isomap 二维图当作稳定聚类证据。</li>
-<li>忽略标准化导致距离被量纲较大的变量主导。</li>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>点间距离用于近似沿流形的关系，坐标轴方向和正负没有固定医学意义。</li>
+<li>远距离是否可信取决于整条最短路径，不应只凭二维图判断。</li>
+<li>图上桥接或分离可能来自 $k$ 的选择与采样空洞。</li>
+<li>颜色分组应由未参与参数挑选的外部标签验证。</li>
 </ul></div>
     </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-locally-linear-embedding-lle.html" data-cn="局部线性嵌入" data-en="Locally Linear Embedding, LLE" data-def="局部线性嵌入是一种非线性流形学习方法。它假设高维数据虽然整体弯曲，但每个样本附近的小邻域可以近似看作线性结构，并在低维空间中尽量保持这种局部重构关系。">局部线性嵌入（Locally Linear Embedding, LLE）</a> 的区别：LLE 保持局部重构权重，Isomap 保持图上测地距离。</li>
-<li>和 <a class="xlink" href="m-multidimensional-scaling-mds.html" data-cn="多维尺度分析" data-en="Multidimensional Scaling, MDS" data-def="多维尺度分析是一类把样本间距离或不相似度表示为低维坐标的方法。它的目标是在二维或三维空间中尽量保留原始距离关系。">多维尺度分析（Multidimensional Scaling, MDS）</a> 的区别：MDS 可直接对距离矩阵降维，Isomap 先用近邻图把欧氏距离转换为测地距离。</li>
-<li>和 <a class="xlink" href="m-uniform-manifold-approximation-and-projection.html" data-cn="UMAP" data-en="Uniform Manifold Approximation and Projection" data-def="UMAP 是一种非线性降维和可视化方法，基于流形假设和近邻图构建高维数据的模糊拓扑结构，再在低维空间中寻找相似的结构。">UMAP（Uniform Manifold Approximation and Projection）</a> 的区别：UMAP 更强调近邻图的模糊拓扑结构，通常更适合大规模可视化。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ol>
+<li>检查近邻图是否连通，以及是否存在异常长边。</li>
+<li>画第 $k$ 近邻距离和局部密度分布。</li>
+<li>比较多组 $k$ 或半径，不仅挑最好看的结果。</li>
+<li>报告 reconstruction error、trustworthiness 与 residual variance。</li>
+<li>比较欧氏、余弦或领域特定距离。</li>
+<li>bootstrap 后用 Procrustes 对齐嵌入，检查结构稳定性。</li>
+<li>下游模型在每个训练折内重新拟合标准化、PCA 与 Isomap。</li>
+</ol></div>
     </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
-<li>单细胞或组学数据中潜在状态轨迹的探索。</li>
-<li>医学影像表型中连续病变谱的可视化。</li>
-<li>多维临床表型中非线性患者相似性展示。</li>
+<li>Isomap 二维嵌入并叠加近邻图。</li>
+<li>测地距离与嵌入距离散点图。</li>
+<li>重构误差随维数或近邻数的曲线。</li>
+<li>不同 $k$ 的小多图与连通分量标记。</li>
 </ul></div>
     </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-locally-linear-embedding-lle.html" data-cn="局部线性嵌入" data-en="Locally Linear Embedding, LLE" data-def="局部线性嵌入是一种非线性流形学习方法。它假设高维数据虽然整体弯曲，但每个样本附近的小邻域可以近似看作线性结构，并在低维空间中尽量保持这种局部重构关系。">局部线性嵌入（Locally Linear Embedding, LLE）</a></li>
-<li><a class="xlink" href="m-multidimensional-scaling-mds.html" data-cn="多维尺度分析" data-en="Multidimensional Scaling, MDS" data-def="多维尺度分析是一类把样本间距离或不相似度表示为低维坐标的方法。它的目标是在二维或三维空间中尽量保留原始距离关系。">多维尺度分析（Multidimensional Scaling, MDS）</a></li>
-<li><a class="xlink" href="m-uniform-manifold-approximation-and-projection.html" data-cn="UMAP" data-en="Uniform Manifold Approximation and Projection" data-def="UMAP 是一种非线性降维和可视化方法，基于流形假设和近邻图构建高维数据的模糊拓扑结构，再在低维空间中寻找相似的结构。">UMAP（Uniform Manifold Approximation and Projection）</a></li>
-<li><a class="xlink" href="m-kernel-principal-component-analysis-kpca.html" data-cn="核主成分分析" data-en="Kernel Principal Component Analysis, KPCA" data-def="核主成分分析是 [[主成分分析（Principal Component Analysis, PCA）]] 的非线性扩展。它通过核函数隐式地把样本映射到高维特征空间，再在该空间中执行 PCA，从而捕捉原始空间中的非线性结构。">核主成分分析（Kernel Principal Component Analysis, KPCA）</a></li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p><strong>优势：</strong> 原理清晰；能展开某些弯曲流形；比只保留局部邻域的方法更强调全局测地结构。</p>
+<p><strong>局限：</strong> 易受短路边、断图和稀疏采样影响；成对最短路径成本高；只适合近似等距结构。</p>
+<p><strong>常见坑：</strong> $k$ 过大造成跨折叠捷径；$k$ 过小使图断开；忽视特征量纲；把二维直线距离当原始欧氏距离；只按标签分离度选参数。</p></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-multidimensional-scaling-mds.html" data-cn="多维尺度分析" data-en="Multidimensional Scaling, MDS" data-def="MDS 只根据对象间不相似度寻找低维坐标，使图上点距尽量复现原始距离或距离顺序。">多维尺度分析（Multidimensional Scaling, MDS）</a>：MDS 直接使用给定不相似度；Isomap 先用近邻图估计测地距离。</li>
+<li><a class="xlink" href="m-locally-linear-embedding-lle.html" data-cn="局部线性嵌入" data-en="Locally Linear Embedding, LLE" data-def="LLE 用每个样本由近邻线性重构的权重描述局部几何，再到低维空间寻找一组仍能被同样权重重构的坐标。">局部线性嵌入（Locally Linear Embedding, LLE）</a>：LLE 保留局部重构权重，不直接保持全局测地距离。</li>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="PCA 旋转坐标轴，依次寻找样本投影方差最大的正交方向，用少数线性组合保留主要总变异。">主成分分析（Principal Component Analysis, PCA）</a>：PCA 保持全局线性方差；Isomap 可展开非线性流形。</li>
+<li><a class="xlink" href="m-uniform-manifold-approximation-and-projection.html" data-cn="UMAP" data-en="Uniform Manifold Approximation and Projection" data-def="UMAP 把高维近邻关系做成带置信度的模糊图，再优化低维点的位置，使高置信边靠近、缺失边保持分离。">UMAP（Uniform Manifold Approximation and Projection）</a>：UMAP 优化模糊邻域图，通常更快，但其二维距离不等同于测地距离。</li>
+<li><strong>如何选择：</strong> 有充分理由相信等距流形且重视沿流形距离时用 Isomap；只需稳定线性基线时先用 PCA；强调局部可视化时考虑 UMAP。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>影像姿态、器官形态或病灶形变的连续表征。</li>
+<li>多指标疾病进展路径探索。</li>
+<li>高维生理信号状态空间可视化。</li>
+</ul>
+<p>研究报告应同时给出预处理、距离、近邻规则、连通性和敏感性分析。</p></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>geodesic distance 测地距离</td>
+<td>沿流形表面可行路径的最短长度</td>
+</tr>
+<tr>
+<td>neighborhood graph 近邻图</td>
+<td>以样本为节点、局部近邻为边的图</td>
+</tr>
+<tr>
+<td>shortest path 最短路径</td>
+<td>图上连接两点且总边权最小的路径</td>
+</tr>
+<tr>
+<td>isometry 等距映射</td>
+<td>尽可能保持距离的映射</td>
+</tr>
+<tr>
+<td>short-circuit edge 短路边</td>
+<td>跨越流形折叠、错误缩短测地距离的边</td>
+</tr>
+<tr>
+<td>residual variance 残余方差</td>
+<td>测地距离与嵌入距离不一致程度的指标</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-multidimensional-scaling-mds.html" data-cn="多维尺度分析" data-en="Multidimensional Scaling, MDS" data-def="MDS 只根据对象间不相似度寻找低维坐标，使图上点距尽量复现原始距离或距离顺序。">多维尺度分析（Multidimensional Scaling, MDS）</a></li>
+<li><a class="xlink" href="m-locally-linear-embedding-lle.html" data-cn="局部线性嵌入" data-en="Locally Linear Embedding, LLE" data-def="LLE 用每个样本由近邻线性重构的权重描述局部几何，再到低维空间寻找一组仍能被同样权重重构的坐标。">局部线性嵌入（Locally Linear Embedding, LLE）</a></li>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="PCA 旋转坐标轴，依次寻找样本投影方差最大的正交方向，用少数线性组合保留主要总变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
+<li><a class="xlink" href="m-uniform-manifold-approximation-and-projection.html" data-cn="UMAP" data-en="Uniform Manifold Approximation and Projection" data-def="UMAP 把高维近邻关系做成带置信度的模糊图，再优化低维点的位置，使高置信边靠近、缺失边保持分离。">UMAP（Uniform Manifold Approximation and Projection）</a></li>
+<li><a class="xlink" href="m-t-distributed-stochastic-neighbor-embedding.html" data-cn="t-SNE" data-en="t-Distributed Stochastic Neighbor Embedding" data-def="t-SNE 把高维和低维的邻近关系都转成概率，并移动低维点，使真正的高维近邻在图上仍有较高相遇概率。">t-SNE（t-Distributed Stochastic Neighbor Embedding）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Tenenbaum JB, de Silva V, Langford JC. A global geometric framework for nonlinear dimensionality reduction. <em>Science</em>. 2000;290(5500):2319-2323.</li>
-<li>Cox TF, Cox MAA. <em>Multidimensional Scaling</em>. 2nd ed. Chapman and Hall/CRC; 2000.</li>
-<li>scikit-learn Developers. <code>sklearn.manifold.Isomap</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.Isomap.html">https://scikit-learn.org/stable/modules/generated/sklearn.manifold.Isomap.html</a> （访问日期：2026-07-02）</li>
+<li>de Silva V, Tenenbaum JB. Global versus local methods in nonlinear dimensionality reduction. <em>Advances in Neural Information Processing Systems</em>. 2003;15.</li>
+<li>scikit-learn Developers. <code>Isomap</code> API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.Isomap.html">https://scikit-learn.org/stable/modules/generated/sklearn.manifold.Isomap.html</a> （访问日期：2026-07-09）</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-locally-linear-embedding-lle.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">局部线性嵌入</div></a><a class="pg pg-next" href="m-singular-value-decomposition-svd.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">奇异值分解</div></a></div>

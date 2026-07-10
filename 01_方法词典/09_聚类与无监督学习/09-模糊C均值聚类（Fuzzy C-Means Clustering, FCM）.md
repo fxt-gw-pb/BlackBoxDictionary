@@ -19,214 +19,252 @@ r_packages: [e1071, ppclust]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-模糊 C 均值聚类是一种软聚类方法。它不是把每个样本硬分配到单一簇，而是给出样本属于每个簇的隶属度。
+FCM 用到各中心的相对距离为每个样本分配一组和为 1 的模糊隶属度，再用隶属度幂加权更新中心。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：当样本可能处在多个亚群之间的过渡状态时，如何表达不确定归属。
-- 适用任务：软分群、边界样本识别、连续表型过渡分析。
-- 常见医学场景：疾病谱系中介状态识别，患者亚型不确定性刻画，影像区域软分割。
+模糊 C 均值是软原型聚类方法。它将 K-means 的硬标签替换为隶属度矩阵 $U$，允许患者同时部分属于多个簇；模糊系数 $m$ 控制归属的清晰程度。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-K-means 会说“这个患者属于第 1 类”。FCM 会说“这个患者 70% 像第 1 类，25% 像第 2 类，5% 像第 3 类”。这对临床连续谱或混合表型尤其有用。
+- 患者处于连续谱或亚型过渡区。
+- 希望识别归属不明确的边界病例。
+- 硬聚类会丢失“更像哪个簇、像到什么程度”的信息。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+K-means 要求每个人只投一票；FCM 允许把一票拆开，例如对炎症型投 0.7、代谢型投 0.3。中心再根据这些分票的幂次权重更新。
 
-设 $u_{ik}$ 为样本 $i$ 属于簇 $k$ 的隶属度，满足：
+## 2. 核心思想与原理
+
+### 2.1 相对距离决定隶属度
+
+一个点是否属于簇 1，不只看它离中心 1 多远，还看它相对其他中心有多远。位于两个中心正中间时，隶属度自然相等。
+
+### 2.2 模糊系数
+
+$m$ 接近 1 时隶属度趋于硬分配；$m$ 增大时分配更平均。过大的 $m$ 会让所有病例都显得模糊，削弱簇结构。
+
+### 2.3 隶属度不是概率
+
+FCM 没有为数据指定生成概率分布，其隶属度由距离目标函数定义。它不能像 [[高斯混合模型（Gaussian Mixture Model, GMM）]] 的责任概率那样解释为模型后验概率。
+
+## 3. 数学形式
+
+### 3.1 约束与目标
 
 $$
-\sum_{k=1}^{C}u_{ik}=1,\quad 0\le u_{ik}\le 1
+\sum_{k=1}^{C}u_{ik}=1,\qquad
+0\le u_{ik}\le1
 $$
 
-FCM 最小化目标函数：
-
 $$
-J_m=\sum_{i=1}^{n}\sum_{k=1}^{C}u_{ik}^m\|x_i-c_k\|^2
-$$
-
-其中 $m>1$ 为模糊系数。簇中心更新为：
-
-$$
-c_k=\frac{\sum_{i=1}^{n}u_{ik}^m x_i}{\sum_{i=1}^{n}u_{ik}^m}
+J_m=
+\sum_{i=1}^{n}\sum_{k=1}^{C}
+u_{ik}^{m}\|x_i-c_k\|^2,\qquad m\gt1
 $$
 
-隶属度更新为：
+### 3.2 中心更新
+
+$$
+c_k=
+\frac{\sum_i u_{ik}^{m}x_i}
+{\sum_i u_{ik}^{m}}
+$$
+
+### 3.3 隶属度更新
 
 $$
 u_{ik}=
 \frac{1}
 {\sum_{j=1}^{C}
-\left(\frac{\|x_i-c_k\|}{\|x_i-c_j\|}\right)^{2/(m-1)}}
+\left(
+\frac{\|x_i-c_k\|}
+{\|x_i-c_j\|}
+\right)^{2/(m-1)}}
 $$
 
-### 2.2 参数或统计量含义
+若点恰好等于某中心，需要按算法约定处理零距离。
 
-- $C$：簇数。
-- $u_{ik}$：样本 $i$ 对簇 $k$ 的隶属度。
-- $m$：模糊系数，越大隶属度越平滑。
-- $c_k$：簇中心。
-- partition coefficient：隶属度清晰程度指标。
+### 3.4 关键条件
 
-### 2.3 关键假设
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 中心型欧氏结构合理 | 非凸簇仍会分错 | 与密度/图方法比较 |
+| $C$ 与 $m$ 合理 | 过分硬化或全部模糊 | validity 指标与路径 |
+| 特征尺度可比 | 大量纲变量支配隶属度 | 标准化敏感性 |
+| 离群点有限 | 中心与隶属度被拉偏 | 稳健处理与病例审查 |
 
-- 簇可由中心原型表达。
-- 样本可能存在混合归属或过渡状态。
-- 距离越近，隶属度越高。
-- 簇数和模糊系数选择合理。
+## 4. 手把手算例
 
-## 3. 数据形式与输入输出
+一维有三个患者 $x=(2,5,8)$，初始中心 $c_1=0,c_2=10$，取 $m=2$。
 
-### 3.1 适合的数据形式
+对 $x=2$，到两个中心的距离为 2 和 8：
 
-- 自变量类型：连续型数值特征。
-- 因变量类型：无监督方法，不需要结局变量。
-- 数据结构：样本乘以特征矩阵。
-- 是否适合高维数据：可用，但需注意距离稳定性，常先降维或筛选特征。
-- 是否适合缺失较多数据：需先处理缺失。
-- 是否适合删失数据：不直接处理删失结局。
-- 是否适合重复测量数据：需先构造样本级特征。
+$$
+u_{1}=
+\frac{1}{1+(2/8)^2}
+=\frac{16}{17}
+\approx0.941
+$$
 
-### 3.2 示例表格
+$$
+u_{2}=1-u_1\approx0.059
+$$
 
-以炎症-代谢混合表型为例：
+对 $x=5$，两个距离相等，因此隶属度为 $(0.5,0.5)$。对 $x=8$，结果与 $x=2$ 对称，为 $(0.059,0.941)$。
 
-| CRP | IL6 | BMI | TG | HDL |
-| --- | --- | --- | --- | --- |
-| 5.2 | 8.1 | 31.2 | 2.4 | 0.9 |
-| 1.1 | 2.0 | 24.8 | 1.1 | 1.5 |
-| 3.8 | 5.5 | 29.5 | 2.0 | 1.0 |
-| 0.8 | 1.5 | 22.9 | 0.9 | 1.7 |
+**更新中心。** 因为 $m=2$，使用隶属度平方加权：
 
-### 3.3 输入与产出
+$$
+c_1^{new}
+=
+\frac{
+2(0.941^2)+5(0.5^2)+8(0.059^2)
+}{
+0.941^2+0.5^2+0.059^2
+}
+\approx2.676
+$$
 
-#### 输入
+由对称性：
 
-- 输入数据：连续型特征矩阵。
-- 关键变量：簇数、模糊系数、停止阈值、最大迭代次数。
-- 需要预处理的内容：缺失处理、标准化、异常值检查、变量选择。
+$$
+c_2^{new}\approx7.324
+$$
 
-#### 产出
+**结论：** 中间患者对两簇各贡献一部分；两端患者主要拉动靠近自己的中心，但并非完全不影响另一中心。
 
-- 模型对象/统计结果：隶属度矩阵、硬标签、簇中心、目标函数收敛曲线。
-- 参数估计：簇中心和隶属度。
-- 预测结果：新样本可计算对各簇的隶属度。
-- 不确定性指标：最大隶属度、隶属度熵、不同初始化稳定性。
+## 5. 数据形式与输入输出
 
-## 4. 适用场景
+### 5.1 数据要求
 
-- 适合：亚群边界模糊、存在过渡样本、希望量化归属不确定性的场景。
-- 不适合：需要清晰互斥分组、簇形状复杂、离群点很多或类别变量为主的场景。
-- 使用前需要特别检查的点：模糊系数、簇数、低最大隶属度样本的临床含义。
+- 连续数值特征，通常需标准化。
+- 缺失需预处理；高维时距离可能趋同。
+- 普通 FCM 不直接处理类别特征、删失或患者内相关性。
 
-## 5. 实现
+### 5.2 输入与产出
 
-### 5.1 Python
+输入为簇数 $C$、模糊系数 $m$、初始隶属度和停止阈值。输出为中心、隶属度矩阵、硬标签、目标轨迹与模糊分区指标。
 
-常用包：
+## 6. 适用场景
 
-- `scikit-fuzzy`
+- 亚群边界模糊、连续表型或软图像分割。
+- 需要重点识别混合表型和过渡病例。
+- 不适合离群点很多、非凸簇明显或必须提供概率后验的任务。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
 import numpy as np
-import pandas as pd
 import skfuzzy as fuzz
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv("inflammation_metabolic_profiles.csv")
-X = df[["CRP", "IL6", "BMI", "TG", "HDL"]]
-X_scaled = StandardScaler().fit_transform(X).T
-
-centers, membership, _, _, objective, _, fpc = fuzz.cluster.cmeans(
-    X_scaled,
-    c=3,
-    m=2.0,
-    error=0.005,
-    maxiter=1000,
-    seed=42
+X_s = StandardScaler().fit_transform(X).T
+centers, membership, _, distances, objective, iterations, fpc = (
+    fuzz.cluster.cmeans(
+        X_s,
+        c=3,
+        m=2.0,
+        error=0.005,
+        maxiter=1000,
+        seed=42,
+    )
 )
 
 cluster = np.argmax(membership, axis=0)
-print("Fuzzy partition coefficient:", fpc)
-print(pd.Series(cluster).value_counts().sort_index())
+max_membership = membership.max(axis=0)
+entropy = -(membership * np.log(membership + 1e-12)).sum(axis=0)
+print(fpc, iterations, max_membership[:5], entropy[:5])
 ```
 
-### 5.2 R
-
-常用包：
-
-- `e1071`
+### 7.2 R
 
 ```r
 library(e1071)
 
 x <- scale(df[, c("CRP", "IL6", "BMI", "TG", "HDL")])
-fit <- cmeans(x, centers = 3, m = 2, iter.max = 100)
+fit <- cmeans(
+  x,
+  centers = 3,
+  m = 2,
+  iter.max = 1000,
+  dist = "euclidean",
+  method = "cmeans"
+)
 
 cluster <- fit$cluster
 membership <- fit$membership
+max_membership <- apply(membership, 1, max)
 head(membership)
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：隶属度矩阵、最大隶属度分布、簇中心、低确定性样本。
-- 每个主要参数如何解释：$m=2$ 是常用模糊系数，增大 $m$ 会让样本对各簇的隶属度更平均。
-- 临床或医学意义如何表达：可描述患者对不同表型的隶属程度，而不是只给单一亚型。
-- 常见误读：隶属度不是严格后验概率，不能直接当作概率风险解释。
+- 隶属度描述距离目标下的相对归属，不是发生概率。
+- 最大隶属度低或熵高的病例处于边界或整体远离中心。
+- 中心是模糊权重均值，不能直接视作真实疾病原型。
+- 若最终只保留硬标签，会丢失 FCM 最有价值的信息。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
+
+1. 比较不同 $C$ 与 $m$ 的 FPC、partition entropy 和稳定性。
+2. 多初始化并比较目标函数与中心。
+3. 画最大隶属度和熵分布。
+4. 改变标准化、变量集和异常值处理。
+5. 与 K-means 和 GMM 的标签及软归属比较。
+
+## 10. 推荐可视化
 
 - 隶属度热图。
-- 最大隶属度或隶属度熵分布图。
-- PCA/UMAP 空间中按硬标签着色、按不确定性调透明度。
-- 各簇中心特征热图。
+- 最大隶属度或隶属度熵分布。
+- 二维投影按主簇着色、按确定性调透明度。
+- 模糊中心特征热图。
 
-## 8. 优势、局限与常见坑
+## 11. 优势、局限与常见坑
 
-### 优势
+**优势：** 保留边界信息，表达过渡状态，输出比硬聚类丰富。
 
-- 能表达边界样本和过渡状态。
-- 输出比硬聚类更丰富。
-- 适合疾病谱系和混合表型分析。
+**局限：** 需给定 $C$ 和 $m$，对尺度、初始化和离群点敏感，仍偏好中心型簇。
 
-### 局限
+**常见坑：** 把隶属度叫后验概率；只汇报硬标签；默认 $m=2$ 不做敏感性；用全部数据挑参数后夸大稳定性。
 
-- 仍需预设簇数。
-- 对初始化、距离尺度和离群点敏感。
-- 隶属度解释需要谨慎。
+## 12. 与相近方法的区别
 
-### 常见坑
+- [[K-means聚类（K-means Clustering）]]：FCM 将硬指示变量放松为连续隶属度。
+- [[高斯混合模型（Gaussian Mixture Model, GMM）]]：GMM 责任度是生成概率模型后验，FCM 隶属度是距离优化权重。
+- [[期望最大化算法（Expectation-Maximization Algorithm, EM）]]：EM 是概率模型估计算法，FCM 是具体模糊目标算法。
+- 选择经验：需要概率密度与协方差选 GMM；只需距离型软边界可选 FCM。
 
-- 把隶属度当作真实概率。
-- 不检查低最大隶属度样本。
-- 用硬标签丢掉软聚类最有价值的信息。
+## 13. 医学研究中的典型应用
 
-## 9. 与相近方法的区别
+- 炎症、代谢或免疫表型连续谱。
+- 疾病亚型间过渡患者识别。
+- 医学影像组织或病灶软分割。
 
-- 和 [[K-means聚类（K-means Clustering）]] 的区别：K-means 给硬标签，FCM 给每个样本对各簇的隶属度。
-- 和 [[高斯混合模型（Gaussian Mixture Model, GMM）]] 的区别：GMM 的软归属来自概率分布模型，FCM 的隶属度来自距离和模糊目标函数。
-- 和 [[期望最大化算法（Expectation-Maximization Algorithm, EM）]] 的区别：EM 是估计含隐变量模型的通用算法，FCM 是一种模糊原型聚类方法。
+## 14. 术语表
 
-## 10. 医学研究中的典型应用
+| 术语 | 含义 |
+| --- | --- |
+| membership | 样本对某簇的模糊隶属度 |
+| fuzzifier | 控制隶属度软硬程度的参数 $m$ |
+| fuzzy centroid | 由隶属度幂加权得到的中心 |
+| partition coefficient | 衡量分区清晰程度的指标 |
+| partition entropy | 衡量隶属度不确定性的熵指标 |
 
-- 疾病亚型之间过渡患者的识别。
-- 影像区域软分割。
-- 炎症、代谢、免疫等连续谱表型的模糊归属分析。
-
-## 11. 相关方法
+## 15. 相关方法
 
 - [[K-means聚类（K-means Clustering）]]
 - [[高斯混合模型（Gaussian Mixture Model, GMM）]]
 - [[期望最大化算法（Expectation-Maximization Algorithm, EM）]]
 - [[主成分分析（Principal Component Analysis, PCA）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
+- Dunn JC. A fuzzy relative of the ISODATA process and its use in detecting compact well-separated clusters. *J Cybern*. 1973;3(3):32-57.
 - Bezdek JC. *Pattern Recognition with Fuzzy Objective Function Algorithms*. Springer; 1981.
-- Dunn JC. A fuzzy relative of the ISODATA process and its use in detecting compact well-separated clusters. *Journal of Cybernetics*. 1973;3(3):32-57.
-- Ross TJ. *Fuzzy Logic with Engineering Applications*. 4th ed. Wiley; 2016.
+- scikit-fuzzy Developers. Fuzzy C-means documentation. [https://scikit-fuzzy.readthedocs.io/en/latest/auto_examples/plot_cmeans.html](https://scikit-fuzzy.readthedocs.io/en/latest/auto_examples/plot_cmeans.html) （访问日期：2026-07-09）

@@ -46,7 +46,7 @@
           <span class="entry-cn">主成分分析</span>
           <span class="entry-en">Principal Component Analysis, PCA</span>
         </div>
-        <p class="entry-def">主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。</p>
+        <p class="entry-def">PCA 旋转坐标轴，依次寻找样本投影方差最大的正交方向，用少数线性组合保留主要总变异。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -59,7 +59,7 @@
           <span class="entry-cn">独立成分分析</span>
           <span class="entry-en">Independent Component Analysis, ICA</span>
         </div>
-        <p class="entry-def">独立成分分析是一种无监督表征学习方法，用来把观测到的混合信号分解成若干统计上尽量相互独立的潜在成分。它常用于盲源分离，也可作为高维数据的独立模式提取方法。</p>
+        <p class="entry-def">ICA 假设观测信号是若干非高斯独立源的线性混合，并寻找反混合矩阵把这些来源尽可能分离。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -72,7 +72,7 @@
           <span class="entry-cn">因子分析</span>
           <span class="entry-en">Factor Analysis</span>
         </div>
-        <p class="entry-def">因子分析是一类潜变量模型，用少数不可直接观测的公共因子解释多个观测变量之间的相关结构。它常用于问卷量表、心理测量、症状维度和综合指标构建。</p>
+        <p class="entry-def">因子分析用少数不可观测公共因子解释多个指标为何相关，并把每个指标未被公共因子解释的变异单独留作特异误差。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -85,7 +85,7 @@
           <span class="entry-cn">局部线性嵌入</span>
           <span class="entry-en">Locally Linear Embedding, LLE</span>
         </div>
-        <p class="entry-def">局部线性嵌入是一种非线性流形学习方法。它假设高维数据虽然整体弯曲，但每个样本附近的小邻域可以近似看作线性结构，并在低维空间中尽量保持这种局部重构关系。</p>
+        <p class="entry-def">LLE 用每个样本由近邻线性重构的权重描述局部几何，再到低维空间寻找一组仍能被同样权重重构的坐标。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -98,7 +98,7 @@
           <span class="entry-cn">Isomap</span>
           <span class="entry-en">Isometric Mapping</span>
         </div>
-        <p class="entry-def">Isomap 是一种非线性流形学习方法。它通过近邻图上的最短路径近似流形测地距离，再用经典多维尺度分析把样本嵌入低维空间。</p>
+        <p class="entry-def">Isomap 用近邻图上的最短路径近似流形测地距离，再用经典 MDS 把这些距离还原为低维坐标。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -111,7 +111,7 @@
           <span class="entry-cn">奇异值分解</span>
           <span class="entry-en">Singular Value Decomposition, SVD</span>
         </div>
-        <p class="entry-def">奇异值分解是一种基础矩阵分解方法，可以把任意矩阵分解为左奇异向量、奇异值和右奇异向量三部分。截断 SVD 使用最大的若干奇异值构造低秩近似，从而实现降维、压缩和去噪。</p>
+        <p class="entry-def">SVD 把任意矩阵拆成样本方向、按强弱排序的奇异值和特征方向；保留前几项可得到最佳低秩近似。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -124,7 +124,7 @@
           <span class="entry-cn">t-SNE</span>
           <span class="entry-en">t-Distributed Stochastic Neighbor Embedding</span>
         </div>
-        <p class="entry-def">t-SNE 是一种用于高维数据可视化的非线性降维方法。它把高维空间和低维空间中的邻近关系都表示为概率分布，并让两个分布尽可能接近。</p>
+        <p class="entry-def">t-SNE 把高维和低维的邻近关系都转成概率，并移动低维点，使真正的高维近邻在图上仍有较高相遇概率。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -137,7 +137,7 @@
           <span class="entry-cn">UMAP</span>
           <span class="entry-en">Uniform Manifold Approximation and Projection</span>
         </div>
-        <p class="entry-def">UMAP 是一种非线性降维和可视化方法，基于流形假设和近邻图构建高维数据的模糊拓扑结构，再在低维空间中寻找相似的结构。</p>
+        <p class="entry-def">UMAP 把高维近邻关系做成带置信度的模糊图，再优化低维点的位置，使高置信边靠近、缺失边保持分离。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -150,7 +150,7 @@
           <span class="entry-cn">核主成分分析</span>
           <span class="entry-en">Kernel Principal Component Analysis, KPCA</span>
         </div>
-        <p class="entry-def">核主成分分析是 [[主成分分析（Principal Component Analysis, PCA）]] 的非线性扩展。它通过核函数隐式地把样本映射到高维特征空间，再在该空间中执行</p>
+        <p class="entry-def">核 PCA 不显式生成大量非线性特征，而是只计算样本在隐式特征空间中的两两内积，再对中心化核矩阵做 PCA。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -163,7 +163,7 @@
           <span class="entry-cn">多维尺度分析</span>
           <span class="entry-en">Multidimensional Scaling, MDS</span>
         </div>
-        <p class="entry-def">多维尺度分析是一类把样本间距离或不相似度表示为低维坐标的方法。它的目标是在二维或三维空间中尽量保留原始距离关系。</p>
+        <p class="entry-def">MDS 只根据对象间不相似度寻找低维坐标，使图上点距尽量复现原始距离或距离顺序。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>

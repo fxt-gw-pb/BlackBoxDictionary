@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,19 +54,29 @@
     <div class="intro-note"><h1>Holm程序（Holm Procedure）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>Holm 先审最小 P 值，再逐步放宽阈值；它与 Bonferroni 同样控制 FWER，却从不更差。</p>
+<h3>1.2 定义</h3>
 <p>Holm 程序是控制 FWER 的逐步法（step-down procedure），通常比 Bonferroni 更有力。</p>
-<h3>1.2 它主要解决什么问题</h3>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
 <li>研究问题：如何在保持 FWER 控制的前提下，比 Bonferroni 更少损失检验力。</li>
 <li>适用任务：严格控制假阳性，同时尽量减少过度保守。</li>
 <li>常见医学场景：中等规模的多终点比较或多亚组比较。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
+<h3>1.4 直觉理解</h3>
 <p>Holm 方法会先看最小的 p 值，对最有希望显著的检验先用最严格阈值；一旦前面几步通过，后面的阈值会逐步放宽。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 根本困难</h3>
+<p>Bonferroni 给所有假设同样严格的 $\alpha/m$，即使最小 P 值已通过，也不把剩余错误预算重新分配。</p>
+<h3>2.2 关键洞察</h3>
+<p>按 P 值从小到大检查。第 $i$ 步只剩 $m-i+1$ 个候选，阈值变为 $\alpha/(m-i+1)$；一旦失败立即停止，保证闭合的 FWER 控制。</p>
+<h3>2.3 与朴素做法对比</h3>
+<p>Holm 是 step-down Bonferroni，不要求独立，拒绝集合总包含 Bonferroni 的拒绝集合。</p></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
 <p>对有序 p 值 $p_{(1)} \le \cdots \le p_{(m)}$：</p>
 <ul>
 <li>若 $p_{(1)} &gt; \alpha/m$，停止；</li>
@@ -77,19 +87,32 @@
 <p>$$
 p_{(i)}^* = \min\left\{1,\ \max\left[(m-i+1)p_{(i)},\ p_{(i-1)}^*\right]\right\}
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
+<h3>3.3 参数或统计量含义</h3>
 <ul>
 <li>$p_{(i)}$：从小到大排序后的第 $i$ 个 p 值。</li>
 <li>$p_{(i)}^*$：Holm 调整后 p 值。</li>
 </ul>
-<h3>2.3 关键假设</h3>
+<h3>3.4 关键假设</h3>
 <ul>
 <li>不要求检验独立。</li>
 <li>目标是控制 FWER。</li>
 </ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>排序 P 值为 $(0.003,0.012,0.021,0.049,0.20)$。Holm 阈值依次：</p>
+<p>$$
+(0.05/5,\;0.05/4,\;0.05/3,\;0.05/2,\;0.05)
+=(0.010,0.0125,0.0167,0.025,0.05)
+$$</p>
+<ul>
+<li>$0.003\le0.010$：拒绝；</li>
+<li>$0.012\le0.0125$：拒绝；</li>
+<li>$0.021&gt;0.0167$：停止。</li>
+</ul>
+<p>最终拒绝前 2 个。Bonferroni 只拒绝 1 个，因此 Holm 在相同 FWER 承诺下更有力。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
 <li>自变量类型：不适用。</li>
 <li>因变量类型：不适用。</li>
@@ -99,7 +122,7 @@ $$</p>
 <li>是否适合删失数据：不适用。</li>
 <li>是否适合重复测量数据：可用于其派生检验结果。</li>
 </ul>
-<h3>3.2 示例表格</h3>
+<h3>5.2 示例表格</h3>
 <table>
 <thead>
 <tr>
@@ -136,7 +159,7 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
 <li>输入数据：原始 p 值。</li>
@@ -150,15 +173,15 @@ $$</p>
 <li>预测结果：无。</li>
 <li>不确定性指标：体现在 FWER 控制。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
 <li>适合：希望比 Bonferroni 略有更高检验力，但仍严格控制 FWER。</li>
 <li>不适合：极大规模发现型研究。</li>
 <li>使用前需要特别检查的点：是否真的需要 FWER 而不是 FDR。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="holm-procedure" data-i="0">Python</button><button class="codetab" data-uid="holm-procedure" data-i="1">R</button></div><div class="codepanel active" data-uid="holm-procedure" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>statsmodels</code></li>
@@ -171,25 +194,34 @@ reject, p_adj, _, _ = multipletests(pvals, alpha=0.05, method=&quot;holm&quot;)
 </ul>
 <pre><code class="language-r">p.adjust(pvals, method = &quot;holm&quot;)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
       <div class="sec-body"><ul>
 <li>核心结果看什么：哪些检验在 Holm 校正后仍显著。</li>
 <li>每个主要参数如何解释：Holm 调整后 p 值可以直接与 0.05 比较。</li>
 <li>临床或医学意义如何表达：适合在严格控制假阳性的同时保留更多真实发现。</li>
 <li>常见误读：Holm 不是 FDR 方法，仍属于 FWER 控制。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>保留原假设编号与排序映射。</li>
+<li>严格遵守“首次失败即停止”，不能跳过失败项继续。</li>
+<li>预先定义家族与方向。</li>
+<li>比较 adjusted P 值与逐步阈值实现是否一致。</li>
+<li>报告效应量、区间和检验依赖结构。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
 <li>原始 p 值、Bonferroni 与 Holm 对比图。</li>
 <li>排序 p 值与 step-down 阈值图。</li>
 </ul>
-<h3>7.1 图像示例</h3>
+<h3>10.1 图像示例</h3>
 <p>下图中的蓝色折线展示了 Holm 调整后的 p 值，通常比 Bonferroni 略低，因此检验力更高。</p>
 <p><img alt="" src="img/multiple_testing_adjustments.png" /></p></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
 <li>控制 FWER。</li>
@@ -206,26 +238,35 @@ reject, p_adj, _, _ = multipletests(pvals, alpha=0.05, method=&quot;holm&quot;)
 <li>和 Hochberg、Hommel 混淆。</li>
 <li>在高维组学场景下误当默认方法。</li>
 </ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
 <li>和 Bonferroni 的区别：Holm 是 sequential step-down，更不保守。</li>
 <li>和 BH 的区别：BH 控制 FDR，不是 FWER。</li>
 </ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
       <div class="sec-body"><ul>
 <li>多终点临床指标的严格校正。</li>
 <li>多个预设亚组比较。</li>
 </ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-bonferroni-correction.html" data-cn="Bonferroni校正" data-en="Bonferroni Correction" data-def="Bonferroni 校正是控制 FWER 的最经典单步方法，把显著性水平 $\alpha$ 平均分配到每个检验上。">Bonferroni校正（Bonferroni Correction）</a></li>
-<li><a class="xlink" href="m-benjamini-hochberg-procedure.html" data-cn="Benjamini-Hochberg程序" data-en="Benjamini-Hochberg Procedure" data-def="Benjamini-Hochberg（BH）程序是控制 FDR 的经典方法，特别适合高维发现型研究。">Benjamini-Hochberg程序（Benjamini-Hochberg Procedure）</a></li>
+<li><strong>Step-down</strong>：从最小 P 值开始逐步检验。</li>
+<li><strong>有序 P 值</strong>：$p_{(1)}\le\cdots\le p_{(m)}$。</li>
+<li><strong>停止规则</strong>：首次不通过后不再拒绝后续假设。</li>
+<li><strong>强 FWER 控制</strong>：无论哪些原假设为真都控制 FWER。</li>
+<li><strong>Holm 调整 P 值</strong>：考虑前序约束后的单调调整值。</li>
 </ul></div>
-    </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-bonferroni-correction.html" data-cn="Bonferroni校正" data-en="Bonferroni Correction" data-def="Bonferroni 把总的第一类错误预算 $\alpha$ 平分给 $m$ 个检验，以最简单、最稳健的方式控制 FWER。">Bonferroni校正（Bonferroni Correction）</a></li>
+<li><a class="xlink" href="m-benjamini-hochberg-procedure.html" data-cn="Benjamini-Hochberg程序" data-en="Benjamini-Hochberg Procedure" data-def="BH 不要求“一个假阳性都不能有”，而是控制发现集合中假发现比例的期望，从而在探索性高维研究中换取更高发现能力。">Benjamini-Hochberg程序（Benjamini-Hochberg Procedure）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Holm S. A simple sequentially rejective multiple test procedure. <em>Scand J Stat</em>. 1979;6(2):65-70.</li>
 <li>R Core Team. <code>p.adjust</code>. R Manual. <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html</a> （访问日期：2026-07-02）</li>

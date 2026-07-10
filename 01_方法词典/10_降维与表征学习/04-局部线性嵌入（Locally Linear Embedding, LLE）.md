@@ -19,214 +19,286 @@ r_packages: [lle]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-局部线性嵌入是一种非线性流形学习方法。它假设高维数据虽然整体弯曲，但每个样本附近的小邻域可以近似看作线性结构，并在低维空间中尽量保持这种局部重构关系。
+LLE 用每个样本由近邻线性重构的权重描述局部几何，再到低维空间寻找一组仍能被同样权重重构的坐标。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：高维样本可能位于低维非线性流形上，如何展开并可视化这个流形。
-- 适用任务：非线性降维、局部邻域结构保持、探索性可视化。
-- 常见医学场景：影像特征可视化、单细胞或组学样本局部状态探索、复杂表型连续谱展示。
+局部线性嵌入是一种无监督非线性流形学习方法。它不直接保持所有成对距离，而是先估计局部重构权重，再求解一个特征值问题得到低维嵌入。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-LLE 不直接保留样本之间的全局距离，而是先用每个点周围的邻居重构这个点。如果高维空间中某个点可以由邻居按一组权重拼出来，低维空间中也应保持同样的重构权重。
+- 高维数据沿弯曲流形分布，线性 PCA 难以展开。
+- 研究重点是局部邻域关系，而非原空间的全局欧氏距离。
+- 需要以较少维度表示影像、组学或连续疾病谱。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+把一张弯曲但未撕裂的网格纸看成高维流形。每个交点都可由附近交点按固定比例“配出来”；LLE 展平网格时保留这些配方，因此局部形状得以延续。
 
-第一步，对每个样本 $x_i$ 找到邻居集合 $N(i)$，并求重构权重：
+## 2. 核心思想与原理
+
+### 2.1 根本困难
+
+全局直线不能贴合弯曲流形，但足够小的局部区域通常近似平面。困难在于怎样把许多局部平面拼成一致的全局低维坐标。
+
+### 2.2 关键洞察
+
+仿射重构权重对平移、旋转和统一缩放不敏感。先固定每个点与近邻之间的相对配方，再让所有低维坐标共同满足这些配方，就能把局部信息拼接起来。
+
+### 2.3 三步算法
+
+1. 为每个样本寻找 $k$ 个近邻。
+2. 在和为 1 的约束下，求近邻重构原样本的权重。
+3. 固定权重，求使低维重构误差最小且已中心化、定标的坐标。
+
+## 3. 数学形式
+
+### 3.1 高维局部重构
+
+令 $\mathcal N_i$ 为样本 $x_i$ 的近邻集合：
 
 $$
-\min_{w_{ij}} \sum_i \left\|x_i-\sum_{j\in N(i)}w_{ij}x_j\right\|^2
+\operatorname*{minimize}_{W}
+\sum_{i=1}^{n}
+\left\|
+x_i-\sum_{j\in\mathcal N_i}w_{ij}x_j
+\right\|^2
 $$
 
 约束为：
 
 $$
-\sum_{j\in N(i)} w_{ij}=1
+\sum_{j\in\mathcal N_i}w_{ij}=1,
+\qquad
+w_{ij}=0\quad(j\notin\mathcal N_i)
 $$
 
-第二步，在低维空间中寻找 $y_i$，保持这些权重：
+和为 1 使重构关系对整体平移保持不变。
+
+### 3.2 低维嵌入
+
+固定 $W$ 后求坐标 $y_i\in\mathbb R^d$：
 
 $$
-\min_{y_i} \sum_i \left\|y_i-\sum_{j\in N(i)}w_{ij}y_j\right\|^2
+\operatorname*{minimize}_{Y}
+\sum_{i=1}^{n}
+\left\|
+y_i-\sum_jw_{ij}y_j
+\right\|^2
 $$
 
-该问题可写为特征分解：
+通常加入 $\sum_i y_i=0$ 与 $Y^\top Y=I$，排除全部坐标相同、任意平移和任意缩放等退化解。
+
+### 3.3 特征值问题
+
+记：
 
 $$
 M=(I-W)^\top(I-W)
 $$
 
-取 $M$ 的最小非零特征值对应的特征向量作为低维嵌入。
+目标可写为 $\operatorname{tr}(Y^\top MY)$。$M$ 的最小特征值对应常数向量，应丢弃；随后 $d$ 个最小非零特征向量构成嵌入。
 
-### 2.2 参数或统计量含义
+### 3.4 关键条件
 
-- $N(i)$：第 $i$ 个样本的近邻集合。
-- $w_{ij}$：用邻居 $x_j$ 重构 $x_i$ 的权重。
-- $y_i$：第 $i$ 个样本的低维坐标。
-- `n_neighbors`：每个点使用的近邻数量。
-- `n_components`：目标低维空间维度。
-- `method`：标准 LLE、modified LLE、Hessian LLE 等变体。
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 流形局部近似线性 | 重构权重不稳定 | 局部重构误差 |
+| 近邻图连通 | 各连通块位置任意 | 连通分量数量 |
+| $k$ 与局部维数匹配 | 太小易断裂，太大跨越弯折 | 多组 $k$ 敏感性分析 |
+| 距离与预处理合理 | 邻居关系被量纲主导 | 标准化与距离比较 |
+| 样本覆盖流形较充分 | 稀疏区域被错误拉伸 | 邻域半径与密度图 |
 
-### 2.3 关键假设
+## 4. 手把手算例
 
-- 数据位于或接近一个低维流形。
-- 局部邻域近似线性。
-- 邻域图能正确反映流形的局部结构。
-- 样本覆盖流形足够密集，噪声不会主导邻域关系。
+考虑一维局部的三个点：
 
-## 3. 数据形式与输入输出
+$$
+x_1=0,\qquad x_2=1,\qquad x_3=2
+$$
 
-### 3.1 适合的数据形式
+用 $x_1,x_3$ 重构中间点 $x_2$。
 
-- 自变量类型：连续型高维特征。
-- 因变量类型：LLE 本身不需要结局变量。
-- 数据结构：样本乘以特征矩阵。
-- 是否适合高维数据：可用于高维数据探索，但近邻搜索和特征分解成本较高。
-- 是否适合缺失较多数据：需先处理缺失。
-- 是否适合删失数据：不直接处理删失结局。
-- 是否适合重复测量数据：需先定义样本单位，或把时间结构纳入距离设计。
+**Step 1：写出约束。**
 
-### 3.2 示例表格
+$$
+w_{21}+w_{23}=1
+$$
 
-以影像组学特征为例：
+令 $w_{23}=w$，则 $w_{21}=1-w$。
 
-| Texture_1 | Texture_2 | Shape_1 | Shape_2 | Intensity_1 | TumorType |
-| --- | --- | --- | --- | --- | --- |
-| 0.42 | 1.21 | 0.33 | 0.71 | 2.4 | A |
-| 0.39 | 1.18 | 0.35 | 0.75 | 2.2 | A |
-| -0.21 | 0.30 | 0.80 | 1.10 | 1.1 | B |
-| -0.28 | 0.25 | 0.77 | 1.06 | 1.0 | B |
+**Step 2：代入重构误差。**
 
-### 3.3 输入与产出
+$$
+\left[
+1-(1-w)\times0-w\times2
+\right]^2
+=(1-2w)^2
+$$
 
-#### 输入
+误差在 $w=0.5$ 时为 0，所以：
 
-- 输入数据：高维连续特征矩阵。
-- 关键变量：近邻数、目标维度、LLE 变体、正则化参数。
-- 需要预处理的内容：缺失处理、标准化、异常值检查、近邻图连通性检查。
+$$
+w_{21}=w_{23}=0.5
+$$
 
-#### 产出
+**Step 3：在低维复现同一配方。**
 
-- 模型对象/统计结果：低维嵌入坐标、重构误差。
-- 参数估计：邻域重构权重和嵌入坐标。
-- 预测结果：通常不直接预测，主要用于探索和可视化。
-- 不确定性指标：可用参数敏感性、重采样嵌入一致性或邻域保持指标评估。
+若低维端点为 $y_1=-1,y_3=1$，则：
 
-## 4. 适用场景
+$$
+y_2=0.5(-1)+0.5(1)=0
+$$
 
-- 适合：数据存在连续非线性流形、希望保持局部邻域关系、目标以可视化和探索为主的场景。
-- 不适合：需要清晰可解释线性载荷、样本量很小、噪声很高或邻域结构不稳定的场景。
-- 使用前需要特别检查的点：近邻数是否过小或过大，邻域图是否连通，嵌入是否对随机扰动敏感。
+因此 $(-1,0,1)$ 完全保留了中间点的局部重构关系。实际 LLE 会同时处理所有点，并用中心化、定标约束确定整体嵌入。
 
-## 5. 实现
+## 5. 数据形式与输入输出
 
-### 5.1 Python
+### 5.1 适合的数据形式
 
-常用包：
+- 输入为样本乘特征矩阵，连续特征最常见。
+- 高维影像向量或组学数据常先用 PCA 去噪。
+- 缺失值需先插补；LLE 本身不处理删失或结局变量。
+- 重复测量若被逐次作为独立样本，邻域可能主要反映个体身份，应先明确分析单位。
 
-- `scikit-learn`
+### 5.2 示例表格
+
+| Patient | Marker_1 | Marker_2 | Marker_3 | Stage |
+| --- | ---: | ---: | ---: | --- |
+| P01 | 0.2 | 1.1 | 2.0 | early |
+| P02 | 0.5 | 1.4 | 1.7 | early |
+| P03 | 1.3 | 0.8 | 0.9 | late |
+| P04 | 1.7 | 0.3 | 0.4 | late |
+
+`Stage` 仅用于嵌入后着色，不参与无监督 LLE 拟合。
+
+### 5.3 输入与产出
+
+输入包括特征矩阵、近邻数、目标维数、LLE 变体与特征求解器。输出包括低维坐标、重构误差及可用于新样本近似投影的拟合对象；坐标轴本身通常没有直接变量含义。
+
+## 6. 适用场景
+
+- 适合采样较密、局部连续且预期位于弯曲低维流形的数据。
+- 可用于影像姿态、连续细胞状态和疾病进展轨迹的探索。
+- 不适合强噪声、离散簇为主、样本稀疏或需要严格统计推断的场景。
+- 若目标是预测，LLE 必须在每个训练折内拟合，不能先对全数据降维。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
 import pandas as pd
-from sklearn.manifold import LocallyLinearEmbedding
+from sklearn.manifold import LocallyLinearEmbedding, trustworthiness
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv("radiomics_features.csv")
-features = ["Texture_1", "Texture_2", "Shape_1", "Shape_2", "Intensity_1"]
-X = df[features]
+X = df[["Marker_1", "Marker_2", "Marker_3"]]
 
-lle_pipe = make_pipeline(
+model = make_pipeline(
     StandardScaler(),
     LocallyLinearEmbedding(
         n_neighbors=12,
         n_components=2,
         method="standard",
-        random_state=42
-    )
+        eigen_solver="auto",
+        random_state=42,
+        n_jobs=-1,
+    ),
 )
+embedding = model.fit_transform(X)
 
-embedding = lle_pipe.fit_transform(X)
-embedding_df = pd.DataFrame(embedding, columns=["LLE1", "LLE2"])
-print(embedding_df.head())
+X_scaled = model.named_steps["standardscaler"].transform(X)
+score = trustworthiness(X_scaled, embedding, n_neighbors=12)
+result = pd.DataFrame(embedding, columns=["LLE1", "LLE2"])
+print(score, result.head())
 ```
 
-### 5.2 R
-
-常用包：
-
-- `lle`
+### 7.2 R
 
 ```r
 library(lle)
 
-x <- scale(df[, c("Texture_1", "Texture_2", "Shape_1", "Shape_2", "Intensity_1")])
-fit <- lle(x, m = 2, k = 12)
+x <- scale(df[, c("Marker_1", "Marker_2", "Marker_3")])
+fit <- lle(
+  x,
+  m = 2,
+  k = 12
+)
 
 embedding <- fit$Y
 head(embedding)
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解读
 
-- 核心结果看什么：二维或三维嵌入中样本的局部分布、邻近样本是否保留、不同临床标签是否形成连续梯度或局部簇。
-- 每个主要参数如何解释：`n_neighbors` 控制“局部”的范围，过小易断裂，过大则可能抹平流形弯曲。
-- 临床或医学意义如何表达：嵌入轴通常不是可直接命名的医学维度，解释应聚焦样本相对位置和局部结构。
-- 常见误读：二维图上两团样本分开，不一定说明原始高维空间中存在稳定分类边界。
+- 重点解释谁与谁相邻、连续轨迹是否保留，不解释 LLE1 的单位或正负。
+- 图形可任意旋转、镜像或平移；不同运行之间应先对齐再比较。
+- 分开的点群可能源于近邻图断裂，不自动等于疾病亚型。
+- 若用临床标签着色，应说明标签未参与无监督拟合。
 
-## 7. 推荐可视化
+## 9. 假设诊断与稳健性
 
-- LLE1-LLE2 嵌入散点图，按疾病分型或连续指标着色。
-- 不同 `n_neighbors` 下的嵌入对比图。
-- 邻域保持指标随参数变化曲线。
-- 嵌入坐标与关键临床变量的相关图。
+1. 检查近邻图连通分量和孤立点。
+2. 比较多组 `n_neighbors`、目标维数与随机种子。
+3. 报告局部重构误差和 trustworthiness。
+4. 观察每个样本第 $k$ 近邻距离，识别稀疏区与异常点。
+5. 与 PCA、Isomap、UMAP 及原空间近邻重叠率比较。
+6. 下游监督任务用嵌套交叉验证，所有预处理只在训练折拟合。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
 
-### 优势
+- LLE1-LLE2 散点图，按独立临床变量着色。
+- 近邻图叠加图，标出断裂和跨越边。
+- `n_neighbors` 敏感性小多图。
+- 原空间与嵌入空间近邻重叠率分布。
 
-- 能捕捉 PCA 难以表达的非线性流形结构。
-- 明确强调局部邻域关系。
-- 对连续流形可视化直观。
+## 11. 优势、局限与常见坑
 
-### 局限
+**优势：** 非参数地利用局部线性结构；优化可归结为特征分解；对某些平滑流形有清晰几何解释。
 
-- 对近邻数敏感。
-- 缺少像 PCA 载荷那样直观的变量解释。
-- 对噪声、离群值和采样密度不均较敏感。
+**局限：** 对近邻选择、噪声和采样密度敏感；标准 LLE 不强调全局距离；大样本近邻搜索和特征分解成本较高。
 
-### 常见坑
+**常见坑：** 用过大的 $k$ 连上流形两侧；忽略断开的近邻图；把轴当生物学变量；只展示最好看的一组参数；全数据拟合后再交叉验证。
 
-- 只展示一个参数下的漂亮二维图，不做敏感性分析。
-- 把低维坐标轴解释为真实医学量表。
-- 在训练测试划分前对全数据 fit LLE 后再建模，造成信息泄露。
+## 12. 与相近方法的区别
 
-## 9. 与相近方法的区别
+- [[Isomap（Isometric Mapping）]]：保持近邻图上的测地距离；LLE 保持局部线性重构权重。
+- [[主成分分析（Principal Component Analysis, PCA）]]：PCA 用一个全局线性子空间；LLE 拼接许多局部线性关系。
+- [[UMAP（Uniform Manifold Approximation and Projection）]]：UMAP 优化模糊近邻图交叉熵，通常更适合大规模可视化。
+- **如何选择：** 相信局部仿射结构且样本覆盖密集时考虑 LLE；重视全局测地关系时考虑 Isomap；先以 PCA 作为线性基线。
 
-- 和 [[主成分分析（Principal Component Analysis, PCA）]] 的区别：PCA 是线性投影，LLE 是非线性局部结构保持。
-- 和 [[Isomap（Isometric Mapping）]] 的区别：Isomap 试图保持流形上的全局测地距离，LLE 更强调局部重构权重。
-- 和 [[t-SNE（t-Distributed Stochastic Neighbor Embedding）]] 的区别：t-SNE 更偏向邻域概率可视化，LLE 有明确的局部线性重构目标。
+## 13. 医学研究中的典型应用
 
-## 10. 医学研究中的典型应用
+- 影像表型随姿态或病变进展的连续流形。
+- 单细胞或组学数据中的连续状态探索。
+- 多指标临床表型的非线性二维展示。
 
-- 影像组学样本的非线性表型谱可视化。
-- 单细胞数据中细胞状态连续变化的探索性展示。
-- 多指标临床表型中潜在连续结构识别。
+这些应用均应把嵌入视为探索性表征，并用原始变量、外部队列或实验信息验证。
 
-## 11. 相关方法
+## 14. 关键术语
+
+| 术语 | 含义 |
+| --- | --- |
+| manifold 流形 | 高维空间中局部近似低维平面的结构 |
+| neighborhood 近邻 | 按给定距离与某样本最接近的一组样本 |
+| reconstruction weight 重构权重 | 用近邻线性组合还原中心点的系数 |
+| affine invariance 仿射不变性 | 局部配方对平移、旋转和统一缩放保持稳定 |
+| embedding 嵌入 | 把对象映射到低维坐标的表示 |
+| trustworthiness 可信度 | 低维近邻在原空间中仍为近邻的程度 |
+
+## 15. 相关方法
 
 - [[主成分分析（Principal Component Analysis, PCA）]]
 - [[Isomap（Isometric Mapping）]]
-- [[t-SNE（t-Distributed Stochastic Neighbor Embedding）]]
 - [[UMAP（Uniform Manifold Approximation and Projection）]]
+- [[t-SNE（t-Distributed Stochastic Neighbor Embedding）]]
+- [[多维尺度分析（Multidimensional Scaling, MDS）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
 - Roweis ST, Saul LK. Nonlinear dimensionality reduction by locally linear embedding. *Science*. 2000;290(5500):2323-2326.
-- VanderPlas J. *Python Data Science Handbook*. O'Reilly Media; 2016.
-- scikit-learn Developers. `sklearn.manifold.LocallyLinearEmbedding`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.manifold.LocallyLinearEmbedding.html](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.LocallyLinearEmbedding.html) （访问日期：2026-07-02）
+- Saul LK, Roweis ST. Think globally, fit locally: unsupervised learning of low dimensional manifolds. *Journal of Machine Learning Research*. 2003;4:119-155.
+- scikit-learn Developers. `LocallyLinearEmbedding` API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.manifold.LocallyLinearEmbedding.html](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.LocallyLinearEmbedding.html) （访问日期：2026-07-09）

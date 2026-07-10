@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">术语表</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,197 +54,262 @@
     <div class="intro-note"><h1>多项式核回归（Polynomial Kernel Regression）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>多项式核回归是一类利用多项式核函数实现非线性拟合的回归方法，实践中常见形式是“带多项式核的支持向量回归”。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>多项式核回归通过计算多项式核内积，隐式使用幂次项和交互项，而无需把高维多项式特征逐列展开。</p>
+<h3>1.2 定义</h3>
+<p>多项式核回归泛指使用多项式核的核回归方法。本卡聚焦实践中最常见的形式：带多项式核的 <a class="xlink" href="m-support-vector-regression-svr.html" data-cn="支持向量回归" data-en="Support Vector Regression, SVR" data-def="SVR 寻找尽可能平坦的回归函数，并允许预测曲线周围存在一个不计损失的 $\epsilon$ 容忍管。">支持向量回归（Support Vector Regression, SVR）</a>。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：如何在不显式构造高次多项式特征的情况下拟合弯曲的非线性关系。</li>
-<li>适用任务：非线性回归、核方法回归、复杂曲线拟合。</li>
-<li>常见医学场景：非线性剂量-反应关系、复杂连续指标拟合。</li>
+<li>连续结局存在低阶弯曲或变量间乘积交互。</li>
+<li>显式多项式展开会迅速增加特征数。</li>
+<li>希望保留 SVR 的 $\epsilon$-不敏感损失和正则化。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>多项式核的作用像是给原始数据做了一个“高维多项式扩展”，但这种扩展不需要显式写出来，而是通过核函数直接完成。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>二次多项式不只看 $x_1,x_2$，还看 $x_1^2,x_2^2,x_1x_2$。核函数像一台内积计算器：不把这些新列真的建出来，也能得到它们在扩展空间中的内积。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>多项式核函数定义为：</p>
-<p>$$
-K(x,x') = (\langle x, x' \rangle + c)^d
-$$</p>
-<p>在核回归模型中，预测函数通常写成：</p>
-<p>$$
-f(x)=\sum_{i=1}^n \alpha_i K(x_i,x)+b
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
-<ul>
-<li>$d$：多项式阶数。</li>
-<li>$c$：偏置常数（<code>coef0</code>）。</li>
-<li>$\alpha_i$：由训练样本决定的权重。</li>
-<li>核技巧：不显式构造高维特征映射，而直接计算核内积。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>关系具有可用多项式结构近似的非线性。</li>
-<li>模型复杂度由核阶数和正则化共同控制。</li>
-<li>常需配合标准化使用。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 显式展开的困难</h3>
+<p>$p$ 个变量做 $d$ 阶展开时，特征数可快速增长。核方法用 $K(x,z)=\phi(x)^\top\phi(z)$ 直接计算高维内积，避免显式存储 $\phi(x)$。</p>
+<h3>2.2 阶数决定结构</h3>
+<p>二次核允许二次曲率和两两交互；更高阶核允许更复杂结构，也更易数值不稳定和过拟合。阶数不是越高越好。</p>
+<h3>2.3 与普通多项式回归不同</h3>
+<p>普通多项式回归通常用平方损失并直接估计展开特征系数；多项式核 SVR 使用间隔损失、对偶表示和支持向量，单个幂次项的系数不直接可见。</p></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：连续变量最典型。</li>
-<li>因变量类型：连续型。</li>
-<li>数据结构：宽表数据或一维曲线数据。</li>
-<li>是否适合高维数据：可用，但核方法在大样本下代价高。</li>
-<li>是否适合缺失较多数据：需先处理缺失值。</li>
-<li>是否适合删失数据：不适合。</li>
-<li>是否适合重复测量数据：不直接适合。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>一个典型的非线性一维回归表格如下：</p>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 多项式核</h3>
+<p>$$
+K(x,z)=(\gamma x^\top z+c_0)^d
+$$</p>
+<p>其中 $d$ 为阶数，$\gamma$ 控制内积缩放，$c_0$ 控制低阶项在核中的贡献。</p>
+<h3>3.2 核预测函数</h3>
+<p>$$
+f(x)=
+\sum_{i=1}^{n}\beta_iK(x_i,x)+b
+$$</p>
+<p>在 SVR 中，$\beta_i=\alpha_i-\alpha_i^*$，仅支持向量对应的 $\beta_i$ 通常非零。</p>
+<h3>3.3 二次核的隐式特征</h3>
+<p>当 $\gamma=1,c_0=1,d=2$ 且 $x=(x_1,x_2)$ 时，可取：</p>
+<p>$$
+\phi(x)=
+(x_1^2,\sqrt2x_1x_2,x_2^2,
+\sqrt2x_1,\sqrt2x_2,1)
+$$</p>
+<p>于是 $\phi(x)^\top\phi(z)=(x^\top z+1)^2$。</p>
+<h3>3.4 关键条件</h3>
 <table>
 <thead>
 <tr>
-<th>X</th>
-<th>y</th>
+<th>条件</th>
+<th>违反后果</th>
+<th>检查方式</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>0.026</td>
-<td>0.045</td>
+<td>多项式结构合理</td>
+<td>RBF 或树模型可能更合适</td>
+<td>比较验证性能</td>
 </tr>
 <tr>
-<td>1.126</td>
-<td>0.735</td>
+<td>特征已标准化</td>
+<td>高次幂放大量纲差异</td>
+<td>管线内缩放</td>
 </tr>
 <tr>
-<td>1.392</td>
-<td>0.979</td>
+<td>阶数较低且正则充分</td>
+<td>边界震荡、过拟合</td>
+<td>嵌套调参</td>
 </tr>
 <tr>
-<td>1.501</td>
-<td>1.123</td>
-</tr>
-<tr>
-<td>1.515</td>
-<td>0.756</td>
-</tr>
-<tr>
-<td>2.340</td>
-<td>0.636</td>
+<td>样本规模适中</td>
+<td>核矩阵成本过高</td>
+<td>与显式近似比较</td>
 </tr>
 </tbody>
-</table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：连续结局与特征矩阵。</li>
-<li>关键变量：核函数阶数 <code>degree</code>、惩罚参数 <code>C</code>、<code>epsilon</code>、<code>coef0</code>。</li>
-<li>需要预处理的内容：标准化、训练测试划分、调参。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：核回归模型、超参数、预测函数。</li>
-<li>参数估计：不强调传统回归系数。</li>
-<li>预测结果：连续型预测值。</li>
-<li>不确定性指标：多依赖交叉验证和测试集误差。</li>
-</ul></div>
+</table></div>
     </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：存在明显曲线关系、但希望通过核技巧避免显式高次展开的场景。</li>
-<li>不适合：超大样本或对可解释性要求很高的场景。</li>
-<li>使用前需要特别检查的点：核阶数、正则化、是否过拟合。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>取二次核 $K(x,z)=(x^\top z+1)^2$，两个二维向量：</p>
+<p>$$
+x=(1,2),\qquad z=(2,1)
+$$</p>
+<p><strong>Step 1：直接用核。</strong></p>
+<p>$$
+x^\top z=1(2)+2(1)=4
+$$</p>
+<p>$$
+K(x,z)=(4+1)^2=25
+$$</p>
+<p><strong>Step 2：显式展开验证。</strong></p>
+<p>$$
+\phi(x)=(1,2\sqrt2,4,\sqrt2,2\sqrt2,1)
+$$</p>
+<p>$$
+\phi(z)=(4,2\sqrt2,1,2\sqrt2,\sqrt2,1)
+$$</p>
+<p>两者内积为：</p>
+<p>$$
+4+8+4+4+4+1=25
+$$</p>
+<p>与核函数完全一致。</p>
+<p><strong>Step 3：放入回归预测。</strong> 再考虑一维支持向量 $x_1=1,x_2=2$，系数 $\beta_1=0.5,\beta_2=-0.2$，截距 $b=0.1$。预测 $x=1.5$：</p>
+<p>$$
+K(1,1.5)=6.25,\qquad K(2,1.5)=16
+$$</p>
+<p>$$
+f(1.5)=0.5(6.25)-0.2(16)+0.1=0.025
+$$</p>
+<p><strong>结论：</strong> 模型只需核值和支持向量系数，就能使用隐式多项式特征完成预测。</p></div>
     </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="polynomial-kernel-regression" data-i="0">Python</button><button class="codetab" data-uid="polynomial-kernel-regression" data-i="1">R</button></div><div class="codepanel active" data-uid="polynomial-kernel-regression" data-i="0"><p>常用包：</p>
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 数据要求</h3>
 <ul>
-<li><code>scikit-learn</code></li>
+<li>连续结局，特征通常先标准化。</li>
+<li>类别变量需妥善编码；缺失需预先处理。</li>
+<li>普通方法不直接处理删失或重复测量相关性。</li>
 </ul>
-<pre><code class="language-python">from sklearn.pipeline import make_pipeline
+<h3>5.2 输入与产出</h3>
+<p>输入包括 $d,\gamma,c_0,C,\epsilon$。输出为连续预测、支持向量和对偶系数，不直接输出各显式幂次项的可解释回归系数。</p></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>领域知识提示低阶多项式曲率或交互。</li>
+<li>特征数不大、样本规模适中。</li>
+<li>不适合超大样本、极高阶结构或需要逐项解释多项式系数的研究。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="polynomial-kernel-regression" data-i="0">Python</button><button class="codetab" data-uid="polynomial-kernel-regression" data-i="1">R</button></div><div class="codepanel active" data-uid="polynomial-kernel-regression" data-i="0"><pre><code class="language-python">from sklearn.model_selection import GridSearchCV, KFold
+from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
 
-fit = make_pipeline(
+pipe = make_pipeline(
     StandardScaler(),
-    SVR(kernel=&#x27;poly&#x27;, degree=3, C=10, epsilon=0.1, coef0=1)
+    SVR(kernel=&quot;poly&quot;)
 )
-fit.fit(X_train, y_train)
-y_pred = fit.predict(X_test)
-</code></pre></div><div class="codepanel" data-uid="polynomial-kernel-regression" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>e1071</code></li>
-</ul>
-<pre><code class="language-r">library(e1071)
+grid = {
+    &quot;svr__degree&quot;: [2, 3],
+    &quot;svr__C&quot;: [0.1, 1, 10],
+    &quot;svr__epsilon&quot;: [0.05, 0.1, 0.2],
+    &quot;svr__gamma&quot;: [&quot;scale&quot;, 0.1],
+    &quot;svr__coef0&quot;: [0, 1],
+}
+cv = KFold(n_splits=5, shuffle=True, random_state=42)
+search = GridSearchCV(pipe, grid, scoring=&quot;neg_mean_absolute_error&quot;, cv=cv)
+search.fit(X_train, y_train)
+pred = search.predict(X_test)
+print(search.best_params_)
+</code></pre></div><div class="codepanel" data-uid="polynomial-kernel-regression" data-i="1"><pre><code class="language-r">library(e1071)
 
-fit &lt;- svm(y ~ x, data = df, type = &quot;eps-regression&quot;, kernel = &quot;polynomial&quot;, degree = 3)
-pred &lt;- predict(fit, newdata = df_test)
+fit &lt;- svm(
+  y ~ .,
+  data = train,
+  type = &quot;eps-regression&quot;,
+  kernel = &quot;polynomial&quot;,
+  degree = 2,
+  gamma = 0.1,
+  coef0 = 1,
+  cost = 10,
+  epsilon = 0.1,
+  scale = TRUE
+)
+
+pred &lt;- predict(fit, newdata = test)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：拟合曲线、预测误差、阶数与复杂度。</li>
-<li>每个主要参数如何解释：更应关注整体拟合形状，而不是单个核参数的语义。</li>
-<li>临床或医学意义如何表达：适合解释“存在平滑但弯曲的非线性趋势”。</li>
-<li>常见误读：它并不等同于普通多项式回归，只是都能产生弯曲拟合。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>原始散点图 + 多项式核拟合曲线。</li>
-<li>不同阶数核的拟合对比图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图展示多项式核回归在非线性数据上的拟合效果，体现了核技巧带来的曲线建模能力。</p>
-<p><img alt="" src="img/polynomial_kernel_regression_curve.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>可以捕捉复杂非线性。</li>
-<li>无需显式手工展开多项式特征。</li>
-<li>能自然纳入支持向量机框架。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>参数调优较复杂。</li>
-<li>可解释性弱于普通多项式回归。</li>
-<li>样本规模大时训练成本高。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>核阶数过高导致过拟合。</li>
-<li>不标准化特征。</li>
-<li>把它和普通多项式回归完全等同。</li>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li><code>degree</code> 决定允许的最高交互阶数，但不代表所有高阶项都同等重要。</li>
+<li><code>coef0</code> 越大，低阶项在非齐次多项式核中的贡献越明显。</li>
+<li>整体预测曲线可解释，单个原始变量的独立效应不容易从对偶模型直接读出。</li>
+<li>拟合关系是预测关联，不应直接称为剂量的因果效应。</li>
 </ul></div>
     </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和多项式回归的区别：多项式回归显式展开特征，多项式核回归通过核函数隐式展开。</li>
-<li>和 RBF-SVR 的区别：多项式核更适合多项式型弯曲，RBF 更灵活但更黑盒。</li>
-<li>和高斯过程回归的区别：两者都依赖核函数，但高斯过程额外提供概率不确定性。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">诊断与稳健性</h2></div>
+      <div class="sec-body"><ol>
+<li>比较线性、二次、三次与 RBF 核的嵌套验证性能。</li>
+<li>画阶数和 $C$ 对验证误差的影响。</li>
+<li>检查支持向量比例及训练时间。</li>
+<li>与显式二次回归比较，判断复杂核是否真正增益。</li>
+<li>检查训练范围外的曲线和极端预测。</li>
+</ol></div>
     </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
-<li>剂量-反应或指标-反应的平滑非线性拟合。</li>
-<li>低维复杂曲线建模。</li>
-</ul></div>
+<li>原始散点与多项式核拟合曲线。</li>
+<li>不同阶数的验证曲线。</li>
+<li>真实值-预测值和残差图。</li>
+<li>二维时可画预测曲面。</li>
+</ul>
+<p>下图展示多项式核回归的非线性拟合：</p>
+<p><img alt="" src="img/polynomial_kernel_regression_curve.png" /></p></div>
     </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-support-vector-regression-svr.html" data-cn="支持向量回归" data-en="Support Vector Regression, SVR" data-def="支持向量回归是支持向量机在回归问题中的扩展，它通过引入 $\epsilon$-不敏感损失函数，在允许一定误差带的同时寻找最平滑的回归函数。">支持向量回归（Support Vector Regression, SVR）</a></li>
-<li><a class="xlink" href="m-polynomial-regression.html" data-cn="多项式回归" data-en="Polynomial Regression" data-def="多项式回归是线性回归最直接的「弯曲」扩展：把 $x,x^2,x^3,\dots$ 当作新的自变量一起塞进线性回归，就能拟合曲线——而模型对系数依然是线性的，仍用普通最小二乘求解。">多项式回归（Polynomial Regression）</a></li>
-<li><a class="xlink" href="m-gaussian-process-regression.html" data-cn="高斯过程回归" data-en="Gaussian Process Regression" data-def="高斯过程回归是一种以“函数分布”为对象的贝叶斯非参数回归方法，不仅能给出预测均值，还能自然给出预测不确定性。">高斯过程回归（Gaussian Process Regression）</a></li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p><strong>优势：</strong> 隐式使用多项式和交互特征，可与 SVR 正则化和容忍损失结合。</p>
+<p><strong>局限：</strong> 阶数和尺度敏感，可解释性弱，大样本训练成本高。</p>
+<p><strong>常见坑：</strong> 不标准化；阶数过高；忽略 <code>gamma</code> 和 <code>coef0</code>；把它等同于普通多项式回归；仅凭训练曲线选阶数。</p></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
+<li><a class="xlink" href="m-polynomial-regression.html" data-cn="多项式回归" data-en="Polynomial Regression" data-def="多项式回归是线性回归最直接的「弯曲」扩展：把 $x,x^2,x^3,\dots$ 当作新的自变量一起塞进线性回归，就能拟合曲线——而模型对系数依然是线性的，仍用普通最小二乘求解。">多项式回归（Polynomial Regression）</a>：显式展开并可解释各项系数。</li>
+<li><a class="xlink" href="m-support-vector-regression-svr.html" data-cn="支持向量回归" data-en="Support Vector Regression, SVR" data-def="SVR 寻找尽可能平坦的回归函数，并允许预测曲线周围存在一个不计损失的 $\epsilon$ 容忍管。">支持向量回归（Support Vector Regression, SVR）</a>：多项式核回归是 SVR 的一个核选择。</li>
+<li><a class="xlink" href="m-gaussian-process-regression.html" data-cn="高斯过程回归" data-en="Gaussian Process Regression" data-def="高斯过程回归给未知函数本身设置概率分布，用核函数规定任意两点的函数值应有多相似，并在观测数据后得到预测分布。">高斯过程回归（Gaussian Process Regression）</a>：同样使用核，但 GPR 给出后验预测分布。</li>
+<li>选择经验：若低阶项解释重要，优先显式多项式回归；若预测优先且特征展开庞大，可考虑核方法。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>预测性剂量-反应和生理指标曲线。</li>
+<li>低维生物标志物间交互的连续结局预测。</li>
+<li>小样本影像或组学特征的非线性回归。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">术语表</h2></div>
+      <div class="sec-body"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>polynomial kernel</td>
+<td>隐式表示多项式特征内积的核</td>
+</tr>
+<tr>
+<td>degree</td>
+<td>多项式核的阶数</td>
+</tr>
+<tr>
+<td><code>coef0</code></td>
+<td>控制低阶与高阶项相对影响的常数</td>
+</tr>
+<tr>
+<td>feature map</td>
+<td>从原空间到隐式特征空间的映射</td>
+</tr>
+<tr>
+<td>kernel matrix</td>
+<td>所有样本两两核相似度组成的矩阵</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-support-vector-regression-svr.html" data-cn="支持向量回归" data-en="Support Vector Regression, SVR" data-def="SVR 寻找尽可能平坦的回归函数，并允许预测曲线周围存在一个不计损失的 $\epsilon$ 容忍管。">支持向量回归（Support Vector Regression, SVR）</a></li>
+<li><a class="xlink" href="m-polynomial-regression.html" data-cn="多项式回归" data-en="Polynomial Regression" data-def="多项式回归是线性回归最直接的「弯曲」扩展：把 $x,x^2,x^3,\dots$ 当作新的自变量一起塞进线性回归，就能拟合曲线——而模型对系数依然是线性的，仍用普通最小二乘求解。">多项式回归（Polynomial Regression）</a></li>
+<li><a class="xlink" href="m-gaussian-process-regression.html" data-cn="高斯过程回归" data-en="Gaussian Process Regression" data-def="高斯过程回归给未知函数本身设置概率分布，用核函数规定任意两点的函数值应有多相似，并在观测数据后得到预测分布。">高斯过程回归（Gaussian Process Regression）</a></li>
+<li><a class="xlink" href="m-support-vector-machine-svm.html" data-cn="支持向量机" data-en="Support Vector Machine, SVM" data-def="SVM 不只寻找能分开两类的边界，还寻找离最近训练点尽可能远的边界，并允许用惩罚换取少量违例。">支持向量机（Support Vector Machine, SVM）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Schölkopf B, Smola AJ. <em>Learning with Kernels</em>. MIT Press; 2002.</li>
 <li>Smola AJ, Schölkopf B. A tutorial on support vector regression. <em>Stat Comput</em>. 2004;14:199-222.</li>
-<li>scikit-learn Developers. <code>sklearn.svm.SVR</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html">https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html</a> （访问日期：2026-07-02）</li>
-<li>CRAN. Package <code>e1071</code>. <a href="https://cran.r-project.org/package=e1071">https://cran.r-project.org/package=e1071</a> （访问日期：2026-07-02）</li>
+<li>scikit-learn Developers. <code>SVR</code> API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html">https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html</a> （访问日期：2026-07-09）</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-gaussian-process-regression.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">高斯过程回归</div></a><a class="pg pg-next" href="m-support-vector-machine-svm.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">支持向量机</div></a></div>

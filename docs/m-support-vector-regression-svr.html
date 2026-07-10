@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">术语表</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,214 +54,289 @@
     <div class="intro-note"><h1>支持向量回归（Support Vector Regression, SVR）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>支持向量回归是支持向量机在回归问题中的扩展，它通过引入 $\epsilon$-不敏感损失函数，在允许一定误差带的同时寻找最平滑的回归函数。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>SVR 寻找尽可能平坦的回归函数，并允许预测曲线周围存在一个不计损失的 $\epsilon$ 容忍管。</p>
+<h3>1.2 定义</h3>
+<p>支持向量回归是 <a class="xlink" href="m-support-vector-machine-svm.html" data-cn="支持向量机" data-en="Support Vector Machine, SVM" data-def="SVM 不只寻找能分开两类的边界，还寻找离最近训练点尽可能远的边界，并允许用惩罚换取少量违例。">支持向量机（Support Vector Machine, SVM）</a> 的连续结局版本。它不最小化所有点的平方误差，而用 $\epsilon$-不敏感损失忽略足够小的误差，只惩罚超出容忍管的部分。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：如何在复杂非线性关系下做稳健的连续结局预测。</li>
-<li>适用任务：非线性回归、小到中等规模数据预测、核方法回归。</li>
-<li>常见医学场景：复杂生理指标预测、连续风险评分估计、非线性剂量-反应曲线拟合。</li>
+<li>小到中等样本中的非线性连续结局预测。</li>
+<li>允许存在临床上可忽略误差的稳健函数拟合。</li>
+<li>通过核函数在不显式构造高维特征时学习弯曲关系。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>SVR 不要求每个点都精确拟合，而是在预测曲线周围放一个“容忍带”（$\epsilon$-tube）。只要点落在带内，就不产生损失；真正决定模型形状的是落在带外的那些支持向量。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>先在预测曲线周围画一条宽度为 $2\epsilon$ 的管道。管内点已经“够准”，不再消耗模型精力；管边界和管外点决定曲线的位置与形状。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>线性 SVR 的优化问题可写成：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 平坦与拟合的权衡</h3>
+<p>$\|w\|^2/2$ 鼓励函数平坦，超出 $\epsilon$ 管的松弛量鼓励贴近数据，$C$ 决定后者相对前者有多重要。</p>
+<h3>2.2 稀疏表示</h3>
+<p>对预测函数有非零对偶系数的训练点称为支持向量。管内且不在边界上的点通常不直接出现在最终核展开中，因此模型由部分关键病例决定。</p>
+<h3>2.3 核技巧</h3>
+<p>线性 SVR 在原特征空间拟合平面；RBF 或多项式核把内积替换为相似度，使线性算法可在隐式高维空间形成非线性曲线。</p></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 原始优化问题</h3>
 <p>$$
-\min_{w,b,\xi_i,\xi_i^*}
-\frac{1}{2}\|w\|^2
-+
-C\sum_{i=1}^n(\xi_i+\xi_i^*)
+\operatorname*{minimize}_{w,b,\xi,\xi^*}
+\quad
+\frac12\|w\|^2
++C\sum_{i=1}^{n}(\xi_i+\xi_i^*)
 $$</p>
-<p>满足约束：</p>
+<p>约束为：</p>
 <p>$$
 \begin{aligned}
-y_i - (w^\top x_i + b) &amp;\le \epsilon + \xi_i \\
-(w^\top x_i + b) - y_i &amp;\le \epsilon + \xi_i^* \\
+y_i-w^\top\phi(x_i)-b &amp;\le \epsilon+\xi_i\\
+w^\top\phi(x_i)+b-y_i &amp;\le \epsilon+\xi_i^*\\
 \xi_i,\xi_i^* &amp;\ge 0
 \end{aligned}
 $$</p>
-<p>核化后预测函数为：</p>
+<h3>3.2 $\epsilon$-不敏感损失</h3>
 <p>$$
-f(x)=\sum_{i=1}^n (\alpha_i-\alpha_i^*)K(x_i,x)+b
+L_\epsilon(y,f)=
+\max\{0,|y-f(x)|-\epsilon\}
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
-<ul>
-<li>$\epsilon$：误差容忍带宽度。</li>
-<li>$C$：误差惩罚强度。</li>
-<li>$K(\cdot,\cdot)$：核函数，如线性核、多项式核、RBF 核。</li>
-<li>支持向量：落在 $\epsilon$ 带外、真正决定模型的样本点。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>结局为连续型。</li>
-<li>数据规模通常不宜过大，否则计算成本会较高。</li>
-<li>特征尺度通常需要标准化。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：连续变量为主，也可混合编码后的分类变量。</li>
-<li>因变量类型：连续型。</li>
-<li>数据结构：宽表数据，或低维非线性散点数据。</li>
-<li>是否适合高维数据：可以，但训练成本会提高。</li>
-<li>是否适合缺失较多数据：需先处理缺失值。</li>
-<li>是否适合删失数据：不适合。</li>
-<li>是否适合重复测量数据：不直接适合。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>一个简单的一维非线性回归表格如下：</p>
+<h3>3.3 核化预测</h3>
+<p>$$
+f(x)=
+\sum_{i=1}^{n}(\alpha_i-\alpha_i^*)K(x_i,x)+b
+$$</p>
+<p>常用 RBF 核为：</p>
+<p>$$
+K(x,z)=\exp[-\gamma\|x-z\|^2]
+$$</p>
+<h3>3.4 关键条件</h3>
 <table>
 <thead>
 <tr>
-<th>X</th>
-<th>y</th>
+<th>条件</th>
+<th>违反后果</th>
+<th>检查方式</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>0.026</td>
-<td>0.045</td>
+<td>特征已合理缩放</td>
+<td>大量纲变量支配核距离</td>
+<td>管线内标准化</td>
 </tr>
 <tr>
-<td>1.126</td>
-<td>0.735</td>
+<td>$C,\epsilon,\gamma$ 经训练内调参</td>
+<td>欠拟合或过拟合</td>
+<td>嵌套交叉验证</td>
 </tr>
 <tr>
-<td>1.392</td>
-<td>0.979</td>
+<td>样本规模适中</td>
+<td>核矩阵训练成本高</td>
+<td>记录时间与内存</td>
 </tr>
 <tr>
-<td>1.501</td>
-<td>1.123</td>
+<td>数据切分无患者泄漏</td>
+<td>测试误差虚低</td>
+<td>分组或时间切分</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>假设候选线性函数为 $f(x)=x$，4 个观测为：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">$x$</th>
+<th style="text-align: right;">$y$</th>
+<th style="text-align: right;">$f(x)$</th>
+<th style="text-align: right;">绝对误差</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.1</td>
 </tr>
 <tr>
-<td>1.515</td>
-<td>0.756</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.1</td>
 </tr>
 <tr>
-<td>2.340</td>
-<td>0.636</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2.4</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.4</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">4.0</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">1.0</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：连续结局和特征矩阵。</li>
-<li>关键变量：核函数、<code>C</code>、<code>epsilon</code>、<code>gamma</code>。</li>
-<li>需要预处理的内容：标准化、训练测试集划分、超参数搜索。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：支持向量集合、拟合函数、最佳超参数。</li>
-<li>参数估计：核参数和支持向量权重，不像线性回归那样直观。</li>
-<li>预测结果：连续型预测值。</li>
-<li>不确定性指标：通常依赖交叉验证误差和测试集性能。</li>
-</ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：复杂非线性、小到中等规模回归任务。</li>
-<li>不适合：超大规模数据、强调强可解释性的场景。</li>
-<li>使用前需要特别检查的点：标准化、核函数选择、<code>C/epsilon/gamma</code> 调参。</li>
-</ul></div>
+<p>取 $\epsilon=0.2$。各点的 $\epsilon$-不敏感损失为：</p>
+<p>$$
+(0,\ 0,\ 0.4-0.2,\ 1.0-0.2)
+=(0,0,0.2,0.8)
+$$</p>
+<p>前两点位于管内，不计损失；后两点超出管道，是决定修正方向的支持病例。</p>
+<p>若 $C=2$，总误差惩罚为：</p>
+<p>$$
+C\sum_iL_\epsilon=2(0.2+0.8)=2
+$$</p>
+<p>又因为 $w=1$，平坦度惩罚为 $\|w\|^2/2=0.5$，该候选函数的目标值为 $2.5$。</p>
+<p><strong>参数直觉：</strong> 增大 $\epsilon$ 会让更多点落入管内；增大 $C$ 会更强烈地要求模型修正管外误差。</p></div>
     </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="support-vector-regression-svr" data-i="0">Python</button><button class="codetab" data-uid="support-vector-regression-svr" data-i="1">R</button></div><div class="codepanel active" data-uid="support-vector-regression-svr" data-i="0"><p>常用包：</p>
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 数据要求</h3>
 <ul>
-<li><code>scikit-learn</code></li>
+<li>因变量为连续型。</li>
+<li>特征可连续或经编码后进入模型，通常必须标准化。</li>
+<li>缺失需预先处理；普通 SVR 不直接处理删失或重复测量相关性。</li>
 </ul>
-<pre><code class="language-python">from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
-from sklearn.svm import SVR
-
-fit = make_pipeline(
-    StandardScaler(),
-    SVR(kernel=&quot;rbf&quot;, C=10, epsilon=0.1, gamma=&quot;scale&quot;)
-)
-fit.fit(X_train, y_train)
-y_pred = fit.predict(X_test)
-</code></pre></div><div class="codepanel" data-uid="support-vector-regression-svr" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>e1071</code></li>
-</ul>
-<pre><code class="language-r">library(e1071)
-
-fit &lt;- svm(y ~ ., data = df, type = &quot;eps-regression&quot;, kernel = &quot;radial&quot;)
-pred &lt;- predict(fit, newdata = df_test)
-</code></pre></div></div></div>
+<h3>5.2 输入与产出</h3>
+<p>输入为特征、连续结局、核函数及 $C,\epsilon,\gamma$。输出为连续预测、支持向量和对偶系数。标准实现不自然给出预测区间。</p></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：预测误差、支持向量数量、核参数。</li>
-<li>每个主要参数如何解释：SVR 更偏预测导向，参数解释通常不如线性模型直接。</li>
-<li>临床或医学意义如何表达：更适合强调“预测性能”和“非线性拟合能力”。</li>
-<li>常见误读：支持向量回归不是简单的“线性回归 + 核函数”，其损失函数和优化目标都不同。</li>
+<li>小到中等样本、特征数中等、非线性明显的连续预测。</li>
+<li>误差在某个容忍范围内临床意义相近的任务。</li>
+<li>不适合超大样本、要求参数效应解释或必须有可靠预测区间的任务。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>原始散点图 + SVR 拟合曲线。</li>
-<li>真实值 vs 预测值散点图。</li>
-<li>不同核函数拟合曲线对比图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图展示 SVR 在一组非线性数据上的拟合曲线，体现了核方法对复杂曲线关系的刻画能力。</p>
-<p><img alt="" src="img/svr_nonlinear_curve.png" /></p>
-<p>下图为 SVR 在房价数据上的真实值 vs 预测值散点图，点越贴近对角线说明预测越准确。</p>
-<p><img alt="" src="img/svr_actual_vs_pred_houseprice.png" /></p></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="support-vector-regression-svr" data-i="0">Python</button><button class="codetab" data-uid="support-vector-regression-svr" data-i="1">R</button></div><div class="codepanel active" data-uid="support-vector-regression-svr" data-i="0"><pre><code class="language-python">from sklearn.model_selection import GridSearchCV, KFold
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVR
+from sklearn.metrics import mean_absolute_error
+
+pipe = make_pipeline(StandardScaler(), SVR(kernel=&quot;rbf&quot;))
+grid = {
+    &quot;svr__C&quot;: [0.1, 1, 10, 100],
+    &quot;svr__epsilon&quot;: [0.05, 0.1, 0.2],
+    &quot;svr__gamma&quot;: [&quot;scale&quot;, 0.01, 0.1],
+}
+cv = KFold(n_splits=5, shuffle=True, random_state=42)
+search = GridSearchCV(pipe, grid, scoring=&quot;neg_mean_absolute_error&quot;, cv=cv)
+search.fit(X_train, y_train)
+
+pred = search.predict(X_test)
+print(search.best_params_)
+print(mean_absolute_error(y_test, pred))
+</code></pre></div><div class="codepanel" data-uid="support-vector-regression-svr" data-i="1"><pre><code class="language-r">library(e1071)
+
+tuned &lt;- tune.svm(
+  y ~ .,
+  data = train,
+  type = &quot;eps-regression&quot;,
+  kernel = &quot;radial&quot;,
+  cost = c(0.1, 1, 10, 100),
+  epsilon = c(0.05, 0.1, 0.2),
+  gamma = c(0.01, 0.1)
+)
+
+fit &lt;- tuned$best.model
+pred &lt;- predict(fit, newdata = test)
+mean(abs(test$y - pred))
+</code></pre></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>非线性拟合能力强。</li>
-<li>对小误差不敏感，具有一定稳健性。</li>
-<li>核技巧让它在低到中等规模问题上很灵活。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>大样本计算成本高。</li>
-<li>参数调优复杂。</li>
-<li>模型解释性一般。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>不标准化特征就直接训练。</li>
-<li>在大数据上直接用 RBF-SVR。</li>
-<li>只调 <code>C</code> 不调 <code>epsilon</code> 和 <code>gamma</code>。</li>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>MAE 与 $\epsilon$ 都有结局原单位，应结合临床可接受误差说明。</li>
+<li><code>C</code> 越大越不容忍管外误差；$\gamma$ 越大，RBF 影响范围越局部。</li>
+<li>支持向量比例过高可能提示管太窄、噪声大或模型复杂。</li>
+<li>预测曲线是条件预测，不代表暴露的因果剂量反应。</li>
 </ul></div>
     </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和线性回归的区别：SVR 关注支持向量和 $\epsilon$-带，而不是整体平方误差最小化。</li>
-<li>和支持向量机的区别：SVR 处理连续结局，SVM 主条目聚焦分类任务。</li>
-<li>和多项式回归的区别：多项式回归靠特征扩展，SVR 靠核函数与 margin 思想。</li>
-<li>和随机森林回归的区别：SVR 更适合平滑非线性曲线，树模型更擅长复杂交互和局部结构。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">诊断与稳健性</h2></div>
+      <div class="sec-body"><ol>
+<li>比较不同 $C,\epsilon,\gamma$ 的验证误差曲面。</li>
+<li>检查支持向量比例与残差分布。</li>
+<li>与线性回归、Ridge 和树模型建立基准。</li>
+<li>做重复嵌套交叉验证，避免调参乐观偏倚。</li>
+<li>检查训练范围外预测、时间外与中心外泛化。</li>
+</ol></div>
     </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
-<li>非线性连续风险预测。</li>
-<li>生理参数与疾病评分之间的复杂关系拟合。</li>
-<li>小中样本、高维但非线性明显的预测任务。</li>
-</ul></div>
+<li>散点、SVR 曲线和 $\epsilon$ 管。</li>
+<li>真实值-预测值与残差图。</li>
+<li>$C,\epsilon,\gamma$ 的验证性能热图。</li>
+</ul>
+<p>下图展示非线性 SVR 拟合曲线：</p>
+<p><img alt="" src="img/svr_nonlinear_curve.png" /></p>
+<p>下图展示真实值与预测值：</p>
+<p><img alt="" src="img/svr_actual_vs_pred_houseprice.png" /></p></div>
     </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-support-vector-machine-svm.html" data-cn="支持向量机" data-en="Support Vector Machine, SVM" data-def="支持向量机是一类通过最大化分类间隔来学习判别边界的监督学习方法。它最经典的用途是二分类，也可以扩展到多分类和非线性分类。">支持向量机（Support Vector Machine, SVM）</a></li>
-<li><a class="xlink" href="m-polynomial-regression.html" data-cn="多项式回归" data-en="Polynomial Regression" data-def="多项式回归是线性回归最直接的「弯曲」扩展：把 $x,x^2,x^3,\dots$ 当作新的自变量一起塞进线性回归，就能拟合曲线——而模型对系数依然是线性的，仍用普通最小二乘求解。">多项式回归（Polynomial Regression）</a></li>
-<li><a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归是在普通线性回归的损失函数中加入 L2 正则化项的一种方法，用来缓解多重共线性、减少过拟合，并提升模型在新数据上的稳定性。">Ridge回归（Ridge Regression）</a></li>
-<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a></li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p><strong>优势：</strong> 非线性灵活，对管内小误差不敏感，解由支持向量稀疏表示。</p>
+<p><strong>局限：</strong> 调参敏感，大样本训练慢，不直接提供概率型不确定性。</p>
+<p><strong>常见坑：</strong> 未标准化；只调 $C$；调参和评估共用同一折；把 $\epsilon$ 当置信区间；在数万以上样本直接使用精确 RBF-SVR。</p></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-support-vector-machine-svm.html" data-cn="支持向量机" data-en="Support Vector Machine, SVM" data-def="SVM 不只寻找能分开两类的边界，还寻找离最近训练点尽可能远的边界，并允许用惩罚换取少量违例。">支持向量机（Support Vector Machine, SVM）</a>：SVM 最大化分类间隔，SVR 构造回归容忍管。</li>
+<li><a class="xlink" href="m-gaussian-process-regression.html" data-cn="高斯过程回归" data-en="Gaussian Process Regression" data-def="高斯过程回归给未知函数本身设置概率分布，用核函数规定任意两点的函数值应有多相似，并在观测数据后得到预测分布。">高斯过程回归（Gaussian Process Regression）</a>：GPR 是概率模型并自然输出不确定性。</li>
+<li><a class="xlink" href="m-polynomial-kernel-regression.html" data-cn="多项式核回归" data-en="Polynomial Kernel Regression" data-def="多项式核回归通过计算多项式核内积，隐式使用幂次项和交互项，而无需把高维多项式特征逐列展开。">多项式核回归（Polynomial Kernel Regression）</a>：是 SVR 选用多项式核时的具体形式。</li>
+<li><a class="xlink" href="m-random-forest-regression.html" data-cn="随机森林回归" data-en="Random Forest Regression" data-def="随机森林回归训练许多带随机性的回归树，再把它们的连续预测取平均，得到比单棵树更稳定的预测值。">随机森林回归（Random Forest Regression）</a>：树更擅长局部阈值与交互，SVR 更偏平滑核函数。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>连续生理指标、风险评分与资源消耗预测。</li>
+<li>小样本影像组学或组学连续结局建模。</li>
+<li>非线性剂量或暴露-响应的预测性拟合。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">术语表</h2></div>
+      <div class="sec-body"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$\epsilon$-tube</td>
+<td>预测曲线周围不计损失的容忍带</td>
+</tr>
+<tr>
+<td>support vector</td>
+<td>位于管边界或管外并决定解的训练点</td>
+</tr>
+<tr>
+<td>slack variable</td>
+<td>超出容忍带的误差量</td>
+</tr>
+<tr>
+<td>kernel trick</td>
+<td>通过核内积隐式进入高维特征空间</td>
+</tr>
+<tr>
+<td>RBF kernel</td>
+<td>相似度随平方距离指数衰减的核</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-support-vector-machine-svm.html" data-cn="支持向量机" data-en="Support Vector Machine, SVM" data-def="SVM 不只寻找能分开两类的边界，还寻找离最近训练点尽可能远的边界，并允许用惩罚换取少量违例。">支持向量机（Support Vector Machine, SVM）</a></li>
+<li><a class="xlink" href="m-gaussian-process-regression.html" data-cn="高斯过程回归" data-en="Gaussian Process Regression" data-def="高斯过程回归给未知函数本身设置概率分布，用核函数规定任意两点的函数值应有多相似，并在观测数据后得到预测分布。">高斯过程回归（Gaussian Process Regression）</a></li>
+<li><a class="xlink" href="m-polynomial-kernel-regression.html" data-cn="多项式核回归" data-en="Polynomial Kernel Regression" data-def="多项式核回归通过计算多项式核内积，隐式使用幂次项和交互项，而无需把高维多项式特征逐列展开。">多项式核回归（Polynomial Kernel Regression）</a></li>
+<li><a class="xlink" href="m-ridge-regression.html" data-cn="Ridge回归" data-en="Ridge Regression" data-def="Ridge 回归给回归系数套上一根「橡皮筋」：允许每个变量都参与预测，但惩罚过大的系数，让模型更稳。">Ridge回归（Ridge Regression）</a></li>
+<li><a class="xlink" href="m-random-forest-regression.html" data-cn="随机森林回归" data-en="Random Forest Regression" data-def="随机森林回归训练许多带随机性的回归树，再把它们的连续预测取平均，得到比单棵树更稳定的预测值。">随机森林回归（Random Forest Regression）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Smola AJ, Schölkopf B. A tutorial on support vector regression. <em>Stat Comput</em>. 2004;14:199-222.</li>
-<li>scikit-learn Developers. <code>sklearn.svm.SVR</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html">https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html</a> （访问日期：2026-07-02）</li>
-<li>CRAN. Package <code>e1071</code>. <a href="https://cran.r-project.org/package=e1071">https://cran.r-project.org/package=e1071</a> （访问日期：2026-07-02）</li>
+<li>scikit-learn Developers. <code>SVR</code> API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html">https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html</a> （访问日期：2026-07-09）</li>
+<li>CRAN. Package <code>e1071</code>. <a href="https://cran.r-project.org/package=e1071">https://cran.r-project.org/package=e1071</a> （访问日期：2026-07-09）</li>
 </ul></div>
     </section>
     <div class="pager"><span></span><a class="pg pg-next" href="m-gaussian-process-regression.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">高斯过程回归</div></a></div>

@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">术语表</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,231 +54,268 @@
     <div class="intro-note"><h1>因子分析（Factor Analysis）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>因子分析是一类潜变量模型，用少数不可直接观测的公共因子解释多个观测变量之间的相关结构。它常用于问卷量表、心理测量、症状维度和综合指标构建。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>因子分析用少数不可观测公共因子解释多个指标为何相关，并把每个指标未被公共因子解释的变异单独留作特异误差。</p>
+<h3>1.2 定义</h3>
+<p>因子分析是线性潜变量模型。观测变量由公共因子的线性组合与变量特异误差构成；探索性因子分析（EFA）用于发现可能的因子结构，验证性因子分析用于检验预先规定结构。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：多个观测指标背后是否存在少数共同潜在维度。</li>
-<li>适用任务：探索性因子分析、量表结构检验、变量降维、潜在构念命名。</li>
-<li>常见医学场景：生活质量量表维度分析，症状群识别，心理健康评分结构探索。</li>
+<li>多个题项背后是否存在少数潜在构念。</li>
+<li>如何区分共同方差与题项特异方差。</li>
+<li>如何构建、精简和解释量表维度。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>如果多个问题或指标总是一起变化，它们可能共同反映同一个潜在概念。因子分析把这种共同变化归结为公共因子，同时把每个变量自身的特殊部分留在误差项中。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>疼痛、疲劳和睡眠问题经常一起变化，可能共同反映“躯体负担”；焦虑和抑郁可能共同反映“情绪困扰”。因子分析寻找这些看不见但能解释相关性的共同来源。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>设标准化后的观测变量向量为 $x\in\mathbb{R}^{p}$，公共因子为 $f\in\mathbb{R}^{k}$：</p>
-<p>$$
-x = \Lambda f + \epsilon
-$$</p>
-<p>其中 $\Lambda$ 为因子载荷矩阵，$\epsilon$ 为特异误差。协方差结构可写为：</p>
-<p>$$
-\Sigma = \Lambda \Phi \Lambda^\top + \Psi
-$$</p>
-<p>若假设因子彼此正交，则 $\Phi=I$：</p>
-<p>$$
-\Sigma = \Lambda \Lambda^\top + \Psi
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
-<ul>
-<li>$\Lambda$：因子载荷矩阵，表示每个观测变量与公共因子的关系。</li>
-<li>$f$：公共因子或潜变量。</li>
-<li>$\Psi$：特异方差矩阵，表示每个变量未被公共因子解释的部分。</li>
-<li>共同度：某变量方差中被公共因子解释的比例。</li>
-<li>因子旋转：通过正交或斜交变换提升载荷解释性。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>观测变量之间的相关性可由少数公共因子解释。</li>
-<li>特异误差之间通常假设相互独立。</li>
-<li>样本量足以稳定估计相关矩阵。</li>
-<li>变量应有足够相关性，完全不相关的变量不适合做因子分析。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 解释共同方差</h3>
+<p>与 PCA 压缩总方差不同，因子分析认为每个变量既有公共部分，也有自身特异与测量误差。模型重点复现变量间协方差。</p>
+<h3>2.2 因子旋转</h3>
+<p>未旋转载荷常难解释。正交旋转保持因子不相关，斜交旋转允许因子相关。旋转改变坐标表达，不改变模型对共同结构的基本拟合。</p>
+<h3>2.3 因子数需要多证据</h3>
+<p>碎石图、平行分析、拟合指标、残差与理论解释应共同决定因子数。机械使用“特征值大于 1”常不可靠。</p></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：连续变量、近似连续的量表题项或有序评分。</li>
-<li>因变量类型：因子分析本身不需要结局变量。</li>
-<li>数据结构：样本乘以变量/题项矩阵。</li>
-<li>是否适合高维数据：适合中等维度，变量很多时需注意样本量和稳定性。</li>
-<li>是否适合缺失较多数据：需先处理缺失，或使用支持缺失机制的估计方法。</li>
-<li>是否适合删失数据：不直接处理删失结局。</li>
-<li>是否适合重复测量数据：普通因子分析需先明确分析单位，纵向量表可考虑专门模型。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>以患者报告结局量表为例：</p>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 测量模型</h3>
+<p>$$
+x=\mu+\Lambda f+\epsilon
+$$</p>
+<p>常设：</p>
+<p>$$
+E(f)=0,\quad\operatorname{Cov}(f)=\Phi,\quad
+\operatorname{Cov}(\epsilon)=\Psi
+$$</p>
+<p>$\Psi$ 通常为对角矩阵。</p>
+<h3>3.2 协方差分解</h3>
+<p>$$
+\Sigma=\Lambda\Phi\Lambda^\top+\Psi
+$$</p>
+<p>正交因子时 $\Phi=I$：</p>
+<p>$$
+\Sigma=\Lambda\Lambda^\top+\Psi
+$$</p>
+<h3>3.3 共同度</h3>
+<p>正交模型中，变量 $j$ 的共同度：</p>
+<p>$$
+h_j^2=\sum_{k=1}^{q}\lambda_{jk}^2
+$$</p>
+<p>标准化变量的特异度为 $\psi_j=1-h_j^2$。</p>
+<h3>3.4 关键条件</h3>
 <table>
 <thead>
 <tr>
-<th>Pain</th>
-<th>Fatigue</th>
-<th>Sleep</th>
-<th>Anxiety</th>
-<th>Depression</th>
-<th>SocialFunction</th>
+<th>条件</th>
+<th>违反后果</th>
+<th>检查方式</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>4</td>
-<td>5</td>
-<td>4</td>
-<td>2</td>
-<td>3</td>
-<td>3</td>
+<td>少数因子可解释相关</td>
+<td>残差相关大、结构不清</td>
+<td>残差相关矩阵</td>
 </tr>
 <tr>
-<td>1</td>
-<td>2</td>
-<td>2</td>
-<td>1</td>
-<td>1</td>
-<td>5</td>
+<td>题项相关估计合适</td>
+<td>Likert 数据 Pearson 相关失真</td>
+<td>polychoric 敏感性</td>
 </tr>
 <tr>
-<td>5</td>
-<td>4</td>
-<td>5</td>
-<td>4</td>
-<td>5</td>
-<td>2</td>
+<td>样本量与题项质量足够</td>
+<td>载荷和因子数不稳定</td>
+<td>平行分析、bootstrap</td>
 </tr>
 <tr>
-<td>2</td>
-<td>3</td>
-<td>2</td>
-<td>2</td>
-<td>2</td>
-<td>4</td>
+<td>特异误差近似独立</td>
+<td>局部依赖未建模</td>
+<td>modification/residual 检查</td>
 </tr>
 </tbody>
-</table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：多个相关观测变量或题项。</li>
-<li>关键变量：提取因子数、估计方法、旋转方式。</li>
-<li>需要预处理的内容：缺失处理、反向题重编码、变量标准化、相关矩阵适用性检查。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：因子载荷矩阵、共同度、特异方差、因子得分。</li>
-<li>参数估计：$\Lambda$、$\Psi$，斜交旋转时还包括因子相关矩阵。</li>
-<li>预测结果：不直接预测，可输出因子得分用于后续建模。</li>
-<li>不确定性指标：可报告载荷置信区间、bootstrap 稳定性或验证性分析结果。</li>
-</ul></div>
+</table></div>
     </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：多个指标可能反映少数潜在构念、希望解释变量间相关结构、需要构建综合维度评分的场景。</li>
-<li>不适合：变量之间相关很弱、目标只是压缩预测特征、需要最大化解释总方差而不关心潜变量含义的场景。</li>
-<li>使用前需要特别检查的点：KMO、Bartlett 球形检验、因子数选择、旋转后载荷是否可解释。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>两个标准化题项 $x_1,x_2$ 由一个方差为 1 的公共因子生成，载荷为：</p>
+<p>$$
+\Lambda=
+\begin{pmatrix}
+0.8\\
+0.6
+\end{pmatrix}
+$$</p>
+<p>为使两个题项方差都为 1，设：</p>
+<p>$$
+\Psi=
+\begin{pmatrix}
+0.36&amp;0\\
+0&amp;0.64
+\end{pmatrix}
+$$</p>
+<p><strong>Step 1：共同度。</strong></p>
+<p>$$
+h_1^2=0.8^2=0.64,\qquad
+h_2^2=0.6^2=0.36
+$$</p>
+<p>题项 1 有 64% 方差由公共因子解释，题项 2 为 36%。</p>
+<p><strong>Step 2：重构协方差。</strong></p>
+<p>$$
+\Lambda\Lambda^\top=
+\begin{pmatrix}
+0.64&amp;0.48\\
+0.48&amp;0.36
+\end{pmatrix}
+$$</p>
+<p>加上 $\Psi$：</p>
+<p>$$
+\Sigma=
+\begin{pmatrix}
+1&amp;0.48\\
+0.48&amp;1
+\end{pmatrix}
+$$</p>
+<p><strong>结论：</strong> 两题相关 0.48 完全来自共同因子；各题剩余 0.36 与 0.64 被视作特异方差。</p></div>
     </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="factor-analysis" data-i="0">Python</button><button class="codetab" data-uid="factor-analysis" data-i="1">R</button></div><div class="codepanel active" data-uid="factor-analysis" data-i="0"><p>常用包：</p>
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 数据要求</h3>
 <ul>
-<li><code>factor_analyzer</code></li>
-<li><code>scikit-learn</code></li>
+<li>多个相关连续指标或有序量表题项。</li>
+<li>反向题需先正确编码，缺失机制和题项分布需检查。</li>
+<li>重复测量和多层数据需使用相应多层/纵向因子模型。</li>
 </ul>
-<pre><code class="language-python">import pandas as pd
-from factor_analyzer import FactorAnalyzer
-from sklearn.preprocessing import StandardScaler
-
-df = pd.read_csv(&quot;patient_reported_outcomes.csv&quot;)
-items = [&quot;Pain&quot;, &quot;Fatigue&quot;, &quot;Sleep&quot;, &quot;Anxiety&quot;, &quot;Depression&quot;, &quot;SocialFunction&quot;]
-X = StandardScaler().fit_transform(df[items])
-
-fa = FactorAnalyzer(n_factors=2, rotation=&quot;varimax&quot;)
-fa.fit(X)
-
-loadings = pd.DataFrame(
-    fa.loadings_,
-    index=items,
-    columns=[&quot;Factor1&quot;, &quot;Factor2&quot;]
-)
-scores = fa.transform(X)
-
-print(loadings.round(3))
-print(pd.DataFrame(scores, columns=[&quot;Factor1&quot;, &quot;Factor2&quot;]).head())
-</code></pre></div><div class="codepanel" data-uid="factor-analysis" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>psych</code></li>
-</ul>
-<pre><code class="language-r">library(psych)
-
-items &lt;- df[, c(&quot;Pain&quot;, &quot;Fatigue&quot;, &quot;Sleep&quot;, &quot;Anxiety&quot;, &quot;Depression&quot;, &quot;SocialFunction&quot;)]
-fit &lt;- fa(items, nfactors = 2, rotate = &quot;varimax&quot;, fm = &quot;ml&quot;)
-
-print(fit$loadings, cutoff = 0.30)
-scores &lt;- factor.scores(items, fit)$scores
-head(scores)
-</code></pre></div></div></div>
+<h3>5.2 输入与产出</h3>
+<p>输入为题项矩阵或相关矩阵、因子数、提取法和旋转。输出为载荷、共同度、特异度、因子相关、因子得分及拟合信息。</p></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：载荷矩阵、共同度、因子相关、因子得分分布。</li>
-<li>每个主要参数如何解释：载荷越大，说明该变量越能代表对应公共因子。</li>
-<li>临床或医学意义如何表达：因子命名应来自高载荷题项的共同含义，而不是算法自动给出的标签。</li>
-<li>常见误读：因子数不是越多越好；旋转改变解释方式，但不应被理解为发现了完全新的数据。</li>
+<li>量表开发、症状群与潜在构念探索。</li>
+<li>多个观测指标被假定由少数共同原因驱动。</li>
+<li>不适合只追求预测压缩、题项几乎不相关或结构高度非线性的任务。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>因子载荷热图。</li>
-<li>碎石图和平行分析图。</li>
-<li>因子得分散点图。</li>
-<li>题项按因子分组的相关矩阵热图。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="factor-analysis" data-i="0">Python</button><button class="codetab" data-uid="factor-analysis" data-i="1">R</button></div><div class="codepanel active" data-uid="factor-analysis" data-i="0"><pre><code class="language-python">from factor_analyzer import FactorAnalyzer
+from sklearn.preprocessing import StandardScaler
+
+X_s = StandardScaler().fit_transform(X)
+fa = FactorAnalyzer(
+    n_factors=2,
+    method=&quot;ml&quot;,
+    rotation=&quot;oblimin&quot;,
+)
+fa.fit(X_s)
+
+loadings = fa.loadings_
+communalities = fa.get_communalities()
+uniquenesses = fa.get_uniquenesses()
+scores = fa.transform(X_s)
+print(loadings, communalities, uniquenesses)
+</code></pre></div><div class="codepanel" data-uid="factor-analysis" data-i="1"><pre><code class="language-r">library(psych)
+
+items &lt;- df[, item_names]
+fa.parallel(items, fa = &quot;fa&quot;, fm = &quot;ml&quot;)
+
+fit &lt;- fa(
+  items,
+  nfactors = 2,
+  rotate = &quot;oblimin&quot;,
+  fm = &quot;ml&quot;,
+  scores = &quot;regression&quot;
+)
+
+print(fit$loadings, cutoff = 0.30)
+fit$communality
+fit$uniquenesses
+</code></pre></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>适合解释多个观测指标背后的潜在构念。</li>
-<li>可将高相关题项压缩为少数可命名维度。</li>
-<li>在量表开发和医学心理测量中有成熟使用传统。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>因子数和旋转方式存在研究者判断。</li>
-<li>对样本量、题项质量和相关矩阵稳定性敏感。</li>
-<li>探索性结果需要外部样本或验证性因子分析确认。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>把 PCA 结果直接解释成潜变量。</li>
-<li>只看特征值大于 1，而不结合平行分析和理论背景。</li>
-<li>对交叉载荷较高的题项强行命名。</li>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>载荷表示变量与因子的关系，但阈值不应机械化。</li>
+<li>共同度低表示所提因子难以解释该题项。</li>
+<li>斜交旋转后应同时看 pattern matrix 与因子相关。</li>
+<li>因子命名来自高载荷题项与理论，不由软件自动决定。</li>
 </ul></div>
     </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a> 的区别：PCA 解释总方差，因子分析解释变量间共同方差并显式建模特异误差。</li>
-<li>和 <a class="xlink" href="m-independent-component-analysis-ica.html" data-cn="独立成分分析" data-en="Independent Component Analysis, ICA" data-def="独立成分分析是一种无监督表征学习方法，用来把观测到的混合信号分解成若干统计上尽量相互独立的潜在成分。它常用于盲源分离，也可作为高维数据的独立模式提取方法。">独立成分分析（Independent Component Analysis, ICA）</a> 的区别：ICA 强调成分统计独立，因子分析强调公共因子解释相关结构。</li>
-<li>和 <a class="xlink" href="m-singular-value-decomposition-svd.html" data-cn="奇异值分解" data-en="Singular Value Decomposition, SVD" data-def="奇异值分解是一种基础矩阵分解方法，可以把任意矩阵分解为左奇异向量、奇异值和右奇异向量三部分。截断 SVD 使用最大的若干奇异值构造低秩近似，从而实现降维、压缩和去噪。">奇异值分解（Singular Value Decomposition, SVD）</a> 的区别：SVD 是矩阵代数分解，因子分析是带误差结构的统计潜变量模型。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">诊断与稳健性</h2></div>
+      <div class="sec-body"><ol>
+<li>检查相关矩阵、KMO 和 Bartlett 检验。</li>
+<li>用平行分析和拟合残差选择因子数。</li>
+<li>比较正交与斜交旋转、不同提取法。</li>
+<li>bootstrap 载荷和因子一致性。</li>
+<li>在独立样本做 CFA 或结构复现。</li>
+</ol></div>
     </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
-<li>患者报告结局量表的维度结构探索。</li>
-<li>症状群或心理健康潜在维度识别。</li>
-<li>多个生活方式指标合成为可解释的潜在行为因子。</li>
+<li>观测与随机特征值的平行分析图。</li>
+<li>旋转载荷热图。</li>
+<li>共同度和特异度条形图。</li>
+<li>因子得分与因子相关图。</li>
 </ul></div>
     </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
-<li><a class="xlink" href="m-independent-component-analysis-ica.html" data-cn="独立成分分析" data-en="Independent Component Analysis, ICA" data-def="独立成分分析是一种无监督表征学习方法，用来把观测到的混合信号分解成若干统计上尽量相互独立的潜在成分。它常用于盲源分离，也可作为高维数据的独立模式提取方法。">独立成分分析（Independent Component Analysis, ICA）</a></li>
-<li><a class="xlink" href="m-singular-value-decomposition-svd.html" data-cn="奇异值分解" data-en="Singular Value Decomposition, SVD" data-def="奇异值分解是一种基础矩阵分解方法，可以把任意矩阵分解为左奇异向量、奇异值和右奇异向量三部分。截断 SVD 使用最大的若干奇异值构造低秩近似，从而实现降维、压缩和去噪。">奇异值分解（Singular Value Decomposition, SVD）</a></li>
-<li><a class="xlink" href="m-linear-discriminant-analysis-lda.html" data-cn="线性判别分析" data-en="Linear Discriminant Analysis, LDA" data-def="线性判别分析是一种经典的监督式分类和降维方法。它寻找能让组间差异尽量大、组内差异尽量小的线性投影方向，并可在这些方向上进行分类。">线性判别分析（Linear Discriminant Analysis, LDA）</a></li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p><strong>优势：</strong> 显式区分共同与特异方差，适合潜在构念和量表结构。</p>
+<p><strong>局限：</strong> 因子数与旋转有主观性，样本和题项质量要求高，探索结果需验证。</p>
+<p><strong>常见坑：</strong> 把 PCA 当 EFA；只用特征值大于 1；强行删除交叉载荷题；把探索性结构写成已证实构念；Likert 题不检查相关类型。</p></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Fabrigar LR, Wegener DT. <em>Exploratory Factor Analysis</em>. Oxford University Press; 2011.</li>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="PCA 旋转坐标轴，依次寻找样本投影方差最大的正交方向，用少数线性组合保留主要总变异。">主成分分析（Principal Component Analysis, PCA）</a>：PCA 压缩总方差，FA 建模共同方差和特异误差。</li>
+<li><a class="xlink" href="m-independent-component-analysis-ica.html" data-cn="独立成分分析" data-en="Independent Component Analysis, ICA" data-def="ICA 假设观测信号是若干非高斯独立源的线性混合，并寻找反混合矩阵把这些来源尽可能分离。">独立成分分析（Independent Component Analysis, ICA）</a>：ICA 追求独立非高斯源，FA 解释相关结构。</li>
+<li><a class="xlink" href="m-singular-value-decomposition-svd.html" data-cn="奇异值分解" data-en="Singular Value Decomposition, SVD" data-def="SVD 把任意矩阵拆成样本方向、按强弱排序的奇异值和特征方向；保留前几项可得到最佳低秩近似。">奇异值分解（Singular Value Decomposition, SVD）</a>：SVD 是代数分解，不含测量误差模型。</li>
+<li>选择经验：量表构念与测量结构用 FA，纯压缩与可视化用 PCA。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>患者报告结局和生活质量量表。</li>
+<li>抑郁、焦虑、疲劳与疼痛症状维度。</li>
+<li>多项生活方式或社会决定因素的潜在构念。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">术语表</h2></div>
+      <div class="sec-body"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>common factor</td>
+<td>解释多个观测变量共同变异的潜变量</td>
+</tr>
+<tr>
+<td>loading</td>
+<td>观测变量与因子的线性关系强度</td>
+</tr>
+<tr>
+<td>communality</td>
+<td>变量方差中由公共因子解释的比例</td>
+</tr>
+<tr>
+<td>uniqueness</td>
+<td>未被公共因子解释的特异方差</td>
+</tr>
+<tr>
+<td>rotation</td>
+<td>改变因子坐标以获得更清晰载荷结构</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="PCA 旋转坐标轴，依次寻找样本投影方差最大的正交方向，用少数线性组合保留主要总变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
+<li><a class="xlink" href="m-independent-component-analysis-ica.html" data-cn="独立成分分析" data-en="Independent Component Analysis, ICA" data-def="ICA 假设观测信号是若干非高斯独立源的线性混合，并寻找反混合矩阵把这些来源尽可能分离。">独立成分分析（Independent Component Analysis, ICA）</a></li>
+<li><a class="xlink" href="m-singular-value-decomposition-svd.html" data-cn="奇异值分解" data-en="Singular Value Decomposition, SVD" data-def="SVD 把任意矩阵拆成样本方向、按强弱排序的奇异值和特征方向；保留前几项可得到最佳低秩近似。">奇异值分解（Singular Value Decomposition, SVD）</a></li>
+<li><a class="xlink" href="m-linear-discriminant-analysis-lda.html" data-cn="线性判别分析" data-en="Linear Discriminant Analysis, LDA" data-def="LDA 寻找“类间中心尽量远、类内样本尽量紧”的线性投影，并在共享协方差假设下形成线性分类边界。">线性判别分析（Linear Discriminant Analysis, LDA）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
 <li>Harman HH. <em>Modern Factor Analysis</em>. 3rd ed. University of Chicago Press; 1976.</li>
-<li>Revelle W. <code>psych</code>: Procedures for Psychological, Psychometric, and Personality Research. <a href="https://cran.r-project.org/package=psych">https://cran.r-project.org/package=psych</a> （访问日期：2026-07-02）</li>
+<li>Fabrigar LR, Wegener DT. <em>Exploratory Factor Analysis</em>. Oxford University Press; 2011.</li>
+<li>Revelle W. <code>psych</code>: Procedures for Psychological, Psychometric, and Personality Research. <a href="https://cran.r-project.org/package=psych">https://cran.r-project.org/package=psych</a> （访问日期：2026-07-09）</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-independent-component-analysis-ica.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">独立成分分析</div></a><a class="pg pg-next" href="m-locally-linear-embedding-lle.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">局部线性嵌入</div></a></div>

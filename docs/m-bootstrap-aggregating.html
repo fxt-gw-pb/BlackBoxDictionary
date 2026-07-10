@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,59 +54,182 @@
     <div class="intro-note"><h1>Bagging算法（Bootstrap Aggregating）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>Bagging 是 Bootstrap Aggregating 的缩写，是一种通过自助抽样生成多个训练子集、分别训练基学习器、再对预测结果投票或平均的集成学习方法。它主要用于降低不稳定模型的方差，典型代表是 <a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是一类基于 bagging 的树集成方法。它通过对样本做 bootstrap 抽样、对特征做随机子采样，训练许多彼此不同的决策树，再把它们的结果投票或平均起来。">随机森林（Random Forest）</a>。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>Bagging 让许多个「看过不同重抽样训练集」的模型各自预测，再投票或平均，以抵消单个模型的偶然波动。</p>
+<h3>1.2 定义</h3>
+<p>Bagging 是 Bootstrap Aggregating 的缩写。它先对训练集做多次 bootstrap 带放回抽样，每次训练一个基学习器，然后把这些基学习器的结果聚合：分类用多数投票或概率平均，回归用预测均值。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：如何让单个高方差模型的预测结果更稳定。</li>
-<li>适用任务：二分类、多分类、连续结局预测。</li>
-<li>常见医学场景：临床风险分类、疾病复发预测、生物标志物组合预测。</li>
+<li>研究问题：单个高方差模型受训练样本扰动影响很大，如何让预测更稳定。</li>
+<li>适用任务：二分类、多分类、连续结局预测、稳定化不稳定模型。</li>
+<li>常见医学场景：并发症风险预测、复发风险分类、多个高噪声生物标志物组合预测。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>Bagging 像是让多个“看过不同训练样本版本”的模型独立判断，再综合它们的意见。若每个模型都会受样本扰动影响，平均或投票后这种偶然波动会被抵消，最终预测更稳。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>Bagging 像让多位医生分别看「略有不同的病例样本」训练出来的经验，再把他们的判断投票。某一位医生可能被自己见过的病例偏到一边，但很多人的偶然偏差平均后会小得多。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>给定训练集 $D=\{(x_i,y_i)\}_{i=1}^{n}$，第 $b$ 个 bootstrap 子集记为 $D_b$，在其上训练基学习器 $h_b(x)$。分类任务的集成预测为：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>像 <a class="xlink" href="m-decision-tree.html" data-cn="决策树" data-en="Decision Tree" data-def="决策树把复杂分类问题拆成一连串「如果满足某条件，就往左；否则往右」的问题，最后在叶节点用多数类别做预测。">决策树（Decision Tree）</a> 这样的模型很灵活，也很不稳定：训练集中多几个或少几个病例，树的第一刀可能就变了。根本困难是：<strong>高灵活模型偏差可能低，但方差高，单次训练得到的规则容易被样本噪声牵着走</strong>。</p>
+<h3>2.2 关键洞察</h3>
+<p>Bagging 的关键洞察是：如果一个估计器容易摇摆，就训练很多个摇摆方向不同的版本，然后平均。只要这些模型的错误不是完全同步，多模型平均就能降低方差。Bootstrap 抽样提供了制造「不同版本训练集」的简单办法。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
+<ul>
+<li>相对单棵树：Bagging 用多棵树投票或平均，显著降低方差。</li>
+<li>相对简单重复训练同一模型：Bagging 每次用 bootstrap 样本，主动制造训练差异。</li>
+<li>相对 <a class="xlink" href="m-boosting.html" data-cn="Boosting算法" data-en="Boosting" data-def="Boosting 让弱学习器依次上场，每一轮都针对当前模型尚未解决的错误做一次小修正，最后把这些修正相加成强模型。">Boosting算法（Boosting）</a>：Bagging 并行训练，主要降方差；Boosting 串行纠错，主要降偏差。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>给定训练集 $D=\{(x_i,y_i)\}_{i=1}^{n}$，第 $b$ 次 bootstrap 样本记为 $D_b$，基学习器为 $h_b(x)$。</p>
+<p>分类投票为：</p>
 <p>$$
-\hat y=\arg\max_k\sum_{b=1}^{B}I(h_b(x)=k)
+\hat y=\operatorname*{arg\,max}_{k}\sum_{b=1}^{B}I\{h_b(x)=k\}
 $$</p>
-<p>回归任务的集成预测为：</p>
+<p>回归平均为：</p>
 <p>$$
 \hat f(x)=\frac{1}{B}\sum_{b=1}^{B}h_b(x)
 $$</p>
-<p>若基学习器方差为 $\sigma^2$，两两相关性近似为 $\rho$，则平均后的方差近似为：</p>
+<p>若每个基学习器方差为 $\sigma^2$，两两相关约为 $\rho$，平均后的方差近似为：</p>
 <p>$$
-\mathrm{Var}(\hat f)=\sigma^2\left(\rho+\frac{1-\rho}{B}\right)
+\operatorname{Var}\{\hat f(x)\}
+=
+\sigma^2\left(\rho+\frac{1-\rho}{B}\right)
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
+<p>这个式子在说：树越多，独立那部分方差越被平均掉；但树之间越相关，剩下的共同波动越难消掉。</p>
+<h3>3.2 推导脉络</h3>
+<ol>
+<li>对原训练集做 $B$ 次带放回抽样，得到 $D_1,\ldots,D_B$。</li>
+<li>在每个 $D_b$ 上训练同类型基学习器 $h_b$。</li>
+<li>分类时统计各类别票数；回归时取预测均值。</li>
+<li>未被某次 bootstrap 抽中的样本可作为袋外样本，用于估计 OOB 误差。</li>
+</ol>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>$B$：基学习器数量。</li>
-<li>bootstrap 抽样：带放回抽样，每个子集大小通常等于原训练集大小。</li>
-<li>$h_b(x)$：第 $b$ 个基学习器。</li>
-<li>$\rho$：基学习器之间的预测相关性，越低越有利于集成。</li>
-<li>OOB 样本：某次 bootstrap 中未被抽中的样本，可用于袋外误差估计。</li>
+<li>$B$：基学习器数量，越大通常越稳定，但计算更慢。</li>
+<li>bootstrap 抽样：有放回抽样，大小常等于原训练集。</li>
+<li>OOB 样本：某棵树训练时没抽到的样本，可近似验证该树。</li>
+<li>基学习器：被集成的模型，常见为深决策树。</li>
+<li>$\rho$：基学习器预测之间的相关性，越低集成收益越大。</li>
 </ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>基学习器对训练样本扰动较敏感，即本身方差较高。</li>
-<li>多个基学习器的错误模式不完全相同。</li>
-<li>主要目标是提升预测稳定性，而非获得简单参数解释。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+<h3>3.4 关键假设(含违反后果)</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>基模型高方差</td>
+<td>单模型对样本扰动敏感</td>
+<td>Bagging 收益明显</td>
+<td>重采样看单模型波动</td>
+</tr>
+<tr>
+<td>基模型错误不完全相关</td>
+<td>不同模型犯错不完全同步</td>
+<td>相关过高则平均收益小</td>
+<td>比较基模型预测相关</td>
+</tr>
+<tr>
+<td>训练样本代表目标人群</td>
+<td>bootstrap 只模拟样本波动</td>
+<td>外部人群偏移仍会失败</td>
+<td>外部验证</td>
+</tr>
+<tr>
+<td>样本量足够</td>
+<td>每次抽样能学到信号</td>
+<td>小样本 OOB 不稳定</td>
+<td>学习曲线</td>
+</tr>
+<tr>
+<td>预测目标明确</td>
+<td>聚合方式与结局类型匹配</td>
+<td>概率或阈值解释错误</td>
+<td>分类/回归指标分开报告</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><h3>4.1 分类投票</h3>
+<p>3 棵 bootstrap 决策树对 5 位患者是否 30 天并发症给出预测：</p>
+<table>
+<thead>
+<tr>
+<th>患者</th>
+<th>树1</th>
+<th>树2</th>
+<th>树3</th>
+<th>Bagging投票</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>B</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>C</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>D</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>E</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>以患者 A 为例，3 棵树中 2 棵投 1，所以集成预测为 1。患者 E 中只有 1 棵投 1，所以预测为 0。</p>
+<h3>4.2 方差降低</h3>
+<p>假设每棵树的预测方差 $\sigma^2=9$，树之间相关性 $\rho=0.2$，训练 $B=10$ 棵树：</p>
+<p>$$
+\operatorname{Var}(\hat f)=
+9\left(0.2+\frac{1-0.2}{10}\right)
+=9(0.28)=2.52
+$$</p>
+<p>单棵树方差为 9，Bagging 后约为 2.52。</p>
+<p><strong>结论：</strong> Bagging 的核心不是让每棵树都完美，而是让多棵不完全相同的树互相抵消偶然波动。树之间相关性越低、树数越多，集成越稳。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
 <li>自变量类型：连续、二分类、多分类变量均可，取决于基学习器。</li>
 <li>因变量类型：二分类、多分类或连续型。</li>
 <li>数据结构：宽表数据。</li>
-<li>是否适合高维数据：可用，但需注意基学习器和样本量。</li>
+<li>是否适合高维数据：可用，但需关注基学习器和样本量。</li>
 <li>是否适合缺失较多数据：通常需先处理缺失。</li>
 <li>是否适合删失数据：普通 Bagging 不直接处理删失结局。</li>
 <li>是否适合重复测量数据：不直接适合，需要先处理相关结构或使用专门模型。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>以术后 30 天并发症预测为例：</p>
+<h3>5.2 示例表格</h3>
 <table>
 <thead>
 <tr>
@@ -161,48 +284,39 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
 <li>输入数据：特征矩阵和目标变量。</li>
-<li>关键变量：基学习器类型、基学习器数量、每次抽样比例、特征抽样比例。</li>
+<li>关键变量：基学习器类型、基学习器数量、每次抽样比例、是否 bootstrap。</li>
 <li>需要预处理的内容：缺失处理、类别编码、训练测试集划分、类别不平衡处理。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：Bagging 集成模型、袋外误差、各基学习器预测。</li>
+<li>模型对象/统计结果：Bagging 集成模型、OOB 误差、各基学习器预测。</li>
 <li>参数估计：通常不输出传统系数。</li>
 <li>预测结果：类别、概率或连续预测值。</li>
-<li>不确定性指标：OOB 误差、交叉验证指标、测试集 AUC / F1 / MSE。</li>
+<li>不确定性指标：OOB 误差、交叉验证指标、测试集 AUC/F1/MSE。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
 <li>适合：单模型不稳定、非线性关系明显、希望降低预测方差的任务。</li>
-<li>不适合：基学习器本身偏差很高且变化很小的任务，例如简单线性模型的直接 Bagging 通常收益有限。</li>
-<li>使用前需要特别检查的点：基模型是否足够多样、OOB 或外部验证表现、类别不平衡下的阈值选择。</li>
+<li>不适合：基学习器本身非常稳定或偏差很高的任务，例如简单线性模型直接 Bagging 通常收益有限。</li>
+<li>使用前需要特别检查的点：基模型是否足够多样、OOB 或外部验证表现、类别不平衡下阈值选择。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="bootstrap-aggregating" data-i="0">Python</button><button class="codetab" data-uid="bootstrap-aggregating" data-i="1">R</button></div><div class="codepanel active" data-uid="bootstrap-aggregating" data-i="0"><p>常用包：</p>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="bootstrap-aggregating" data-i="0">Python</button><button class="codetab" data-uid="bootstrap-aggregating" data-i="1">R</button></div><div class="codepanel active" data-uid="bootstrap-aggregating" data-i="0"><p>常用包:</p>
 <ul>
 <li><code>scikit-learn</code></li>
 </ul>
-<pre><code class="language-python">import pandas as pd
-from sklearn.ensemble import BaggingClassifier
+<pre><code class="language-python">from sklearn.ensemble import BaggingClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import train_test_split
 
-df = pd.read_csv(&quot;surgical_complication.csv&quot;)
-X = df[[&quot;Age&quot;, &quot;ASA&quot;, &quot;SurgeryTime&quot;, &quot;Albumin&quot;, &quot;Emergency&quot;]]
-y = df[&quot;Complication30d&quot;].astype(int)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
-
-fit = BaggingClassifier(
-    estimator=DecisionTreeClassifier(max_depth=None, min_samples_leaf=10),
+base = DecisionTreeClassifier(max_depth=None, min_samples_leaf=10)
+model = BaggingClassifier(
+    estimator=base,
     n_estimators=200,
     max_samples=0.8,
     bootstrap=True,
@@ -210,53 +324,62 @@ fit = BaggingClassifier(
     random_state=42,
     n_jobs=-1
 )
-fit.fit(X_train, y_train)
 
-print(&quot;OOB score:&quot;, fit.oob_score_)
-pred_prob = fit.predict_proba(X_test)[:, 1]
-</code></pre></div><div class="codepanel" data-uid="bootstrap-aggregating" data-i="1"><p>常用包：</p>
+model.fit(X_train, y_train)
+print(model.oob_score_)
+prob = model.predict_proba(X_test)[:, 1]
+</code></pre></div><div class="codepanel" data-uid="bootstrap-aggregating" data-i="1"><p>常用包:</p>
 <ul>
 <li><code>ipred</code></li>
-<li><code>caret</code></li>
 </ul>
 <pre><code class="language-r">library(ipred)
 
 fit &lt;- bagging(
   Complication30d ~ Age + ASA + SurgeryTime + Albumin + Emergency,
-  data = df_train,
+  data = train_df,
   nbagg = 200,
   coob = TRUE
 )
 
-pred &lt;- predict(fit, newdata = df_test, type = &quot;prob&quot;)
+pred &lt;- predict(fit, newdata = test_df, type = &quot;prob&quot;)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：测试集性能、OOB 误差、模型稳定性。</li>
+<li>核心结果看什么：测试集性能、OOB 误差、预测稳定性。</li>
 <li>每个主要参数如何解释：树数越多通常越稳定；抽样比例影响基模型差异；基学习器复杂度影响偏差与方差。</li>
 <li>临床或医学意义如何表达：Bagging 更适合作为稳健预测工具，不适合直接解释单个变量的独立效应。</li>
-<li>常见误读：OOB 误差不能替代外部验证；投票多不代表模型已校准。</li>
+<li>常见误读：OOB 误差不能替代外部验证；投票结果也不保证概率已校准。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
       <div class="sec-body"><ul>
-<li>OOB 误差随基学习器数量变化曲线。</li>
-<li>ROC 曲线、PR 曲线和校准曲线。</li>
-<li>基模型预测分布或集成预测概率分布。</li>
+<li>OOB 误差曲线：观察树数增加后误差是否趋于稳定。</li>
+<li>基学习器相关性：若树之间高度相似，Bagging 收益有限。</li>
+<li>外部验证：OOB 是内部估计，医学模型仍需时间外或中心外验证。</li>
+<li>类别不平衡：报告敏感度、特异度、AUC、PR-AUC 和校准，不只看准确率。</li>
+<li>概率校准：集成投票概率可用校准曲线和 Brier score 检查。</li>
 </ul></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>OOB 误差随树数变化曲线。</li>
+<li>ROC 曲线、PR 曲线和校准曲线。</li>
+<li>各基模型预测分布与集成预测分布对比。</li>
+<li>bootstrap 样本覆盖示意图。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
 <li>能显著降低高方差模型的预测波动。</li>
-<li>基学习器之间可并行训练。</li>
-<li>通常调参压力小于 Boosting。</li>
+<li>基学习器可并行训练。</li>
+<li>调参压力通常低于 Boosting。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>对降低偏差帮助有限。</li>
-<li>模型解释性弱于单个模型。</li>
+<li>主要降方差，对高偏差模型帮助有限。</li>
+<li>解释性弱于单个模型。</li>
 <li>基模型数量多时预测成本增加。</li>
 </ul>
 <h3>常见坑</h3>
@@ -264,35 +387,50 @@ pred &lt;- predict(fit, newdata = df_test, type = &quot;prob&quot;)
 <li>对稳定模型机械使用 Bagging，收益不明显。</li>
 <li>忽略类别不平衡和概率校准。</li>
 <li>只报告准确率，不报告医学预测中更关键的灵敏度、特异度、校准和临床阈值表现。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是一类基于 bagging 的树集成方法。它通过对样本做 bootstrap 抽样、对特征做随机子采样，训练许多彼此不同的决策树，再把它们的结果投票或平均起来。">随机森林（Random Forest）</a> 的区别：随机森林是 Bagging 的特化版本，额外在每个节点随机抽取特征。</li>
-<li>和 <a class="xlink" href="m-boosting.html" data-cn="Boosting算法" data-en="Boosting" data-def="Boosting 是一类串行集成学习方法，它把多个弱学习器按顺序组合起来，每一轮都让新模型重点修正当前集成模型的错误。AdaBoost、GBDT、XGBoost 和 LightGBM 都属于 Boosting 家族。">Boosting算法（Boosting）</a> 的区别：Bagging 并行训练多个模型以降方差；Boosting 串行训练模型以逐步纠错。</li>
-<li>和 <a class="xlink" href="m-voting-ensemble.html" data-cn="投票集成" data-en="Voting Ensemble" data-def="投票集成是一种把多个分类模型的预测结果合并为最终分类结果的模型融合方法。硬投票统计类别票数，软投票累加或加权平均类别概率。">投票集成（Voting Ensemble）</a> 的区别：投票集成通常组合已训练的不同模型；Bagging 通过 bootstrap 自动生成多个训练版本。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>临床表格数据风险预测的稳健基线模型。</li>
-<li>病理或组学特征较多时的分类任务。</li>
-<li>小到中等样本量下对单棵树不稳定性的修正。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是一类基于 bagging 的树集成方法。它通过对样本做 bootstrap 抽样、对特征做随机子采样，训练许多彼此不同的决策树，再把它们的结果投票或平均起来。">随机森林（Random Forest）</a></li>
-<li><a class="xlink" href="m-extremely-randomized-trees.html" data-cn="极端随机树" data-en="Extremely Randomized Trees" data-def="极端随机树，也称 Extra Trees，是一种树集成方法。它和随机森林相似，但在节点分裂时不仅随机抽取特征，还随机生成候选切分点，再从这些随机候选中选择较优切分。">极端随机树（Extremely Randomized Trees）</a></li>
-<li><a class="xlink" href="m-voting-ensemble.html" data-cn="投票集成" data-en="Voting Ensemble" data-def="投票集成是一种把多个分类模型的预测结果合并为最终分类结果的模型融合方法。硬投票统计类别票数，软投票累加或加权平均类别概率。">投票集成（Voting Ensemble）</a></li>
-<li><a class="xlink" href="m-boosting.html" data-cn="Boosting算法" data-en="Boosting" data-def="Boosting 是一类串行集成学习方法，它把多个弱学习器按顺序组合起来，每一轮都让新模型重点修正当前集成模型的错误。AdaBoost、GBDT、XGBoost 和 LightGBM 都属于 Boosting 家族。">Boosting算法（Boosting）</a></li>
+<li>把 OOB 表现当成外部验证。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是在 Bagging 多棵树的基础上，再让每个节点只看一部分随机特征，从而让树与树更不相似、投票更稳。">随机森林（Random Forest）</a> 的区别：随机森林是 Bagging 的特化版本，额外在每个节点随机抽取特征。</li>
+<li>和 <a class="xlink" href="m-boosting.html" data-cn="Boosting算法" data-en="Boosting" data-def="Boosting 让弱学习器依次上场，每一轮都针对当前模型尚未解决的错误做一次小修正，最后把这些修正相加成强模型。">Boosting算法（Boosting）</a> 的区别：Bagging 并行训练多个模型以降方差，Boosting 串行训练模型以逐步纠错。</li>
+<li>和 <a class="xlink" href="m-voting-ensemble.html" data-cn="投票集成" data-en="Voting Ensemble" data-def="投票集成用固定规则合并多个分类模型：硬投票数类别票，软投票平均经过校准且可比较的类别概率。">投票集成（Voting Ensemble）</a> 的区别：投票集成通常组合已训练的不同模型，Bagging 通过 bootstrap 自动生成多个训练版本。</li>
+<li>如何选择：若单模型很不稳定且希望稳健平均，用 Bagging；若还想降低树间相关性，用随机森林。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>临床表格数据风险预测的稳健基线模型。</li>
+<li>病理、影像或组学特征较多时的分类任务。</li>
+<li>小到中等样本量下对单棵树不稳定性的修正。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>Bootstrap 抽样（Bootstrap Sampling）</strong>：从训练集有放回抽样生成新训练集。</li>
+<li><strong>聚合（Aggregating）</strong>：把多个模型预测合并为一个预测。</li>
+<li><strong>袋外样本（Out-of-Bag, OOB）</strong>：某次 bootstrap 中未被抽中的样本。</li>
+<li><strong>基学习器（Base Learner）</strong>：被 Bagging 复制训练的单个模型。</li>
+<li><strong>方差降低（Variance Reduction）</strong>：通过平均多个不完全相关模型减少预测波动。</li>
+<li><strong>多数投票（Majority Vote）</strong>：分类任务中票数最多的类别作为预测。</li>
+<li><strong>概率校准（Probability Calibration）</strong>：检查预测概率是否接近真实发生率。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是在 Bagging 多棵树的基础上，再让每个节点只看一部分随机特征，从而让树与树更不相似、投票更稳。">随机森林（Random Forest）</a></li>
+<li><a class="xlink" href="m-extremely-randomized-trees.html" data-cn="极端随机树" data-en="Extremely Randomized Trees" data-def="极端随机树比随机森林更随机：每个节点不仅随机抽特征，还随机抽切分阈值，再从随机候选中挑一个较好的。">极端随机树（Extremely Randomized Trees）</a></li>
+<li><a class="xlink" href="m-voting-ensemble.html" data-cn="投票集成" data-en="Voting Ensemble" data-def="投票集成用固定规则合并多个分类模型：硬投票数类别票，软投票平均经过校准且可比较的类别概率。">投票集成（Voting Ensemble）</a></li>
+<li><a class="xlink" href="m-boosting.html" data-cn="Boosting算法" data-en="Boosting" data-def="Boosting 让弱学习器依次上场，每一轮都针对当前模型尚未解决的错误做一次小修正，最后把这些修正相加成强模型。">Boosting算法（Boosting）</a></li>
+<li><a class="xlink" href="m-bootstrap-resampling.html" data-cn="Bootstrap重抽样" data-en="Bootstrap Resampling" data-def="Bootstrap 用「从手上的样本里有放回地反复重抽」来模拟「把整个研究重做很多遍」，从而不靠任何公式，就能估计任意统计量的抽样波动、标准误和置信区间。">Bootstrap重抽样（Bootstrap Resampling）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Breiman L. Bagging predictors. <em>Mach Learn</em>. 1996;24:123-140.</li>
 <li>Breiman L. Random forests. <em>Mach Learn</em>. 2001;45:5-32.</li>
-<li>scikit-learn Developers. <code>sklearn.ensemble.BaggingClassifier</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.BaggingClassifier.html">https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.BaggingClassifier.html</a> （访问日期：2026-07-02）</li>
+<li>Hastie T, Tibshirani R, Friedman J. <em>The Elements of Statistical Learning</em>. 2nd ed. Springer; 2009.</li>
+<li>James G, Witten D, Hastie T, Tibshirani R. <em>An Introduction to Statistical Learning</em>. 2nd ed. Springer; 2021.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-decision-tree-regression.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">决策树回归</div></a><a class="pg pg-next" href="m-random-forest.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">随机森林</div></a></div>

@@ -19,190 +19,249 @@ r_packages: [gbm]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-梯度提升回归是一类通过逐步叠加弱学习器来逼近目标函数的集成回归方法，常见实现是以浅层回归树作为基学习器。
+梯度提升回归用一连串浅回归树逐步拟合当前损失的负梯度，从而不断修正连续结局预测。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：如何通过一系列逐步修正残差的小模型，得到更强的预测器。
-- 适用任务：表格数据连续结局预测、复杂非线性回归、性能导向建模。
-- 常见医学场景：连续风险评分预测、成本预测、住院时长预测。
+梯度提升回归是 [[梯度提升决策树（Gradient Boosting Decision Tree, GBDT）]] 在连续结局上的具体形式。平方损失下，每棵新树拟合当前残差；使用绝对误差、Huber 或分位数损失时，它拟合相应损失给出的伪残差。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-梯度提升的思路像是“不断纠错”：先用一个简单模型做粗略预测，再让后续模型专门去学习前面模型留下的误差，逐步把预测修正得更准。
+- 连续结局与特征关系明显非线性。
+- 不同变量间存在阈值效应与交互。
+- 线性回归偏差较大，而单棵回归树预测不够稳定。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+先用总体均值作为粗略预测，再让第一棵树修正大方向，第二棵树修正剩余偏差。学习率像修订幅度，避免每轮因局部误差而改得过猛。
 
-梯度提升的加法模型可写成：
+## 2. 核心思想与原理
+
+### 2.1 损失决定学习目标
+
+- 平方损失：重罚大误差，伪残差等于普通残差。
+- 绝对误差：对离群值更稳健，目标更接近条件中位数。
+- Huber 损失：小误差用平方惩罚，大误差近似线性惩罚。
+- 分位数损失：估计给定条件分位数，可构造预测区间的上下界。
+
+### 2.2 偏差与方差控制
+
+浅树、小学习率和较多轮数常形成平滑的逐步逼近；树太深或步长太大，则容易快速贴合训练噪声。
+
+### 2.3 它不是传统回归推断
+
+模型给出预测函数而非一组可直接解释的斜率。变量效应、标准误和置信区间不是默认产物；若研究目标是参数估计，应考虑更合适的统计模型。
+
+## 3. 数学形式
+
+### 3.1 平方损失
 
 $$
-F_M(x)=F_{M-1}(x)+\nu h_M(x)
+L(y,F)=\frac12[y-F(x)]^2
 $$
 
-其中 $h_M(x)$ 是第 $M$ 轮拟合到负梯度（在平方损失下就是残差）的弱学习器，$\nu$ 是学习率。
-
-在平方误差损失下：
+其负梯度为：
 
 $$
 r_{im}=y_i-F_{m-1}(x_i)
 $$
 
-第 $m$ 棵树就是去拟合这些残差。
+### 3.2 树与叶节点更新
 
-### 2.2 参数或统计量含义
+用回归树把特征空间分为 $R_{1m},\ldots,R_{Jm}$。平方损失下，第 $j$ 个叶节点的最佳修正是叶内残差均值：
 
-- `n_estimators`：基学习器数量。
-- `learning_rate`：每一步修正幅度。
-- `max_depth`：每棵基树复杂度。
-- boosting：串行逐步纠错。
+$$
+\gamma_{jm}=
+\frac{1}{|R_{jm}|}
+\sum_{x_i\in R_{jm}}r_{im}
+$$
 
-### 2.3 关键假设
+$$
+F_m(x)=F_{m-1}(x)+
+\nu\sum_{j=1}^{J}\gamma_{jm}I(x\in R_{jm})
+$$
 
-- 对函数形式没有强线性假设。
-- 依赖较多超参数控制模型复杂度。
-- 学习率和树数之间需要平衡。
+### 3.3 关键参数
 
-## 3. 数据形式与输入输出
+- `loss`：平方、绝对、Huber 或分位数等。
+- `learning_rate` 与 `n_estimators`：更新幅度与轮数。
+- `max_depth`、`min_samples_leaf`：单树复杂度和平滑程度。
+- `subsample`：每轮抽样比例，低于 1 时形成随机梯度提升。
 
-### 3.1 适合的数据形式
+### 3.4 关键条件
 
-- 自变量类型：连续、离散或编码后的分类变量。
-- 因变量类型：连续型。
-- 数据结构：宽表数据。
-- 是否适合高维数据：适合表格型中高维数据。
-- 是否适合缺失较多数据：需先处理缺失值。
-- 是否适合删失数据：不适合。
-- 是否适合重复测量数据：不直接适合。
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 结局定义一致 | 模型学习测量或编码差异 | 核查结局分布与单位 |
+| 损失符合目标 | 均值、稳健位置或分位数答非所问 | 预先定义 estimand |
+| 外推范围有限 | 树模型在训练范围外常近似常数外推 | 比较特征取值范围 |
+| 数据独立或已妥善分组 | 重复测量造成泄漏 | 按患者分组切分 |
 
-### 3.2 示例表格
+## 4. 手把手算例
 
-梯度提升回归常用在这类表格型预测任务：
+4 名患者连续结局为 $y=(2,4,6,8)$，用平方损失和学习率 $\nu=0.5$。
 
-| OverallQual | GrLivArea | GarageCars | TotalBsmtSF | YearBuilt | SalePrice |
-| --- | --- | --- | --- | --- | --- |
-| 7 | 1710 | 2 | 856 | 2003 | 208500 |
-| 6 | 1262 | 2 | 1262 | 1976 | 181500 |
-| 7 | 1786 | 2 | 920 | 2001 | 223500 |
-| 7 | 1717 | 3 | 756 | 1915 | 140000 |
-| 8 | 2198 | 3 | 1145 | 2000 | 250000 |
+**Step 1：初始常数。**
 
-### 3.3 输入与产出
+$$
+F_0=\bar y=5
+$$
 
-#### 输入
+残差为 $(-3,-1,1,3)$，初始 $\operatorname{MSE}=5$。
 
-- 输入数据：连续结局和特征矩阵。
-- 关键变量：树数、学习率、每棵树深度。
-- 需要预处理的内容：缺失处理、训练测试集划分。
+**Step 2：第一棵树。** 假设树把前两人与后两人分开。两个叶节点的残差均值分别为：
 
-#### 产出
+$$
+\gamma_L=(-3-1)/2=-2,\qquad
+\gamma_R=(1+3)/2=2
+$$
 
-- 模型对象/统计结果：集成模型、特征重要性、预测值。
-- 参数估计：不强调系数，更强调整体模型表现。
-- 预测结果：连续型预测值。
-- 不确定性指标：测试集误差、交叉验证误差。
+更新后：
 
-## 4. 适用场景
+$$
+F_1=(5,5,5,5)+0.5(-2,-2,2,2)=(4,4,6,6)
+$$
 
-- 适合：追求较高预测性能、非线性和交互明显的表格数据场景。
-- 不适合：只追求简单解释或样本非常小的场景。
-- 使用前需要特别检查的点：学习率、树数、过拟合、早停策略。
+新残差为 $(-2,0,0,2)$，$\operatorname{MSE}=2$。
 
-## 5. 实现
+**Step 3：再修正。** 若第二棵树把两个端点的残差近似为 $(-2,0,0,2)$：
 
-### 5.1 Python
+$$
+F_2=F_1+0.5(-2,0,0,2)=(3,4,6,7)
+$$
 
-常用包：
+此时 $\operatorname{MSE}=0.5$。
 
-- `scikit-learn`
+**结论：** 浅树每轮只解释一部分剩余结构，小步累加形成最终非线性回归函数。
+
+## 5. 数据形式与输入输出
+
+### 5.1 数据要求
+
+- 因变量为连续型，可按研究目标变换尺度。
+- 特征可为数值或编码后的类别变量。
+- 经典实现通常需预先处理缺失。
+- 重复测量必须按患者分组切分，避免同一患者进入训练与测试。
+
+### 5.2 产出
+
+输出连续预测、逐轮损失和特征重要性。预测不确定性通常需借助分位数模型、bootstrap、保形预测或其他专门方法获得，不能把单点预测误写成区间。
+
+## 6. 适用场景
+
+- 费用、住院时长、实验室数值和连续风险评分预测。
+- 非线性和交互强、预测性能优先的表格数据。
+- 慎用于需可靠外推、样本很小或主要目标为变量效应估计的研究。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
 from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.metrics import mean_absolute_error, root_mean_squared_error
 
-fit = GradientBoostingRegressor(
-    n_estimators=200,
-    learning_rate=0.05,
-    max_depth=3,
-    random_state=42
+model = GradientBoostingRegressor(
+    loss="huber",
+    n_estimators=800,
+    learning_rate=0.03,
+    max_depth=2,
+    min_samples_leaf=20,
+    subsample=0.8,
+    n_iter_no_change=30,
+    validation_fraction=0.2,
+    random_state=42,
 )
-fit.fit(X_train, y_train)
-y_pred = fit.predict(X_test)
+model.fit(X_train, y_train)
+
+pred = model.predict(X_test)
+print("MAE:", mean_absolute_error(y_test, pred))
+print("RMSE:", root_mean_squared_error(y_test, pred))
 ```
 
-### 5.2 R
-
-常用包：
-
-- `gbm`
+### 7.2 R
 
 ```r
 library(gbm)
 
 fit <- gbm(
-  formula = SalePrice ~ .,
-  data = df,
-  distribution = "gaussian",
-  n.trees = 200,
-  interaction.depth = 3,
-  shrinkage = 0.05
+  AnnualCost ~ Age + Charlson + HbA1c + eGFR + PriorCost,
+  data = train,
+  distribution = "tdist",
+  n.trees = 800,
+  interaction.depth = 2,
+  n.minobsinnode = 20,
+  shrinkage = 0.03,
+  bag.fraction = 0.8,
+  cv.folds = 5
 )
+
+best_n <- gbm.perf(fit, method = "cv", plot.it = FALSE)
+pred <- predict(fit, newdata = test, n.trees = best_n)
 ```
 
-## 6. 结果如何解释
+这里 Python 使用 Huber 损失，R 的 `gbm` 示例使用 t-distribution loss 作为稳健回归方案；二者不是同一个损失函数。
 
-- 核心结果看什么：测试集性能、学习曲线、重要特征。
-- 每个主要参数如何解释：更多从模型复杂度和学习过程角度解释，而不是单个系数解释。
-- 临床或医学意义如何表达：适合强调预测精度和高阶模式捕捉能力。
-- 常见误读：更多的树并不总是更好，学习率和树数需要一起看。
+## 8. 结果如何解释
 
-## 7. 推荐可视化
+- MAE 表示平均绝对误差，单位与结局相同；RMSE 对大误差更敏感。
+- $R^2$ 反映相对基准的解释程度，但不能替代误差的临床单位解释。
+- 残差应按预测值、时间、中心和关键亚组检查。
+- 变量重要性和解释图描述模型预测关系，不是调整后的因果效应。
 
-- 真实值 vs 预测值散点图。
-- 学习曲线。
-- 特征重要性条形图。
+## 9. 诊断与稳健性
 
-### 7.1 图像示例
+1. 画训练/验证损失，检查最佳轮数与过拟合。
+2. 比较平方、Huber 和绝对误差损失。
+3. 检查真实值-预测值、残差-预测值图和极端误差病例。
+4. 以简单均值、线性回归和 [[随机森林回归（Random Forest Regression）]] 为基准。
+5. 做时间外、中心外和亚组验证；按临床可接受误差解释结果。
 
-下图展示梯度提升回归在房价数据上的真实值与预测值对照关系，用来直观查看拟合效果。
+## 10. 推荐可视化
+
+- 真实值与预测值散点图，叠加 45 度参考线。
+- 残差与预测值图。
+- 训练/验证损失曲线。
+- 特征重要性、部分依赖或 SHAP 图。
+
+下图展示真实值与预测值的对照关系：
 
 ![](../../04_示例图像/gradient_boosting_actual_vs_pred.png)
 
-## 8. 优势、局限与常见坑
+## 11. 优势、局限与常见坑
 
-### 优势
+**优势：** 连续结局预测能力强，损失灵活，能自动学习非线性与交互。
 
-- 对表格数据性能通常很强。
-- 能处理复杂非线性和交互。
-- 可逐步提升预测精度。
+**局限：** 外推能力弱、调参较多、不直接提供经典推断与预测区间。
 
-### 局限
+**常见坑：** 随机拆分重复测量；只报 $R^2$；未与简单基准比较；把特征重要性解释成效应大小。
 
-- 调参较多。
-- 训练时间通常比单棵树更长。
-- 若学习率和树数设置不当，容易过拟合。
+## 12. 与相近方法的区别
 
-### 常见坑
+- [[梯度提升决策树（Gradient Boosting Decision Tree, GBDT）]]：总框架与连续结局具体应用的关系。
+- [[决策树回归（Decision Tree Regression）]]：单树易解释但不稳定，提升回归逐轮叠加多树。
+- [[随机森林回归（Random Forest Regression）]]：并行平均主要降方差，梯度提升串行修正偏差。
+- [[XGBoost（Extreme Gradient Boosting, XGBoost）]]：增加二阶近似、显式正则化和工程优化。
 
-- 学习率太大、树太深导致过拟合。
-- 只看训练误差不看验证集误差。
-- 误把特征重要性当成因果重要性。
+## 13. 医学研究中的典型应用
 
-## 9. 与相近方法的区别
+- 年度医疗费用和住院时长预测。
+- 肾功能、血糖、血压等连续指标预测。
+- 术后恢复评分、生活质量评分与剂量需求预测。
 
-- 和随机森林的区别：随机森林是并行 bagging；梯度提升是串行 boosting。
-- 和 XGBoost/LightGBM 的区别：后者是在 boosting 基础上的工程和算法增强。
-- 和决策树回归的区别：梯度提升是多棵树逐步叠加。
+## 14. 术语表
 
-## 10. 医学研究中的典型应用
+| 术语 | 含义 |
+| --- | --- |
+| 平方损失 | 对大残差施加平方惩罚 |
+| Huber 损失 | 兼顾平方损失效率与绝对误差稳健性 |
+| 分位数损失 | 针对条件分位数的非对称绝对损失 |
+| 叶节点值 | 新树在该区域给出的预测修正 |
+| 外推 | 对训练特征范围之外的数据预测 |
 
-- 表格型连续风险预测。
-- 多变量费用和资源消耗预测。
-- 临床数据中的复杂非线性建模。
-
-## 11. 相关方法
+## 15. 相关方法
 
 - [[Boosting算法（Boosting）]]
 - [[梯度提升决策树（Gradient Boosting Decision Tree, GBDT）]]
@@ -211,8 +270,9 @@ fit <- gbm(
 - [[决策树回归（Decision Tree Regression）]]
 - [[随机森林回归（Random Forest Regression）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
 - Friedman JH. Greedy function approximation: a gradient boosting machine. *Ann Stat*. 2001;29(5):1189-1232.
-- scikit-learn Developers. `sklearn.ensemble.GradientBoostingRegressor`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingRegressor.html](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingRegressor.html) （访问日期：2026-07-02）
-- CRAN. Package `gbm`. [https://cran.r-project.org/package=gbm](https://cran.r-project.org/package=gbm) （访问日期：2026-07-02）
+- Friedman JH. Stochastic gradient boosting. *Comput Stat Data Anal*. 2002;38(4):367-378.
+- scikit-learn Developers. `GradientBoostingRegressor` API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingRegressor.html](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingRegressor.html) （访问日期：2026-07-09）
+- CRAN. Package `gbm`. [https://cran.r-project.org/package=gbm](https://cran.r-project.org/package=gbm) （访问日期：2026-07-09）

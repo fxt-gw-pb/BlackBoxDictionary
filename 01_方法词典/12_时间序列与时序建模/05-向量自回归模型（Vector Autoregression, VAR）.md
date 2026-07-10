@@ -18,199 +18,122 @@ r_packages: [vars]
 # 向量自回归模型（Vector Autoregression, VAR）
 
 ## 1. 方法概览
+### 1.1 一句话本质
+VAR 让一组变量都由这组变量的过去共同预测，从而刻画相互滞后联动。
+### 1.2 定义
+VAR($p$) 是多变量 AR：每个方程使用所有变量的 $p$ 阶滞后。
+### 1.3 它主要解决什么问题
+多条平稳时间序列的联合预测、Granger 预测关系、脉冲响应与方差分解。
+### 1.4 直觉与类比
+心率不仅延续自身惯性，也可能跟随先前乳酸；乳酸也可能受先前心率影响。
 
-### 1.1 定义
+## 2. 核心思想与原理
+### 2.1 根本困难
+逐变量建 AR 会遗漏跨变量的动态信息，并使残差相关。
+### 2.2 关键洞察
+把多个序列堆成向量，以系数矩阵统一描述“谁的过去预测谁的现在”。
+### 2.3 与朴素做法对比
+VAR 少设结构、适合预测；代价是参数按变量数平方增长，结构性因果识别需额外假设。
 
-向量自回归模型是多变量时间序列模型，用每个变量自身和其他变量的历史值共同预测当前多个变量。VAR($p$) 可看作多变量版 AR 模型。
-
-### 1.2 它主要解决什么问题
-
-- 研究问题：多个时间序列之间是否存在滞后联动关系。
-- 适用任务：多指标联合预测、动态关联分析、脉冲响应分析、预测误差方差分解。
-- 常见医学场景：感染病例、就诊量与气象污染指标联动；多项生命体征动态预测；医院运营指标之间的相互影响分析。
-
-### 1.3 直觉理解
-
-VAR 不只问“这个指标过去能否预测自己”，还问“其他指标的过去能否帮助预测它”。例如气温、污染和病例数可能互相滞后影响，VAR 用一个系统同时建模这些关系。
-
-## 2. 数学形式
-
-### 2.1 核心公式
-
-设 $y_t\in\mathbb{R}^K$ 为 $K$ 维时间序列向量。VAR($p$) 写作：
-
+## 3. 数学形式
+### 3.1 核心公式
 $$
-y_t=c+A_1y_{t-1}+A_2y_{t-2}+\cdots+A_py_{t-p}+u_t
+\mathbf y_t=\mathbf c+\mathbf A_1\mathbf y_{t-1}
++\cdots+\mathbf A_p\mathbf y_{t-p}+\boldsymbol\varepsilon_t
 $$
+### 3.2 推导脉络
+每个方程可用相同解释变量分别 OLS；联合动态由 companion matrix 特征根决定。
+### 3.3 参数含义
+$A_{k,ij}$ 表示控制其他滞后后，变量 $j$ 的第 $k$ 阶滞后对变量 $i$ 的预测关系。
+### 3.4 关键假设
+联合平稳、参数稳定、残差序列不相关；脉冲响应还需对同期残差相关作识别。
 
-其中：
-
+## 4. 手把手算例
+设 VAR(1)：
 $$
-u_t\sim WN(0,\Sigma_u)
+\mathbf A=\begin{pmatrix}0.5&0.2\\0.1&0.6\end{pmatrix},
+\qquad \mathbf y_t=(2,1)^\top
 $$
-
-$h$ 步预测递推为：
-
+无未来冲击时：
 $$
-\hat y_{T+h}=c+\sum_{i=1}^{p}A_i \hat y_{T+h-i}
+\hat{\mathbf y}_{t+1}=\mathbf A\mathbf y_t=(1.2,0.8)^\top
 $$
+$$
+\hat{\mathbf y}_{t+2}=\mathbf A(1.2,0.8)^\top=(0.76,0.60)^\top
+$$
+若第一个变量受到单位冲击，脉冲响应为
+$$
+h=0:(1,0),\quad h=1:(0.5,0.1),\quad h=2:(0.27,0.11)
+$$
+冲击不仅自身衰减，也通过交叉系数传到第二变量。
 
-### 2.2 参数或统计量含义
+## 5. 数据形式与输入输出
+### 5.1 适合的数据形式
+同频率、对齐的多变量连续平稳序列；变量过多会参数爆炸。
+### 5.2 示例表格
+| hour | heart_rate_z | lactate_z |
+| --- | ---: | ---: |
+| 1 | 2.0 | 1.0 |
+| 2 | 1.2 | 0.8 |
+### 5.3 输入与产出
+输入对齐矩阵和 $p$；产出系数矩阵、联合预测、Granger 检验、IRF 与 FEVD。
 
-- $K$：变量数量。
-- $p$：滞后阶数。
-- $A_i$：第 $i$ 阶滞后系数矩阵。
-- $\Sigma_u$：创新项协方差矩阵。
-- IRF：脉冲响应函数，描述一个变量受到冲击后系统的动态响应。
-- FEVD：预测误差方差分解。
+## 6. 适用场景
+适合少量相互影响的平稳序列；高维、小样本、协整或不规则采样需正则 VAR/VECM 等方法。
 
-### 2.3 关键假设
-
-- 多个序列联合平稳，或已通过差分/变换处理。
-- 滞后阶数足以捕捉主要动态关系。
-- 残差近似白噪声。
-- 变量数量和滞后阶数不能相对样本量过大。
-
-## 3. 数据形式与输入输出
-
-### 3.1 适合的数据形式
-
-- 自变量类型：多个变量的滞后值。
-- 因变量类型：多个连续型时间序列。
-- 数据结构：等间隔多变量时间序列，每行一个时间点。
-- 是否适合高维数据：变量多时参数急剧增加，需降维或正则化。
-- 是否适合缺失较多数据：需先处理缺失。
-- 是否适合删失数据：不直接处理删失结局。
-- 是否适合重复测量数据：适合总体级多序列；个体级重复测量需面板 VAR 或混合模型。
-
-### 3.2 示例表格
-
-以公共卫生监测为例：
-
-| Date | ILICases | EDVisits | PM25 | Temperature |
-| --- | --- | --- | --- | --- |
-| 2026-01-01 | 320 | 212 | 48 | 2.1 |
-| 2026-01-02 | 355 | 225 | 52 | 1.8 |
-| 2026-01-03 | 410 | 231 | 60 | 0.4 |
-| 2026-01-04 | 390 | 220 | 55 | 3.0 |
-
-### 3.3 输入与产出
-
-#### 输入
-
-- 输入数据：多个同步时间序列。
-- 关键变量：滞后阶数、趋势/截距设定、预测步长。
-- 需要预处理的内容：缺失处理、频率对齐、平稳性检查、变量变换、滞后阶数选择。
-
-#### 产出
-
-- 模型对象/统计结果：系数矩阵、残差协方差、预测值、IRF、FEVD。
-- 参数估计：$A_1,\dots,A_p$、截距和残差协方差。
-- 预测结果：多个变量的联合预测和区间。
-- 不确定性指标：参数标准误、预测区间、IRF 置信区间。
-
-## 4. 适用场景
-
-- 适合：多变量指标同步记录、变量之间可能存在滞后影响、目标是系统动态解释和预测的场景。
-- 不适合：变量太多样本太少、非平稳且无协整处理、强非线性或结构突变明显的场景。
-- 使用前需要特别检查的点：平稳性、滞后阶数、残差相关、变量顺序对正交化 IRF 的影响。
-
-## 5. 实现
-
-### 5.1 Python
-
-常用包：
-
-- `statsmodels`
-
+## 7. 实现
+### 7.1 Python
 ```python
-import pandas as pd
+import numpy as np
 from statsmodels.tsa.api import VAR
-
-df = pd.read_csv("public_health_monitoring.csv", parse_dates=["Date"])
-y = df.set_index("Date")[["ILICases", "EDVisits", "PM25", "Temperature"]].asfreq("D")
-y = y.interpolate()
-
-model = VAR(y)
-fit = model.fit(maxlags=7, ic="aic")
-forecast = fit.forecast(y.values[-fit.k_ar:], steps=7)
-
-print(fit.summary())
-print(pd.DataFrame(forecast, columns=y.columns))
+rng = np.random.default_rng(42)
+A = np.array([[0.5, 0.2], [0.1, 0.6]])
+y = np.zeros((300, 2))
+for t in range(1, 300):
+    y[t] = A @ y[t-1] + rng.normal(size=2)
+fit = VAR(y).fit(1)
+print(fit.forecast(y[-1:], steps=3))
 ```
-
-### 5.2 R
-
-常用包：
-
-- `vars`
-
+### 7.2 R
 ```r
 library(vars)
-
-y <- ts(df[, c("ILICases", "EDVisits", "PM25", "Temperature")], frequency = 7)
-lag_select <- VARselect(y, lag.max = 7, type = "const")
-fit <- VAR(y, p = lag_select$selection["AIC(n)"], type = "const")
-
-predict(fit, n.ahead = 7)
-serial.test(fit)
+set.seed(42)
+A <- matrix(c(0.5, 0.1, 0.2, 0.6), 2, 2)
+y <- matrix(0, 300, 2)
+for (t in 2:300) y[t, ] <- A %*% y[t-1, ] + rnorm(2)
+fit <- VAR(as.data.frame(y), p = 1, type = "const")
+predict(fit, n.ahead = 3)
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解读
+系数是条件预测关系，不自动等于因果效应；Granger 因果仅表示过去值增加预测信息。
 
-- 核心结果看什么：滞后系数矩阵、联合预测、IRF、FEVD、残差诊断。
-- 每个主要参数如何解释：$A_i[j,k]$ 表示第 $k$ 个变量滞后 $i$ 期对第 $j$ 个变量当前值的线性贡献。
-- 临床或医学意义如何表达：可说明多个监测指标之间的滞后联动，但需谨慎区分预测关联和因果效应。
-- 常见误读：VAR 系数不是自动的因果效应，IRF 也依赖识别设定。
+## 9. 假设诊断与稳健性
+检查联合平稳性、残差自相关/协方差、根、滞后阶、变量顺序对正交 IRF 的敏感性和滚动验证。
 
-## 7. 推荐可视化
+## 10. 推荐可视化
+多序列标准化轨迹、系数热图、IRF 置信带、FEVD 堆积图、滚动预测。
 
-- 多变量时间序列折线图。
-- 预测曲线和预测区间。
-- 脉冲响应函数图。
-- 残差相关热图和残差 ACF。
+## 11. 优势、局限与常见坑
+优势是对称联合建模；局限是参数多、识别弱。常见坑：量纲未处理、变量过多、把 Granger 当机制因果。
 
-## 8. 优势、局限与常见坑
+## 12. 与相近方法的区别
+AR 是单变量特例；VARMA 还建模冲击滞后；协整非平稳序列应用 VECM；外生变量可用 VARX。
 
-### 优势
+## 13. 医学研究中的典型应用
+多项生命体征联动、医院资源序列、公共卫生指标动态；单个患者间差异与信息性缺失需另建模。
 
-- 能同时建模多个序列的动态关系。
-- 不需要事先指定严格因果方向。
-- 可做 IRF 和 FEVD 分析。
+## 14. 关键术语
+- **Granger 因果**：过去信息是否改善预测，不是机制因果。
+- **脉冲响应（IRF）**：单位冲击对未来各变量的动态影响。
+- **FEVD**：预测误差由各冲击贡献的比例。
+- **同期识别**：把相关残差分解为结构冲击所需的额外假设。
 
-### 局限
-
-- 参数数量随变量数和滞后阶数快速增加。
-- 对平稳性敏感。
-- 解释因果关系需要额外识别假设。
-
-### 常见坑
-
-- 变量太多但样本太短。
-- 忽略单位根或协整问题。
-- 过度解读滞后系数的因果含义。
-
-## 9. 与相近方法的区别
-
-- 和 [[自回归模型（Autoregressive Model, AR）]] 的区别：AR 是单变量，VAR 是多变量系统。
-- 和 [[向量自回归滑动平均模型（Vector Autoregressive Moving Average Model, VARMA）]] 的区别：VARMA 还包含多变量误差移动平均项。
-- 和 [[XGBoost时间序列预测（XGBoost for Time Series Forecasting）]] 的区别：VAR 是线性系统模型，XGBoost 依赖特征工程和树模型捕捉非线性。
-
-## 10. 医学研究中的典型应用
-
-- 传染病病例、就诊量、气象和污染指标的动态联动分析。
-- ICU 多项生命体征短期联合预测。
-- 医院运营指标之间的滞后影响探索。
-
-## 11. 相关方法
-
+## 15. 相关方法
 - [[自回归模型（Autoregressive Model, AR）]]
 - [[向量自回归滑动平均模型（Vector Autoregressive Moving Average Model, VARMA）]]
 - [[自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）]]
-- [[XGBoost时间序列预测（XGBoost for Time Series Forecasting）]]
 
-## 12. 参考资料
-
-- Lutkepohl H. *New Introduction to Multiple Time Series Analysis*. Springer; 2005.
-- Sims CA. Macroeconomics and reality. *Econometrica*. 1980;48(1):1-48.
-- statsmodels Developers. Vector Autoregressions documentation. [https://www.statsmodels.org/](https://www.statsmodels.org/) （访问日期：2026-07-02）
+## 16. 参考资料
+- Lütkepohl H. *New Introduction to Multiple Time Series Analysis*. Springer; 2005.
+- Hamilton JD. *Time Series Analysis*. Princeton University Press; 1994.

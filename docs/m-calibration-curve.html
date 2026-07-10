@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,19 +54,29 @@
     <div class="intro-note"><h1>校准曲线（Calibration Curve）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>校准回答“预测 20% 风险的人是否约有 20% 发病”，关注概率的绝对可信度，而不是排序。</p>
+<h3>1.2 定义</h3>
 <p>校准曲线（可靠性图）比较模型的预测概率与实际观察到的事件发生频率，用来判断“模型说的 20% 风险，是不是真的大约 20% 的人发生了事件”。</p>
-<h3>1.2 它主要解决什么问题</h3>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
 <li>研究问题：预测概率在数值上可信吗，是系统性偏高还是偏低。</li>
 <li>适用任务：风险预测模型的校准评估、模型更新与重校准、不同模型的可靠性比较。</li>
 <li>常见医学场景：临床风险评分（如心血管 10 年风险）、术后并发症概率、疾病复发概率的可信度评估。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
+<h3>1.4 直觉理解</h3>
 <p>把样本按预测概率分组（或用平滑曲线），横轴是预测概率、纵轴是该组真实发生率。理想模型的点应落在 45° 对角线上；偏离对角线说明预测概率系统性偏高或偏低。区分度好的模型也可能校准很差。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 根本困难</h3>
+<p>模型可把高风险者排在前面却系统性高估或低估概率；AUC 对任何单调变换不变，无法发现这一问题。</p>
+<h3>2.2 关键洞察</h3>
+<p>把相近预测概率的人分组或平滑，在每个风险水平比较平均预测与真实发生率；理想曲线是 45° 线。</p>
+<h3>2.3 与朴素做法对比</h3>
+<p>Hosmer–Lemeshow 依赖任意分组且样本量敏感；校准截距、斜率、平滑曲线和 Brier score 提供更完整诊断。</p></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
 <p>理想校准要求：</p>
 <p>$$
 P(Y=1\mid \hat{p}=p)=p,\quad \forall p\in[0,1]
@@ -79,22 +89,52 @@ $$</p>
 <p>$$
 \mathrm{Brier}=\frac{1}{n}\sum_{i=1}^{n}(\hat{p}_i-y_i)^2
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
+<h3>3.3 参数或统计量含义</h3>
 <ul>
 <li>校准截距 $\alpha$：预测概率整体是否偏高（$\alpha&lt;0$）或偏低（$\alpha&gt;0$）。</li>
 <li>校准斜率 $\beta$：$\beta&lt;1$ 表示预测过度极端（过拟合的典型表现）。</li>
 <li>Brier 分数：越小越好，兼含区分度与校准（可做校准/区分分解）。</li>
 <li>Hosmer-Lemeshow 统计量：分组拟合优度检验，但对分组和样本量敏感，不宜单独依赖。</li>
 </ul>
-<h3>2.3 关键假设</h3>
+<h3>3.4 关键假设</h3>
 <ul>
 <li>需要预测概率（而非仅类别标签）与二分类结局。</li>
 <li>校准是针对特定人群的性质，换人群需重新评估（外部校准）。</li>
 <li>分组法依赖分箱数量，平滑法（loess/样条）更稳健。</li>
 </ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>预测概率 $(0.1,0.2,0.8,0.9)$，真实结局 $(0,1,0,1)$。分成低、高两组：</p>
+<table>
+<thead>
+<tr>
+<th>组</th>
+<th style="text-align: right;">平均预测</th>
+<th style="text-align: right;">观察发生率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>低风险</td>
+<td style="text-align: right;">0.15</td>
+<td style="text-align: right;">0.50</td>
+</tr>
+<tr>
+<td>高风险</td>
+<td style="text-align: right;">0.85</td>
+<td style="text-align: right;">0.50</td>
+</tr>
+</tbody>
+</table>
+<p>低风险组被严重低估，高风险组被高估。Brier score 为
+$$
+\frac{(0.1-0)^2+(0.2-1)^2+(0.8-0)^2+(0.9-1)^2}{4}
+=0.325
+$$
+即使排序可能尚可，概率并不可信。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
 <li>自变量类型：模型预测概率。</li>
 <li>因变量类型：二分类结局。</li>
@@ -104,7 +144,7 @@ $$</p>
 <li>是否适合删失数据：不直接适用；生存模型用特定时间点的校准（如 1 年预测生存 vs KM 观测）。</li>
 <li>是否适合重复测量数据：聚类结构会影响区间估计。</li>
 </ul>
-<h3>3.2 示例表格</h3>
+<h3>5.2 示例表格</h3>
 <table>
 <thead>
 <tr>
@@ -147,7 +187,7 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
 <li>输入数据：预测概率向量、真实标签向量。</li>
@@ -161,15 +201,15 @@ $$</p>
 <li>预测结果：可用于重校准（Platt scaling、isotonic）。</li>
 <li>不确定性指标：曲线置信带、截距/斜率区间。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
 <li>适合：风险预测模型报告（配合区分度）、模型外部验证、比较重校准前后。</li>
 <li>不适合：只需类别判别、无法输出概率的模型（可先做概率化）。</li>
 <li>使用前需要特别检查的点：评估数据是否独立、样本量是否足以稳定估计、是否同时报告了区分度。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="calibration-curve" data-i="0">Python</button><button class="codetab" data-uid="calibration-curve" data-i="1">R</button></div><div class="codepanel active" data-uid="calibration-curve" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>scikit-learn</code></li>
@@ -199,23 +239,32 @@ print(&quot;Brier:&quot;, round(brier_score_loss(yte, p), 4))
 val &lt;- val.prob(p = p, y = y)   # 输出截距、斜率、Brier、C 指数并绘制校准曲线
 print(val)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
       <div class="sec-body"><ul>
 <li>核心结果看什么：曲线是否贴近对角线、校准截距与斜率、Brier 分数。</li>
 <li>每个主要参数如何解释：斜率 &lt;1 说明预测过于极端（高的偏高、低的偏低）；截距偏离 0 说明整体平移。</li>
 <li>临床或医学意义如何表达：校准差的模型即便区分度好，用于个体风险沟通也会误导决策。</li>
 <li>常见误读：只看 Hosmer-Lemeshow 的 p 值（不显著≠校准好，尤其小样本）；把校准好等同于模型有临床价值。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>使用独立或交叉验证预测，避免训练集乐观校准。</li>
+<li>同时报截距（calibration-in-the-large）与斜率。</li>
+<li>用平滑曲线并附 bootstrap 置信带，避免只依赖分箱。</li>
+<li>按中心、时间、亚组与风险范围检查。</li>
+<li>再校准只能在独立校准集完成，并需再次外部验证。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
 <li>校准曲线（loess 或分箱），叠加 45° 参考线与置信带。</li>
 <li>预测概率的直方图/密度（观察风险分布与覆盖范围）。</li>
 <li>重校准前后对比曲线。</li>
 </ul></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
 <li>直接回答“预测概率可信吗”，是风险模型不可或缺的评估维度。</li>
@@ -232,32 +281,41 @@ print(val)
 <ul>
 <li>在训练集上评估校准，过度乐观。</li>
 <li>依赖 Hosmer-Lemeshow 检验下结论。</li>
-<li>校准好即宣称模型可用，忽略 <a class="xlink" href="m-decision-curve-analysis-dca.html" data-cn="决策曲线分析" data-en="Decision Curve Analysis, DCA" data-def="决策曲线分析通过“净获益”指标，评估一个预测模型或诊断策略在不同决策阈值下相对于“全部干预”和“全部不干预”两个极端策略的临床价值。">决策曲线分析（Decision Curve Analysis, DCA）</a> 的净获益。</li>
+<li>校准好即宣称模型可用，忽略 <a class="xlink" href="m-decision-curve-analysis-dca.html" data-cn="决策曲线分析" data-en="Decision Curve Analysis, DCA" data-def="DCA 用阈值概率把漏诊与误治代价换成同一尺度，比较模型、全治和全不治谁带来更高净获益。">决策曲线分析（Decision Curve Analysis, DCA）</a> 的净获益。</li>
 </ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-receiver-operating-characteristic-and-auc.html" data-cn="ROC曲线与AUC" data-en="Receiver Operating Characteristic and AUC" data-def="ROC 曲线（受试者工作特征曲线）把一个连续评分或预测概率在所有可能阈值下的敏感度与（1−特异度）连成一条曲线；AUC 是曲线下面积，用一个 0–1 的数概括模型的整体区分能力。">ROC曲线与AUC（Receiver Operating Characteristic and AUC）</a> 的区别：AUC 评排序/区分，校准评概率数值准确性，二者正交。</li>
-<li>和 <a class="xlink" href="m-decision-curve-analysis-dca.html" data-cn="决策曲线分析" data-en="Decision Curve Analysis, DCA" data-def="决策曲线分析通过“净获益”指标，评估一个预测模型或诊断策略在不同决策阈值下相对于“全部干预”和“全部不干预”两个极端策略的临床价值。">决策曲线分析（Decision Curve Analysis, DCA）</a> 的区别：DCA 评临床净获益，校准评概率可靠性。</li>
+<li>和 <a class="xlink" href="m-receiver-operating-characteristic-and-auc.html" data-cn="ROC曲线与AUC" data-en="Receiver Operating Characteristic and AUC" data-def="ROC 扫描所有阈值观察灵敏度—假阳性权衡，AUC 则等于随机一名阳性得分高于随机一名阴性的概率。">ROC曲线与AUC（Receiver Operating Characteristic and AUC）</a> 的区别：AUC 评排序/区分，校准评概率数值准确性，二者正交。</li>
+<li>和 <a class="xlink" href="m-decision-curve-analysis-dca.html" data-cn="决策曲线分析" data-en="Decision Curve Analysis, DCA" data-def="DCA 用阈值概率把漏诊与误治代价换成同一尺度，比较模型、全治和全不治谁带来更高净获益。">决策曲线分析（Decision Curve Analysis, DCA）</a> 的区别：DCA 评临床净获益，校准评概率可靠性。</li>
 <li>和重校准方法（Platt scaling、isotonic）的关系：校准曲线诊断问题，重校准解决问题。</li>
 </ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
       <div class="sec-body"><ul>
 <li>临床预测模型 TRIPOD 报告中的校准评估。</li>
 <li>将外部模型移植到本地人群时的校准检查与重校准。</li>
 <li>机器学习模型（树/提升模型常概率偏差）的概率可靠性评估。</li>
 </ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-receiver-operating-characteristic-and-auc.html" data-cn="ROC曲线与AUC" data-en="Receiver Operating Characteristic and AUC" data-def="ROC 曲线（受试者工作特征曲线）把一个连续评分或预测概率在所有可能阈值下的敏感度与（1−特异度）连成一条曲线；AUC 是曲线下面积，用一个 0–1 的数概括模型的整体区分能力。">ROC曲线与AUC（Receiver Operating Characteristic and AUC）</a></li>
-<li><a class="xlink" href="m-decision-curve-analysis-dca.html" data-cn="决策曲线分析" data-en="Decision Curve Analysis, DCA" data-def="决策曲线分析通过“净获益”指标，评估一个预测模型或诊断策略在不同决策阈值下相对于“全部干预”和“全部不干预”两个极端策略的临床价值。">决策曲线分析（Decision Curve Analysis, DCA）</a></li>
-<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
-<li><a class="xlink" href="m-cross-validation.html" data-cn="交叉验证" data-en="Cross-Validation" data-def="交叉验证是一类重采样方法，通过反复把数据切成训练与验证子集来估计模型在新数据上的表现，也常用于超参数选择。">交叉验证（Cross-Validation）</a></li>
+<li><strong>校准截距</strong>：整体预测是否系统偏高/偏低。</li>
+<li><strong>校准斜率</strong>：预测是否过度极端（小于 1 常提示过拟合）。</li>
+<li><strong>Brier score</strong>：概率预测平方误差。</li>
+<li><strong>可靠性图（Reliability diagram）</strong>：预测与观察概率对照图。</li>
+<li><strong>再校准（Recalibration）</strong>：在新数据上修正概率尺度。</li>
 </ul></div>
-    </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-receiver-operating-characteristic-and-auc.html" data-cn="ROC曲线与AUC" data-en="Receiver Operating Characteristic and AUC" data-def="ROC 扫描所有阈值观察灵敏度—假阳性权衡，AUC 则等于随机一名阳性得分高于随机一名阴性的概率。">ROC曲线与AUC（Receiver Operating Characteristic and AUC）</a></li>
+<li><a class="xlink" href="m-decision-curve-analysis-dca.html" data-cn="决策曲线分析" data-en="Decision Curve Analysis, DCA" data-def="DCA 用阈值概率把漏诊与误治代价换成同一尺度，比较模型、全治和全不治谁带来更高净获益。">决策曲线分析（Decision Curve Analysis, DCA）</a></li>
+<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
+<li><a class="xlink" href="m-cross-validation.html" data-cn="交叉验证" data-en="Cross-Validation" data-def="交叉验证轮流把每部分样本当作未见数据，用多次“训练—验证”近似模型对新样本的泛化表现。">交叉验证（Cross-Validation）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Van Calster B, McLernon DJ, van Smeden M, et al. Calibration: the Achilles heel of predictive analytics. <em>BMC Med</em>. 2019;17(1):230.</li>
 <li>Steyerberg EW, Vickers AJ, Cook NR, et al. Assessing the performance of prediction models: a framework for traditional and novel measures. <em>Epidemiology</em>. 2010;21(1):128-138.</li>

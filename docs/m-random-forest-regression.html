@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,50 +54,164 @@
     <div class="intro-note"><h1>随机森林回归（Random Forest Regression）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>随机森林回归通过训练多棵带有随机性的回归树，并对它们的预测结果取平均，从而获得更稳定、更鲁棒的连续结局预测模型。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>随机森林回归训练许多带随机性的回归树，再把它们的连续预测取平均，得到比单棵树更稳定的预测值。</p>
+<h3>1.2 定义</h3>
+<p>随机森林回归是随机森林用于连续结局的版本。每棵树通过 bootstrap 样本和节点特征随机生成，叶节点输出均值；森林最终对所有树的预测取平均。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：如何在复杂非线性和多交互场景下获得更稳健的回归预测。</li>
-<li>适用任务：连续结局预测、非线性建模、变量重要性评估。</li>
-<li>常见医学场景：由多种临床变量预测连续风险评分、费用、住院时长或实验室指标。</li>
+<li>研究问题：连续结局与变量之间有非线性和交互时，如何比单棵回归树更稳健地预测。</li>
+<li>适用任务：连续风险评分、费用、住院天数、实验室指标或生理指标预测。</li>
+<li>常见医学场景：根据年龄、合并症、实验室指标预测住院时长、医疗费用、炎症水平或连续风险评分。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>随机森林可以理解为“让很多棵不同视角的回归树各自给出判断”，然后把这些判断平均起来，减少单棵树的波动和过拟合。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>单棵回归树像一个人给出粗略分段估计，容易受训练病例影响。随机森林回归让许多棵树各自估计一个连续值，然后取平均：有的树估高一点，有的估低一点，平均后更稳。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>若共有 $B$ 棵回归树，则随机森林的预测为：</p>
-<p>$$
-\hat f(x)=\frac{1}{B}\sum_{b=1}^{B} T_b(x)
-$$</p>
-<p>其中 $T_b(x)$ 是第 $b$ 棵树对样本 $x$ 的预测。</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p><a class="xlink" href="m-decision-tree-regression.html" data-cn="决策树回归" data-en="Decision Tree Regression" data-def="决策树回归把连续结局分成一块块区域，每个叶节点用该区域的平均值作为预测。">决策树回归（Decision Tree Regression）</a> 能捕捉阈值和交互，但单棵树预测是阶梯状且不稳定。训练集稍有变化，切分阈值和叶节点均值就可能改变。根本困难是：<strong>回归树低偏差但高方差，连续预测容易随样本扰动大幅摇摆</strong>。</p>
+<h3>2.2 关键洞察</h3>
+<p>随机森林回归的关键洞察与分类随机森林相同：通过 bootstrap 样本和随机特征制造许多不同的回归树，再取平均。连续预测的平均能平滑单树的阶梯和偶然阈值，使模型方差下降。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>Bootstrap 采样：每棵树看到的是带放回抽样后的训练集。</li>
-<li>随机特征子集：每次分裂时只在部分特征中找最佳分裂。</li>
-<li>$B$：树的数量，越多通常越稳定但计算更慢。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>对函数形式没有强假设。</li>
-<li>依赖多树平均降低方差。</li>
-<li>特征空间中存在可被树结构捕捉的分裂模式。</li>
+<li>相对单棵回归树：随机森林回归更稳，预测曲线更平滑。</li>
+<li>相对 <a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a>：随机森林不要求线性和可加关系。</li>
+<li>相对 <a class="xlink" href="m-gradient-boosting-regression.html" data-cn="梯度提升回归" data-en="Gradient Boosting Regression" data-def="梯度提升回归用一连串浅回归树逐步拟合当前损失的负梯度，从而不断修正连续结局预测。">梯度提升回归（Gradient Boosting Regression）</a>：随机森林并行平均，调参相对宽容；梯度提升串行纠错，常有更高上限但更敏感。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>设第 $b$ 棵回归树预测为 $T_b(x)$，共有 $B$ 棵树，则：</p>
+<p>$$
+\hat f_{\mathrm{RF}}(x)=\frac{1}{B}\sum_{b=1}^{B}T_b(x)
+$$</p>
+<p>若第 $b$ 棵树将样本 $x$ 分到叶节点 $R_{b}(x)$，该树预测为叶节点均值：</p>
+<p>$$
+T_b(x)=\frac{1}{|R_b(x)|}\sum_{i:x_i\in R_b(x)}y_i
+$$</p>
+<p>这个式子在说：每棵树给出一个局部均值，森林再把这些局部均值平均。</p>
+<h3>3.2 推导脉络</h3>
+<ol>
+<li>用 bootstrap 抽样生成每棵树的训练数据。</li>
+<li>每个节点只看随机抽取的一部分特征来找分裂。</li>
+<li>每棵树输出叶节点均值，得到 $T_b(x)$。</li>
+<li>对 $B$ 棵树预测取平均，降低单树方差。</li>
+<li>可用袋外样本或独立测试集估计 RMSE、MAE 和 $R^2$。</li>
+</ol>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：连续、分类、离散变量均可。</li>
+<li>$B$ / <code>n_estimators</code>：树的数量。</li>
+<li><code>max_features</code>：每次分裂候选特征数，影响树间相关性。</li>
+<li><code>min_samples_leaf</code>：叶节点最小样本数，越大预测越平滑。</li>
+<li>OOB 误差：袋外样本估计的内部泛化误差。</li>
+<li>特征重要性：变量对 MSE 降低或预测性能的贡献。</li>
+</ul>
+<h3>3.4 关键假设(含违反后果)</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>非线性信号可由树捕捉</td>
+<td>阈值和交互有预测价值</td>
+<td>模型表现不优于简单基线</td>
+<td>与线性模型比较</td>
+</tr>
+<tr>
+<td>树之间不完全相关</td>
+<td>平均能降低方差</td>
+<td>收益有限</td>
+<td>调整 <code>max_features</code></td>
+</tr>
+<tr>
+<td>叶节点均值稳定</td>
+<td>每个叶子有足够样本</td>
+<td>预测噪声大</td>
+<td>查看 <code>min_samples_leaf</code></td>
+</tr>
+<tr>
+<td>训练人群代表应用人群</td>
+<td>预测关系可迁移</td>
+<td>外部误差升高</td>
+<td>时间外/中心外验证</td>
+</tr>
+<tr>
+<td>连续结局异常值可控</td>
+<td>均值不被极端值支配</td>
+<td>MSE 和叶均值受影响</td>
+<td>残差图、MAE、截尾敏感性</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>3 棵回归树预测 4 位患者住院天数：</p>
+<table>
+<thead>
+<tr>
+<th>患者</th>
+<th>树1</th>
+<th>树2</th>
+<th>树3</th>
+<th>森林平均预测</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>$(5+6+7)/3=6.0$</td>
+</tr>
+<tr>
+<td>B</td>
+<td>9</td>
+<td>8</td>
+<td>10</td>
+<td>$(9+8+10)/3=9.0$</td>
+</tr>
+<tr>
+<td>C</td>
+<td>4</td>
+<td>5</td>
+<td>4</td>
+<td>$(4+5+4)/3=4.33$</td>
+</tr>
+<tr>
+<td>D</td>
+<td>12</td>
+<td>10</td>
+<td>11</td>
+<td>$(12+10+11)/3=11.0$</td>
+</tr>
+</tbody>
+</table>
+<p>若患者 A 的真实住院天数为 6 天，树1 低估 1 天，树3 高估 1 天，但平均正好为 6 天。</p>
+<p>再看方差：假设每棵树预测方差为 16，树间相关性为 0.25，树数 $B=100$：</p>
+<p>$$
+16\left(0.25+\frac{0.75}{100}\right)=16(0.2575)=4.12
+$$</p>
+<p><strong>结论：</strong> 随机森林回归不是让每棵树都准，而是用平均让单树的高低波动互相抵消。树越多、相关性越低，预测越稳定。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：连续、分类、二分类变量均可。</li>
 <li>因变量类型：连续型。</li>
 <li>数据结构：宽表数据。</li>
-<li>是否适合高维数据：可以，但高维稀疏场景并非最优。</li>
+<li>是否适合高维数据：可以，但极高维稀疏场景未必最优。</li>
 <li>是否适合缺失较多数据：通常先做缺失处理更稳妥。</li>
-<li>是否适合删失数据：不适合。</li>
+<li>是否适合删失数据：普通随机森林回归不适合，需要随机生存森林。</li>
 <li>是否适合重复测量数据：不直接适合。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>随机森林回归常见的数据结构与普通表格预测任务一致：</p>
+<h3>5.2 示例表格</h3>
 <table>
 <thead>
 <tr>
@@ -152,77 +266,101 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
 <li>输入数据：连续结局和特征矩阵。</li>
-<li>关键变量：树数 <code>n_estimators</code>、树深度、最小分裂样本数、最大特征数。</li>
-<li>需要预处理的内容：缺失处理、训练测试集划分。</li>
+<li>关键变量：树数、树深、最小叶节点样本数、最大特征数。</li>
+<li>需要预处理的内容：缺失处理、训练测试集划分、异常值检查。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：多棵树的集成模型、OOB 误差（可选）、特征重要性。</li>
-<li>参数估计：树结构本身不直接解释，更多看重要性排序。</li>
+<li>模型对象/统计结果：多棵树的集成模型、OOB 误差、特征重要性。</li>
+<li>参数估计：不提供传统线性系数。</li>
 <li>预测结果：连续型预测值。</li>
-<li>不确定性指标：交叉验证误差、测试集 MSE、$R^2$。</li>
+<li>不确定性指标：测试集 RMSE、MAE、$R^2$、交叉验证误差。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：表格数据、非线性关系、交互关系复杂、对预测性能要求较高的场景。</li>
-<li>不适合：强解释导向、希望得到简单系数模型时。</li>
-<li>使用前需要特别检查的点：特征重要性偏倚、调参范围、训练成本。</li>
+<li>适合：表格数据、非线性关系、交互复杂、对预测性能要求较高的连续结局任务。</li>
+<li>不适合：强解释导向、需要简单系数、需要外推到训练范围外的线性趋势。</li>
+<li>使用前需要特别检查的点：特征重要性偏倚、外部验证、异常值影响、训练成本。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="random-forest-regression" data-i="0">Python</button><button class="codetab" data-uid="random-forest-regression" data-i="1">R</button></div><div class="codepanel active" data-uid="random-forest-regression" data-i="0"><p>常用包：</p>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="random-forest-regression" data-i="0">Python</button><button class="codetab" data-uid="random-forest-regression" data-i="1">R</button></div><div class="codepanel active" data-uid="random-forest-regression" data-i="0"><p>常用包:</p>
 <ul>
 <li><code>scikit-learn</code></li>
 </ul>
 <pre><code class="language-python">from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error
 
-fit = RandomForestRegressor(
-    n_estimators=300,
+model = RandomForestRegressor(
+    n_estimators=500,
+    max_features=&quot;sqrt&quot;,
+    min_samples_leaf=5,
     random_state=42,
-    n_jobs=-1
+    n_jobs=-1,
+    oob_score=True
 )
-fit.fit(X_train, y_train)
-y_pred = fit.predict(X_test)
-</code></pre></div><div class="codepanel" data-uid="random-forest-regression" data-i="1"><p>常用包：</p>
+
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+print(mean_absolute_error(y_test, y_pred))
+</code></pre></div><div class="codepanel" data-uid="random-forest-regression" data-i="1"><p>常用包:</p>
 <ul>
 <li><code>randomForest</code></li>
 </ul>
 <pre><code class="language-r">library(randomForest)
 
-fit &lt;- randomForest(SalePrice ~ ., data = df, ntree = 500, importance = TRUE)
-pred &lt;- predict(fit, newdata = df_test)
+fit &lt;- randomForest(
+  SalePrice ~ .,
+  data = train_df,
+  ntree = 500,
+  mtry = 3,
+  nodesize = 5,
+  importance = TRUE
+)
+
+pred &lt;- predict(fit, newdata = test_df)
 importance(fit)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：预测误差、稳定性、特征重要性。</li>
-<li>每个主要参数如何解释：随机森林通常更偏预测解释，而不是参数解释。</li>
-<li>临床或医学意义如何表达：适合表达“哪些变量最能区分或预测结果”，但不适合直接做线性效应解读。</li>
-<li>常见误读：特征重要性高不等于因果重要。</li>
+<li>核心结果看什么：测试集 RMSE/MAE、OOB 误差、预测-真实散点图、特征重要性。</li>
+<li>每个主要参数如何解读：树数影响稳定性，<code>min_samples_leaf</code> 影响预测平滑程度，<code>max_features</code> 影响树间差异。</li>
+<li>临床或医学意义如何表达：适合说「模型能较好预测住院天数，主要依赖哪些变量」，不宜说某变量每增加一单位导致多少变化。</li>
+<li>常见误读：特征重要性高不等于因果效应，也不提供线性斜率。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
       <div class="sec-body"><ul>
-<li>特征重要性条形图。</li>
+<li>外部验证：用新时间段或新中心数据检查 RMSE/MAE。</li>
+<li>残差分析：看高预测值、低预测值区域是否系统性偏差。</li>
+<li>重要性稳健性：比较 impurity importance 与 permutation importance。</li>
+<li>超参数敏感性：调整 <code>max_features</code>、<code>min_samples_leaf</code>、树数，看性能是否稳定。</li>
+<li>外推风险：随机森林对训练范围外的连续趋势外推能力弱，应检查变量范围。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
 <li>真实值 vs 预测值散点图。</li>
-<li>局部依赖图或 SHAP（后续可扩展）。</li>
+<li>特征重要性条形图。</li>
+<li>残差图和误差分布图。</li>
+<li>部分依赖图或 SHAP 图，用于辅助解释非线性关系。</li>
 </ul>
-<h3>7.1 图像示例</h3>
+<h3>10.1 图像示例</h3>
 <p>下图给出随机森林回归在房价数据上的特征重要性排序，适合说明模型关注的主要变量。</p>
 <p><img alt="" src="img/random_forest_feature_importance.png" /></p></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
 <li>非线性与交互建模能力强。</li>
-<li>对异常值和噪声较稳健。</li>
-<li>一般比单棵树泛化更好。</li>
+<li>一般比单棵回归树泛化更好。</li>
+<li>对特征缩放不敏感，能处理复杂表格模式。</li>
 </ul>
 <h3>局限</h3>
 <ul>
@@ -235,36 +373,51 @@ importance(fit)
 <li>只看重要性排序，不做外部验证。</li>
 <li>把高重要性变量误解成因果变量。</li>
 <li>树数太少导致结果不稳定。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和决策树回归的区别：随机森林通过 bagging 多树集成来降方差。</li>
-<li>和随机森林的区别：这里聚焦连续结局；二分类或多分类任务看主条目“随机森林”。</li>
-<li>和梯度提升回归的区别：随机森林是并行 bagging，梯度提升是串行 boosting。</li>
-<li>和线性回归的区别：随机森林不依赖线性假设。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>表格型临床预测模型。</li>
-<li>多变量连续结局风险建模。</li>
-<li>特征重要性初筛。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是一类基于 bagging 的树集成方法。它通过对样本做 bootstrap 抽样、对特征做随机子采样，训练许多彼此不同的决策树，再把它们的结果投票或平均起来。">随机森林（Random Forest）</a></li>
-<li><a class="xlink" href="m-decision-tree-regression.html" data-cn="决策树回归" data-en="Decision Tree Regression" data-def="决策树回归是一种通过递归划分特征空间，把连续结局映射到一系列区域均值上的非参数回归方法。">决策树回归（Decision Tree Regression）</a></li>
-<li><a class="xlink" href="m-gradient-boosting-regression.html" data-cn="梯度提升回归" data-en="Gradient Boosting Regression" data-def="梯度提升回归是一类通过逐步叠加弱学习器来逼近目标函数的集成回归方法，常见实现是以浅层回归树作为基学习器。">梯度提升回归（Gradient Boosting Regression）</a></li>
-<li><a class="xlink" href="m-support-vector-regression-svr.html" data-cn="支持向量回归" data-en="Support Vector Regression, SVR" data-def="支持向量回归是支持向量机在回归问题中的扩展，它通过引入 $\epsilon$-不敏感损失函数，在允许一定误差带的同时寻找最平滑的回归函数。">支持向量回归（Support Vector Regression, SVR）</a></li>
+<li>忘记检查模型对高值和低值结局的系统性偏差。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-decision-tree-regression.html" data-cn="决策树回归" data-en="Decision Tree Regression" data-def="决策树回归把连续结局分成一块块区域，每个叶节点用该区域的平均值作为预测。">决策树回归（Decision Tree Regression）</a> 的区别：随机森林回归通过多树平均降方差。</li>
+<li>和 <a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是在 Bagging 多棵树的基础上，再让每个节点只看一部分随机特征，从而让树与树更不相似、投票更稳。">随机森林（Random Forest）</a> 的关系：两者框架相同，本卡聚焦连续结局。</li>
+<li>和 <a class="xlink" href="m-gradient-boosting-regression.html" data-cn="梯度提升回归" data-en="Gradient Boosting Regression" data-def="梯度提升回归用一连串浅回归树逐步拟合当前损失的负梯度，从而不断修正连续结局预测。">梯度提升回归（Gradient Boosting Regression）</a> 的区别：随机森林是并行 bagging，梯度提升是串行 boosting。</li>
+<li>和 <a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a> 的区别：随机森林不依赖线性假设，但难以给出简单系数解释。</li>
+<li>如何选择：要稳健非线性连续预测，用随机森林回归；要更强性能可比较梯度提升。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>预测住院天数、医疗费用、连续风险评分。</li>
+<li>多变量连续结局风险建模。</li>
+<li>生理指标、实验室指标或生活质量评分预测。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>回归森林（Regression Forest）</strong>：用于连续结局预测的随机森林。</li>
+<li><strong>叶节点均值（Leaf Mean）</strong>：单棵树叶节点内样本结局均值。</li>
+<li><strong>OOB 误差（Out-of-Bag Error）</strong>：袋外样本估计的内部预测误差。</li>
+<li><strong>RMSE（Root Mean Squared Error）</strong>：均方误差平方根，强调大误差。</li>
+<li><strong>MAE（Mean Absolute Error）</strong>：平均绝对误差，解释为平均错多少单位。</li>
+<li><strong>部分依赖图（Partial Dependence Plot）</strong>：展示某变量改变时模型平均预测如何变化。</li>
+<li><strong>外推（Extrapolation）</strong>：预测训练数据范围之外的情况，树模型通常不擅长。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是在 Bagging 多棵树的基础上，再让每个节点只看一部分随机特征，从而让树与树更不相似、投票更稳。">随机森林（Random Forest）</a></li>
+<li><a class="xlink" href="m-decision-tree-regression.html" data-cn="决策树回归" data-en="Decision Tree Regression" data-def="决策树回归把连续结局分成一块块区域，每个叶节点用该区域的平均值作为预测。">决策树回归（Decision Tree Regression）</a></li>
+<li><a class="xlink" href="m-gradient-boosting-regression.html" data-cn="梯度提升回归" data-en="Gradient Boosting Regression" data-def="梯度提升回归用一连串浅回归树逐步拟合当前损失的负梯度，从而不断修正连续结局预测。">梯度提升回归（Gradient Boosting Regression）</a></li>
+<li><a class="xlink" href="m-support-vector-regression-svr.html" data-cn="支持向量回归" data-en="Support Vector Regression, SVR" data-def="SVR 寻找尽可能平坦的回归函数，并允许预测曲线周围存在一个不计损失的 $\epsilon$ 容忍管。">支持向量回归（Support Vector Regression, SVR）</a></li>
+<li><a class="xlink" href="m-linear-regression.html" data-cn="线性回归" data-en="Linear Regression" data-def="线性回归用一条直线（或超平面）去拟合「给定自变量时因变量的平均值」，办法是找到让所有点到直线的竖直残差平方和最小的那条线。">线性回归（Linear Regression）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Breiman L. Random forests. <em>Mach Learn</em>. 2001;45:5-32.</li>
-<li>scikit-learn Developers. <code>sklearn.ensemble.RandomForestRegressor</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html">https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html</a> （访问日期：2026-07-02）</li>
-<li>CRAN. Package <code>randomForest</code>. <a href="https://cran.r-project.org/package=randomForest">https://cran.r-project.org/package=randomForest</a> （访问日期：2026-07-02）</li>
+<li>Breiman L, Friedman JH, Olshen RA, Stone CJ. <em>Classification and Regression Trees</em>. Wadsworth; 1984.</li>
+<li>Hastie T, Tibshirani R, Friedman J. <em>The Elements of Statistical Learning</em>. 2nd ed. Springer; 2009.</li>
+<li>James G, Witten D, Hastie T, Tibshirani R. <em>An Introduction to Statistical Learning</em>. 2nd ed. Springer; 2021.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-random-forest.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">随机森林</div></a><a class="pg pg-next" href="m-extremely-randomized-trees.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">极端随机树</div></a></div>

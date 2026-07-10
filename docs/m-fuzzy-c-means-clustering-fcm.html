@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">术语表</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,233 +54,264 @@
     <div class="intro-note"><h1>模糊C均值聚类（Fuzzy C-Means Clustering, FCM）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>模糊 C 均值聚类是一种软聚类方法。它不是把每个样本硬分配到单一簇，而是给出样本属于每个簇的隶属度。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>FCM 用到各中心的相对距离为每个样本分配一组和为 1 的模糊隶属度，再用隶属度幂加权更新中心。</p>
+<h3>1.2 定义</h3>
+<p>模糊 C 均值是软原型聚类方法。它将 K-means 的硬标签替换为隶属度矩阵 $U$，允许患者同时部分属于多个簇；模糊系数 $m$ 控制归属的清晰程度。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：当样本可能处在多个亚群之间的过渡状态时，如何表达不确定归属。</li>
-<li>适用任务：软分群、边界样本识别、连续表型过渡分析。</li>
-<li>常见医学场景：疾病谱系中介状态识别，患者亚型不确定性刻画，影像区域软分割。</li>
+<li>患者处于连续谱或亚型过渡区。</li>
+<li>希望识别归属不明确的边界病例。</li>
+<li>硬聚类会丢失“更像哪个簇、像到什么程度”的信息。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>K-means 会说“这个患者属于第 1 类”。FCM 会说“这个患者 70% 像第 1 类，25% 像第 2 类，5% 像第 3 类”。这对临床连续谱或混合表型尤其有用。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>K-means 要求每个人只投一票；FCM 允许把一票拆开，例如对炎症型投 0.7、代谢型投 0.3。中心再根据这些分票的幂次权重更新。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>设 $u_{ik}$ 为样本 $i$ 属于簇 $k$ 的隶属度，满足：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 相对距离决定隶属度</h3>
+<p>一个点是否属于簇 1，不只看它离中心 1 多远，还看它相对其他中心有多远。位于两个中心正中间时，隶属度自然相等。</p>
+<h3>2.2 模糊系数</h3>
+<p>$m$ 接近 1 时隶属度趋于硬分配；$m$ 增大时分配更平均。过大的 $m$ 会让所有病例都显得模糊，削弱簇结构。</p>
+<h3>2.3 隶属度不是概率</h3>
+<p>FCM 没有为数据指定生成概率分布，其隶属度由距离目标函数定义。它不能像 <a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="GMM 把总体密度表示为若干高斯成分的加权和，并为每名患者给出属于各成分的后验概率。">高斯混合模型（Gaussian Mixture Model, GMM）</a> 的责任概率那样解释为模型后验概率。</p></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 约束与目标</h3>
 <p>$$
-\sum_{k=1}^{C}u_{ik}=1,\quad 0\le u_{ik}\le 1
+\sum_{k=1}^{C}u_{ik}=1,\qquad
+0\le u_{ik}\le1
 $$</p>
-<p>FCM 最小化目标函数：</p>
 <p>$$
-J_m=\sum_{i=1}^{n}\sum_{k=1}^{C}u_{ik}^m\|x_i-c_k\|^2
+J_m=
+\sum_{i=1}^{n}\sum_{k=1}^{C}
+u_{ik}^{m}\|x_i-c_k\|^2,\qquad m\gt1
 $$</p>
-<p>其中 $m&gt;1$ 为模糊系数。簇中心更新为：</p>
+<h3>3.2 中心更新</h3>
 <p>$$
-c_k=\frac{\sum_{i=1}^{n}u_{ik}^m x_i}{\sum_{i=1}^{n}u_{ik}^m}
+c_k=
+\frac{\sum_i u_{ik}^{m}x_i}
+{\sum_i u_{ik}^{m}}
 $$</p>
-<p>隶属度更新为：</p>
+<h3>3.3 隶属度更新</h3>
 <p>$$
 u_{ik}=
 \frac{1}
 {\sum_{j=1}^{C}
-\left(\frac{\|x_i-c_k\|}{\|x_i-c_j\|}\right)^{2/(m-1)}}
+\left(
+\frac{\|x_i-c_k\|}
+{\|x_i-c_j\|}
+\right)^{2/(m-1)}}
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
-<ul>
-<li>$C$：簇数。</li>
-<li>$u_{ik}$：样本 $i$ 对簇 $k$ 的隶属度。</li>
-<li>$m$：模糊系数，越大隶属度越平滑。</li>
-<li>$c_k$：簇中心。</li>
-<li>partition coefficient：隶属度清晰程度指标。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>簇可由中心原型表达。</li>
-<li>样本可能存在混合归属或过渡状态。</li>
-<li>距离越近，隶属度越高。</li>
-<li>簇数和模糊系数选择合理。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：连续型数值特征。</li>
-<li>因变量类型：无监督方法，不需要结局变量。</li>
-<li>数据结构：样本乘以特征矩阵。</li>
-<li>是否适合高维数据：可用，但需注意距离稳定性，常先降维或筛选特征。</li>
-<li>是否适合缺失较多数据：需先处理缺失。</li>
-<li>是否适合删失数据：不直接处理删失结局。</li>
-<li>是否适合重复测量数据：需先构造样本级特征。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>以炎症-代谢混合表型为例：</p>
+<p>若点恰好等于某中心，需要按算法约定处理零距离。</p>
+<h3>3.4 关键条件</h3>
 <table>
 <thead>
 <tr>
-<th>CRP</th>
-<th>IL6</th>
-<th>BMI</th>
-<th>TG</th>
-<th>HDL</th>
+<th>条件</th>
+<th>违反后果</th>
+<th>检查方式</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>5.2</td>
-<td>8.1</td>
-<td>31.2</td>
-<td>2.4</td>
-<td>0.9</td>
+<td>中心型欧氏结构合理</td>
+<td>非凸簇仍会分错</td>
+<td>与密度/图方法比较</td>
 </tr>
 <tr>
-<td>1.1</td>
-<td>2.0</td>
-<td>24.8</td>
-<td>1.1</td>
-<td>1.5</td>
+<td>$C$ 与 $m$ 合理</td>
+<td>过分硬化或全部模糊</td>
+<td>validity 指标与路径</td>
 </tr>
 <tr>
-<td>3.8</td>
-<td>5.5</td>
-<td>29.5</td>
-<td>2.0</td>
-<td>1.0</td>
+<td>特征尺度可比</td>
+<td>大量纲变量支配隶属度</td>
+<td>标准化敏感性</td>
 </tr>
 <tr>
-<td>0.8</td>
-<td>1.5</td>
-<td>22.9</td>
-<td>0.9</td>
-<td>1.7</td>
+<td>离群点有限</td>
+<td>中心与隶属度被拉偏</td>
+<td>稳健处理与病例审查</td>
 </tr>
 </tbody>
-</table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：连续型特征矩阵。</li>
-<li>关键变量：簇数、模糊系数、停止阈值、最大迭代次数。</li>
-<li>需要预处理的内容：缺失处理、标准化、异常值检查、变量选择。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：隶属度矩阵、硬标签、簇中心、目标函数收敛曲线。</li>
-<li>参数估计：簇中心和隶属度。</li>
-<li>预测结果：新样本可计算对各簇的隶属度。</li>
-<li>不确定性指标：最大隶属度、隶属度熵、不同初始化稳定性。</li>
-</ul></div>
+</table></div>
     </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：亚群边界模糊、存在过渡样本、希望量化归属不确定性的场景。</li>
-<li>不适合：需要清晰互斥分组、簇形状复杂、离群点很多或类别变量为主的场景。</li>
-<li>使用前需要特别检查的点：模糊系数、簇数、低最大隶属度样本的临床含义。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>一维有三个患者 $x=(2,5,8)$，初始中心 $c_1=0,c_2=10$，取 $m=2$。</p>
+<p>对 $x=2$，到两个中心的距离为 2 和 8：</p>
+<p>$$
+u_{1}=
+\frac{1}{1+(2/8)^2}
+=\frac{16}{17}
+\approx0.941
+$$</p>
+<p>$$
+u_{2}=1-u_1\approx0.059
+$$</p>
+<p>对 $x=5$，两个距离相等，因此隶属度为 $(0.5,0.5)$。对 $x=8$，结果与 $x=2$ 对称，为 $(0.059,0.941)$。</p>
+<p><strong>更新中心。</strong> 因为 $m=2$，使用隶属度平方加权：</p>
+<p>$$
+c_1^{new}
+=
+\frac{
+2(0.941^2)+5(0.5^2)+8(0.059^2)
+}{
+0.941^2+0.5^2+0.059^2
+}
+\approx2.676
+$$</p>
+<p>由对称性：</p>
+<p>$$
+c_2^{new}\approx7.324
+$$</p>
+<p><strong>结论：</strong> 中间患者对两簇各贡献一部分；两端患者主要拉动靠近自己的中心，但并非完全不影响另一中心。</p></div>
     </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="fuzzy-c-means-clustering-fcm" data-i="0">Python</button><button class="codetab" data-uid="fuzzy-c-means-clustering-fcm" data-i="1">R</button></div><div class="codepanel active" data-uid="fuzzy-c-means-clustering-fcm" data-i="0"><p>常用包：</p>
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 数据要求</h3>
 <ul>
-<li><code>scikit-fuzzy</code></li>
+<li>连续数值特征，通常需标准化。</li>
+<li>缺失需预处理；高维时距离可能趋同。</li>
+<li>普通 FCM 不直接处理类别特征、删失或患者内相关性。</li>
 </ul>
-<pre><code class="language-python">import numpy as np
-import pandas as pd
+<h3>5.2 输入与产出</h3>
+<p>输入为簇数 $C$、模糊系数 $m$、初始隶属度和停止阈值。输出为中心、隶属度矩阵、硬标签、目标轨迹与模糊分区指标。</p></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>亚群边界模糊、连续表型或软图像分割。</li>
+<li>需要重点识别混合表型和过渡病例。</li>
+<li>不适合离群点很多、非凸簇明显或必须提供概率后验的任务。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="fuzzy-c-means-clustering-fcm" data-i="0">Python</button><button class="codetab" data-uid="fuzzy-c-means-clustering-fcm" data-i="1">R</button></div><div class="codepanel active" data-uid="fuzzy-c-means-clustering-fcm" data-i="0"><pre><code class="language-python">import numpy as np
 import skfuzzy as fuzz
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv(&quot;inflammation_metabolic_profiles.csv&quot;)
-X = df[[&quot;CRP&quot;, &quot;IL6&quot;, &quot;BMI&quot;, &quot;TG&quot;, &quot;HDL&quot;]]
-X_scaled = StandardScaler().fit_transform(X).T
-
-centers, membership, _, _, objective, _, fpc = fuzz.cluster.cmeans(
-    X_scaled,
-    c=3,
-    m=2.0,
-    error=0.005,
-    maxiter=1000,
-    seed=42
+X_s = StandardScaler().fit_transform(X).T
+centers, membership, _, distances, objective, iterations, fpc = (
+    fuzz.cluster.cmeans(
+        X_s,
+        c=3,
+        m=2.0,
+        error=0.005,
+        maxiter=1000,
+        seed=42,
+    )
 )
 
 cluster = np.argmax(membership, axis=0)
-print(&quot;Fuzzy partition coefficient:&quot;, fpc)
-print(pd.Series(cluster).value_counts().sort_index())
-</code></pre></div><div class="codepanel" data-uid="fuzzy-c-means-clustering-fcm" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>e1071</code></li>
-</ul>
-<pre><code class="language-r">library(e1071)
+max_membership = membership.max(axis=0)
+entropy = -(membership * np.log(membership + 1e-12)).sum(axis=0)
+print(fpc, iterations, max_membership[:5], entropy[:5])
+</code></pre></div><div class="codepanel" data-uid="fuzzy-c-means-clustering-fcm" data-i="1"><pre><code class="language-r">library(e1071)
 
 x &lt;- scale(df[, c(&quot;CRP&quot;, &quot;IL6&quot;, &quot;BMI&quot;, &quot;TG&quot;, &quot;HDL&quot;)])
-fit &lt;- cmeans(x, centers = 3, m = 2, iter.max = 100)
+fit &lt;- cmeans(
+  x,
+  centers = 3,
+  m = 2,
+  iter.max = 1000,
+  dist = &quot;euclidean&quot;,
+  method = &quot;cmeans&quot;
+)
 
 cluster &lt;- fit$cluster
 membership &lt;- fit$membership
+max_membership &lt;- apply(membership, 1, max)
 head(membership)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：隶属度矩阵、最大隶属度分布、簇中心、低确定性样本。</li>
-<li>每个主要参数如何解释：$m=2$ 是常用模糊系数，增大 $m$ 会让样本对各簇的隶属度更平均。</li>
-<li>临床或医学意义如何表达：可描述患者对不同表型的隶属程度，而不是只给单一亚型。</li>
-<li>常见误读：隶属度不是严格后验概率，不能直接当作概率风险解释。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>隶属度热图。</li>
-<li>最大隶属度或隶属度熵分布图。</li>
-<li>PCA/UMAP 空间中按硬标签着色、按不确定性调透明度。</li>
-<li>各簇中心特征热图。</li>
-</ul></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>能表达边界样本和过渡状态。</li>
-<li>输出比硬聚类更丰富。</li>
-<li>适合疾病谱系和混合表型分析。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>仍需预设簇数。</li>
-<li>对初始化、距离尺度和离群点敏感。</li>
-<li>隶属度解释需要谨慎。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>把隶属度当作真实概率。</li>
-<li>不检查低最大隶属度样本。</li>
-<li>用硬标签丢掉软聚类最有价值的信息。</li>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>隶属度描述距离目标下的相对归属，不是发生概率。</li>
+<li>最大隶属度低或熵高的病例处于边界或整体远离中心。</li>
+<li>中心是模糊权重均值，不能直接视作真实疾病原型。</li>
+<li>若最终只保留硬标签，会丢失 FCM 最有价值的信息。</li>
 </ul></div>
     </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a> 的区别：K-means 给硬标签，FCM 给每个样本对各簇的隶属度。</li>
-<li>和 <a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="高斯混合模型是假设观测数据由多个高斯分布按一定权重混合而成的概率模型。它既可以做密度估计，也可以用于软聚类，即给每个样本分配“属于各个簇的概率”。">高斯混合模型（Gaussian Mixture Model, GMM）</a> 的区别：GMM 的软归属来自概率分布模型，FCM 的隶属度来自距离和模糊目标函数。</li>
-<li>和 <a class="xlink" href="m-expectation-maximization-algorithm-em.html" data-cn="期望最大化算法" data-en="Expectation-Maximization Algorithm, EM" data-def="期望最大化算法是一种用于含隐变量或缺失数据模型的迭代最大似然估计算法。它交替执行 E 步和 M 步：先估计隐变量的条件期望，再在该期望下更新模型参数。">期望最大化算法（Expectation-Maximization Algorithm, EM）</a> 的区别：EM 是估计含隐变量模型的通用算法，FCM 是一种模糊原型聚类方法。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">诊断与稳健性</h2></div>
+      <div class="sec-body"><ol>
+<li>比较不同 $C$ 与 $m$ 的 FPC、partition entropy 和稳定性。</li>
+<li>多初始化并比较目标函数与中心。</li>
+<li>画最大隶属度和熵分布。</li>
+<li>改变标准化、变量集和异常值处理。</li>
+<li>与 K-means 和 GMM 的标签及软归属比较。</li>
+</ol></div>
     </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
-<li>疾病亚型之间过渡患者的识别。</li>
-<li>影像区域软分割。</li>
-<li>炎症、代谢、免疫等连续谱表型的模糊归属分析。</li>
+<li>隶属度热图。</li>
+<li>最大隶属度或隶属度熵分布。</li>
+<li>二维投影按主簇着色、按确定性调透明度。</li>
+<li>模糊中心特征热图。</li>
 </ul></div>
     </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a></li>
-<li><a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="高斯混合模型是假设观测数据由多个高斯分布按一定权重混合而成的概率模型。它既可以做密度估计，也可以用于软聚类，即给每个样本分配“属于各个簇的概率”。">高斯混合模型（Gaussian Mixture Model, GMM）</a></li>
-<li><a class="xlink" href="m-expectation-maximization-algorithm-em.html" data-cn="期望最大化算法" data-en="Expectation-Maximization Algorithm, EM" data-def="期望最大化算法是一种用于含隐变量或缺失数据模型的迭代最大似然估计算法。它交替执行 E 步和 M 步：先估计隐变量的条件期望，再在该期望下更新模型参数。">期望最大化算法（Expectation-Maximization Algorithm, EM）</a></li>
-<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p><strong>优势：</strong> 保留边界信息，表达过渡状态，输出比硬聚类丰富。</p>
+<p><strong>局限：</strong> 需给定 $C$ 和 $m$，对尺度、初始化和离群点敏感，仍偏好中心型簇。</p>
+<p><strong>常见坑：</strong> 把隶属度叫后验概率；只汇报硬标签；默认 $m=2$ 不做敏感性；用全部数据挑参数后夸大稳定性。</p></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a>：FCM 将硬指示变量放松为连续隶属度。</li>
+<li><a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="GMM 把总体密度表示为若干高斯成分的加权和，并为每名患者给出属于各成分的后验概率。">高斯混合模型（Gaussian Mixture Model, GMM）</a>：GMM 责任度是生成概率模型后验，FCM 隶属度是距离优化权重。</li>
+<li><a class="xlink" href="m-expectation-maximization-algorithm-em.html" data-cn="期望最大化算法" data-en="Expectation-Maximization Algorithm, EM" data-def="EM 在“根据当前参数推断隐藏信息”和“把推断出的软信息当作完整数据更新参数”之间交替，逐步提高观测数据似然。">期望最大化算法（Expectation-Maximization Algorithm, EM）</a>：EM 是概率模型估计算法，FCM 是具体模糊目标算法。</li>
+<li>选择经验：需要概率密度与协方差选 GMM；只需距离型软边界可选 FCM。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>炎症、代谢或免疫表型连续谱。</li>
+<li>疾病亚型间过渡患者识别。</li>
+<li>医学影像组织或病灶软分割。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">术语表</h2></div>
+      <div class="sec-body"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>membership</td>
+<td>样本对某簇的模糊隶属度</td>
+</tr>
+<tr>
+<td>fuzzifier</td>
+<td>控制隶属度软硬程度的参数 $m$</td>
+</tr>
+<tr>
+<td>fuzzy centroid</td>
+<td>由隶属度幂加权得到的中心</td>
+</tr>
+<tr>
+<td>partition coefficient</td>
+<td>衡量分区清晰程度的指标</td>
+</tr>
+<tr>
+<td>partition entropy</td>
+<td>衡量隶属度不确定性的熵指标</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a></li>
+<li><a class="xlink" href="m-gaussian-mixture-model-gmm.html" data-cn="高斯混合模型" data-en="Gaussian Mixture Model, GMM" data-def="GMM 把总体密度表示为若干高斯成分的加权和，并为每名患者给出属于各成分的后验概率。">高斯混合模型（Gaussian Mixture Model, GMM）</a></li>
+<li><a class="xlink" href="m-expectation-maximization-algorithm-em.html" data-cn="期望最大化算法" data-en="Expectation-Maximization Algorithm, EM" data-def="EM 在“根据当前参数推断隐藏信息”和“把推断出的软信息当作完整数据更新参数”之间交替，逐步提高观测数据似然。">期望最大化算法（Expectation-Maximization Algorithm, EM）</a></li>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="PCA 旋转坐标轴，依次寻找样本投影方差最大的正交方向，用少数线性组合保留主要总变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Dunn JC. A fuzzy relative of the ISODATA process and its use in detecting compact well-separated clusters. <em>J Cybern</em>. 1973;3(3):32-57.</li>
 <li>Bezdek JC. <em>Pattern Recognition with Fuzzy Objective Function Algorithms</em>. Springer; 1981.</li>
-<li>Dunn JC. A fuzzy relative of the ISODATA process and its use in detecting compact well-separated clusters. <em>Journal of Cybernetics</em>. 1973;3(3):32-57.</li>
-<li>Ross TJ. <em>Fuzzy Logic with Engineering Applications</em>. 4th ed. Wiley; 2016.</li>
+<li>scikit-fuzzy Developers. Fuzzy C-means documentation. <a href="https://scikit-fuzzy.readthedocs.io/en/latest/auto_examples/plot_cmeans.html">https://scikit-fuzzy.readthedocs.io/en/latest/auto_examples/plot_cmeans.html</a> （访问日期：2026-07-09）</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-balanced-iterative-reducing-and-clustering-using-hierarchies-birch.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">BIRCH聚类</div></a><a class="pg pg-next" href="m-expectation-maximization-algorithm-em.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">期望最大化算法</div></a></div>

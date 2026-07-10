@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,231 +54,282 @@
     <div class="intro-note"><h1>方差阈值法（Variance Threshold）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>方差阈值法是一种过滤式特征选择方法。它计算每个特征在样本中的方差，并删除方差低于预设阈值的特征，用来去掉几乎不变化、信息量很低的变量。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>方差阈值法删除在训练样本中几乎不变化的特征，因为一个近似常数很难区分样本，却会增加存储、计算和数值负担。</p>
+<h3>1.2 定义</h3>
+<p>方差阈值法是一种无监督过滤式特征选择：逐列计算离散程度，保留方差高于预设阈值的列。它不看结局，因此只能判断“有没有变化”，不能判断“变化是否与结局有关”。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：如何在建模前快速删除近似常量特征。</li>
-<li>适用任务：无监督特征过滤、建模前降噪、高维矩阵预处理。</li>
-<li>常见医学场景：组学特征初筛、影像组学稳定特征过滤、电子病历中几乎恒定字段清理。</li>
+<li>清除常数列、近零方差哑变量和流水线遗留空特征。</li>
+<li>降低高维矩阵尺寸，避免无信息列干扰后续算法。</li>
+<li>医学场景：组学质控、one-hot 编码后稀有类别、跨中心数据字典中的恒定字段。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>如果一个变量在所有患者中几乎一样，它很难帮助模型区分不同个体。方差阈值法就是先把这类“没有变化”的列清掉，让后续模型少背一些没有信息的包袱。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>若所有患者的“本中心代码”都为 1，这一列无法帮助区分患者；它像一把永远指向同一刻度的尺。方差阈值先把这种尺清走，但不会判断另一把变化很大的尺是否真的测到了疾病。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>对第 $j$ 个特征 $X_j$，其样本方差为：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>自动合并数据、哑变量编码和组学预处理常产生大量恒定或极稀疏列。它们不提供样本间排序，却可能导致矩阵奇异、距离被无意义维度稀释或训练变慢。</p>
+<h3>2.2 关键洞察</h3>
+<p>特征对区分样本的最低必要条件是“至少有一定变化”。因此先用与模型无关的廉价统计量做粗筛，再把监督选择交给后续步骤。它是数据卫生规则，不是最终变量选择结论。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
+<ul>
+<li>删除常数列对应阈值 0，是最安全的版本。</li>
+<li>近零方差规则常同时考虑唯一值比例和最常见/次常见频数比，比单纯方差更适合类别变量。</li>
+<li>标准化后所有非恒定连续变量方差约为 1，因此方差筛选必须在标准化前拟合。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>总体形式的样本方差为</p>
 <p>$$
 s_j^2=\frac{1}{n}\sum_{i=1}^{n}(x_{ij}-\bar x_j)^2
 $$</p>
-<p>设阈值为 $\theta$，选择规则为：</p>
+<p>选择规则：</p>
 <p>$$
-\text{keep}(X_j)=I(s_j^2\geq \theta)
+\mathcal S=\{j:s_j^2&gt;\tau\}
 $$</p>
-<p>对于二分类哑变量，若取值为 1 的比例为 $p$，方差为：</p>
+<p>这个式子在说：只保留跨样本波动超过阈值 $\tau$ 的列。</p>
+<p>二元特征若阳性比例为 $p$，方差为</p>
 <p>$$
-\mathrm{Var}(X_j)=p(1-p)
+\operatorname{Var}(X)=p(1-p)
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
+<h3>3.2 推导脉络</h3>
+<p>常数列所有偏差均为 0，因此方差为 0。二元特征在 $p=0.5$ 时方差最大 0.25，越接近全 0 或全 1 方差越小。由此可把“极稀有”转成方差阈值，但阈值依赖编码和尺度。</p>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>$s_j^2$：第 $j$ 个特征的样本方差。</li>
-<li>$\theta$：方差阈值。</li>
-<li>近零方差：特征几乎恒定，或某个取值占绝大多数。</li>
-<li><code>threshold</code>：实现中的阈值参数。</li>
+<li>$s_j^2$：第 $j$ 个特征在训练集中的波动。</li>
+<li>$\tau$：保留阈值；不是普适常数，应结合尺度和任务。</li>
+<li>$p$：二元特征阳性比例。</li>
+<li>support mask：每列保留/删除的布尔结果。</li>
 </ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>特征变化越小，通常提供的信息越少。</li>
-<li>这是无监督过滤方法，不使用结局变量。</li>
-<li>只有在特征尺度可比时，方差大小才有直接比较意义。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：连续变量、二值变量、编码后的分类变量。</li>
-<li>因变量类型：不需要结局变量。</li>
-<li>数据结构：样本乘以特征的矩阵。</li>
-<li>是否适合高维数据：适合，尤其适合作为第一步粗筛。</li>
-<li>是否适合缺失较多数据：需先处理缺失或按规则计算方差。</li>
-<li>是否适合删失数据：作为特征预处理可用，但不处理删失结局。</li>
-<li>是否适合重复测量数据：需先明确分析单位，避免把同一患者重复记录当作独立样本。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>以 ICU 表格特征预处理为例：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>Age</th>
-<th>SexMale</th>
-<th>HospitalID_01</th>
-<th>RareCode_X</th>
-<th>Lactate</th>
-<th>Death30d</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>73</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>3.1</td>
-<td>1</td>
+<td>训练集代表部署分布</td>
+<td>低方差状态在未来也相近</td>
+<td>外部中心可能出现重要变化</td>
+<td>分中心频数/方差</td>
 </tr>
 <tr>
-<td>46</td>
-<td>0</td>
-<td>1</td>
-<td>0</td>
-<td>1.1</td>
-<td>0</td>
+<td>列尺度可比较</td>
+<td>同一阈值具有共同意义</td>
+<td>大单位变量天然更易保留</td>
+<td>在原始语义尺度设规则</td>
 </tr>
 <tr>
-<td>65</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>2.4</td>
-<td>1</td>
+<td>稀有不等于关键</td>
+<td>极低频特征可安全粗筛</td>
+<td>罕见病标志被误删</td>
+<td>与临床白名单联用</td>
 </tr>
 <tr>
-<td>39</td>
-<td>0</td>
-<td>1</td>
-<td>0</td>
-<td>0.8</td>
-<td>0</td>
+<td>选择仅在训练折拟合</td>
+<td>测试分布不参与筛选</td>
+<td>轻微信息泄漏</td>
+<td>pipeline/嵌套验证</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>6 名患者有三列：</p>
+<table>
+<thead>
+<tr>
+<th>患者</th>
+<th style="text-align: right;">constant</th>
+<th style="text-align: right;">rare_flag</th>
+<th style="text-align: right;">marker</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1–5</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1,2,3,4,5</td>
 </tr>
 <tr>
-<td>58</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-<td>1.6</td>
-<td>0</td>
+<td>6</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">6</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：特征矩阵。</li>
-<li>关键变量：每个特征的方差、阈值。</li>
-<li>需要预处理的内容：缺失处理、类别编码、是否标准化的决策。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：保留特征掩码、各特征方差。</li>
-<li>参数估计：无。</li>
-<li>预测结果：无，输出降维后的特征矩阵。</li>
-<li>不确定性指标：通常不提供。</li>
-</ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：删除常量列、近似常量列、极低频哑变量。</li>
-<li>不适合：单独作为最终特征选择依据，尤其不适合判断特征与结局是否相关。</li>
-<li>使用前需要特别检查的点：特征尺度是否可比；二值特征的低方差是否仍有医学意义，例如罕见但重要的突变。</li>
-</ul></div>
+<p><strong>constant：</strong></p>
+<p>$$
+s^2=0
+$$</p>
+<p><strong>rare_flag：</strong> $p=1/6$，</p>
+<p>$$
+s^2=p(1-p)=\frac16\frac56=\frac5{36}=0.139
+$$</p>
+<p><strong>marker：</strong> 均值 3.5，</p>
+<p>$$
+s^2=\frac{(-2.5)^2+\cdots+(2.5)^2}{6}
+=\frac{17.5}{6}=2.917
+$$</p>
+<p>阈值 $\tau=0.1$ 时删除 constant，保留 rare_flag 与 marker；若 $\tau=0.15$，rare_flag 也被删除。后一个决定可能删掉罕见但重要的临床信号，所以应由语境决定。</p></div>
     </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="variance-threshold" data-i="0">Python</button><button class="codetab" data-uid="variance-threshold" data-i="1">R</button></div><div class="codepanel active" data-uid="variance-threshold" data-i="0"><p>常用包：</p>
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
-<li><code>scikit-learn</code></li>
+<li>数值化表格或稀疏高维矩阵。</li>
+<li>结局类型不限，因为方法不看结局。</li>
+<li>缺失值需先定义处理方式；NA 不能简单当作一个数值。</li>
+<li>不处理删失、混杂或重复测量相关性。</li>
 </ul>
-<pre><code class="language-python">import pandas as pd
-from sklearn.feature_selection import VarianceThreshold
-from sklearn.model_selection import train_test_split
-
-df = pd.read_csv(&quot;icu_features.csv&quot;)
-X = df.drop(columns=[&quot;Death30d&quot;])
-y = df[&quot;Death30d&quot;]
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
-
-selector = VarianceThreshold(threshold=0.01)
-X_train_sel = selector.fit_transform(X_train)
-X_test_sel = selector.transform(X_test)
-
-selected_features = X.columns[selector.get_support()]
-print(selected_features.tolist())
-</code></pre></div><div class="codepanel" data-uid="variance-threshold" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>caret</code></li>
-</ul>
-<pre><code class="language-r">library(caret)
-
-x_train &lt;- df_train[, setdiff(names(df_train), &quot;Death30d&quot;)]
-nzv &lt;- nearZeroVar(x_train)
-
-x_train_sel &lt;- x_train[, -nzv]
-x_test_sel &lt;- df_test[, names(x_train_sel)]
-</code></pre></div></div></div>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>patient_id</th>
+<th style="text-align: right;">site_B</th>
+<th style="text-align: right;">rare_variant</th>
+<th style="text-align: right;">biomarker</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P01</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.2</td>
+</tr>
+<tr>
+<td>P02</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2.1</td>
+</tr>
+<tr>
+<td>P03</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3.4</td>
+</tr>
+</tbody>
+</table>
+<h3>5.3 输入与产出</h3>
+<p>输入训练特征矩阵与阈值；产出保留列、删除列、列方差和可复用转换器。不会产生结局关联或因果效应。</p></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：哪些特征被删除、删除原因是否只是低变化。</li>
-<li>每个主要参数如何解释：阈值越高，删除越激进。</li>
-<li>临床或医学意义如何表达：该方法只说明某特征在当前样本中变化很少，不说明其没有生物学或临床意义。</li>
-<li>常见误读：低方差不等于无效，高方差也不等于有预测价值。</li>
+<li>适合：流水线第一道粗筛、常数/近常数清理。</li>
+<li>不适合：尺度差异巨大却共用阈值，或罕见信号具有明确临床意义。</li>
+<li>应与监督选择、临床白名单及外部中心检查结合。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>特征方差排序条形图。</li>
-<li>低方差特征取值频数图。</li>
-<li>阈值与保留特征数量关系图。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="variance-threshold" data-i="0">Python</button><button class="codetab" data-uid="variance-threshold" data-i="1">R</button></div><div class="codepanel active" data-uid="variance-threshold" data-i="0"><pre><code class="language-python">import pandas as pd
+from sklearn.feature_selection import VarianceThreshold
+
+X = pd.DataFrame({
+    &quot;constant&quot;: [1, 1, 1, 1, 1, 1],
+    &quot;rare_flag&quot;: [0, 0, 0, 0, 0, 1],
+    &quot;marker&quot;: [1, 2, 3, 4, 5, 6],
+})
+selector = VarianceThreshold(threshold=0.1)
+Xt = selector.fit_transform(X)  # 只在训练折 fit
+print(pd.Series(selector.variances_, index=X.columns))
+print(X.columns[selector.get_support()].tolist())
+</code></pre></div><div class="codepanel" data-uid="variance-threshold" data-i="1"><pre><code class="language-r">library(recipes)
+
+train &lt;- data.frame(
+  constant = rep(1, 6),
+  rare_flag = c(0, 0, 0, 0, 0, 1),
+  marker = 1:6
+)
+rec &lt;- recipe(~ ., data = train) |&gt;
+  step_zv(all_predictors()) |&gt;
+  prep(training = train)
+bake(rec, new_data = train)
+</code></pre></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><p>“删除”只表示训练集波动未过阈值，不表示变量在生物学上无意义。应报告阈值、方差定义、筛选前后列数和被白名单保留的例外。</p></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>在交叉验证各折记录保留频率；不稳定列提示阈值敏感。</li>
+<li>比较多个合理阈值下的下游性能。</li>
+<li>按中心、批次和亚组计算方差，排查局部恒定。</li>
+<li>对稀有病、药物暴露和变异位点使用临床白名单。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>对数尺度方差排序图与阈值线。</li>
+<li>二元特征患病率/阳性率直方图。</li>
+<li>各折保留频率热图。</li>
+<li>中心 × 特征方差热图。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>简单、快速、无需结局变量。</li>
-<li>适合高维数据的第一步粗筛。</li>
-<li>能清理常量列和无效哑变量。</li>
+<li>快速、无模型、适合高维稀疏矩阵。</li>
+<li>不使用标签，减少直接结局泄漏。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>不评估特征与结局关系。</li>
-<li>对特征尺度敏感。</li>
-<li>可能删除低频但临床重要的特征。</li>
+<li>完全忽略结局和特征交互。</li>
+<li>对单位、编码、中心构成敏感。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>标准化后所有连续特征方差都接近 1，再做方差阈值就失去意义。</li>
-<li>在全数据上先筛选，再做训练测试划分，造成数据处理流程不规范。</li>
-<li>对罕见事件变量机械删除。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-univariate-feature-selection.html" data-cn="单变量特征选择" data-en="Univariate Feature Selection" data-def="单变量特征选择是一类过滤式方法。它逐个评估每个特征与目标变量之间的关系，根据统计量、P 值或信息量得分选择排名靠前或达到阈值的特征。">单变量特征选择（Univariate Feature Selection）</a> 的区别：方差阈值不看结局；单变量方法会评估每个特征与结局的关系。</li>
-<li>和 <a class="xlink" href="m-correlation-based-feature-selection.html" data-cn="相关系数特征选择" data-en="Correlation-based Feature Selection" data-def="相关系数特征选择是一种基于变量间相关性的过滤方法。它通过计算特征之间，或特征与结局之间的相关系数，删除冗余特征或保留与结局关系更强的特征。">相关系数特征选择（Correlation-based Feature Selection）</a> 的区别：方差阈值删除低变化特征；相关系数法删除高冗余特征。</li>
-<li>和 <a class="xlink" href="m-embedded-feature-selection.html" data-cn="嵌入式特征选择" data-en="Embedded Feature Selection" data-def="嵌入式特征选择是在模型训练过程中同步完成特征评价或筛选的方法。常见形式包括 L1 正则化模型、树模型特征重要性和基于模型系数的 SelectFromModel。">嵌入式特征选择（Embedded Feature Selection）</a> 的区别：方差阈值不依赖模型训练。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>删除所有患者取值完全相同的 EHR 字段。</li>
-<li>影像组学中去除几乎不变化的纹理特征。</li>
-<li>组学分析中先删除低变异探针或低表达特征。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-univariate-feature-selection.html" data-cn="单变量特征选择" data-en="Univariate Feature Selection" data-def="单变量特征选择是一类过滤式方法。它逐个评估每个特征与目标变量之间的关系，根据统计量、P 值或信息量得分选择排名靠前或达到阈值的特征。">单变量特征选择（Univariate Feature Selection）</a></li>
-<li><a class="xlink" href="m-correlation-based-feature-selection.html" data-cn="相关系数特征选择" data-en="Correlation-based Feature Selection" data-def="相关系数特征选择是一种基于变量间相关性的过滤方法。它通过计算特征之间，或特征与结局之间的相关系数，删除冗余特征或保留与结局关系更强的特征。">相关系数特征选择（Correlation-based Feature Selection）</a></li>
-<li><a class="xlink" href="m-embedded-feature-selection.html" data-cn="嵌入式特征选择" data-en="Embedded Feature Selection" data-def="嵌入式特征选择是在模型训练过程中同步完成特征评价或筛选的方法。常见形式包括 L1 正则化模型、树模型特征重要性和基于模型系数的 SelectFromModel。">嵌入式特征选择（Embedded Feature Selection）</a></li>
+<li>标准化后才做筛选。</li>
+<li>在全数据上 fit。</li>
+<li>把低频等同无用。</li>
+<li>对 one-hot 各列使用不合语义的统一阈值。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Kuhn M, Johnson K. <em>Feature Engineering and Selection: A Practical Approach for Predictive Models</em>. Chapman and Hall/CRC; 2019.</li>
-<li>scikit-learn Developers. <code>sklearn.feature_selection.VarianceThreshold</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.VarianceThreshold.html">https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.VarianceThreshold.html</a> （访问日期：2026-07-02）</li>
-<li>Kuhn M. Building predictive models in R using the caret package. <em>J Stat Softw</em>. 2008;28(5):1-26.</li>
+<li>单变量选择看特征—结局关联；方差阈值不看结局。</li>
+<li>相关过滤删除特征间冗余；方差阈值只看单列。</li>
+<li>如何选择：先删除恒定列，再在训练流水线内做监督或冗余筛选。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>删除单中心数据中恒定设备/站点字段。</li>
+<li>清理组学低变异探针。</li>
+<li>删除 one-hot 后几乎从不出现的类别，但罕见病特征需保护。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>常数特征（Constant feature）</strong>：所有样本取值相同。</li>
+<li><strong>近零方差（Near-zero variance）</strong>：只有极少数样本不同。</li>
+<li><strong>过滤式选择（Filter method）</strong>：不依赖最终模型的预筛。</li>
+<li><strong>支持掩码（Support mask）</strong>：标记保留列的布尔向量。</li>
+<li><strong>数据泄漏（Leakage）</strong>：测试信息参与预处理拟合。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-univariate-feature-selection.html" data-cn="单变量特征选择" data-en="Univariate Feature Selection" data-def="单变量特征选择让每个特征单独参加一次“与结局的考试”，再按得分或校正后的显著性筛选，但看不到联合效应和交互。">单变量特征选择（Univariate Feature Selection）</a></li>
+<li><a class="xlink" href="m-correlation-based-feature-selection.html" data-cn="相关系数特征选择" data-en="Correlation-based Feature Selection" data-def="相关过滤把高度同步变化的特征视为重复测量，在每组冗余变量中保留代表，以降低共线性与重复信息。">相关系数特征选择（Correlation-based Feature Selection）</a></li>
+<li><a class="xlink" href="m-embedded-feature-selection.html" data-cn="嵌入式特征选择" data-en="Embedded Feature Selection" data-def="嵌入式选择把“哪些变量留下”写进模型训练目标或结构，让预测拟合与特征取舍同时完成。">嵌入式特征选择（Embedded Feature Selection）</a></li>
+<li><a class="xlink" href="m-multiple-imputation.html" data-cn="多重插补" data-en="Multiple Imputation" data-def="多重插补不假装缺失值有唯一答案，而是生成多份合理完整数据，分别分析，再把“数据内不确定性”和“不同填法之间的不确定性”一起合并。">多重插补（Multiple Imputation）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Kuhn M, Johnson K. <em>Feature Engineering and Selection</em>. CRC Press; 2019.</li>
+<li>scikit-learn developers. VarianceThreshold. https://scikit-learn.org/stable/modules/feature_selection.html</li>
 </ul></div>
     </section>
     <div class="pager"><span></span><a class="pg pg-next" href="m-univariate-feature-selection.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">单变量特征选择</div></a></div>

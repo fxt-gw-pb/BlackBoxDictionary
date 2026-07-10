@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,203 +54,141 @@
     <div class="intro-note"><h1>自回归滑动平均模型（Autoregressive Moving Average Model, ARMA）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>ARMA 模型把自回归 AR 部分和移动平均 MA 部分组合起来，用于建模平稳单变量时间序列。ARMA($p,q$) 同时利用过去观测值和过去误差项预测当前值。</p>
-<h3>1.2 它主要解决什么问题</h3>
-<ul>
-<li>研究问题：平稳序列中既有历史惯性，又有短期冲击传播时，如何统一建模。</li>
-<li>适用任务：平稳时间序列预测、残差相关建模、ARIMA 的无差分特例。</li>
-<li>常见医学场景：平稳阶段的床位占用率、标准化后的空气污染指标、去趋势后的病例数或监测指标。</li>
-</ul>
-<h3>1.3 直觉理解</h3>
-<p>ARMA 同时问两件事：过去观测水平会不会影响现在，过去没解释掉的冲击会不会继续影响现在。它比单独 AR 或 MA 更灵活，但仍要求序列近似平稳。</p></div>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>ARMA 同时用过去观测的惯性和过去冲击的回声，以较少参数描述平稳序列复杂自相关。</p>
+<h3>1.2 定义</h3>
+<p>ARMA($p,q$) 合并 AR($p$) 与 MA($q$)，适用于已平稳的单变量序列。</p>
+<h3>1.3 它主要解决什么问题</h3>
+<p>当 ACF/PACF 都拖尾、纯 AR 或纯 MA 需要很高阶时进行简约建模。</p>
+<h3>1.4 直觉与类比</h3>
+<p>序列既会沿用昨天的状态，也会继续消化昨天未预料到的冲击。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>ARMA($p,q$) 模型为：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 根本困难</h3>
+<p>惯性和短期冲击常同时存在，单一机制会把另一机制误塞进高阶参数。</p>
+<h3>2.2 关键洞察</h3>
+<p>AR 产生持续衰减记忆，MA 产生有限冲击记忆；组合可生成更丰富但仍简约的相关结构。</p>
+<h3>2.3 与朴素做法对比</h3>
+<p>相比高阶 AR，低阶 ARMA 可能参数更少；代价是 MA 创新未观测、估计更复杂。</p></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
 <p>$$
 y_t=c+\sum_{i=1}^{p}\phi_i y_{t-i}
 +\varepsilon_t+\sum_{j=1}^{q}\theta_j\varepsilon_{t-j}
 $$</p>
-<p>滞后算子形式为：</p>
-<p>$$
-\phi(B)y_t=c+\theta(B)\varepsilon_t
-$$</p>
-<p>其中：</p>
-<p>$$
-\phi(B)=1-\phi_1B-\cdots-\phi_pB^p,\quad
-\theta(B)=1+\theta_1B+\cdots+\theta_qB^q
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
-<ul>
-<li>$p$：AR 阶数。</li>
-<li>$q$：MA 阶数。</li>
-<li>$\phi_i$：自回归系数。</li>
-<li>$\theta_j$：移动平均系数。</li>
-<li>AIC/BIC：常用于比较不同阶数组合。</li>
-<li>ACF/PACF：用于初步判断 AR 与 MA 结构。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>序列平稳。</li>
-<li>残差为白噪声。</li>
-<li>模型满足稳定性和可逆性条件。</li>
-<li>线性滞后结构足以描述主要时间依赖。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：目标变量滞后值和误差滞后项。</li>
-<li>因变量类型：连续型平稳时间序列。</li>
-<li>数据结构：等间隔单变量时间序列。</li>
-<li>是否适合高维数据：不适合直接处理多变量高维。</li>
-<li>是否适合缺失较多数据：需先处理缺失或使用支持缺失的估计方法。</li>
-<li>是否适合删失数据：不直接处理删失结局。</li>
-<li>是否适合重复测量数据：适合总体级序列，不适合直接处理个体重复测量。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>以去趋势后的 PM2.5 日均值为例：</p>
+<h3>3.2 推导脉络</h3>
+<p>用滞后算子写为 $\phi(B)y_t=c+\theta(B)\varepsilon_t$；AR 多项式决定平稳性，MA 多项式决定可逆性。</p>
+<h3>3.3 参数含义</h3>
+<p>$p$ 是观测记忆阶数，$q$ 是冲击记忆阶数；AIC/BIC 与残差诊断共同选型。</p>
+<h3>3.4 关键假设</h3>
+<p>弱平稳、可逆、参数稳定、残差白噪声、等间隔；结构变点会使全期单一参数失真。</p></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>ARMA(1,1)：$y_t=0.5y_{t-1}+\varepsilon_t+0.4\varepsilon_{t-1}$，$y_0=\varepsilon_0=0$。
+若 $\varepsilon_1=2,\varepsilon_2=-1,\varepsilon_3=0$：
+$$
+y_1=2
+$$
+$$
+y_2=0.5(2)-1+0.4(2)=0.8
+$$
+$$
+y_3=0.5(0.8)+0+0.4(-1)=0
+$$
+第 2 期既继承 $y_1$ 的 1.0，又保留冲击 2 的 0.8，再叠加新冲击 $-1$。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<p>等间隔、平稳、连续单变量序列；不直接处理趋势、删失或层级数据。</p>
+<h3>5.2 示例表格</h3>
 <table>
 <thead>
 <tr>
-<th>Date</th>
-<th>PM25_detrended</th>
+<th>time</th>
+<th style="text-align: right;">y</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>2026-01-01</td>
-<td>-3.2</td>
+<td>1</td>
+<td style="text-align: right;">2.0</td>
 </tr>
 <tr>
-<td>2026-01-02</td>
-<td>1.8</td>
+<td>2</td>
+<td style="text-align: right;">0.8</td>
 </tr>
 <tr>
-<td>2026-01-03</td>
-<td>4.1</td>
+<td>3</td>
+<td style="text-align: right;">0.0</td>
 </tr>
 <tr>
-<td>2026-01-04</td>
-<td>-0.7</td>
+<td>### 5.3 输入与产出</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td>输入序列与 $(p,q)$；产出系数、创新、信息准则和多步预测区间。</td>
+<td style="text-align: right;"></td>
 </tr>
 </tbody>
-</table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：平稳或已去趋势的单变量序列。</li>
-<li>关键变量：AR 阶数 $p$、MA 阶数 $q$、是否包含常数项。</li>
-<li>需要预处理的内容：平稳性检查、缺失处理、异常值检查、训练测试时间切分。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：AR/MA 系数、残差、信息准则、预测值。</li>
-<li>参数估计：$\phi_i$、$\theta_j$、误差方差。</li>
-<li>预测结果：未来若干期点预测和预测区间。</li>
-<li>不确定性指标：参数标准误、预测区间、残差白噪声检验。</li>
-</ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：平稳单变量序列，ACF/PACF 显示有限滞后依赖。</li>
-<li>不适合：明显趋势或季节性未处理、结构突变、强非线性、外部协变量很重要的场景。</li>
-<li>使用前需要特别检查的点：平稳性、阶数选择、残差诊断、预测窗口是否合理。</li>
-</ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="autoregressive-moving-average-model-arma" data-i="0">Python</button><button class="codetab" data-uid="autoregressive-moving-average-model-arma" data-i="1">R</button></div><div class="codepanel active" data-uid="autoregressive-moving-average-model-arma" data-i="0"><p>常用包：</p>
-<ul>
-<li><code>statsmodels</code></li>
-</ul>
-<pre><code class="language-python">import pandas as pd
-from statsmodels.tsa.arima.model import ARIMA
-
-df = pd.read_csv(&quot;daily_pm25_detrended.csv&quot;, parse_dates=[&quot;Date&quot;])
-y = df.set_index(&quot;Date&quot;)[&quot;PM25_detrended&quot;].asfreq(&quot;D&quot;).interpolate()
-
-fit = ARIMA(y, order=(2, 0, 1)).fit()
-forecast = fit.get_forecast(steps=7)
-
-print(fit.summary())
-print(forecast.summary_frame())
-</code></pre></div><div class="codepanel" data-uid="autoregressive-moving-average-model-arma" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>forecast</code></li>
-</ul>
-<pre><code class="language-r">library(forecast)
-
-y &lt;- ts(df$PM25_detrended, frequency = 7)
-fit &lt;- Arima(y, order = c(2, 0, 1), include.mean = TRUE)
-
-forecast(fit, h = 7)
-checkresiduals(fit)
-</code></pre></div></div></div>
+</table></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：AR/MA 系数、AIC/BIC、残差是否白噪声、预测误差。</li>
-<li>每个主要参数如何解释：AR 系数反映历史观测影响，MA 系数反映历史冲击影响。</li>
-<li>临床或医学意义如何表达：适合描述去趋势后指标的短期自相关结构，并用于短期预测。</li>
-<li>常见误读：ARMA 对平稳序列建模，不应直接套在有明显趋势的原始序列上。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><p>适合平稳且 ACF/PACF 均拖尾的序列；明显趋势季节、非线性或变点需扩展。</p></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>原始/去趋势序列图。</li>
-<li>ACF 与 PACF 图。</li>
-<li>拟合值和预测值对比图。</li>
-<li>残差 ACF、QQ 图和残差时间图。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="autoregressive-moving-average-model-arma" data-i="0">Python</button><button class="codetab" data-uid="autoregressive-moving-average-model-arma" data-i="1">R</button></div><div class="codepanel active" data-uid="autoregressive-moving-average-model-arma" data-i="0"><pre><code class="language-python">import numpy as np
+from statsmodels.tsa.arima.model import ARIMA
+rng = np.random.default_rng(42)
+e = rng.normal(size=300)
+y = np.zeros(300)
+for t in range(1, 300):
+    y[t] = 0.5*y[t-1] + e[t] + 0.4*e[t-1]
+fit = ARIMA(y, order=(1, 0, 1)).fit()
+print(fit.summary(), fit.forecast(5))
+</code></pre></div><div class="codepanel" data-uid="autoregressive-moving-average-model-arma" data-i="1"><pre><code class="language-r">set.seed(42)
+y &lt;- arima.sim(model = list(ar = 0.5, ma = 0.4), n = 300)
+fit &lt;- arima(y, order = c(1, 0, 1))
+predict(fit, n.ahead = 5)
+</code></pre></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>统一表达 AR 和 MA 依赖。</li>
-<li>对平稳线性序列预测效果稳健。</li>
-<li>模型诊断体系成熟。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>不能直接处理非平稳趋势。</li>
-<li>阶数选择需要诊断和比较。</li>
-<li>对结构突变和非线性关系表达有限。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>忽略平稳性要求。</li>
-<li>只靠 AIC 选模型而不看残差。</li>
-<li>在模型选择中反复看测试集造成乐观偏差。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><p>$\phi$ 描述条件惯性，$\theta$ 描述旧创新回声；二者可能抵消，不能逐个脱离整体动态解释。</p></div>
     </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-autoregressive-model-ar.html" data-cn="自回归模型" data-en="Autoregressive Model, AR" data-def="自回归模型是一类用序列自身过去值预测当前值的时间序列模型。AR($p$) 表示当前观测由前 $p$ 个滞后值的线性组合和随机误差构成。">自回归模型（Autoregressive Model, AR）</a> 的区别：ARMA 额外加入 MA 误差项。</li>
-<li>和 <a class="xlink" href="m-moving-average-model-ma.html" data-cn="移动平均模型" data-en="Moving Average Model, MA" data-def="移动平均模型在时间序列建模中通常指 MA($q$)：当前值由当前随机冲击和过去 $q$ 个随机冲击线性组合而成。实践中“移动平均”也常指简单移动平均平滑，用于去噪和观察趋势。">移动平均模型（Moving Average Model, MA）</a> 的区别：ARMA 额外加入过去观测值。</li>
-<li>和 <a class="xlink" href="m-autoregressive-integrated-moving-average-model-arima.html" data-cn="自回归积分滑动平均模型" data-en="Autoregressive Integrated Moving Average Model, ARIMA" data-def="ARIMA 是用于单变量时间序列预测的经典模型。它通过差分把非平稳序列转为平稳序列，再用 ARMA 模型刻画差分后序列的自相关结构。">自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）</a> 的区别：ARIMA 通过差分处理非平稳序列，ARMA 适合已平稳序列。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><p>检查平稳/可逆根、残差 ACF 与 Ljung–Box、参数近边界、滚动验证和变点。</p></div>
     </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>去趋势后的空气污染或温度暴露预测。</li>
-<li>医院运行指标的平稳阶段短期预测。</li>
-<li>传染病监测残差相关结构建模。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><p>序列、ACF/PACF、残差诊断、滚动预测和冲击响应。</p></div>
     </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-autoregressive-model-ar.html" data-cn="自回归模型" data-en="Autoregressive Model, AR" data-def="自回归模型是一类用序列自身过去值预测当前值的时间序列模型。AR($p$) 表示当前观测由前 $p$ 个滞后值的线性组合和随机误差构成。">自回归模型（Autoregressive Model, AR）</a></li>
-<li><a class="xlink" href="m-moving-average-model-ma.html" data-cn="移动平均模型" data-en="Moving Average Model, MA" data-def="移动平均模型在时间序列建模中通常指 MA($q$)：当前值由当前随机冲击和过去 $q$ 个随机冲击线性组合而成。实践中“移动平均”也常指简单移动平均平滑，用于去噪和观察趋势。">移动平均模型（Moving Average Model, MA）</a></li>
-<li><a class="xlink" href="m-autoregressive-integrated-moving-average-model-arima.html" data-cn="自回归积分滑动平均模型" data-en="Autoregressive Integrated Moving Average Model, ARIMA" data-def="ARIMA 是用于单变量时间序列预测的经典模型。它通过差分把非平稳序列转为平稳序列，再用 ARMA 模型刻画差分后序列的自相关结构。">自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）</a></li>
-<li><a class="xlink" href="m-vector-autoregression-var.html" data-cn="向量自回归模型" data-en="Vector Autoregression, VAR" data-def="向量自回归模型是多变量时间序列模型，用每个变量自身和其他变量的历史值共同预测当前多个变量。VAR($p$) 可看作多变量版 AR 模型。">向量自回归模型（Vector Autoregression, VAR）</a></li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p>优势是简约灵活；局限是阶数识别与非线性。常见坑：只凭 ACF 机械选阶、搜索后不留测试集。</p></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><p>纯 AR 令 $q=0$，纯 MA 令 $p=0$；ARIMA 对差分后序列使用 ARMA。</p></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><p>平稳化后的床位、监护与实验室质控序列短期预测。</p></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
       <div class="sec-body"><ul>
-<li>Box GEP, Jenkins GM, Reinsel GC, Ljung GM. <em>Time Series Analysis: Forecasting and Control</em>. 5th ed. Wiley; 2015.</li>
-<li>Brockwell PJ, Davis RA. <em>Time Series: Theory and Methods</em>. 2nd ed. Springer; 1991.</li>
-<li>Hyndman RJ, Athanasopoulos G. <em>Forecasting: Principles and Practice</em>. 3rd ed. OTexts; 2021. <a href="https://otexts.com/fpp3/">https://otexts.com/fpp3/</a> （访问日期：2026-07-02）</li>
+<li><strong>滞后算子（Backshift operator）</strong>：$By_t=y_{t-1}$。</li>
+<li><strong>简约性（Parsimony）</strong>：用尽量少参数解释动态。</li>
+<li><strong>信息准则</strong>：拟合与参数数量的权衡。</li>
+<li><strong>拖尾（Tailing off）</strong>：相关随阶数逐渐衰减而非突然归零。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-autoregressive-model-ar.html" data-cn="自回归模型" data-en="Autoregressive Model, AR" data-def="AR 用序列自身过去的值预测现在，把“惯性会延续但逐渐衰减”写成线性递推。">自回归模型（Autoregressive Model, AR）</a></li>
+<li><a class="xlink" href="m-moving-average-model-ma.html" data-cn="移动平均模型" data-en="Moving Average Model, MA" data-def="统计时间序列中的 MA 用有限个过去随机冲击解释当前值，而不是对过去观测做滚动平均。">移动平均模型（Moving Average Model, MA）</a></li>
+<li><a class="xlink" href="m-autoregressive-integrated-moving-average-model-arima.html" data-cn="自回归积分滑动平均模型" data-en="Autoregressive Integrated Moving Average Model, ARIMA" data-def="ARIMA 先用差分去掉随机趋势，再对差分后的平稳变化量建立 ARMA。">自回归积分滑动平均模型（Autoregressive Integrated Moving Average Model, ARIMA）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Box GEP, et al. <em>Time Series Analysis</em>. Wiley; 2015.</li>
+<li>Hyndman RJ, Athanasopoulos G. <em>Forecasting: Principles and Practice</em>. OTexts; 2021.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-moving-average-model-ma.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">移动平均模型</div></a><a class="pg pg-next" href="m-autoregressive-integrated-moving-average-model-arima.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">自回归积分滑动平均模型</div></a></div>

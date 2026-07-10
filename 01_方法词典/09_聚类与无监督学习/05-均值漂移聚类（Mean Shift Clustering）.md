@@ -19,202 +19,229 @@ r_packages: [meanShiftR]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-均值漂移聚类是一种基于密度峰的无监督方法。它通过不断把样本点移动到邻域内样本的加权均值位置，使点沿着密度上升方向收敛到局部密度峰，最终把收敛到同一峰的点归为一簇。
+Mean Shift 让候选中心反复移动到局部邻域的加权均值，沿密度上升方向收敛到密度峰，并把到达同一峰的样本归为一簇。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：不预设簇数时，数据中有哪些高密度中心或模式。
-- 适用任务：密度峰聚类、图像分割、空间热点探索、模式发现。
-- 常见医学场景：影像像素/区域分割，空间流行病学热点探索，连续临床表型中的高密度患者群识别。
+均值漂移聚类是一种非参数密度峰聚类方法。它以核密度估计为基础，用带宽规定观察尺度，不要求事先给定簇数；最终簇数由该尺度下保留下来的密度峰数量决定。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-均值漂移像让每个样本沿着“人群更密集”的方向爬坡。多个样本如果最后爬到同一个密度山峰，就被视为属于同一簇。
+- 簇数未知，但局部高密度模式有意义。
+- 希望找到密度峰而非均值质心。
+- 图像、空间或低维连续数据存在多个模式。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+每个起点都站在密度地形上，反复走向周围人群的平均位置。若多个起点最后爬上同一座山峰，它们属于同一簇。
 
-给定核函数 $K$ 和带宽 $h$，核密度估计为：
+## 2. 核心思想与原理
+
+### 2.1 均值偏移就是上坡方向
+
+核密度的梯度可写成与“局部加权均值减当前位置”同方向的量。移动到局部均值，等价于向密度更高处迭代。
+
+### 2.2 带宽定义分群尺度
+
+小带宽保留细小峰，簇数多且对噪声敏感；大带宽把邻近峰平滑合并，簇数少。所谓“自动簇数”并非无参数，而是把 $K$ 的选择换成带宽选择。
+
+### 2.3 峰合并与标签
+
+不同种子可能收敛到非常接近的峰，算法需要合并近重复中心，再把样本分给相应峰。实现细节会影响边界点和孤立点标签。
+
+## 3. 数学形式
+
+### 3.1 核密度估计
 
 $$
-\hat f(x)=\frac{1}{nh^p}\sum_{i=1}^{n}K\left(\frac{x-x_i}{h}\right)
+\hat f_h(x)=
+\frac{1}{nh^p}
+\sum_{i=1}^{n}
+K\left(\frac{x-x_i}{h}\right)
 $$
 
-均值漂移向量可写为：
+### 3.2 均值漂移向量
 
 $$
-m(x)=
-\frac{\sum_{i=1}^{n}x_i g\left(\left\|\frac{x-x_i}{h}\right\|^2\right)}
-{\sum_{i=1}^{n}g\left(\left\|\frac{x-x_i}{h}\right\|^2\right)}
+m_h(x)=
+\frac{\sum_i x_i g\left(\left\|\frac{x-x_i}{h}\right\|^2\right)}
+{\sum_i g\left(\left\|\frac{x-x_i}{h}\right\|^2\right)}
 -x
 $$
 
-迭代更新：
+### 3.3 更新
 
 $$
-x^{(t+1)}=x^{(t)}+m(x^{(t)})
+x^{(t+1)}=x^{(t)}+m_h[x^{(t)}]
 $$
 
-### 2.2 参数或统计量含义
+平坦核实现中，更新就是半径 $h$ 邻域内样本的普通均值。
 
-- `bandwidth`：核窗口带宽，控制邻域尺度。
-- 核函数：用于给邻域内样本赋权。
-- mode / density peak：样本最终收敛到的密度峰。
-- cluster center：聚类中心，即密度峰位置。
-- `bin_seeding`：是否用离散网格加速初始化。
+### 3.4 关键条件
 
-### 2.3 关键假设
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 低维密度可估 | 高维密度峰不稳定 | 降维和距离诊断 |
+| 单一带宽有意义 | 不同尺度簇被合并或碎裂 | 带宽路径 |
+| 特征尺度合理 | 大量纲变量主导邻域 | 标准化敏感性 |
+| 样本覆盖足够 | 假峰或漏峰 | bootstrap 稳定性 |
 
-- 簇可被密度峰合理刻画。
-- 一个合适的带宽能表达目标尺度。
-- 特征空间中的距离和密度对研究问题有意义。
-- 样本量足以估计局部密度。
+## 4. 手把手算例
 
-## 3. 数据形式与输入输出
+一维样本：
 
-### 3.1 适合的数据形式
+$$
+x=(0,1,2,8,9)
+$$
 
-- 自变量类型：连续数值特征、空间坐标、图像颜色/位置特征。
-- 因变量类型：无监督方法，不需要结局变量。
-- 数据结构：样本乘以特征矩阵。
-- 是否适合高维数据：高维下密度估计困难，通常需要降维或选取少数关键特征。
-- 是否适合缺失较多数据：需先处理缺失。
-- 是否适合删失数据：不直接处理删失结局。
-- 是否适合重复测量数据：需先定义样本单位或特征表示。
+使用半径 $h=2$ 的平坦核。
 
-### 3.2 示例表格
+**Step 1：从种子 0 出发。** 距离 0 不超过 2 的点为 $\{0,1,2\}$：
 
-以影像区域特征为例：
+$$
+x^{(1)}=\frac{0+1+2}{3}=1
+$$
 
-| X | Y | Intensity | Texture | LesionScore |
-| --- | --- | --- | --- | --- |
-| 12 | 35 | 0.82 | 1.20 | 0.77 |
-| 13 | 36 | 0.85 | 1.15 | 0.80 |
-| 80 | 22 | 0.31 | 0.40 | 0.12 |
-| 81 | 23 | 0.28 | 0.38 | 0.10 |
+在 1 处的邻域仍为 $\{0,1,2\}$，均值仍是 1，因此收敛到峰 1。
 
-### 3.3 输入与产出
+**Step 2：从种子 2 出发。** 它的邻域同样是 $\{0,1,2\}$，一步移动到 1，也归入第一峰。
 
-#### 输入
+**Step 3：从种子 8 出发。** 邻域为 $\{8,9\}$：
 
-- 输入数据：连续型特征矩阵。
-- 关键变量：带宽、核函数、停止阈值。
-- 需要预处理的内容：缺失处理、标准化、带宽估计、异常值检查。
+$$
+x^{(1)}=\frac{8+9}{2}=8.5
+$$
 
-#### 产出
+再次计算仍为 8.5，形成第二峰。
 
-- 模型对象/统计结果：簇标签、密度峰中心、估计簇数。
-- 参数估计：密度峰位置。
-- 预测结果：可把新样本分配到最近密度峰，但标准实现主要用于拟合数据。
-- 不确定性指标：带宽敏感性、簇中心稳定性、重采样一致性。
+**结论：** 五个起点最终汇入 1 和 8.5 两个密度峰，因此得到两个簇。若把带宽增大到足以连接两组，两个峰可能被平滑成一个。
 
-## 4. 适用场景
+## 5. 数据形式与输入输出
 
-- 适合：簇数未知、希望寻找密度峰、数据维度较低或已降维的场景。
-- 不适合：样本量很大且维度高、各簇尺度差异很大、需要明确概率归属的场景。
-- 使用前需要特别检查的点：带宽选择、密度峰是否稳定、是否存在由于尺度差异造成的假峰。
+### 5.1 数据要求
 
-## 5. 实现
+- 连续特征、空间坐标或图像位置/颜色特征。
+- 多量纲特征需标准化；高维通常先做有依据的表征压缩。
+- 缺失需预处理，普通方法不建模删失或重复测量。
 
-### 5.1 Python
+### 5.2 输入与产出
 
-常用包：
+输入为带宽、种子、核和收敛标准。输出为密度峰中心、簇数和样本标签；标准实现不提供概率隶属度。
 
-- `scikit-learn`
+## 6. 适用场景
+
+- 低维、簇数未知、密度峰具有实际含义。
+- 图像分割、空间热点和模式发现。
+- 不适合超大高维数据、不同簇尺度悬殊或需要概率归属的任务。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import pandas as pd
 from sklearn.cluster import MeanShift, estimate_bandwidth
-from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv("image_region_features.csv")
-X = df[["X", "Y", "Intensity", "Texture", "LesionScore"]]
+X_s = StandardScaler().fit_transform(X)
+bandwidth = estimate_bandwidth(
+    X_s,
+    quantile=0.2,
+    n_samples=min(2000, len(X_s)),
+)
 
-X_scaled = StandardScaler().fit_transform(X)
-bandwidth = estimate_bandwidth(X_scaled, quantile=0.2, n_samples=len(X_scaled))
-
-fit = MeanShift(bandwidth=bandwidth, bin_seeding=True)
-cluster = fit.fit_predict(X_scaled)
-
-print("Clusters:", len(set(cluster)))
-print(pd.Series(cluster).value_counts().sort_index())
+model = MeanShift(
+    bandwidth=bandwidth,
+    bin_seeding=True,
+    min_bin_freq=5,
+    cluster_all=False,
+    n_jobs=-1,
+)
+cluster = model.fit_predict(X_s)
+centers = model.cluster_centers_
+print(len(centers), model.n_iter_)
 ```
 
-### 5.2 R
-
-常用包：
-
-- `meanShiftR`
+### 7.2 R
 
 ```r
 library(meanShiftR)
 
 x <- scale(df[, c("X", "Y", "Intensity", "Texture", "LesionScore")])
-fit <- meanShift(as.matrix(x), bandwidth = 1.2)
+fit <- meanShift(
+  as.matrix(x),
+  bandwidth = 1.2
+)
 
 cluster <- fit$assignment
 table(cluster)
 ```
 
-## 6. 结果如何解释
+不同 R 包的函数名与输出结构差异较大，使用前应以所安装版本的帮助文档为准。
 
-- 核心结果看什么：密度峰位置、簇数量、各簇样本量、不同带宽下结果是否稳定。
-- 每个主要参数如何解释：带宽越大，密度估计越平滑，簇数通常越少。
-- 临床或医学意义如何表达：适合描述为“在所选尺度下发现若干高密度模式”，而不是直接宣称存在固定疾病亚型。
-- 常见误读：自动得到簇数不代表该簇数就是唯一正确答案。
+## 8. 结果如何解释
 
-## 7. 推荐可视化
+- 中心是密度模式，不一定等于簇内算术均值。
+- 簇数是给定带宽下的结果，不是唯一真实簇数。
+- `cluster_all=False` 时，无法归入峰邻域的点可标为 -1。
+- 临床解释应表述为“在该尺度下的高密度模式”。
 
-- 二维特征空间中的密度峰和聚类结果。
-- 带宽变化下簇数曲线。
-- 核密度热图。
-- 图像或空间数据中的聚类区域叠加图。
+## 9. 诊断与稳健性
 
-## 8. 优势、局限与常见坑
+1. 画带宽-簇数和带宽-中心位置路径。
+2. bootstrap 后比较峰数量与位置。
+3. 检查孤立点和小簇是否由噪声造成。
+4. 比较标准化、变量集和降维方案。
+5. 与 DBSCAN、K-means 和 KDE 结果对照。
 
-### 优势
+## 10. 推荐可视化
 
-- 不需要预先指定簇数。
-- 可发现密度峰和非参数模式。
-- 对图像分割和空间热点直观。
+- 核密度曲线或热图与密度峰。
+- 样本移动轨迹和最终中心。
+- 带宽变化下簇数阶梯图。
+- 图像或地图上的聚类区域。
 
-### 局限
+## 11. 优势、局限与常见坑
 
-- 带宽选择非常关键。
-- 高维密度估计困难。
-- 大样本计算成本较高。
+**优势：** 不预设簇数，直接寻找密度峰，可用于任意峰形的吸引盆。
 
-### 常见坑
+**局限：** 带宽敏感，高维和大样本昂贵，不同尺度簇难兼顾。
 
-- 不标准化多尺度特征。
-- 把带宽估计默认值当成唯一合理选择。
-- 在高维稀疏数据上直接使用而不先降维。
+**常见坑：** 把自动簇数当无参数；直接接受默认带宽；未标准化；把每个小峰都命名为医学亚型；忽略带宽估计本身的计算成本。
 
-## 9. 与相近方法的区别
+## 12. 与相近方法的区别
 
-- 和 [[DBSCAN（Density-Based Spatial Clustering of Applications with Noise）]] 的区别：DBSCAN 以密度连通定义簇，均值漂移以密度峰吸引盆定义簇。
-- 和 [[K-means聚类（K-means Clustering）]] 的区别：K-means 需要预设 $K$，均值漂移通过密度峰自动形成簇。
-- 和 [[核密度估计（Kernel Density Estimation, KDE）]] 的区别：KDE 是密度估计工具，均值漂移利用 KDE 的梯度思想做聚类。
+- [[DBSCAN（Density-Based Spatial Clustering of Applications with Noise）]]：按密度连通定义簇，Mean Shift 按密度峰吸引盆定义簇。
+- [[K-means聚类（K-means Clustering）]]：固定 $K$ 并优化平方距离。
+- [[核密度估计（Kernel Density Estimation, KDE）]]：KDE 估密度，Mean Shift 使用密度梯度找峰并分群。
+- 选择经验：低维模式发现关注“峰”时选 Mean Shift，关注噪声与连通形状时选 DBSCAN。
 
-## 10. 医学研究中的典型应用
+## 13. 医学研究中的典型应用
 
-- 医学影像分割中的颜色、纹理和空间特征聚类。
-- 空间病例分布的高密度区域识别。
-- 连续临床表型数据中的密度峰亚群探索。
+- 医学图像像素或区域的空间-颜色联合分割。
+- 病例地理分布与空间组学密度峰探索。
+- 连续表型中的常见模式中心识别。
 
-## 11. 相关方法
+## 14. 术语表
+
+| 术语 | 含义 |
+| --- | --- |
+| mode | 概率密度的局部最大点 |
+| bandwidth | 决定局部邻域和平滑尺度的参数 |
+| mean shift vector | 局部加权均值减当前位置 |
+| basin of attraction | 会收敛到同一密度峰的起点集合 |
+| bin seeding | 用网格箱中心减少初始种子数量 |
+
+## 15. 相关方法
 
 - [[DBSCAN（Density-Based Spatial Clustering of Applications with Noise）]]
 - [[K-means聚类（K-means Clustering）]]
 - [[核密度估计（Kernel Density Estimation, KDE）]]
 - [[谱聚类（Spectral Clustering）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
-- Fukunaga K, Hostetler L. The estimation of the gradient of a density function, with applications in pattern recognition. *IEEE Transactions on Information Theory*. 1975;21(1):32-40.
-- Comaniciu D, Meer P. Mean shift: a robust approach toward feature space analysis. *IEEE Transactions on Pattern Analysis and Machine Intelligence*. 2002;24(5):603-619.
-- scikit-learn Developers. `sklearn.cluster.MeanShift`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MeanShift.html](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MeanShift.html) （访问日期：2026-07-02）
+- Fukunaga K, Hostetler L. The estimation of the gradient of a density function, with applications in pattern recognition. *IEEE Trans Inf Theory*. 1975;21(1):32-40.
+- Comaniciu D, Meer P. Mean shift: a robust approach toward feature space analysis. *IEEE Trans Pattern Anal Mach Intell*. 2002;24(5):603-619.
+- scikit-learn Developers. `MeanShift` API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MeanShift.html](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MeanShift.html) （访问日期：2026-07-09）

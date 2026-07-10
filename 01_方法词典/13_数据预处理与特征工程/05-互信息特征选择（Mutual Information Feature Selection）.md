@@ -19,210 +19,247 @@ r_packages: [FSelectorRcpp, infotheo]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-互信息特征选择用互信息衡量每个特征与目标变量之间共享的信息量，并据此筛选特征。它可以捕捉非线性依赖，不局限于线性相关。
+互信息衡量知道一个特征后，结局的不确定性平均减少多少，因此能发现不限于线性或均值差异的边际依赖。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：哪些特征与结局之间存在较强的信息依赖。
-- 适用任务：分类或回归任务中的过滤式特征筛选。
-- 常见医学场景：非线性生物标志物筛选、影像组学特征排序、临床表格数据初筛。
+互信息（MI）是两个随机变量共享的信息量。特征选择时逐列估计 $I(X_j;Y)$，按得分保留前 $k$ 个。离散分类中它等于信息增益；连续变量常用分箱、核密度或 k 近邻估计。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-互信息衡量“知道这个特征以后，关于结局能少多少不确定”。如果一个特征与结局共享的信息多，它就更可能帮助预测。
+- 发现 U 形、阈值、单调或离散的非线性边际关系。
+- 对分类和连续结局建立模型无关的初筛排名。
+- 医学场景：组学、影像组学、多类型生物标志物筛选。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+相关问“两者是否沿直线一起升降”，互信息问“知道 X 能否让我更少猜 Y”。即使高低两端都危险、直线相关接近 0，只要 X 能缩小 Y 的可能范围，MI 仍可大于 0。
 
-互信息定义为：
+## 2. 核心思想与原理
+
+### 2.1 它到底在解决什么根本困难
+
+Pearson/F 检验依赖特定函数形状。真实生物关系常有阈值、饱和或多峰，预先枚举变换困难。MI 直接比较联合分布与边际分布乘积，不预设线性。
+
+### 2.2 关键洞察
+
+若 $X,Y$ 独立，则 $p(x,y)=p(x)p(y)$，观察 X 不改变 Y 的分布，MI 为 0；偏离独立越大，MI 越高。MI 对可逆变换理论上不变，但有限样本估计会受尺度、邻居数和分箱影响。
+
+### 2.3 与朴素/相邻做法的对比
+
+- 比相关更一般，但不提供方向和简单效应大小。
+- 比模型内选择更快，却忽略特征冗余与交互。
+- mRMR 等方法在高相关候选中同时奖励结局信息、惩罚特征间 MI。
+
+## 3. 数学形式
+
+### 3.1 核心公式
+
+离散变量：
 
 $$
-I(X;Y)=\sum_x\sum_y p(x,y)\log\frac{p(x,y)}{p(x)p(y)}
+I(X;Y)=\sum_x\sum_y p(x,y)
+\log_2\frac{p(x,y)}{p(x)p(y)}
 $$
 
-也可写成熵的形式：
-
-$$
-I(X;Y)=H(X)+H(Y)-H(X,Y)
-$$
-
-或：
+等价形式：
 
 $$
 I(X;Y)=H(Y)-H(Y\mid X)
 $$
 
-特征选择时，常按每个特征 $X_j$ 与目标 $Y$ 的互信息得分排序：
+这个式子在说：观察 X 前后的不确定性差，就是 X 提供的关于 Y 的信息。
+
+连续变量将求和换成积分：
 
 $$
-\mathrm{score}(X_j)=I(X_j;Y)
+I(X;Y)=\iint p(x,y)\log
+\frac{p(x,y)}{p(x)p(y)}\,dx\,dy
 $$
 
-### 2.2 参数或统计量含义
+### 3.2 推导脉络
 
-- $I(X;Y)$：两个变量共享的信息量。
-- $H(Y)$：目标变量的不确定性。
-- $H(Y\mid X)$：已知特征后的剩余不确定性。
-- `n_neighbors`：连续变量互信息估计中常见的近邻参数。
-- `discrete_features`：指定哪些特征按离散变量处理。
+MI 是联合分布与“独立情况下的分布”之间的 KL 散度，因此非负，且独立时为 0。有限样本需估计分布；分箱太细或邻居数太小会高方差，太粗或邻居数太大会抹平关系。
 
-### 2.3 关键假设
+### 3.3 参数与统计量含义
 
-- 有足够样本估计变量分布或局部密度。
-- 每个特征单独评分，不自动处理特征冗余。
-- 连续变量的互信息估计会受样本量、噪声和参数影响。
+- $H(Y)$：结局原始熵。
+- $H(Y\mid X)$：知道特征后剩余熵。
+- $k$：kNN 估计器邻居数，不是保留特征数。
+- $I(X_j;Y)$：边际信息量，不含控制其他变量后的增量信息。
 
-## 3. 数据形式与输入输出
+### 3.4 关键假设（含违反后果）
 
-### 3.1 适合的数据形式
+| 假设 | 含义 | 违反后果 |
+| --- | --- | --- |
+| 样本近似独立同分布 | 经验分布可估计目标分布 | 重复患者使 MI 虚高 |
+| 样本量支持密度估计 | 稀疏区域有足够邻居 | 得分偏差/波动 |
+| 离散/连续类型正确 | 估计器与变量匹配 | 得分失真 |
+| 筛选只在训练折 | 测试标签不可见 | 泄漏 |
 
-- 自变量类型：连续变量、离散变量、编码后的分类变量。
-- 因变量类型：二分类、多分类或连续型。
-- 数据结构：监督学习特征矩阵。
-- 是否适合高维数据：适合初筛，但需注意估计稳定性和多重比较。
-- 是否适合缺失较多数据：需先处理缺失。
-- 是否适合删失数据：普通实现不直接适合删失结局。
-- 是否适合重复测量数据：需按独立分析单位处理。
+## 4. 手把手算例
 
-### 3.2 示例表格
+8 人二元特征与结局列联表：
 
-以疾病风险预测为例：
+| | $Y=0$ | $Y=1$ |
+| --- | ---: | ---: |
+| $X=0$ | 3 | 1 |
+| $X=1$ | 1 | 3 |
 
-| Age | BMI | CRP | ExerciseScore | DietScore | Disease |
-| --- | --- | --- | --- | --- | --- |
-| 71 | 29.4 | 4.1 | 1 | 2 | 1 |
-| 52 | 23.8 | 1.2 | 4 | 4 | 0 |
-| 63 | 31.2 | 2.8 | 2 | 3 | 1 |
-| 44 | 22.1 | 0.9 | 5 | 5 | 0 |
-| 68 | 28.7 | 3.6 | 2 | 2 | 1 |
+Y 两类各半，故 $H(Y)=1$ bit。每个 X 组内类别比例为 $3/4,1/4$：
 
-### 3.3 输入与产出
+$$
+H(Y\mid X=0)=H(Y\mid X=1)
+=-0.75\log_2 0.75-0.25\log_2 0.25
+=0.811
+$$
 
-#### 输入
+两组等大：
 
-- 输入数据：特征矩阵和目标变量。
-- 关键变量：互信息估计方法、近邻数、选择数量或阈值。
-- 需要预处理的内容：缺失处理、类别编码、连续/离散变量标记、训练测试划分。
+$$
+H(Y\mid X)=0.5(0.811)+0.5(0.811)=0.811
+$$
 
-#### 产出
+$$
+I(X;Y)=1-0.811=0.189\text{ bit}
+$$
 
-- 模型对象/统计结果：每个特征的互信息得分。
-- 参数估计：无传统模型参数。
-- 预测结果：无，输出筛选后特征矩阵。
-- 不确定性指标：可用 bootstrap 或交叉验证评估得分稳定性。
+观察 X 后，结局不确定性减少 0.189 bit。它有依赖，但并非完美预测；MI 不告诉我们“X=1 增加还是降低风险”，方向需看条件概率。
 
-## 4. 适用场景
+## 5. 数据形式与输入输出
 
-- 适合：非线性关系可能存在、特征数量较多、需要模型无关初筛的场景。
-- 不适合：样本量很小、连续变量分布估计不稳、强交互但单变量依赖弱的场景。
-- 使用前需要特别检查的点：互信息估计是否稳定、是否存在冗余特征、是否在训练集内完成筛选。
+### 5.1 适合的数据形式
 
-## 5. 实现
+- 离散/连续特征，分类或连续结局。
+- 时间到事件需专门生存互信息；普通 MI 忽略删失。
+- 重复测量需患者级抽样或专门依赖处理。
+- 缺失作为一类可能捕捉诊疗流程而非生物信号。
 
-### 5.1 Python
+### 5.2 示例表格
 
-常用包：
+| patient_id | marker_binary | nonlinear_marker | outcome |
+| --- | ---: | ---: | ---: |
+| P01 | 0 | -2.1 | 0 |
+| P02 | 0 | 0.1 | 1 |
+| P03 | 1 | 2.0 | 1 |
 
-- `scikit-learn`
+### 5.3 输入与产出
+
+输入训练 $X,y$、变量类型、估计器参数与保留数；产出 MI 得分、排名、支持掩码和稳定性结果。
+
+## 6. 适用场景
+
+- 适合：怀疑非线性边际关系、候选很多、最终模型尚未确定。
+- 不适合：样本很小、交互才是唯一信号、需要方向/因果解释。
+- 与冗余控制和嵌套验证结合使用。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
 import pandas as pd
-from sklearn.feature_selection import mutual_info_classif, SelectKBest
-from sklearn.model_selection import train_test_split
+from sklearn.feature_selection import mutual_info_classif
 
-df = pd.read_csv("disease_features.csv")
-X = df[["Age", "BMI", "CRP", "ExerciseScore", "DietScore"]]
-y = df["Disease"].astype(int)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
+X = pd.DataFrame({
+    "informative": [0, 0, 0, 0, 1, 1, 1, 1],
+    "noise": [0, 1, 0, 1, 0, 1, 0, 1],
+})
+y = [0, 0, 0, 1, 0, 1, 1, 1]
+mi = mutual_info_classif(
+    X, y, discrete_features=True, random_state=42
 )
-
-selector = SelectKBest(
-    score_func=lambda X, y: mutual_info_classif(X, y, random_state=42),
-    k=3
-)
-X_train_sel = selector.fit_transform(X_train, y_train)
-X_test_sel = selector.transform(X_test)
-
-scores = pd.Series(selector.scores_, index=X.columns).sort_values(ascending=False)
-print(scores)
+print(pd.Series(mi, index=X.columns).sort_values(ascending=False))
 ```
 
-### 5.2 R
-
-常用包：
-
-- `FSelectorRcpp`
+### 7.2 R
 
 ```r
-library(FSelectorRcpp)
+library(infotheo)
 
-scores <- information_gain(
-  Disease ~ Age + BMI + CRP + ExerciseScore + DietScore,
-  data = df_train
+dat <- data.frame(
+  informative = c(0, 0, 0, 0, 1, 1, 1, 1),
+  noise = c(0, 1, 0, 1, 0, 1, 0, 1),
+  y = c(0, 0, 0, 1, 0, 1, 1, 1)
 )
-
-scores[order(scores$importance, decreasing = TRUE), ]
+sapply(dat[1:2], function(x) mutinformation(x, dat$y))
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解读
 
-- 核心结果看什么：互信息得分排序、筛选后模型性能、得分稳定性。
-- 每个主要参数如何解释：得分越高，特征与结局共享的信息越多；近邻数会影响连续变量估计平滑程度。
-- 临床或医学意义如何表达：可说特征与结局有较强统计依赖，但不能说是独立效应或因果效应。
-- 常见误读：互信息高不代表模型一定会使用该特征，也不代表该变量不可替代。
+得分越高，边际依赖越强；0 不证明总体独立，只表示当前估计器和样本未发现信息。不同估计器的绝对值不宜直接比较，排名也需报告稳定性。
 
-## 7. 推荐可视化
+## 9. 假设诊断与稳健性
 
-- 互信息得分条形图。
-- Top-K 特征稳定性热图。
-- 特征值与目标的非线性关系图。
+- 多随机种子/邻居数/分箱重复估计。
+- bootstrap 或交叉验证记录入选频率。
+- 与 Pearson、Spearman 和单变量 F 排名对照。
+- 置换 y 建立零信息基线。
+- 去除批次、中心、ID 和未来信息后重算。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
+
+- MI 排序图与置换阈值。
+- 特征—结局散点/条件分布图。
+- 邻居数或分箱数敏感性曲线。
+- 各折入选频率热图。
+- MI 冗余网络图。
+
+## 11. 优势、局限与常见坑
 
 ### 优势
 
-- 能捕捉非线性依赖。
-- 不要求正态分布或线性关系。
-- 可作为模型无关初筛方法。
+- 捕捉一般非线性依赖。
+- 不依赖最终预测模型。
 
 ### 局限
 
-- 连续变量互信息估计可能不稳定。
-- 不自动去除冗余特征。
-- 得分没有像相关系数那样直观的方向。
+- 连续 MI 估计困难且无方向。
+- 边际筛选忽略冗余与纯交互。
 
 ### 常见坑
 
-- 不区分连续和离散特征的处理方式。
-- 在全数据上算互信息再做外部测试。
-- 把互信息得分解释成风险比、回归系数或因果效应。
+- 在全数据上筛选。
+- 把连续编码误标为离散或反之。
+- 只看单次随机估计。
+- 把 MI 当因果效应大小。
 
-## 9. 与相近方法的区别
+## 12. 与相近方法的区别
 
-- 和 [[信息增益（Information Gain）]] 的区别：信息增益多用于分类树语境；互信息是更一般的变量依赖度量。
-- 和 [[相关系数特征选择（Correlation-based Feature Selection）]] 的区别：相关系数主要捕捉线性或单调关系；互信息可捕捉更一般的依赖。
-- 和 [[单变量特征选择（Univariate Feature Selection）]] 的区别：互信息是单变量特征选择的一种得分函数。
+- 信息增益是离散分类场景中的 MI。
+- 相关描述线性/单调方向，MI 更一般但无符号。
+- 嵌入式选择考虑模型内联合贡献。
+- 如何选择：非线性初筛用 MI，随后用冗余控制和联合模型验证。
 
-## 10. 医学研究中的典型应用
+## 13. 医学研究中的典型应用
 
-- 从非线性生物标志物候选集中筛选疾病相关变量。
-- 影像组学特征初筛。
-- 表格数据中寻找可能存在阈值效应的预测变量。
+- 非线性生物标志物、组学和影像组学筛选。
+- 症状/基因型与诊断类别信息量评估。
+- 多模态候选变量初筛。
 
-## 11. 相关方法
+需报告估计方法、缺失、批次、类别不平衡、患者级切分和选择稳定性。
+
+## 14. 关键术语
+
+- **互信息（Mutual information）**：两个变量共享的信息量。
+- **联合分布（Joint distribution）**：变量组合取值的概率。
+- **KL 散度**：一个分布相对另一个分布的差异。
+- **kNN 估计器**：用近邻距离估计连续 MI。
+- **mRMR**：最大相关、最小冗余选择。
+- **置换基线（Permutation baseline）**：打乱结局得到的偶然得分分布。
+
+## 15. 相关方法
 
 - [[信息增益（Information Gain）]]
-- [[相关系数特征选择（Correlation-based Feature Selection）]]
 - [[单变量特征选择（Univariate Feature Selection）]]
-- [[K近邻算法（K-Nearest Neighbors, KNN）]]
+- [[Pearson相关（Pearson Correlation）]]
+- [[Spearman秩相关（Spearman Rank Correlation）]]
+- [[嵌入式特征选择（Embedded Feature Selection）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
-- Cover TM, Thomas JA. *Elements of Information Theory*. 2nd ed. Wiley; 2006.
-- Kraskov A, Stogbauer H, Grassberger P. Estimating mutual information. *Phys Rev E*. 2004;69(6):066138.
-- scikit-learn Developers. `mutual_info_classif`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.mutual_info_classif.html](https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.mutual_info_classif.html) （访问日期：2026-07-02）
+- Cover TM, Thomas JA. *Elements of Information Theory*. Wiley; 2006.
+- Kraskov A, Stögbauer H, Grassberger P. Estimating mutual information. *Physical Review E*. 2004;69:066138.
+- scikit-learn developers. Mutual information. https://scikit-learn.org/stable/modules/feature_selection.html

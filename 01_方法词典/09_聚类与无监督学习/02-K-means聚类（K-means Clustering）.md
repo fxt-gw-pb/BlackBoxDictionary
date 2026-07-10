@@ -19,201 +19,240 @@ r_packages: [stats, factoextra]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。
+K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：在没有标签的情况下，样本能否按数值特征被划分为若干相对紧凑的亚群。
-- 适用任务：患者分群、原型发现、样本压缩、聚类结果作为后续描述分析的分组变量。
-- 常见医学场景：基于代谢指标识别代谢表型，按多项实验室指标探索患者亚群，基于影像组学特征进行初步分型。
+K-means 是基于质心的硬聚类方法。用户预先指定 $K$，算法交替进行最近质心分配与簇内均值更新，直到标签或目标函数基本不再变化。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-K-means 会先放置 $K$ 个中心点，然后反复做两件事：把每个样本分给最近的中心，再用每个簇内样本的平均位置更新中心。迭代稳定后，同一簇内样本通常彼此更相似。
+- 无标签数值数据能否分为若干紧凑、互斥的亚群。
+- 用少量原型概括大量患者。
+- 为后续描述、采样或可视化生成探索性分组。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+在患者特征空间放置 $K$ 个“典型患者”。每个人归到最像的典型患者名下，再用组内平均重新定义典型患者，反复直到稳定。
 
-设样本为 $x_i\in\mathbb{R}^p$，簇标签为 $c_i\in\{1,\dots,K\}$，第 $k$ 个簇的质心为 $\mu_k$。K-means 最小化簇内平方和：
+## 2. 核心思想与原理
+
+### 2.1 交替最小化
+
+固定质心时，最近质心分配最优；固定标签时，算术均值使平方距离和最小。两个步骤都不增加目标函数，但只保证收敛到局部最优。
+
+### 2.2 隐含的簇形状
+
+欧氏距离与均值原型使 K-means 偏好近似球形、尺度相近、方差相近的簇。弯月形、长条形或密度差异大的簇可能被错误切开。
+
+### 2.3 为什么标准化重要
+
+平方距离会放大量纲。SBP 的数值范围若远大于 HDL，未标准化时聚类可能几乎只由 SBP 决定。
+
+## 3. 数学形式
+
+### 3.1 目标函数
 
 $$
-\min_{c_1,\dots,c_n,\mu_1,\dots,\mu_K}
-\sum_{i=1}^{n}\left\|x_i-\mu_{c_i}\right\|_2^2
+\operatorname*{minimize}_{C_1,\ldots,C_K}
+\sum_{k=1}^{K}
+\sum_{x_i\in C_k}
+\|x_i-\mu_k\|_2^2
 $$
 
-给定标签时，质心更新为：
+### 3.2 分配与更新
 
 $$
-\mu_k=\frac{1}{|C_k|}\sum_{i:c_i=k}x_i
+c_i=
+\operatorname*{arg\,min}_{k}
+\|x_i-\mu_k\|_2^2
 $$
 
-给定质心时，标签更新为：
+$$
+\mu_k=
+\frac{1}{|C_k|}
+\sum_{x_i\in C_k}x_i
+$$
+
+### 3.3 评价量
+
+- inertia/WCSS：目标函数值，随 $K$ 增大必然不升。
+- silhouette：比较样本簇内紧密度与最近其他簇距离。
+- `n_init`：不同初始质心重复次数，取目标最小解。
+
+### 3.4 关键条件
+
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 欧氏距离有意义 | 分组不反映临床相似性 | 变量与距离审查 |
+| 特征尺度可比 | 大量纲变量支配 | 标准化敏感性分析 |
+| 簇近似紧凑凸形 | 非球形结构被切错 | 二维投影与替代算法 |
+| 离群点有限 | 质心被拉偏 | 稳健预处理与病例审查 |
+
+## 4. 手把手算例
+
+一维数据为：
 
 $$
-c_i=\arg\min_k\|x_i-\mu_k\|_2^2
+x=(1,2,8,9)
 $$
 
-### 2.2 参数或统计量含义
+设 $K=2$，初始质心 $\mu_1=1,\mu_2=8$。
 
-- $K$：预先指定的簇数。
-- $\mu_k$：第 $k$ 个簇的中心。
-- inertia / within-cluster sum of squares：簇内平方和，越小表示簇内越紧凑。
-- `n_init`：不同随机初始化重复运行次数。
-- `max_iter`：每次初始化允许的最大迭代次数。
+**Step 1：分配。**
 
-### 2.3 关键假设
+- 1 和 2 更接近 $\mu_1$。
+- 8 和 9 更接近 $\mu_2$。
 
-- 簇大致呈球形或凸形。
-- 各变量尺度可比，通常需要标准化。
-- 预先指定的 $K$ 接近真实或有解释意义的分群数量。
-- 离群点不会严重扭曲质心。
+得到 $C_1=\{1,2\}$、$C_2=\{8,9\}$。
 
-## 3. 数据形式与输入输出
+**Step 2：更新质心。**
 
-### 3.1 适合的数据形式
+$$
+\mu_1=\frac{1+2}{2}=1.5,\qquad
+\mu_2=\frac{8+9}{2}=8.5
+$$
 
-- 自变量类型：连续型数值特征。
-- 因变量类型：无监督方法，不需要结局变量。
-- 数据结构：每行一个样本，每列一个特征。
-- 是否适合高维数据：可用，但高维时距离可能变得不稳定，常先降维或筛选特征。
-- 是否适合缺失较多数据：不适合直接处理，需先插补或剔除缺失。
-- 是否适合删失数据：不直接处理删失结局。
-- 是否适合重复测量数据：需先构造个体级特征，普通 K-means 不建模相关结构。
+**Step 3：重新分配。** 四个点所属簇不变，因此算法收敛。
 
-### 3.2 示例表格
+**Step 4：计算 WCSS。**
 
-以代谢表型聚类为例：
+$$
+\begin{aligned}
+\operatorname{WCSS}
+&=(1-1.5)^2+(2-1.5)^2\\
+&\quad +(8-8.5)^2+(9-8.5)^2\\
+&=1
+\end{aligned}
+$$
 
-| BMI | TG | HDL | FastingGlucose | SBP |
-| --- | --- | --- | --- | --- |
-| 31.2 | 2.4 | 0.9 | 7.8 | 146 |
-| 24.8 | 1.1 | 1.5 | 5.2 | 122 |
-| 29.5 | 2.0 | 1.0 | 6.9 | 138 |
-| 22.9 | 0.9 | 1.7 | 4.9 | 116 |
+**结论：** K-means 给出互斥标签和两个原型 1.5、8.5，不表达边界病例属于两簇的概率。
 
-### 3.3 输入与产出
+## 5. 数据形式与输入输出
 
-#### 输入
+### 5.1 数据要求
 
-- 输入数据：数值型特征矩阵。
-- 关键变量：簇数 $K$、初始化方法、重复初始化次数。
-- 需要预处理的内容：缺失处理、标准化、异常值检查、变量选择。
+- 主要用于连续数值特征。
+- 缺失需预先处理，类别变量不能简单当连续数值编码。
+- 重复测量应先定义患者级表示，避免一名患者被当作多个独立个体。
 
-#### 产出
+### 5.2 输入与产出
 
-- 模型对象/统计结果：簇标签、簇中心、簇内平方和。
-- 参数估计：每个簇的质心。
-- 预测结果：新样本可分配到最近质心。
-- 不确定性指标：不同随机种子或重采样下的聚类稳定性，轮廓系数。
+输入为数值矩阵、$K$、初始化和停止标准。输出为硬标签、质心、每点到质心距离和 WCSS。
 
-## 4. 适用场景
+## 6. 适用场景
 
-- 适合：希望快速得到互斥分组、簇较紧凑且形状接近球形、样本量较大的场景。
-- 不适合：簇形状弯曲、密度差异明显、噪声点很多、类别变量为主的场景。
-- 使用前需要特别检查的点：变量标准化、$K$ 的选择、离群值、聚类稳定性和临床可解释性。
+- 大样本、数值特征、簇近似球形且希望快速得到原型。
+- 作为无监督分析基线或数据压缩工具。
+- 不适合噪声多、任意形状、不同密度或要求软归属的任务。
 
-## 5. 实现
+## 7. 实现
 
-### 5.1 Python
-
-常用包：
-
-- `scikit-learn`
+### 7.1 Python
 
 ```python
-import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
-from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv("metabolic_profiles.csv")
-X = df[["BMI", "TG", "HDL", "FastingGlucose", "SBP"]]
+scaler = StandardScaler().fit(X)
+X_s = scaler.transform(X)
 
-model = make_pipeline(
-    StandardScaler(),
-    KMeans(n_clusters=3, n_init=20, random_state=42)
+model = KMeans(
+    n_clusters=3,
+    init="k-means++",
+    n_init=50,
+    random_state=42,
 )
-cluster = model.fit_predict(X)
-
-score = silhouette_score(model.named_steps["standardscaler"].transform(X), cluster)
-print("Silhouette:", score)
-print(pd.Series(cluster).value_counts().sort_index())
+cluster = model.fit_predict(X_s)
+centers_original = scaler.inverse_transform(model.cluster_centers_)
+print("WCSS:", model.inertia_)
+print("silhouette:", silhouette_score(X_s, cluster))
+print(centers_original)
 ```
 
-### 5.2 R
-
-常用包：
-
-- `stats`
+### 7.2 R
 
 ```r
+set.seed(42)
 x <- scale(df[, c("BMI", "TG", "HDL", "FastingGlucose", "SBP")])
-fit <- kmeans(x, centers = 3, nstart = 20)
+
+fit <- kmeans(
+  x,
+  centers = 3,
+  nstart = 50,
+  iter.max = 100
+)
 
 cluster <- fit$cluster
 fit$centers
 fit$tot.withinss
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：簇中心、各簇样本量、簇内紧凑度、不同簇的临床特征差异。
-- 每个主要参数如何解释：`n_clusters=3` 表示强制把样本划分成 3 个互斥亚群。
-- 临床或医学意义如何表达：应先描述每个簇的特征模式，再谨慎讨论是否对应潜在疾病表型。
-- 常见误读：K-means 总会给出分组，但分组不一定有真实生物学意义。
+- 质心是标准化空间中的平均原型，必要时变回原单位描述。
+- 簇编号没有顺序含义，也可能在不同运行中交换。
+- WCSS 只能用于同一数据预处理下比较；随 $K$ 增大必然下降。
+- 聚类标签是探索性结构，不是诊断真值或因果分组。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
 
-- 肘部法曲线。
-- 轮廓系数随 $K$ 变化图。
-- PCA/UMAP 二维空间中的聚类散点图。
-- 各簇特征均值热图或雷达图。
+1. 比较 $K$ 的肘部、silhouette 和稳定性。
+2. 使用多次初始化并记录最佳与次佳 WCSS。
+3. bootstrap 后比较样本共同聚类概率。
+4. 改变标准化、变量集和异常值处理方案。
+5. 在独立队列用最近质心分配后验证临床特征是否复现。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
 
-### 优势
+- WCSS 肘部图和 silhouette 随 $K$ 变化图。
+- PCA 二维投影上的标签与质心。
+- 标准化簇中心热图。
+- 重采样共识矩阵。
 
-- 简单、快速、可扩展。
-- 簇中心易于解释为典型原型。
-- 适合做聚类分析的基线方法。
+## 11. 优势、局限与常见坑
 
-### 局限
+**优势：** 简单、快速、可扩展，质心原型便于描述。
 
-- 需要预先指定 $K$。
-- 对异常值和初始质心敏感。
-- 难以识别非球形簇和不同密度簇。
+**局限：** 需指定 $K$，对尺度、初始化和离群点敏感，只适合特定簇形状。
 
-### 常见坑
+**常见坑：** 未标准化；机械依赖肘部法；只跑一次；把类别编码直接纳入均值；把任意分组命名为疾病亚型。
 
-- 未标准化变量就直接聚类。
-- 只凭肘部法机械选择 $K$。
-- 把聚类标签当成真实诊断标签使用。
+## 12. 与相近方法的区别
 
-## 9. 与相近方法的区别
+- [[高斯混合模型（Gaussian Mixture Model, GMM）]]：GMM 给软概率并允许椭圆协方差。
+- [[模糊C均值聚类（Fuzzy C-Means Clustering, FCM）]]：输出隶属度而非硬标签。
+- [[DBSCAN（Density-Based Spatial Clustering of Applications with Noise）]]：无需指定簇数，可标记噪声和非球形簇。
+- 选择经验：簇紧凑、规模大、需要快速原型时先用 K-means。
 
-- 和 [[Mini-Batch K-means聚类（Mini-Batch K-means Clustering）]] 的区别：Mini-Batch K-means 用小批量样本更新质心，更适合大数据。
-- 和 [[高斯混合模型（Gaussian Mixture Model, GMM）]] 的区别：K-means 是硬聚类且偏球形簇，GMM 是概率软聚类且可拟合椭圆簇。
-- 和 [[模糊C均值聚类（Fuzzy C-Means Clustering, FCM）]] 的区别：K-means 给硬标签，FCM 给每个样本属于各簇的隶属度。
+## 13. 医学研究中的典型应用
 
-## 10. 医学研究中的典型应用
+- 代谢、炎症或实验室指标患者分群。
+- 影像组学和组学降维后的探索性亚型。
+- 医疗服务利用模式与患者画像原型。
 
-- 代谢综合征相关指标的患者亚群探索。
-- 影像组学特征的初步无监督分型。
-- 多个连续实验室指标的临床表型聚类。
+## 14. 术语表
 
-## 11. 相关方法
+| 术语 | 含义 |
+| --- | --- |
+| centroid | 簇内样本的均值向量 |
+| inertia/WCSS | 所有点到所属质心的平方距离和 |
+| Lloyd algorithm | 交替分配与更新质心的经典算法 |
+| k-means++ | 让初始质心彼此分散的初始化方法 |
+| hard clustering | 每个样本只属于一个簇 |
+
+## 15. 相关方法
 
 - [[Mini-Batch K-means聚类（Mini-Batch K-means Clustering）]]
 - [[高斯混合模型（Gaussian Mixture Model, GMM）]]
 - [[模糊C均值聚类（Fuzzy C-Means Clustering, FCM）]]
-- [[主成分分析（Principal Component Analysis, PCA）]]
+- [[层次聚类（Hierarchical Clustering）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
-- MacQueen J. Some methods for classification and analysis of multivariate observations. *Proceedings of the Fifth Berkeley Symposium on Mathematical Statistics and Probability*. 1967;1:281-297.
-- Lloyd S. Least squares quantization in PCM. *IEEE Transactions on Information Theory*. 1982;28(2):129-137.
-- scikit-learn Developers. `sklearn.cluster.KMeans`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html) （访问日期：2026-07-02）
+- MacQueen J. Some methods for classification and analysis of multivariate observations. *Proceedings of the Fifth Berkeley Symposium*. 1967;1:281-297.
+- Lloyd S. Least squares quantization in PCM. *IEEE Trans Inf Theory*. 1982;28(2):129-137.
+- scikit-learn Developers. `KMeans` API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html) （访问日期：2026-07-09）

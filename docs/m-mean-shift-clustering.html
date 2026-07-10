@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">术语表</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,223 +54,240 @@
     <div class="intro-note"><h1>均值漂移聚类（Mean Shift Clustering）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>均值漂移聚类是一种基于密度峰的无监督方法。它通过不断把样本点移动到邻域内样本的加权均值位置，使点沿着密度上升方向收敛到局部密度峰，最终把收敛到同一峰的点归为一簇。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>Mean Shift 让候选中心反复移动到局部邻域的加权均值，沿密度上升方向收敛到密度峰，并把到达同一峰的样本归为一簇。</p>
+<h3>1.2 定义</h3>
+<p>均值漂移聚类是一种非参数密度峰聚类方法。它以核密度估计为基础，用带宽规定观察尺度，不要求事先给定簇数；最终簇数由该尺度下保留下来的密度峰数量决定。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：不预设簇数时，数据中有哪些高密度中心或模式。</li>
-<li>适用任务：密度峰聚类、图像分割、空间热点探索、模式发现。</li>
-<li>常见医学场景：影像像素/区域分割，空间流行病学热点探索，连续临床表型中的高密度患者群识别。</li>
+<li>簇数未知，但局部高密度模式有意义。</li>
+<li>希望找到密度峰而非均值质心。</li>
+<li>图像、空间或低维连续数据存在多个模式。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>均值漂移像让每个样本沿着“人群更密集”的方向爬坡。多个样本如果最后爬到同一个密度山峰，就被视为属于同一簇。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>每个起点都站在密度地形上，反复走向周围人群的平均位置。若多个起点最后爬上同一座山峰，它们属于同一簇。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>给定核函数 $K$ 和带宽 $h$，核密度估计为：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 均值偏移就是上坡方向</h3>
+<p>核密度的梯度可写成与“局部加权均值减当前位置”同方向的量。移动到局部均值，等价于向密度更高处迭代。</p>
+<h3>2.2 带宽定义分群尺度</h3>
+<p>小带宽保留细小峰，簇数多且对噪声敏感；大带宽把邻近峰平滑合并，簇数少。所谓“自动簇数”并非无参数，而是把 $K$ 的选择换成带宽选择。</p>
+<h3>2.3 峰合并与标签</h3>
+<p>不同种子可能收敛到非常接近的峰，算法需要合并近重复中心，再把样本分给相应峰。实现细节会影响边界点和孤立点标签。</p></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核密度估计</h3>
 <p>$$
-\hat f(x)=\frac{1}{nh^p}\sum_{i=1}^{n}K\left(\frac{x-x_i}{h}\right)
+\hat f_h(x)=
+\frac{1}{nh^p}
+\sum_{i=1}^{n}
+K\left(\frac{x-x_i}{h}\right)
 $$</p>
-<p>均值漂移向量可写为：</p>
+<h3>3.2 均值漂移向量</h3>
 <p>$$
-m(x)=
-\frac{\sum_{i=1}^{n}x_i g\left(\left\|\frac{x-x_i}{h}\right\|^2\right)}
-{\sum_{i=1}^{n}g\left(\left\|\frac{x-x_i}{h}\right\|^2\right)}
+m_h(x)=
+\frac{\sum_i x_i g\left(\left\|\frac{x-x_i}{h}\right\|^2\right)}
+{\sum_i g\left(\left\|\frac{x-x_i}{h}\right\|^2\right)}
 -x
 $$</p>
-<p>迭代更新：</p>
+<h3>3.3 更新</h3>
 <p>$$
-x^{(t+1)}=x^{(t)}+m(x^{(t)})
+x^{(t+1)}=x^{(t)}+m_h[x^{(t)}]
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
-<ul>
-<li><code>bandwidth</code>：核窗口带宽，控制邻域尺度。</li>
-<li>核函数：用于给邻域内样本赋权。</li>
-<li>mode / density peak：样本最终收敛到的密度峰。</li>
-<li>cluster center：聚类中心，即密度峰位置。</li>
-<li><code>bin_seeding</code>：是否用离散网格加速初始化。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>簇可被密度峰合理刻画。</li>
-<li>一个合适的带宽能表达目标尺度。</li>
-<li>特征空间中的距离和密度对研究问题有意义。</li>
-<li>样本量足以估计局部密度。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：连续数值特征、空间坐标、图像颜色/位置特征。</li>
-<li>因变量类型：无监督方法，不需要结局变量。</li>
-<li>数据结构：样本乘以特征矩阵。</li>
-<li>是否适合高维数据：高维下密度估计困难，通常需要降维或选取少数关键特征。</li>
-<li>是否适合缺失较多数据：需先处理缺失。</li>
-<li>是否适合删失数据：不直接处理删失结局。</li>
-<li>是否适合重复测量数据：需先定义样本单位或特征表示。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>以影像区域特征为例：</p>
+<p>平坦核实现中，更新就是半径 $h$ 邻域内样本的普通均值。</p>
+<h3>3.4 关键条件</h3>
 <table>
 <thead>
 <tr>
-<th>X</th>
-<th>Y</th>
-<th>Intensity</th>
-<th>Texture</th>
-<th>LesionScore</th>
+<th>条件</th>
+<th>违反后果</th>
+<th>检查方式</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>12</td>
-<td>35</td>
-<td>0.82</td>
-<td>1.20</td>
-<td>0.77</td>
+<td>低维密度可估</td>
+<td>高维密度峰不稳定</td>
+<td>降维和距离诊断</td>
 </tr>
 <tr>
-<td>13</td>
-<td>36</td>
-<td>0.85</td>
-<td>1.15</td>
-<td>0.80</td>
+<td>单一带宽有意义</td>
+<td>不同尺度簇被合并或碎裂</td>
+<td>带宽路径</td>
 </tr>
 <tr>
-<td>80</td>
-<td>22</td>
-<td>0.31</td>
-<td>0.40</td>
-<td>0.12</td>
+<td>特征尺度合理</td>
+<td>大量纲变量主导邻域</td>
+<td>标准化敏感性</td>
 </tr>
 <tr>
-<td>81</td>
-<td>23</td>
-<td>0.28</td>
-<td>0.38</td>
-<td>0.10</td>
+<td>样本覆盖足够</td>
+<td>假峰或漏峰</td>
+<td>bootstrap 稳定性</td>
 </tr>
 </tbody>
-</table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：连续型特征矩阵。</li>
-<li>关键变量：带宽、核函数、停止阈值。</li>
-<li>需要预处理的内容：缺失处理、标准化、带宽估计、异常值检查。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：簇标签、密度峰中心、估计簇数。</li>
-<li>参数估计：密度峰位置。</li>
-<li>预测结果：可把新样本分配到最近密度峰，但标准实现主要用于拟合数据。</li>
-<li>不确定性指标：带宽敏感性、簇中心稳定性、重采样一致性。</li>
-</ul></div>
+</table></div>
     </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：簇数未知、希望寻找密度峰、数据维度较低或已降维的场景。</li>
-<li>不适合：样本量很大且维度高、各簇尺度差异很大、需要明确概率归属的场景。</li>
-<li>使用前需要特别检查的点：带宽选择、密度峰是否稳定、是否存在由于尺度差异造成的假峰。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>一维样本：</p>
+<p>$$
+x=(0,1,2,8,9)
+$$</p>
+<p>使用半径 $h=2$ 的平坦核。</p>
+<p><strong>Step 1：从种子 0 出发。</strong> 距离 0 不超过 2 的点为 $\{0,1,2\}$：</p>
+<p>$$
+x^{(1)}=\frac{0+1+2}{3}=1
+$$</p>
+<p>在 1 处的邻域仍为 $\{0,1,2\}$，均值仍是 1，因此收敛到峰 1。</p>
+<p><strong>Step 2：从种子 2 出发。</strong> 它的邻域同样是 $\{0,1,2\}$，一步移动到 1，也归入第一峰。</p>
+<p><strong>Step 3：从种子 8 出发。</strong> 邻域为 $\{8,9\}$：</p>
+<p>$$
+x^{(1)}=\frac{8+9}{2}=8.5
+$$</p>
+<p>再次计算仍为 8.5，形成第二峰。</p>
+<p><strong>结论：</strong> 五个起点最终汇入 1 和 8.5 两个密度峰，因此得到两个簇。若把带宽增大到足以连接两组，两个峰可能被平滑成一个。</p></div>
     </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="mean-shift-clustering" data-i="0">Python</button><button class="codetab" data-uid="mean-shift-clustering" data-i="1">R</button></div><div class="codepanel active" data-uid="mean-shift-clustering" data-i="0"><p>常用包：</p>
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 数据要求</h3>
 <ul>
-<li><code>scikit-learn</code></li>
+<li>连续特征、空间坐标或图像位置/颜色特征。</li>
+<li>多量纲特征需标准化；高维通常先做有依据的表征压缩。</li>
+<li>缺失需预处理，普通方法不建模删失或重复测量。</li>
 </ul>
-<pre><code class="language-python">import pandas as pd
-from sklearn.cluster import MeanShift, estimate_bandwidth
-from sklearn.pipeline import make_pipeline
+<h3>5.2 输入与产出</h3>
+<p>输入为带宽、种子、核和收敛标准。输出为密度峰中心、簇数和样本标签；标准实现不提供概率隶属度。</p></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>低维、簇数未知、密度峰具有实际含义。</li>
+<li>图像分割、空间热点和模式发现。</li>
+<li>不适合超大高维数据、不同簇尺度悬殊或需要概率归属的任务。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="mean-shift-clustering" data-i="0">Python</button><button class="codetab" data-uid="mean-shift-clustering" data-i="1">R</button></div><div class="codepanel active" data-uid="mean-shift-clustering" data-i="0"><pre><code class="language-python">from sklearn.cluster import MeanShift, estimate_bandwidth
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv(&quot;image_region_features.csv&quot;)
-X = df[[&quot;X&quot;, &quot;Y&quot;, &quot;Intensity&quot;, &quot;Texture&quot;, &quot;LesionScore&quot;]]
+X_s = StandardScaler().fit_transform(X)
+bandwidth = estimate_bandwidth(
+    X_s,
+    quantile=0.2,
+    n_samples=min(2000, len(X_s)),
+)
 
-X_scaled = StandardScaler().fit_transform(X)
-bandwidth = estimate_bandwidth(X_scaled, quantile=0.2, n_samples=len(X_scaled))
-
-fit = MeanShift(bandwidth=bandwidth, bin_seeding=True)
-cluster = fit.fit_predict(X_scaled)
-
-print(&quot;Clusters:&quot;, len(set(cluster)))
-print(pd.Series(cluster).value_counts().sort_index())
-</code></pre></div><div class="codepanel" data-uid="mean-shift-clustering" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>meanShiftR</code></li>
-</ul>
-<pre><code class="language-r">library(meanShiftR)
+model = MeanShift(
+    bandwidth=bandwidth,
+    bin_seeding=True,
+    min_bin_freq=5,
+    cluster_all=False,
+    n_jobs=-1,
+)
+cluster = model.fit_predict(X_s)
+centers = model.cluster_centers_
+print(len(centers), model.n_iter_)
+</code></pre></div><div class="codepanel" data-uid="mean-shift-clustering" data-i="1"><pre><code class="language-r">library(meanShiftR)
 
 x &lt;- scale(df[, c(&quot;X&quot;, &quot;Y&quot;, &quot;Intensity&quot;, &quot;Texture&quot;, &quot;LesionScore&quot;)])
-fit &lt;- meanShift(as.matrix(x), bandwidth = 1.2)
+fit &lt;- meanShift(
+  as.matrix(x),
+  bandwidth = 1.2
+)
 
 cluster &lt;- fit$assignment
 table(cluster)
-</code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：密度峰位置、簇数量、各簇样本量、不同带宽下结果是否稳定。</li>
-<li>每个主要参数如何解释：带宽越大，密度估计越平滑，簇数通常越少。</li>
-<li>临床或医学意义如何表达：适合描述为“在所选尺度下发现若干高密度模式”，而不是直接宣称存在固定疾病亚型。</li>
-<li>常见误读：自动得到簇数不代表该簇数就是唯一正确答案。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>二维特征空间中的密度峰和聚类结果。</li>
-<li>带宽变化下簇数曲线。</li>
-<li>核密度热图。</li>
-<li>图像或空间数据中的聚类区域叠加图。</li>
-</ul></div>
+</code></pre>
+<p>不同 R 包的函数名与输出结构差异较大，使用前应以所安装版本的帮助文档为准。</p></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>不需要预先指定簇数。</li>
-<li>可发现密度峰和非参数模式。</li>
-<li>对图像分割和空间热点直观。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>带宽选择非常关键。</li>
-<li>高维密度估计困难。</li>
-<li>大样本计算成本较高。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>不标准化多尺度特征。</li>
-<li>把带宽估计默认值当成唯一合理选择。</li>
-<li>在高维稀疏数据上直接使用而不先降维。</li>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>中心是密度模式，不一定等于簇内算术均值。</li>
+<li>簇数是给定带宽下的结果，不是唯一真实簇数。</li>
+<li><code>cluster_all=False</code> 时，无法归入峰邻域的点可标为 -1。</li>
+<li>临床解释应表述为“在该尺度下的高密度模式”。</li>
 </ul></div>
     </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-dbscan-density-based-spatial-clustering-of-applications-with-noise.html" data-cn="DBSCAN" data-en="Density-Based Spatial Clustering of Applications with Noise" data-def="DBSCAN 是一种基于密度的聚类方法。它把高密度区域连接成簇，并把低密度区域中的点标记为噪声或离群点。">DBSCAN（Density-Based Spatial Clustering of Applications with Noise）</a> 的区别：DBSCAN 以密度连通定义簇，均值漂移以密度峰吸引盆定义簇。</li>
-<li>和 <a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a> 的区别：K-means 需要预设 $K$，均值漂移通过密度峰自动形成簇。</li>
-<li>和 <a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计给每个观测放上一个小小的、光滑的「山包」（核），再把所有山包叠加平均，得到一条连续平滑的密度曲线——本质是把直方图的硬台阶抹圆。">核密度估计（Kernel Density Estimation, KDE）</a> 的区别：KDE 是密度估计工具，均值漂移利用 KDE 的梯度思想做聚类。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">诊断与稳健性</h2></div>
+      <div class="sec-body"><ol>
+<li>画带宽-簇数和带宽-中心位置路径。</li>
+<li>bootstrap 后比较峰数量与位置。</li>
+<li>检查孤立点和小簇是否由噪声造成。</li>
+<li>比较标准化、变量集和降维方案。</li>
+<li>与 DBSCAN、K-means 和 KDE 结果对照。</li>
+</ol></div>
     </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
-<li>医学影像分割中的颜色、纹理和空间特征聚类。</li>
-<li>空间病例分布的高密度区域识别。</li>
-<li>连续临床表型数据中的密度峰亚群探索。</li>
+<li>核密度曲线或热图与密度峰。</li>
+<li>样本移动轨迹和最终中心。</li>
+<li>带宽变化下簇数阶梯图。</li>
+<li>图像或地图上的聚类区域。</li>
 </ul></div>
     </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-dbscan-density-based-spatial-clustering-of-applications-with-noise.html" data-cn="DBSCAN" data-en="Density-Based Spatial Clustering of Applications with Noise" data-def="DBSCAN 是一种基于密度的聚类方法。它把高密度区域连接成簇，并把低密度区域中的点标记为噪声或离群点。">DBSCAN（Density-Based Spatial Clustering of Applications with Noise）</a></li>
-<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a></li>
-<li><a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计给每个观测放上一个小小的、光滑的「山包」（核），再把所有山包叠加平均，得到一条连续平滑的密度曲线——本质是把直方图的硬台阶抹圆。">核密度估计（Kernel Density Estimation, KDE）</a></li>
-<li><a class="xlink" href="m-spectral-clustering.html" data-cn="谱聚类" data-en="Spectral Clustering" data-def="谱聚类是一种基于图的聚类方法。它先把样本表示成相似度图，再利用图拉普拉斯矩阵的特征向量把样本嵌入到低维空间，最后在该空间中进行聚类。">谱聚类（Spectral Clustering）</a></li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p><strong>优势：</strong> 不预设簇数，直接寻找密度峰，可用于任意峰形的吸引盆。</p>
+<p><strong>局限：</strong> 带宽敏感，高维和大样本昂贵，不同尺度簇难兼顾。</p>
+<p><strong>常见坑：</strong> 把自动簇数当无参数；直接接受默认带宽；未标准化；把每个小峰都命名为医学亚型；忽略带宽估计本身的计算成本。</p></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Fukunaga K, Hostetler L. The estimation of the gradient of a density function, with applications in pattern recognition. <em>IEEE Transactions on Information Theory</em>. 1975;21(1):32-40.</li>
-<li>Comaniciu D, Meer P. Mean shift: a robust approach toward feature space analysis. <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>. 2002;24(5):603-619.</li>
-<li>scikit-learn Developers. <code>sklearn.cluster.MeanShift</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MeanShift.html">https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MeanShift.html</a> （访问日期：2026-07-02）</li>
+<li><a class="xlink" href="m-dbscan-density-based-spatial-clustering-of-applications-with-noise.html" data-cn="DBSCAN" data-en="Density-Based Spatial Clustering of Applications with Noise" data-def="DBSCAN 从局部邻居足够多的核心点向外扩展密度连通区域，并把无法连接到任何核心区域的点标记为噪声。">DBSCAN（Density-Based Spatial Clustering of Applications with Noise）</a>：按密度连通定义簇，Mean Shift 按密度峰吸引盆定义簇。</li>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a>：固定 $K$ 并优化平方距离。</li>
+<li><a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计给每个观测放上一个小小的、光滑的「山包」（核），再把所有山包叠加平均，得到一条连续平滑的密度曲线——本质是把直方图的硬台阶抹圆。">核密度估计（Kernel Density Estimation, KDE）</a>：KDE 估密度，Mean Shift 使用密度梯度找峰并分群。</li>
+<li>选择经验：低维模式发现关注“峰”时选 Mean Shift，关注噪声与连通形状时选 DBSCAN。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>医学图像像素或区域的空间-颜色联合分割。</li>
+<li>病例地理分布与空间组学密度峰探索。</li>
+<li>连续表型中的常见模式中心识别。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">术语表</h2></div>
+      <div class="sec-body"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mode</td>
+<td>概率密度的局部最大点</td>
+</tr>
+<tr>
+<td>bandwidth</td>
+<td>决定局部邻域和平滑尺度的参数</td>
+</tr>
+<tr>
+<td>mean shift vector</td>
+<td>局部加权均值减当前位置</td>
+</tr>
+<tr>
+<td>basin of attraction</td>
+<td>会收敛到同一密度峰的起点集合</td>
+</tr>
+<tr>
+<td>bin seeding</td>
+<td>用网格箱中心减少初始种子数量</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-dbscan-density-based-spatial-clustering-of-applications-with-noise.html" data-cn="DBSCAN" data-en="Density-Based Spatial Clustering of Applications with Noise" data-def="DBSCAN 从局部邻居足够多的核心点向外扩展密度连通区域，并把无法连接到任何核心区域的点标记为噪声。">DBSCAN（Density-Based Spatial Clustering of Applications with Noise）</a></li>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a></li>
+<li><a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计给每个观测放上一个小小的、光滑的「山包」（核），再把所有山包叠加平均，得到一条连续平滑的密度曲线——本质是把直方图的硬台阶抹圆。">核密度估计（Kernel Density Estimation, KDE）</a></li>
+<li><a class="xlink" href="m-spectral-clustering.html" data-cn="谱聚类" data-en="Spectral Clustering" data-def="谱聚类把样本变成相似图，利用图拉普拉斯的低频特征向量寻找“内部连接强、彼此连接弱”的节点组。">谱聚类（Spectral Clustering）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Fukunaga K, Hostetler L. The estimation of the gradient of a density function, with applications in pattern recognition. <em>IEEE Trans Inf Theory</em>. 1975;21(1):32-40.</li>
+<li>Comaniciu D, Meer P. Mean shift: a robust approach toward feature space analysis. <em>IEEE Trans Pattern Anal Mach Intell</em>. 2002;24(5):603-619.</li>
+<li>scikit-learn Developers. <code>MeanShift</code> API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MeanShift.html">https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MeanShift.html</a> （访问日期：2026-07-09）</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-dbscan-density-based-spatial-clustering-of-applications-with-noise.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">DBSCAN</div></a><a class="pg pg-next" href="m-spectral-clustering.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">谱聚类</div></a></div>

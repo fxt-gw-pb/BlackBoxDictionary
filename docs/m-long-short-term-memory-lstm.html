@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,220 +54,408 @@
     <div class="intro-note"><h1>长短期记忆网络（Long Short-Term Memory, LSTM）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>LSTM 是循环神经网络的重要变体，通过遗忘门、输入门和输出门控制信息流动，专门用于缓解普通 RNN 难以学习长程依赖的问题。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>LSTM 在普通 RNN 之外增加一条近似加性的细胞状态，并用门控制“忘什么、写什么、读什么”，让有用信息和梯度能跨越更长时间。</p>
+<h3>1.2 定义</h3>
+<p>长短期记忆网络是门控循环神经网络的经典结构。每个时间步维护细胞状态 $\mathbf c_t$ 和隐藏状态 $\mathbf h_t$：遗忘门控制旧记忆保留比例，输入门控制新候选内容写入比例，输出门控制记忆向外暴露比例。它缓解普通 RNN 的梯度消失，但并不保证无限长期记忆。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：当序列历史较长、关键信息可能跨越多个时间步时，如何保留有用记忆并抑制无关信息。</li>
-<li>适用任务：时间序列预测、序列分类、文本建模、事件序列分析。</li>
-<li>常见医学场景：ICU 连续监测数据预测、药物处方序列分析、长期随访事件风险建模。</li>
+<li>研究问题：关键线索与结局相隔较远、短期噪声又很多时，如何选择性保存和更新历史。</li>
+<li>适用任务：长序列分类、时间序列预测、逐时点风险、文本与医疗事件序列建模。</li>
+<li>常见医学场景：ICU 多小时监测预警、长期随访事件预测、处方/诊断序列编码、临床文本建模。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>LSTM 像一个带有“记忆抽屉”和“开关阀门”的序列模型。每到一个新时间点，它都会决定什么该忘掉、什么该写进去、什么该输出，因此比普通 RNN 更能处理远距离依赖。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>把细胞状态想成一条传送带，信息可以在上面向后传。三个门像比例阀：遗忘门擦掉已过时内容，输入门决定新观察写多少，输出门决定当前要把多少记忆交给预测层。普通 RNN 每步都重写整张便笺；LSTM 则允许“保留大部分，只做小幅增删”。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>对时间步 $t$，LSTM 的门控更新为：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>普通 RNN 的历史影响要穿过连续的权重矩阵和激活导数，长序列上容易指数衰减或爆炸。临床序列中，数小时前的低血压、数月前的用药或病历开头的否定词都可能仍然重要。LSTM 让细胞状态通过</p>
 <p>$$
-f_t = \sigma(W_f x_t + U_f h_{t-1} + b_f)
+\mathbf c_t=\mathbf f_t\odot\mathbf c_{t-1}+\cdots
 $$</p>
+<p>以加法方式更新，梯度沿这条路径主要乘遗忘门，而不必每步都穿过完整的 tanh 变换。</p>
+<h3>2.2 关键洞察</h3>
+<p>“记忆”不应在每一步全部重算，而应允许受控复制和局部修改。门值由 sigmoid 产生，位于 0 到 1：接近 1 表示通过，接近 0 表示阻断。由于门本身也由当前输入和旧状态计算，模型能针对不同病例、不同时间点动态决定信息流。</p>
+<p>若遗忘门长期接近 1，早期细胞状态对后来状态的导数</p>
 <p>$$
-i_t = \sigma(W_i x_t + U_i h_{t-1} + b_i),\qquad
-\tilde c_t = \tanh(W_c x_t + U_c h_{t-1} + b_c)
+\frac{\partial \mathbf c_t}{\partial \mathbf c_{t-k}}
+\approx
+\prod_{j=t-k+1}^{t}\mathbf f_j
 $$</p>
-<p>$$
-c_t = f_t \odot c_{t-1} + i_t \odot \tilde c_t
-$$</p>
-<p>$$
-o_t = \sigma(W_o x_t + U_o h_{t-1} + b_o),\qquad
-h_t = o_t \odot \tanh(c_t)
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
+<p>可以保持较大；这就是 LSTM 比普通 RNN 更容易学习长依赖的核心。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>$f_t$：遗忘门，控制旧记忆保留比例。</li>
-<li>$i_t$：输入门，控制新信息写入比例。</li>
-<li>$o_t$：输出门，控制当前隐藏状态暴露程度。</li>
-<li>$c_t$：细胞状态，是长期记忆通道。</li>
-<li>$h_t$：隐藏状态，是当前时刻对外输出的表征。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>远距离依赖对预测有价值。</li>
-<li>序列顺序和时间结构不能被打乱。</li>
-<li>训练样本足够支持门控参数学习。</li>
+<li>相比普通 RNN：LSTM 的状态和门更多，参数约增至四组，但长程训练更稳定。</li>
+<li>相比 GRU：LSTM 分离 $\mathbf c_t$ 与 $\mathbf h_t$、有三类门；GRU 更紧凑，性能需实证比较。</li>
+<li>相比 Transformer：LSTM 递归扫描、内存随序列长度较温和；Transformer 更易并行并直接连接远距离位置。</li>
+<li>相比传统时间序列模型：LSTM 能学复杂非线性，但较难解释，也不自动保证趋势、季节性或不规则时间处理正确。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>令 $\mathbf s_t=[\mathbf h_{t-1};\mathbf x_t]$ 为旧隐藏状态与当前输入的拼接：</p>
+<p>$$
+\mathbf f_t=\sigma(\mathbf W_f\mathbf s_t+\mathbf b_f)
+$$</p>
+<p>$$
+\mathbf i_t=\sigma(\mathbf W_i\mathbf s_t+\mathbf b_i),
+\qquad
+\tilde{\mathbf c}_t=\tanh(\mathbf W_c\mathbf s_t+\mathbf b_c)
+$$</p>
+<p>$$
+\mathbf c_t
+=\mathbf f_t\odot\mathbf c_{t-1}
++\mathbf i_t\odot\tilde{\mathbf c}_t
+$$</p>
+<p>$$
+\mathbf o_t=\sigma(\mathbf W_o\mathbf s_t+\mathbf b_o),
+\qquad
+\mathbf h_t=\mathbf o_t\odot\tanh(\mathbf c_t)
+$$</p>
+<p>这个式子在说：先按比例保留旧记忆，再按比例写入候选记忆，最后只把需要的部分暴露为当前隐藏状态。$\odot$ 表示逐元素相乘。</p>
+<h3>3.2 推导脉络</h3>
+<p>普通 RNN 只有 $\mathbf h_t=\tanh(\cdots)$，旧状态每步都被重新压缩。LSTM 把内部长期存储 $\mathbf c_t$ 与对外工作状态 $\mathbf h_t$ 分开：</p>
+<ol>
+<li>用遗忘门决定旧记忆剩多少。</li>
+<li>生成候选内容，并用输入门决定写多少。</li>
+<li>两部分相加形成新细胞状态。</li>
+<li>用输出门决定当前读出多少。</li>
+</ol>
+<p>四组仿射变换可在一次矩阵乘法中并行计算。训练仍用 BPTT；门控改变的是梯度流的路径，不是优化器的基本原理。</p>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：单变量或多变量序列、token 序列、事件流。</li>
-<li>因变量类型：未来值、序列标签、下一个事件或整个输出序列。</li>
-<li>数据结构：三维序列张量。</li>
-<li>是否适合高维数据：可以，但训练和正则化要求更高。</li>
-<li>是否适合缺失较多数据：需先做插补、缺失掩码或专门时序缺失建模。</li>
-<li>是否适合删失数据：不直接建模删失机制。</li>
-<li>是否适合重复测量数据：适合有顺序的重复测量，尤其是规则采样。</li>
+<li>$\mathbf f_t$：遗忘门，逐维控制旧细胞状态保留比例。</li>
+<li>$\mathbf i_t$：输入门，逐维控制候选记忆写入比例。</li>
+<li>$\tilde{\mathbf c}_t$：候选记忆，范围通常为 $-1$ 到 $1$。</li>
+<li>$\mathbf c_t$：细胞状态，承担较长期的信息传递。</li>
+<li>$\mathbf o_t$：输出门，控制细胞状态对当前隐藏状态的暴露。</li>
+<li>$\mathbf h_t$：对下一时间步和输出层可见的工作状态。</li>
+<li>若输入维为 $d$、隐藏维为 $m$，标准 LSTM 参数量为 $4m(d+m+1)$。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>以连续血糖预测为例：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>PatientID</th>
-<th>Time</th>
-<th>Glucose</th>
-<th>InsulinDose</th>
-<th>CarbIntake</th>
-<th>NextGlucoseRisk</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>P001</td>
-<td>08:00</td>
-<td>7.1</td>
-<td>4</td>
-<td>35</td>
-<td>normal</td>
+<td>远程历史确有增量信息</td>
+<td>早期观测在控制近期信息后仍有用</td>
+<td>复杂门控不带来收益</td>
+<td>与短窗口和普通 RNN 比较</td>
 </tr>
 <tr>
-<td>P001</td>
-<td>09:00</td>
-<td>8.4</td>
-<td>0</td>
-<td>0</td>
-<td>high</td>
+<td>同一动态机制可跨步共享</td>
+<td>参数共享近似合理</td>
+<td>阶段性机制被平均</td>
+<td>加时间/阶段特征，分层评估</td>
 </tr>
 <tr>
-<td>P001</td>
-<td>10:00</td>
-<td>9.2</td>
-<td>2</td>
-<td>10</td>
-<td>high</td>
+<td>时间间隔和缺失已表达</td>
+<td>步长含义一致或显式输入</td>
+<td>门把观测次数当真实时间</td>
+<td>加 delta_t 与 missing mask</td>
 </tr>
 <tr>
-<td>P002</td>
-<td>08:00</td>
-<td>5.8</td>
-<td>3</td>
-<td>25</td>
-<td>normal</td>
+<td>序列切分无泄漏</td>
+<td>患者和未来信息严格隔离</td>
+<td>性能虚高</td>
+<td>患者级、时间前向验证</td>
+</tr>
+<tr>
+<td>序列长度足以训练门控</td>
+<td>有足够有效序列和结局</td>
+<td>过拟合且门值不稳定</td>
+<td>学习曲线、多随机种子</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>沿用 RNN 卡的三步序列思路，考虑一个只有一维细胞状态的简化 LSTM。为突出门控更新，假设各步仿射变换已经给出相同门值</p>
+<p>$$
+f_t=0.8,\qquad i_t=0.6,\qquad o_t=0.7
+$$</p>
+<p>三个时间点产生的候选记忆分别为</p>
+<p>$$
+\tilde c_1=0.50,\qquad
+\tilde c_2=-0.25,\qquad
+\tilde c_3=0.75
+$$</p>
+<p>初始 $c_0=0$。</p>
+<p><strong>第 1 步：写入第一条信息。</strong></p>
+<p>$$
+c_1=0.8\times0+0.6\times0.50=0.300
+$$</p>
+<p>$$
+h_1=0.7\tanh(0.300)=0.204
+$$</p>
+<p><strong>第 2 步：保留旧信息，同时写入一条负向证据。</strong></p>
+<p>$$
+c_2=0.8\times0.300+0.6\times(-0.25)
+=0.240-0.150=0.090
+$$</p>
+<p>$$
+h_2=0.7\tanh(0.090)=0.063
+$$</p>
+<p>负向候选抵消了一部分旧记忆，但没有把它全部覆盖。</p>
+<p><strong>第 3 步：加入新的正向证据。</strong></p>
+<p>$$
+c_3=0.8\times0.090+0.6\times0.75
+=0.072+0.450=0.522
+$$</p>
+<p>$$
+h_3=0.7\tanh(0.522)=0.335
+$$</p>
+<p><strong>追踪第一步信息。</strong> $c_1$ 中的 0.300 经过两次遗忘门后仍贡献</p>
+<p>$$
+0.300\times0.8\times0.8=0.192
+$$</p>
+<p>也就是保留原贡献的 64%。作为对照，RNN 卡的普通循环链经过三次局部导数连乘只剩约 5.8%。这不是说 LSTM 永不遗忘，而是说明当模型把 $f_t$ 学到接近 1 时，信息可沿加性状态通道更稳定地传播。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：按时间或位置排序的多变量序列。</li>
+<li>因变量类型：序列级分类/回归，或逐时间点输出。</li>
+<li>数据结构：样本 × 时间 × 特征，配合长度、mask、时间间隔。</li>
+<li>是否适合高维数据：可与 embedding、CNN 或降维层结合。</li>
+<li>是否适合缺失较多数据：需插补、mask 和 delta_t；缺失本身可能信息性。</li>
+<li>是否适合删失数据：标准 LSTM 分类/回归损失不处理删失，需专用生存损失。</li>
+<li>是否适合重复测量数据：适合动态预测，但若目标是群体平均效应或随机效应推断，应使用纵向统计模型。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>patient_id</th>
+<th style="text-align: right;">hour</th>
+<th style="text-align: right;">heart_rate</th>
+<th style="text-align: right;">spo2</th>
+<th style="text-align: right;">lactate</th>
+<th style="text-align: right;">lactate_missing</th>
+<th style="text-align: right;">delta_t</th>
+<th style="text-align: right;">deterioration_6h</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P01</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">82</td>
+<td style="text-align: right;">97</td>
+<td style="text-align: right;">1.4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>P01</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">98</td>
+<td style="text-align: right;">94</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>P01</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">112</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">3.2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">1</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<p>将表格转为张量时，应保留实际间隔、缺失指示和有效长度；预测窗口内或之后的信息不能进入输入。</p>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：固定窗口或整段序列张量。</li>
-<li>关键变量：窗口长度、隐藏单元数、层数、dropout、学习率。</li>
-<li>需要预处理的内容：排序、标准化、时间切分、窗口构造、避免未来信息泄露。</li>
+<li>变长序列、时间戳/间隔、mask 和结局。</li>
+<li>LSTM 隐藏维度、层数、dropout、单向/双向和截断长度。</li>
+<li>严格按患者与时间建立的训练/验证/测试集。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：训练好的 LSTM 权重、损失曲线、验证性能。</li>
-<li>参数估计：门控层和输出层权重。</li>
-<li>预测结果：类别概率、连续值或下一步序列输出。</li>
-<li>不确定性指标：验证误差、时间外测试、bootstrap 或 ensemble 近似区间。</li>
+<li>最后或全部时间点的 $\mathbf h_t$，以及内部 $\mathbf c_t$。</li>
+<li>序列级或逐时点预测。</li>
+<li>训练历史和验证指标。</li>
+<li>门值可用于诊断，但不能直接当成临床可解释因果权重。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：存在长短期依赖、普通 RNN 难以稳定建模的序列任务。</li>
-<li>不适合：序列很短、样本太少、或更需要并行效率和全局依赖时。</li>
-<li>使用前需要特别检查的点：窗口设计、过拟合、训练不稳定、外部时移漂移。</li>
-</ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="long-short-term-memory-lstm" data-i="0">Python</button><button class="codetab" data-uid="long-short-term-memory-lstm" data-i="1">R</button></div><div class="codepanel active" data-uid="long-short-term-memory-lstm" data-i="0"><p>常用包：</p>
-<ul>
-<li><code>torch</code></li>
-</ul>
-<pre><code class="language-python">import torch
-from torch import nn
-
-class LSTMClassifier(nn.Module):
-    def __init__(self, n_features, hidden_size=64, n_classes=2):
-        super().__init__()
-        self.lstm = nn.LSTM(n_features, hidden_size, batch_first=True)
-        self.head = nn.Linear(hidden_size, n_classes)
-
-    def forward(self, x):
-        output, _ = self.lstm(x)
-        return self.head(output[:, -1, :])
-</code></pre></div><div class="codepanel" data-uid="long-short-term-memory-lstm" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>keras</code></li>
-</ul>
-<pre><code class="language-r">library(keras)
-
-model &lt;- keras_model_sequential() |&gt;
-  layer_lstm(units = 64, input_shape = c(seq_len, n_features)) |&gt;
-  layer_dense(units = 2, activation = &quot;softmax&quot;)
-</code></pre></div></div></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：验证误差、不同预测窗口的稳定性、长时间外测试表现。</li>
-<li>每个主要参数如何解释：隐藏单元数和层数控制容量，窗口长度控制模型可见历史。</li>
-<li>临床或医学意义如何表达：适合动态风险更新，但必须明确预测时间点和可干预时间。</li>
-<li>常见误读：LSTM 的“记忆”是统计意义上的状态表示，不等同于可直接解释的临床记忆机制。</li>
+<li>适合：短期与长期线索共同作用、序列中有选择性遗忘需求、数据量足以训练门控。</li>
+<li>不适合：序列很短、静态汇总已充分、需要可解释纵向效应、存在未处理删失或超长序列需高并行。</li>
+<li>使用前检查：时间泄漏、实际间隔、缺失机制、padding mask、患者级切分、序列长度和报警评价。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>真实值与预测值时间曲线。</li>
-<li>训练/验证损失曲线。</li>
-<li>分时间窗或分患者亚组的误差图。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="long-short-term-memory-lstm" data-i="0">Python</button><button class="codetab" data-uid="long-short-term-memory-lstm" data-i="1">R</button></div><div class="codepanel active" data-uid="long-short-term-memory-lstm" data-i="0"><p>常用包：TensorFlow/Keras。为便于和 RNN 卡比较，使用相同的合成任务。</p>
+<pre><code class="language-python">import numpy as np
+import tensorflow as tf
+
+tf.keras.utils.set_random_seed(42)
+rng = np.random.default_rng(42)
+X = rng.normal(size=(800, 12, 1)).astype(&quot;float32&quot;)
+y = (X[:, -3:, 0].sum(axis=1) &gt; 0).astype(&quot;float32&quot;)
+
+idx = rng.permutation(len(X))
+train, test = idx[:600], idx[600:]
+
+model = tf.keras.Sequential([
+    tf.keras.Input(shape=(12, 1)),
+    tf.keras.layers.LSTM(16, dropout=0.1),
+    tf.keras.layers.Dense(1, activation=&quot;sigmoid&quot;),
+])
+model.compile(
+    optimizer=tf.keras.optimizers.Adam(1e-3, clipnorm=1.0),
+    loss=&quot;binary_crossentropy&quot;,
+    metrics=[tf.keras.metrics.AUC(name=&quot;auc&quot;)],
+)
+model.fit(
+    X[train], y[train],
+    validation_split=0.2, epochs=30, batch_size=32,
+    callbacks=[tf.keras.callbacks.EarlyStopping(
+        patience=4, restore_best_weights=True
+    )],
+    verbose=0,
+)
+model.evaluate(X[test], y[test])
+</code></pre>
+<p>若序列以 0 padding，可在 LSTM 前加入 Masking 层；必须确认真实数据中的全零时间点不会被误当成 padding。</p></div><div class="codepanel" data-uid="long-short-term-memory-lstm" data-i="1"><p>常用包：keras3。</p>
+<pre><code class="language-r">library(keras3)
+
+set.seed(42)
+x &lt;- array(rnorm(800 * 12), dim = c(800, 12, 1))
+y &lt;- as.numeric(apply(x[, 10:12, 1], 1, sum) &gt; 0)
+idx &lt;- sample(seq_len(800), 600)
+
+model &lt;- keras_model_sequential() |&gt;
+  layer_lstm(units = 16, dropout = 0.1, input_shape = c(12, 1)) |&gt;
+  layer_dense(units = 1, activation = &quot;sigmoid&quot;)
+
+model |&gt; compile(
+  optimizer = optimizer_adam(learning_rate = 1e-3, clipnorm = 1),
+  loss = &quot;binary_crossentropy&quot;,
+  metrics = metric_auc(name = &quot;auc&quot;)
+)
+model |&gt; fit(
+  x[idx, , , drop = FALSE], y[idx],
+  validation_split = 0.2, epochs = 30, batch_size = 32,
+  callbacks = callback_early_stopping(
+    patience = 4, restore_best_weights = TRUE
+  ),
+  verbose = 0
+)
+model |&gt; evaluate(x[-idx, , , drop = FALSE], y[-idx])
+</code></pre></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>先按真实部署单元评价：患者级风险、事件级灵敏度、每患者误报数和预警提前量。</li>
+<li>LSTM 优于 RNN 只说明门控结构在当前验证方案中有预测收益，不证明发现了“长期因果记忆”。</li>
+<li>门值是高维、条件依赖的内部计算量；单独展示某门接近 1 不能证明某临床变量重要。</li>
+<li>双向 LSTM 会使用未来上下文，只适用于离线分类/标注；实时预测必须使用单向结构。</li>
+<li>概率需独立校准；不同中心和时间段可能需要再校准或重训。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>基线对照：与静态 Logistic/GBDT、普通 RNN、GRU 和不同窗口长度比较，确认长历史确有增益。</li>
+<li>时间消融：遮掉早期、中期或近期窗口，观察性能下降是否符合临床预期。</li>
+<li>泄漏审计：确保插补、标准化、标签和特征聚合不使用预测时点后的信息。</li>
+<li>门与梯度诊断：检查遗忘门是否长期饱和在 0/1、梯度范数是否异常；必要时调整初始化、归一化和 clipping。</li>
+<li>不规则采样：加入 delta_t/mask，并与时间衰减 LSTM 或神经 ODE 类方法做敏感性比较。</li>
+<li>外部稳健性：跨中心、设备、采样频率和人群亚组评价性能与校准。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>观测窗口—预测时点—结局窗口时间轴。</li>
+<li>患者级动态风险曲线，叠加用药、检验和事件。</li>
+<li>RNN、GRU、LSTM 在不同依赖距离/序列长度下的性能曲线。</li>
+<li>训练/验证损失与梯度范数。</li>
+<li>遗忘门/输入门随时间的摘要热图：作为诊断，不作为因果解释。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>比基础 RNN 更擅长捕捉长程依赖。</li>
-<li>对复杂多变量序列有较强表达能力。</li>
-<li>已广泛用于时间序列和文本任务。</li>
+<li>比普通 RNN 更容易学习长程依赖。</li>
+<li>门控允许选择性保留、写入和读出信息。</li>
+<li>可处理变长、多变量序列并与 CNN/embedding 联合。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>训练和调参成本较高。</li>
-<li>可解释性有限。</li>
-<li>仍然存在并行效率不高的问题。</li>
+<li>参数和计算量高于普通 RNN/GRU。</li>
+<li>仍是顺序计算，长序列训练不易并行。</li>
+<li>不自动解决不规则采样、信息性缺失、删失和因果解释。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>用随机拆分代替按时间或按患者拆分。</li>
-<li>序列太短却堆叠过深网络。</li>
-<li>只在内部验证集上报告效果。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-recurrent-neural-network-rnn.html" data-cn="循环神经网络" data-en="Recurrent Neural Network, RNN" data-def="循环神经网络是一类面向序列数据的神经网络。它在每个时间步共享同一组参数，并把前一时刻的隐藏状态传递到当前时刻，从而建模顺序依赖关系。">循环神经网络（Recurrent Neural Network, RNN）</a> 的区别：LSTM 用门控机制缓解梯度消失，适合更长依赖。</li>
-<li>和 <a class="xlink" href="m-gated-recurrent-unit-gru.html" data-cn="门控循环单元" data-en="Gated Recurrent Unit, GRU" data-def="GRU 是一种门控循环神经网络结构。它将 LSTM 的门控机制做了更紧凑的简化，通过更新门和重置门控制历史信息保留与新信息写入。">门控循环单元（Gated Recurrent Unit, GRU）</a> 的区别：GRU 结构更紧凑，参数更少，训练常更快。</li>
-<li>和 <a class="xlink" href="m-transformer.html" data-cn="Transformer" data-en="Transformer" data-def="Transformer 是以多头注意力为核心的序列建模架构。它不依赖传统递归结构，而是通过自注意力和位置编码并行建模序列中的全局依赖。">Transformer（Transformer）</a> 的区别：Transformer 通过注意力并行建模全局依赖，LSTM 仍以递归顺序处理序列。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>连续血糖、心率和血压等生理信号预测。</li>
-<li>长随访电子病历事件序列建模。</li>
-<li>ICU 短期恶化风险动态更新。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-recurrent-neural-network-rnn.html" data-cn="循环神经网络" data-en="Recurrent Neural Network, RNN" data-def="循环神经网络是一类面向序列数据的神经网络。它在每个时间步共享同一组参数，并把前一时刻的隐藏状态传递到当前时刻，从而建模顺序依赖关系。">循环神经网络（Recurrent Neural Network, RNN）</a></li>
-<li><a class="xlink" href="m-gated-recurrent-unit-gru.html" data-cn="门控循环单元" data-en="Gated Recurrent Unit, GRU" data-def="GRU 是一种门控循环神经网络结构。它将 LSTM 的门控机制做了更紧凑的简化，通过更新门和重置门控制历史信息保留与新信息写入。">门控循环单元（Gated Recurrent Unit, GRU）</a></li>
-<li><a class="xlink" href="m-transformer.html" data-cn="Transformer" data-en="Transformer" data-def="Transformer 是以多头注意力为核心的序列建模架构。它不依赖传统递归结构，而是通过自注意力和位置编码并行建模序列中的全局依赖。">Transformer（Transformer）</a></li>
-<li><a class="xlink" href="m-long-short-term-memory-for-time-series-forecasting.html" data-cn="LSTM时间序列预测" data-en="Long Short-Term Memory for Time Series Forecasting" data-def="LSTM 是循环神经网络的一种改进结构，通过门控机制保存、遗忘和输出序列信息。本条目聚焦 [[长短期记忆网络（Long Short-Term Memory, LSTM）]] 在时间序列预测中的应用型变体，强调窗口构造、时间切分和预测评估。">LSTM时间序列预测（Long Short-Term Memory for Time Series Forecasting）</a></li>
+<li>因“LSTM 会记忆”而无限延长窗口，不做消融。</li>
+<li>忽略 padding mask 或把合法 0 值屏蔽。</li>
+<li>双向 LSTM 用于在线预警。</li>
+<li>把同一患者不同窗口随机分到不同集合。</li>
+<li>从内部门值直接得出临床机制结论。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Hochreiter S, Schmidhuber J. Long short-term memory. <em>Neural Computation</em>. 1997;9(8):1735-1780.</li>
-<li>Goodfellow I, Bengio Y, Courville A. <em>Deep Learning</em>. MIT Press; 2016.</li>
-<li>PyTorch Developers. <code>torch.nn.LSTM</code>. <a href="https://pytorch.org/docs/stable/generated/torch.nn.LSTM.html">https://pytorch.org/docs/stable/generated/torch.nn.LSTM.html</a> （访问日期：2026-07-02）</li>
+<li>与普通 RNN：LSTM 用细胞状态和门控建立更稳定的长程路径，代价是更多参数。</li>
+<li>与 GRU：GRU 只有更新门和重置门，不分离细胞/隐藏状态；小数据或速度敏感时值得先试。</li>
+<li>与 Transformer：Transformer 直接用注意力连接全序列并高度并行；LSTM 以固定状态递归，流式推理自然。</li>
+<li>与时间序列统计模型：ARIMA/状态空间模型结构更明确、可解释；LSTM 更灵活但需要严格基线比较。</li>
+<li>如何选择：有明确长依赖且数据量中等时比较 GRU/LSTM；若短依赖足够用简单 RNN，若超长序列和大规模预训练则比较 Transformer。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>ICU/病房连续监测中的动态恶化与脓毒症预警。</li>
+<li>长期 EHR 中诊断、检验、处方和操作序列的风险预测。</li>
+<li>ECG、EEG 和可穿戴设备波形分类。</li>
+<li>临床文本和病历段落的序列编码。</li>
+</ul>
+<p>医学应用必须明确预测锚点、输入可用时点、缺失机制、实际时间间隔、重复窗口、类别不平衡和患者级切分。对死亡/复发等时间到事件结局，普通固定窗二分类会忽视删失，应使用专门生存目标并考虑竞争风险。</p></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>细胞状态（Cell state）</strong>：LSTM 内部承担较长期信息传递的状态 $\mathbf c_t$。</li>
+<li><strong>遗忘门（Forget gate）</strong>：控制上一细胞状态保留比例的门。</li>
+<li><strong>输入门（Input gate）</strong>：控制候选记忆写入比例的门。</li>
+<li><strong>输出门（Output gate）</strong>：控制细胞状态向隐藏状态暴露比例的门。</li>
+<li><strong>候选记忆（Cell candidate）</strong>：当前时间步可能写入的新内容 $\tilde{\mathbf c}_t$。</li>
+<li><strong>门饱和（Gate saturation）</strong>：sigmoid 门值长期接近 0 或 1，梯度可能很小。</li>
+<li><strong>长程依赖（Long-term dependency）</strong>：相距较远的位置仍存在对预测有用的关系。</li>
+<li><strong>梯度裁剪（Gradient clipping）</strong>：限制梯度范数或数值以防爆炸。</li>
+<li><strong>截断 BPTT（Truncated BPTT）</strong>：只在有限时间段内反传梯度以节省计算。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-recurrent-neural-network-rnn.html" data-cn="循环神经网络" data-en="Recurrent Neural Network, RNN" data-def="RNN 用一个随时间递推的隐藏状态充当“压缩记忆”，让当前预测同时依赖当前输入和此前序列。">循环神经网络（Recurrent Neural Network, RNN）</a></li>
+<li><a class="xlink" href="m-gated-recurrent-unit-gru.html" data-cn="门控循环单元" data-en="Gated Recurrent Unit, GRU" data-def="GRU 用更新门在“保留旧状态”和“写入新候选”之间做逐维插值，再用重置门决定生成候选时要参考多少历史，以更紧凑的结构缓解普通 RNN 的长程梯度问题。">门控循环单元（Gated Recurrent Unit, GRU）</a></li>
+<li><a class="xlink" href="m-attention-mechanism.html" data-cn="注意力机制" data-en="Attention Mechanism" data-def="注意力机制先计算“当前查询与每条信息有多相关”，再把相关性归一化成权重，对各条信息做数据依赖的加权汇总。">注意力机制（Attention Mechanism）</a></li>
+<li><a class="xlink" href="m-transformer.html" data-cn="Transformer" data-en="Transformer" data-def="Transformer 让序列中每个位置用自注意力直接汇总其他位置，再通过残差、归一化和逐位置前馈网络反复加工，从而不依赖递归也能建模全局上下文。">Transformer（Transformer）</a></li>
+<li><a class="xlink" href="m-autoregressive-model-ar.html" data-cn="自回归模型" data-en="Autoregressive Model, AR" data-def="AR 用序列自身过去的值预测现在，把“惯性会延续但逐渐衰减”写成线性递推。">自回归模型（Autoregressive Model, AR）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Hochreiter S, Schmidhuber J. Long short-term memory. <em>Neural Computation</em>. 1997;9(8):1735-1780. https://doi.org/10.1162/neco.1997.9.8.1735</li>
+<li>Gers FA, Schmidhuber J, Cummins F. Learning to forget: Continual prediction with LSTM. <em>Neural Computation</em>. 2000;12(10):2451-2471. https://doi.org/10.1162/089976600300015015</li>
+<li>Greff K, Srivastava RK, Koutník J, Steunebrink BR, Schmidhuber J. LSTM: A search space odyssey. <em>IEEE Transactions on Neural Networks and Learning Systems</em>. 2017;28(10):2222-2232. https://doi.org/10.1109/TNNLS.2016.2582924</li>
+<li>Goodfellow I, Bengio Y, Courville A. <em>Deep Learning</em>. MIT Press; 2016. https://www.deeplearningbook.org/</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-recurrent-neural-network-rnn.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">循环神经网络</div></a><a class="pg pg-next" href="m-gated-recurrent-unit-gru.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">门控循环单元</div></a></div>

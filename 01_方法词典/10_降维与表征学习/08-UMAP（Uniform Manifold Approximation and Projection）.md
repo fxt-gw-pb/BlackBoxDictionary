@@ -19,219 +19,298 @@ r_packages: [uwot]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-UMAP 是一种非线性降维和可视化方法，基于流形假设和近邻图构建高维数据的模糊拓扑结构，再在低维空间中寻找相似的结构。
+UMAP 把高维近邻关系做成带置信度的模糊图，再优化低维点的位置，使高置信边靠近、缺失边保持分离。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：如何把高维样本嵌入二维或三维，同时尽量保留局部邻域和部分全局结构。
-- 适用任务：高维数据可视化、非线性嵌入、样本相似性探索、下游聚类前表征。
-- 常见医学场景：单细胞数据可视化、影像组学分布展示、临床表型亚群探索。
+UMAP 是一种非线性流形学习与可视化方法。它在局部尺度校正后构造模糊单纯复形的一维骨架，可直观理解为加权近邻图，再最小化高维图和低维图之间的模糊集合交叉熵。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-UMAP 先在高维空间中为每个样本建立近邻关系，并把这些关系看作带权图。然后它在低维空间中调整样本位置，让低维图尽量复现高维图的邻近关系。
+- 高维样本的局部邻域难以直接展示。
+- 不同区域密度不同，固定距离尺度难以同时适配。
+- 需要较快地处理大规模数据，并可能把新样本映射到已有嵌入。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+每个样本都按自己所在街区的尺度描述“我们有多像邻居”，再把双向看法合并为一张关系网。低维排座时，强关系频繁拉近，随机抽到的非邻居负责推开。
 
-UMAP 在高维空间中构造模糊单纯复形，可简化理解为近邻边权：
+## 2. 核心思想与原理
+
+### 2.1 根本困难
+
+高密度区域和低密度区域不能共用同一个距离阈值；同时，直接保持所有成对距离既昂贵，也可能牺牲真正关心的局部结构。
+
+### 2.2 关键洞察
+
+- 每个样本用局部连通距离 $\rho_i$ 和尺度 $\sigma_i$ 校准自己的邻域。
+- 将方向性邻域通过模糊并集合并，形成对称边权。
+- 在低维用可微重尾曲线表示边概率，并以吸引和排斥共同优化。
+
+### 2.3 参数控制的尺度
+
+`n_neighbors` 决定构图时观察多宽的邻域，`min_dist` 控制低维中相似点可以压得多紧。它们改变的是展示尺度，不是从数据中自动检验出的真值。
+
+## 3. 数学形式
+
+### 3.1 局部方向性边权
+
+对 $j\in\mathcal N_i$：
 
 $$
-p_{ij}=\exp\left(-\frac{\max(0,d(x_i,x_j)-\rho_i)}{\sigma_i}\right)
-$$
-
-其中 $\rho_i$ 为局部连通性距离，$\sigma_i$ 控制局部尺度。低维空间中边权常写为：
-
-$$
-q_{ij}=\frac{1}{1+a\|y_i-y_j\|^{2b}}
-$$
-
-优化目标是让高维边权 $p_{ij}$ 与低维边权 $q_{ij}$ 的交叉熵尽量小：
-
-$$
-C=\sum_{i,j}\left[
-p_{ij}\log\frac{p_{ij}}{q_{ij}}+
-(1-p_{ij})\log\frac{1-p_{ij}}{1-q_{ij}}
+p_{j\mid i}=
+\exp\left[
+-\frac{\max(0,d(x_i,x_j)-\rho_i)}{\sigma_i}
 \right]
 $$
 
-### 2.2 参数或统计量含义
+其中 $\rho_i$ 保障局部连通，$\sigma_i$ 适应局部密度。
 
-- `n_neighbors`：平衡局部与全局结构的近邻数量。
-- `min_dist`：控制低维嵌入中点之间可压缩的最小距离。
-- `metric`：高维空间中的距离度量。
-- `n_components`：低维嵌入维度。
-- $\rho_i$：保证局部连通性的距离校正。
-- $\sigma_i$：样本局部尺度参数。
+### 3.2 模糊并集
 
-### 2.3 关键假设
+双向关系合并为：
 
-- 数据位于或接近某个低维流形。
-- 近邻图能反映样本间有意义的局部关系。
-- 所选距离度量与医学或生物学相似性相符。
+$$
+p_{ij}
+=p_{j\mid i}+p_{i\mid j}
+-p_{j\mid i}p_{i\mid j}
+$$
 
-## 3. 数据形式与输入输出
+只要任一方向认为关系较强，合并后的边权就不会很低。
 
-### 3.1 适合的数据形式
+### 3.3 低维边权与目标
 
-- 自变量类型：连续特征、嵌入向量、稀疏高维特征。
-- 因变量类型：UMAP 本身不需要结局变量；也可使用监督式 UMAP 变体。
-- 数据结构：样本乘以特征矩阵。
-- 是否适合高维数据：适合，常先 PCA/SVD 预降维以降噪和加速。
-- 是否适合缺失较多数据：需先处理缺失。
-- 是否适合删失数据：不直接处理删失结局。
-- 是否适合重复测量数据：需先明确样本单位或自定义距离。
+$$
+q_{ij}=
+\frac1{1+a\|y_i-y_j\|^{2b}}
+$$
 
-### 3.2 示例表格
+一对样本的交叉熵贡献可写为：
 
-以多组学综合特征为例：
+$$
+-p_{ij}\log q_{ij}
+-(1-p_{ij})\log(1-q_{ij})
+$$
 
-| PC1 | PC2 | PC3 | PC4 | Subtype |
-| --- | --- | --- | --- | --- |
-| 1.8 | -0.4 | 0.2 | 0.6 | A |
-| 1.6 | -0.3 | 0.4 | 0.5 | A |
-| -1.1 | 1.2 | -0.2 | -0.7 | B |
-| -1.4 | 1.0 | -0.1 | -0.6 | B |
+$a,b$ 由 `min_dist` 与 `spread` 拟合。实现中通常通过边采样和负采样近似优化，而非枚举所有样本对。
 
-### 3.3 输入与产出
+### 3.4 关键条件
 
-#### 输入
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 局部距离有意义 | 模糊图无领域意义 | 预处理与距离敏感性 |
+| 近邻图大体连通 | 出现任意分离的岛 | 连通分量与断边警告 |
+| 采样能覆盖结构 | 稀疏区被拉伸或切断 | 邻域距离分布 |
+| 参数结论稳定 | 视觉叙事依赖单一设定 | 参数网格与多种种子 |
+| 标签未用于挑选无监督图 | 产生确认偏倚 | 预先规定分析流程 |
 
-- 输入数据：高维特征矩阵或预降维表示。
-- 关键变量：近邻数、最小距离、距离度量、目标维度、随机种子。
-- 需要预处理的内容：缺失处理、标准化、异常值检查、必要时预降维。
+## 4. 手把手算例
 
-#### 产出
+设样本 $i$ 到近邻 $j$ 的距离为 2，局部连通距离 $\rho_i=1$，局部尺度 $\sigma_i=1$。
 
-- 模型对象/统计结果：低维嵌入坐标、近邻图结构。
-- 参数估计：低维坐标和图结构权重。
-- 预测结果：可通过已拟合模型 transform 新样本，但主要用途仍是表征和可视化。
-- 不确定性指标：参数敏感性、随机种子稳定性、邻域保持指标。
+**Step 1：计算 $i$ 看 $j$ 的方向性权重。**
 
-## 4. 适用场景
+$$
+p_{j\mid i}
+=\exp[-(2-1)/1]
+=e^{-1}
+\approx0.368
+$$
 
-- 适合：大规模高维数据可视化、局部亚群探索、需要比 t-SNE 更快或更易投影新样本的场景。
-- 不适合：需要严格统计推断、解释坐标轴、保持精确全局距离的场景。
-- 使用前需要特别检查的点：`n_neighbors` 和 `min_dist` 是否改变主要结论，颜色标注是否造成视觉误导，是否用独立证据支持亚群解释。
+假设反方向因局部密度不同，有：
 
-## 5. 实现
+$$
+p_{i\mid j}=0.600
+$$
 
-### 5.1 Python
+**Step 2：取模糊并集。**
 
-常用包：
+$$
+p_{ij}
+=0.368+0.600-(0.368)(0.600)
+\approx0.747
+$$
 
-- `umap-learn`
-- `scikit-learn`
+合并后，这是一条较强的邻边。
+
+**Step 3：检查低维布局。** 为便于手算，令 $a=b=1$，低维距离为 0.5：
+
+$$
+q_{ij}
+=\frac1{1+0.5^2}
+=0.800
+$$
+
+该边的交叉熵贡献为：
+
+$$
+-0.747\log(0.800)
+-0.253\log(0.200)
+\approx0.574
+$$
+
+优化会同时考虑许多强边的吸引与负样本的排斥。这里的数字说明：局部尺度不同的双向判断可合成一个目标边权，再由低维距离去逼近它。
+
+## 5. 数据形式与输入输出
+
+### 5.1 适合的数据形式
+
+- 样本乘特征矩阵、稀疏矩阵或预计算距离。
+- 高维连续数据常标准化后先 PCA 或 SVD 去噪。
+- 单细胞计数通常先完成领域适当的归一化和高变特征选择。
+- 缺失值需先处理；删失结局不是无监督 UMAP 的直接输入。
+- 重复测量数据需防止个体身份或时间批次主导邻域。
+
+### 5.2 示例表格
+
+| Patient | PC1 | PC2 | PC3 | Subtype |
+| --- | ---: | ---: | ---: | --- |
+| P01 | 1.8 | -0.4 | 0.2 | A |
+| P02 | 1.6 | -0.3 | 0.4 | A |
+| P03 | -1.1 | 1.2 | -0.2 | B |
+| P04 | -1.4 | 1.0 | -0.1 | B |
+
+`Subtype` 只用于无监督嵌入后的外部核对。
+
+### 5.3 输入与产出
+
+输入包括特征、距离、`n_neighbors`、`min_dist`、目标维数与随机种子。输出包括低维坐标、模糊近邻图和可选的新样本变换模型；不确定性需用参数、种子和重采样稳定性表达。
+
+## 6. 适用场景
+
+- 大规模高维数据的局部结构展示和候选亚群探索。
+- 单细胞、影像组学、多组学及深度嵌入。
+- 需要在固定预处理流程下近似映射新样本的场景。
+- 不适合把二维距离当效应量、把图形当显著性检验或要求坐标轴直接解释。
+- 若保留密度本身很重要，可评估 densMAP，而不是假设普通 UMAP 保持密度。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
 import pandas as pd
 import umap
 from sklearn.decomposition import PCA
-from sklearn.pipeline import make_pipeline
+from sklearn.manifold import trustworthiness
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv("multiomics_features.csv")
-X = df.drop(columns=["Subtype"])
-
-X_pca = make_pipeline(
-    StandardScaler(),
-    PCA(n_components=30, random_state=42)
-).fit_transform(X)
+features = [col for col in df.columns if col.startswith("Feature_")]
+X_scaled = StandardScaler().fit_transform(df[features])
+X_pca = PCA(
+    n_components=30,
+    svd_solver="randomized",
+    random_state=42,
+).fit_transform(X_scaled)
 
 reducer = umap.UMAP(
     n_neighbors=15,
     min_dist=0.1,
     n_components=2,
     metric="euclidean",
-    random_state=42
+    random_state=42,
+    transform_seed=42,
 )
 embedding = reducer.fit_transform(X_pca)
 
-embedding_df = pd.DataFrame(embedding, columns=["UMAP1", "UMAP2"])
-print(embedding_df.head())
+score = trustworthiness(X_pca, embedding, n_neighbors=15)
+result = pd.DataFrame(embedding, columns=["UMAP1", "UMAP2"])
+print(score, reducer.graph_.shape)
 ```
 
-### 5.2 R
-
-常用包：
-
-- `uwot`
+### 7.2 R
 
 ```r
 library(uwot)
 
-x <- scale(df[, setdiff(names(df), "Subtype")])
+x <- scale(df[, grep("^Feature_", names(df))])
 pca <- prcomp(x, center = FALSE, scale. = FALSE)
-x_pca <- pca$x[, 1:30]
+x_pca <- pca$x[, 1:30, drop = FALSE]
 
+set.seed(42)
 embedding <- umap(
   x_pca,
   n_neighbors = 15,
   min_dist = 0.1,
   n_components = 2,
-  ret_model = FALSE
+  metric = "euclidean",
+  ret_model = FALSE,
+  n_threads = 1
 )
 head(embedding)
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解读
 
-- 核心结果看什么：局部邻域、亚群分离、连续梯度、已知标注在嵌入中的分布。
-- 每个主要参数如何解释：`n_neighbors` 越小越强调局部结构，越大越强调更宽范围的全局结构。
-- 临床或医学意义如何表达：UMAP 是探索性表征，亚群或梯度应结合原始变量、外部标签和独立验证解释。
-- 常见误读：UMAP 上的簇不自动等于真实疾病亚型；坐标轴本身通常没有直接含义。
+- 解释局部邻接、连续梯度及在多组参数下重复出现的结构。
+- UMAP1、UMAP2 的方向、尺度和单位没有直接医学含义。
+- 簇间距离、面积和密度可能被优化过程改变，不能直接作定量比较。
+- 图上的岛可能来自真实分群，也可能来自构图断裂、批次或预处理。
 
-## 7. 推荐可视化
+## 9. 假设诊断与稳健性
 
-- UMAP 二维散点图，按疾病亚型、细胞类型、风险评分或关键基因表达着色。
-- 参数敏感性对比图。
-- 与 t-SNE/PCA 的嵌入对比图。
-- UMAP 上叠加连续临床结局或生物标志物热度。
+1. 检查模糊图的连通分量、孤立点及断边警告。
+2. 系统比较 `n_neighbors`、`min_dist`、距离和随机种子。
+3. 报告 trustworthiness、近邻重叠率及必要时 continuity。
+4. 分别按批次、中心、测序深度、缺失率和质量指标着色。
+5. bootstrap 或子采样后对嵌入做对齐与邻域比较。
+6. 新样本投影需检查其到训练分布的距离，避免外推。
+7. 监督建模时，标准化、PCA 和 UMAP 都必须在训练折内拟合。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
 
-### 优势
+- UMAP 散点图，分别按生物标签和技术因素着色。
+- `n_neighbors` 与 `min_dist` 参数网格。
+- 原空间和低维空间的近邻保持图。
+- 模糊近邻图连通分量与边权分布。
 
-- 在大规模高维数据上通常较快。
-- 可兼顾局部结构与部分全局关系。
-- 已拟合模型可用于新样本投影。
+## 11. 优势、局限与常见坑
 
-### 局限
+**优势：** 扩展性较好；局部尺度自适应；通常支持新样本变换；距离和监督变体较灵活。
 
-- 对参数、距离度量和预处理敏感。
-- 坐标轴缺乏直接可解释性。
-- 可视化结果容易被过度解释。
+**局限：** 参数与随机性会改变布局；普通 UMAP 不保证全局距离或密度；理论假设不等同于数据必然满足流形模型。
 
-### 常见坑
+**常见坑：** 根据标签挑最分离的图；把岛直接命名为新亚型；忽略批次和质量因素；全数据拟合造成泄漏；对训练分布之外样本盲目 `transform`。
 
-- 根据 UMAP 图直接宣布发现新亚型。
-- 不说明预处理和参数选择。
-- 用全数据 fit UMAP 后再评估监督模型，造成信息泄露。
+## 12. 与相近方法的区别
 
-## 9. 与相近方法的区别
+- [[t-SNE（t-Distributed Stochastic Neighbor Embedding）]]：t-SNE 匹配邻居概率；UMAP 匹配模糊图，通常更快且可变换新样本。
+- [[Isomap（Isometric Mapping）]]：Isomap 保持最短路径测地距离；UMAP 不把远距离作为精确尺度。
+- [[局部线性嵌入（Locally Linear Embedding, LLE）]]：LLE 保留局部重构权重；UMAP 用带权近邻边。
+- [[主成分分析（Principal Component Analysis, PCA）]]：PCA 是线性方差投影，可解释性和可重复性更强。
+- **如何选择：** 大规模局部可视化与新样本映射可优先评估 UMAP；需严格线性基线和载荷解释时用 PCA；所有视觉发现都需独立验证。
 
-- 和 [[t-SNE（t-Distributed Stochastic Neighbor Embedding）]] 的区别：UMAP 通常更快，可投影新样本，并更强调拓扑图结构。
-- 和 [[Isomap（Isometric Mapping）]] 的区别：Isomap 保持图上测地距离，UMAP 优化模糊近邻图的低维表示。
-- 和 [[主成分分析（Principal Component Analysis, PCA）]] 的区别：PCA 是线性、可解释方差的降维，UMAP 是非线性邻域图嵌入。
+## 13. 医学研究中的典型应用
 
-## 10. 医学研究中的典型应用
+- 单细胞类型、状态和发育连续谱展示。
+- 多组学患者表征及候选亚群探索。
+- 影像组学或临床高维特征的样本相似性可视化。
 
-- 单细胞转录组细胞状态和亚群可视化。
-- 多组学患者嵌入和潜在亚型探索。
-- 影像组学或临床高维特征的样本相似性展示。
+研究报告至少应给出特征处理、PCA 维数、距离、`n_neighbors`、`min_dist`、随机种子和稳定性分析。
 
-## 11. 相关方法
+## 14. 关键术语
+
+| 术语 | 含义 |
+| --- | --- |
+| fuzzy simplicial set 模糊单纯复形 | 用零到一的成员强度表示局部拓扑关系 |
+| membership strength 成员强度 | 一条邻边属于局部结构的置信度 |
+| local connectivity 局部连通性 | 确保每个样本至少与最近邻强连接的设定 |
+| fuzzy union 模糊并集 | 合并双向邻域置信度的运算 |
+| negative sampling 负采样 | 抽取非邻边近似排斥项以加速优化 |
+| transform 新样本变换 | 在已拟合嵌入基础上定位新观测 |
+
+## 15. 相关方法
 
 - [[t-SNE（t-Distributed Stochastic Neighbor Embedding）]]
 - [[Isomap（Isometric Mapping）]]
+- [[局部线性嵌入（Locally Linear Embedding, LLE）]]
 - [[主成分分析（Principal Component Analysis, PCA）]]
 - [[多维尺度分析（Multidimensional Scaling, MDS）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
 - McInnes L, Healy J, Melville J. UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction. arXiv:1802.03426; 2018.
 - McInnes L, Healy J, Saul N, Grossberger L. UMAP: Uniform Manifold Approximation and Projection. *Journal of Open Source Software*. 2018;3(29):861.
-- umap-learn Developers. UMAP documentation. [https://umap-learn.readthedocs.io/](https://umap-learn.readthedocs.io/) （访问日期：2026-07-02）
+- umap-learn Developers. `UMAP` API Guide. [https://umap-learn.readthedocs.io/en/latest/api.html](https://umap-learn.readthedocs.io/en/latest/api.html) （访问日期：2026-07-09）

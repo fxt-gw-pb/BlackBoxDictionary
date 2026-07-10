@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">术语表</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,223 +54,245 @@
     <div class="intro-note"><h1>层次聚类（Hierarchical Clustering）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>层次聚类是一类把样本组织成树状层次结构的无监督方法。最常见的是凝聚式层次聚类：先把每个样本看作一个簇，再按相似性逐步合并，最终形成一棵树状图。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>层次聚类按距离逐步合并或拆分样本，把从细到粗的分群过程保存为一棵树，而不是只给单一分组。</p>
+<h3>1.2 定义</h3>
+<p>层次聚类构造嵌套簇结构。最常见的凝聚式方法从每个样本各自成簇开始，每轮合并距离最近的两簇，直到只剩一个簇；在树状图某一高度剪切即可得到平面标签。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：样本之间是否存在从细到粗的层级分群结构。</li>
-<li>适用任务：探索性分群、样本相似性可视化、基因或患者层次结构展示。</li>
-<li>常见医学场景：热图行列聚类，组学样本分层，症状或表型相似性结构分析。</li>
+<li>样本是否存在多尺度、嵌套的相似性结构。</li>
+<li>不想在建树前固定唯一簇数。</li>
+<li>需要将聚类与热图结合展示患者或基因模式。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>层次聚类像是在不断把最相似的对象归并成更大的组。树状图的低处分叉表示样本很相似，高处分叉表示只有在较粗层次下才被合并。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>像整理家谱：先合并最相似的个体，再把相似的小组并成更大的家族。分叉越低表示越相似，分叉越高表示只有在更粗尺度下才归在一起。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>设两个簇为 $A$ 和 $B$，层次聚类需要定义簇间距离。常见 linkage 包括：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 两个选择决定结果</h3>
+<p>样本距离定义“谁像谁”，linkage 定义“两个簇如何比较”。相同数据改用相关距离、欧氏距离或不同 linkage，树可能明显变化。</p>
+<h3>2.2 合并不可撤销</h3>
+<p>凝聚算法一旦合并两簇，后续不会拆开。因此早期局部决定会影响整个树，这也是对噪声和距离选择敏感的原因。</p>
+<h3>2.3 树不是天然真相</h3>
+<p>任何距离矩阵都能生成一棵树。树状图存在不等于生物学上真有层级亚型，仍需稳定性和外部解释。</p></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 常见 linkage</h3>
 <p>单链接：</p>
 <p>$$
-d(A,B)=\min_{x_i\in A,x_j\in B} d(x_i,x_j)
+d_{\mathrm{single}}(A,B)=
+\min_{x\in A,z\in B}d(x,z)
 $$</p>
 <p>完全链接：</p>
 <p>$$
-d(A,B)=\max_{x_i\in A,x_j\in B} d(x_i,x_j)
+d_{\mathrm{complete}}(A,B)=
+\max_{x\in A,z\in B}d(x,z)
 $$</p>
 <p>平均链接：</p>
 <p>$$
-d(A,B)=\frac{1}{|A||B|}\sum_{x_i\in A}\sum_{x_j\in B}d(x_i,x_j)
+d_{\mathrm{average}}(A,B)=
+\frac{1}{|A||B|}
+\sum_{x\in A}\sum_{z\in B}d(x,z)
 $$</p>
-<p>Ward 方法每次合并使簇内平方和增加最小：</p>
+<h3>3.2 Ward 合并代价</h3>
 <p>$$
-\Delta(A,B)=\sum_{x_i\in A\cup B}\|x_i-\mu_{A\cup B}\|^2
--\sum_{x_i\in A}\|x_i-\mu_A\|^2
--\sum_{x_i\in B}\|x_i-\mu_B\|^2
+\Delta(A,B)=
+\operatorname{SSE}(A\cup B)
+-\operatorname{SSE}(A)
+-\operatorname{SSE}(B)
 $$</p>
-<h3>2.2 参数或统计量含义</h3>
-<ul>
-<li>距离度量：样本之间的距离，如欧氏距离、曼哈顿距离、相关距离。</li>
-<li>linkage：簇间距离定义，如 single、complete、average、ward。</li>
-<li>cut height：树状图剪切高度，用于得到最终簇标签。</li>
-<li>cophenetic correlation：树状图距离与原始距离的一致性指标。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>所选距离能表达研究问题中的相似性。</li>
-<li>层级结构对数据有意义。</li>
-<li>合并策略与簇形状相匹配。</li>
-<li>样本数不宜过大，否则树状图和距离矩阵都会变得沉重。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：连续特征、标准化特征或预先计算的距离矩阵。</li>
-<li>因变量类型：无监督方法，不需要结局变量。</li>
-<li>数据结构：样本乘以特征矩阵，或样本乘以样本距离矩阵。</li>
-<li>是否适合高维数据：可用，组学热图常见，但需注意距离稳定性。</li>
-<li>是否适合缺失较多数据：需先处理缺失，或选择能处理缺失的距离。</li>
-<li>是否适合删失数据：不直接处理删失结局。</li>
-<li>是否适合重复测量数据：需先定义样本单位或构造个体级特征。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>以基因表达模块探索为例：</p>
+<p>Ward 每轮选择使簇内平方和增加最小的合并，通常与欧氏距离配合。</p>
+<h3>3.3 树的剪切</h3>
+<p>给定剪切高度 $h$，高度低于 $h$ 已连接的叶子归为同簇。也可直接指定最终簇数 $K$。</p>
+<h3>3.4 关键条件</h3>
 <table>
 <thead>
 <tr>
-<th>GeneA</th>
-<th>GeneB</th>
-<th>GeneC</th>
-<th>GeneD</th>
-<th>Group</th>
+<th>条件</th>
+<th>违反后果</th>
+<th>检查方式</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>1.2</td>
-<td>0.4</td>
-<td>-0.3</td>
-<td>0.8</td>
-<td>Case</td>
+<td>距离符合研究含义</td>
+<td>树反映错误相似性</td>
+<td>比较距离定义</td>
 </tr>
 <tr>
-<td>1.0</td>
-<td>0.5</td>
-<td>-0.2</td>
-<td>0.7</td>
-<td>Case</td>
+<td>尺度处理合理</td>
+<td>大量纲变量主导</td>
+<td>标准化敏感性</td>
 </tr>
 <tr>
-<td>-0.6</td>
-<td>1.5</td>
-<td>0.9</td>
-<td>-0.4</td>
-<td>Control</td>
+<td>层次结构相对稳定</td>
+<td>分支随重采样改变</td>
+<td>bootstrap 共识</td>
 </tr>
 <tr>
-<td>-0.4</td>
-<td>1.2</td>
-<td>0.8</td>
-<td>-0.5</td>
-<td>Control</td>
+<td>样本量可承受距离矩阵</td>
+<td>内存和图形不可用</td>
+<td>记录复杂度、先压缩</td>
 </tr>
 </tbody>
-</table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：特征矩阵或距离矩阵。</li>
-<li>关键变量：距离度量、linkage、剪切高度或簇数。</li>
-<li>需要预处理的内容：缺失处理、标准化、异常值检查、变量筛选。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：树状图、合并矩阵、剪切后的簇标签。</li>
-<li>参数估计：每一步合并的簇和距离。</li>
-<li>预测结果：普通层次聚类不自然支持新样本快速预测。</li>
-<li>不确定性指标：bootstrap 稳定性、cophenetic correlation、不同 linkage 对比。</li>
-</ul></div>
+</table></div>
     </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：样本量中小、希望观察层级结构、需要树状图或热图展示的场景。</li>
-<li>不适合：超大样本、需要在线更新、簇边界明显非层级或噪声点很多的场景。</li>
-<li>使用前需要特别检查的点：距离度量、linkage 选择、标准化策略、树状图剪切是否稳定。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>一维有 4 个样本：</p>
+<p>$$
+A=1,\quad B=2,\quad C=8,\quad D=9
+$$</p>
+<p>使用欧氏距离。</p>
+<p><strong>Step 1：计算最近样本。</strong> $d(A,B)=1$，$d(C,D)=1$，其余距离至少为 6。先合并 $AB$，再合并 $CD$，两次高度均为 1。</p>
+<p><strong>Step 2：比较两个大簇。</strong></p>
+<p>单链接取最近点：</p>
+<p>$$
+d_{\mathrm{single}}(AB,CD)=d(B,C)=6
+$$</p>
+<p>完全链接取最远点：</p>
+<p>$$
+d_{\mathrm{complete}}(AB,CD)=d(A,D)=8
+$$</p>
+<p>平均链接取四个跨簇距离平均：</p>
+<p>$$
+d_{\mathrm{average}}
+=\frac{7+8+6+7}{4}=7
+$$</p>
+<p><strong>Step 3：读树状图。</strong> 三种 linkage 都先得到 $\{A,B\}$ 和 $\{C,D\}$，但最终合并高度分别为 6、8、7。</p>
+<p><strong>结论：</strong> linkage 不改变这组数据的两个明显小簇，却改变“两个簇相距多远”的定义；复杂数据中甚至可能改变整个合并顺序。</p></div>
     </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="hierarchical-clustering" data-i="0">Python</button><button class="codetab" data-uid="hierarchical-clustering" data-i="1">R</button></div><div class="codepanel active" data-uid="hierarchical-clustering" data-i="0"><p>常用包：</p>
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 数据要求</h3>
 <ul>
-<li><code>scipy</code></li>
-<li><code>scikit-learn</code></li>
+<li>可输入样本-特征矩阵或预计算距离矩阵。</li>
+<li>连续特征常需标准化；组学中可按问题使用相关距离。</li>
+<li>缺失需在距离计算前处理。</li>
 </ul>
-<pre><code class="language-python">import pandas as pd
-from scipy.cluster.hierarchy import linkage, fcluster
+<h3>5.2 输入与产出</h3>
+<p>输入为距离、linkage 和剪切规则。输出为 linkage 矩阵、树状图、合并高度与剪切标签。传统方法不自然支持新样本在线分配。</p></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>中小样本，希望观察多层次结构或绘制聚类热图。</li>
+<li>对样本或变量的相似关系比在线预测更重要。</li>
+<li>不适合超大样本、噪声很多或必须快速给新样本标签的场景。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="hierarchical-clustering" data-i="0">Python</button><button class="codetab" data-uid="hierarchical-clustering" data-i="1">R</button></div><div class="codepanel active" data-uid="hierarchical-clustering" data-i="0"><pre><code class="language-python">from scipy.cluster.hierarchy import dendrogram, fcluster, linkage
 from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
 
-df = pd.read_csv(&quot;omics_profiles.csv&quot;)
-X = df[[&quot;GeneA&quot;, &quot;GeneB&quot;, &quot;GeneC&quot;, &quot;GeneD&quot;]]
-X_scaled = StandardScaler().fit_transform(X)
-
-Z = linkage(X_scaled, method=&quot;ward&quot;)
+X_s = StandardScaler().fit_transform(X)
+Z = linkage(
+    X_s,
+    method=&quot;ward&quot;,
+    metric=&quot;euclidean&quot;,
+    optimal_ordering=True,
+)
 cluster = fcluster(Z, t=3, criterion=&quot;maxclust&quot;)
 
-df[&quot;cluster&quot;] = cluster
-print(df[&quot;cluster&quot;].value_counts().sort_index())
-</code></pre></div><div class="codepanel" data-uid="hierarchical-clustering" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>stats</code></li>
-</ul>
-<pre><code class="language-r">x &lt;- scale(df[, c(&quot;GeneA&quot;, &quot;GeneB&quot;, &quot;GeneC&quot;, &quot;GeneD&quot;)])
+dendrogram(Z, labels=sample_ids)
+plt.ylabel(&quot;merge distance&quot;)
+plt.show()
+</code></pre></div><div class="codepanel" data-uid="hierarchical-clustering" data-i="1"><pre><code class="language-r">x &lt;- scale(df[, c(&quot;GeneA&quot;, &quot;GeneB&quot;, &quot;GeneC&quot;, &quot;GeneD&quot;)])
 d &lt;- dist(x, method = &quot;euclidean&quot;)
 fit &lt;- hclust(d, method = &quot;ward.D2&quot;)
 
 cluster &lt;- cutree(fit, k = 3)
-table(cluster)
+plot(fit, labels = rownames(df), hang = -1)
+rect.hclust(fit, k = 3, border = 2:4)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：树状图分叉高度、主要分支、剪切后簇的特征模式。</li>
-<li>每个主要参数如何解释：Ward 方法倾向得到相对紧凑、方差较小的簇。</li>
-<li>临床或医学意义如何表达：可描述为“在所选特征和距离度量下，样本呈现若干层级相似性结构”。</li>
-<li>常见误读：树状图分支不等同于系统发育关系或因果演化关系。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>树状图。</li>
-<li>带行列聚类的热图。</li>
-<li>不同剪切高度下的簇数变化图。</li>
-<li>PCA/UMAP 上叠加层次聚类标签。</li>
-</ul></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>不必先固定簇数，可以事后剪切树状图。</li>
-<li>树状图直观展示层级关系。</li>
-<li>适合与热图结合用于组学和临床特征展示。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>对距离和 linkage 选择敏感。</li>
-<li>早期合并一旦发生通常不会被撤销。</li>
-<li>大样本计算和可视化都较困难。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>混用不同尺度变量而不标准化。</li>
-<li>只看树状图视觉效果，不评估稳定性。</li>
-<li>随意剪切树状图并赋予过强医学意义。</li>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>合并高度表示所选 linkage 下的差异尺度，不一定是原始两点距离。</li>
+<li>叶子左右顺序并非唯一，邻近显示不一定意味着直接合并。</li>
+<li>剪切高度或 $K$ 是分析选择，应结合稳定性与临床可解释性。</li>
+<li>树状图不是演化树，也不代表时间或因果方向。</li>
 </ul></div>
     </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a> 的区别：K-means 直接给定 $K$ 个互斥簇，层次聚类提供从细到粗的树状结构。</li>
-<li>和 <a class="xlink" href="m-balanced-iterative-reducing-and-clustering-using-hierarchies-birch.html" data-cn="BIRCH聚类" data-en="Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH" data-def="BIRCH 是一种面向大规模数据的聚类算法。它通过簇特征树（CF tree）把大量样本压缩成可管理的微簇摘要，再对这些摘要进行聚类。">BIRCH聚类（Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH）</a> 的区别：BIRCH 用 CF 树压缩数据，更适合大规模数据；传统层次聚类更适合中小样本解释。</li>
-<li>和 <a class="xlink" href="m-spectral-clustering.html" data-cn="谱聚类" data-en="Spectral Clustering" data-def="谱聚类是一种基于图的聚类方法。它先把样本表示成相似度图，再利用图拉普拉斯矩阵的特征向量把样本嵌入到低维空间，最后在该空间中进行聚类。">谱聚类（Spectral Clustering）</a> 的区别：谱聚类通过图拉普拉斯嵌入处理复杂形状簇，层次聚类主要依赖距离和合并策略。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">诊断与稳健性</h2></div>
+      <div class="sec-body"><ol>
+<li>比较 Euclidean、Manhattan 或相关距离。</li>
+<li>比较 single、complete、average 与 Ward。</li>
+<li>计算 cophenetic correlation 评估树对原距离的保真。</li>
+<li>bootstrap 样本或特征，评估分支复现率。</li>
+<li>检查离群点是否在高处单独合并并扭曲树。</li>
+</ol></div>
     </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
-<li>基因表达热图中的样本和基因聚类。</li>
-<li>患者临床表型层级相似性展示。</li>
-<li>多组学特征模块或样本分支结构探索。</li>
+<li>标注合并高度的树状图。</li>
+<li>行列双向聚类热图。</li>
+<li>不同 linkage 的树状图并排对照。</li>
+<li>bootstrap 共识矩阵或分支稳定性图。</li>
 </ul></div>
     </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a></li>
-<li><a class="xlink" href="m-balanced-iterative-reducing-and-clustering-using-hierarchies-birch.html" data-cn="BIRCH聚类" data-en="Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH" data-def="BIRCH 是一种面向大规模数据的聚类算法。它通过簇特征树（CF tree）把大量样本压缩成可管理的微簇摘要，再对这些摘要进行聚类。">BIRCH聚类（Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH）</a></li>
-<li><a class="xlink" href="m-spectral-clustering.html" data-cn="谱聚类" data-en="Spectral Clustering" data-def="谱聚类是一种基于图的聚类方法。它先把样本表示成相似度图，再利用图拉普拉斯矩阵的特征向量把样本嵌入到低维空间，最后在该空间中进行聚类。">谱聚类（Spectral Clustering）</a></li>
-<li><a class="xlink" href="m-multidimensional-scaling-mds.html" data-cn="多维尺度分析" data-en="Multidimensional Scaling, MDS" data-def="多维尺度分析是一类把样本间距离或不相似度表示为低维坐标的方法。它的目标是在二维或三维空间中尽量保留原始距离关系。">多维尺度分析（Multidimensional Scaling, MDS）</a></li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p><strong>优势：</strong> 不必建树前固定簇数，完整展示多尺度层次，适合热图。</p>
+<p><strong>局限：</strong> 距离与 linkage 敏感，合并不可撤销，计算和存储通常近二次增长。</p>
+<p><strong>常见坑：</strong> 混用不同尺度；把叶序当距离；随意剪树；只展示漂亮热图不做稳定性；将树解释为生物演化。</p></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Murtagh F, Contreras P. Algorithms for hierarchical clustering: an overview. <em>WIREs Data Mining and Knowledge Discovery</em>. 2012;2(1):86-97.</li>
-<li>Ward JH Jr. Hierarchical grouping to optimize an objective function. <em>Journal of the American Statistical Association</em>. 1963;58(301):236-244.</li>
-<li>SciPy Developers. Hierarchical clustering documentation. <a href="https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html">https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html</a> （访问日期：2026-07-02）</li>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a>：直接优化固定 $K$ 的平面分组。</li>
+<li><a class="xlink" href="m-balanced-iterative-reducing-and-clustering-using-hierarchies-birch.html" data-cn="BIRCH聚类" data-en="Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH" data-def="BIRCH 把相近样本在线压缩为可相加的 CF 微簇，再在微簇中心上做全局聚类，从而避免反复保存和比较全部原始点。">BIRCH聚类（Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH）</a>：用 CF 树压缩大数据，更适合扩展。</li>
+<li><a class="xlink" href="m-spectral-clustering.html" data-cn="谱聚类" data-en="Spectral Clustering" data-def="谱聚类把样本变成相似图，利用图拉普拉斯的低频特征向量寻找“内部连接强、彼此连接弱”的节点组。">谱聚类（Spectral Clustering）</a>：基于图拉普拉斯嵌入处理非凸结构。</li>
+<li>选择经验：需要树状层级且样本量中小时使用传统层次聚类。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>基因表达、蛋白组和代谢组热图。</li>
+<li>患者表型或症状模式的层次探索。</li>
+<li>基因、细胞或特征模块的相似性组织。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">术语表</h2></div>
+      <div class="sec-body"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>dendrogram</td>
+<td>记录逐步合并关系和高度的树状图</td>
+</tr>
+<tr>
+<td>linkage</td>
+<td>定义两个簇之间距离的规则</td>
+</tr>
+<tr>
+<td>cut height</td>
+<td>将树转换为平面簇的剪切高度</td>
+</tr>
+<tr>
+<td>Ward method</td>
+<td>最小化簇内平方和增量的合并法</td>
+</tr>
+<tr>
+<td>cophenetic distance</td>
+<td>两个叶子首次合并时的树高度</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a></li>
+<li><a class="xlink" href="m-balanced-iterative-reducing-and-clustering-using-hierarchies-birch.html" data-cn="BIRCH聚类" data-en="Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH" data-def="BIRCH 把相近样本在线压缩为可相加的 CF 微簇，再在微簇中心上做全局聚类，从而避免反复保存和比较全部原始点。">BIRCH聚类（Balanced Iterative Reducing and Clustering using Hierarchies, BIRCH）</a></li>
+<li><a class="xlink" href="m-spectral-clustering.html" data-cn="谱聚类" data-en="Spectral Clustering" data-def="谱聚类把样本变成相似图，利用图拉普拉斯的低频特征向量寻找“内部连接强、彼此连接弱”的节点组。">谱聚类（Spectral Clustering）</a></li>
+<li><a class="xlink" href="m-multidimensional-scaling-mds.html" data-cn="多维尺度分析" data-en="Multidimensional Scaling, MDS" data-def="MDS 只根据对象间不相似度寻找低维坐标，使图上点距尽量复现原始距离或距离顺序。">多维尺度分析（Multidimensional Scaling, MDS）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Ward JH Jr. Hierarchical grouping to optimize an objective function. <em>J Am Stat Assoc</em>. 1963;58(301):236-244.</li>
+<li>Murtagh F, Contreras P. Algorithms for hierarchical clustering: an overview. <em>WIREs Data Min Knowl Discov</em>. 2012;2(1):86-97.</li>
+<li>SciPy Developers. Hierarchical clustering documentation. <a href="https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html">https://docs.scipy.org/doc/scipy/reference/cluster.hierarchy.html</a> （访问日期：2026-07-09）</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-k-means-clustering.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">K-means聚类</div></a><a class="pg pg-next" href="m-dbscan-density-based-spatial-clustering-of-applications-with-noise.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">DBSCAN</div></a></div>

@@ -19,218 +19,305 @@ r_packages: [Rtsne]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-t-SNE 是一种用于高维数据可视化的非线性降维方法。它把高维空间和低维空间中的邻近关系都表示为概率分布，并让两个分布尽可能接近。
+t-SNE 把高维和低维的邻近关系都转成概率，并移动低维点，使真正的高维近邻在图上仍有较高相遇概率。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：高维样本的局部邻域结构如何在二维或三维图中展示。
-- 适用任务：探索性可视化、样本分布观察、潜在亚群展示。
-- 常见医学场景：单细胞聚类可视化、影像组学样本分布展示、组学或表型数据的探索性分群。
+t-SNE 是面向二维或三维可视化的非线性嵌入方法。高维相似度使用自适应带宽的高斯核，低维相似度使用重尾 Student $t$ 分布，再最小化二者的 Kullback-Leibler 散度。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-t-SNE 关心“谁是谁的邻居”。如果两个点在高维空间中很相似，算法会尽量让它们在二维图中也靠近；为了避免所有点挤在一起，低维空间使用 t 分布产生更重的尾部。
+- 高维局部邻域无法直接观察。
+- PCA 的线性投影掩盖弯曲或复杂的局部结构。
+- 需要探索单细胞、组学、影像或深度特征中的潜在亚群。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+先为每个样本列一张“最可能成为邻居”的名单，再在二维会场安排座位，让名单上的人尽量坐近。名单外的距离只提供较弱约束，所以远处簇间空白不能按比例解释。
 
-高维空间中，点 $x_i$ 与 $x_j$ 的相似度定义为条件概率：
+## 2. 核心思想与原理
 
-$$
-p_{j|i}=\frac{\exp(-\|x_i-x_j\|^2/2\sigma_i^2)}
-{\sum_{k\neq i}\exp(-\|x_i-x_k\|^2/2\sigma_i^2)}
-$$
+### 2.1 根本困难
 
-对称化后得到：
+高维空间容易出现距离集中，低维空间又容纳不下所有邻近关系，造成拥挤问题：很多中等距离点会被挤到中心。
 
-$$
-p_{ij}=\frac{p_{j|i}+p_{i|j}}{2n}
-$$
+### 2.2 关键洞察
 
-低维空间中，使用 t 分布定义相似度：
+- 用每个点自己的高斯带宽，把邻域尺度调到相近的有效邻居数。
+- 低维使用重尾 $t$ 分布，使非近邻能被推得更远，为真正近邻腾出空间。
+- 用非对称的 KL 目标强烈惩罚“高维近邻在图上被拆开”。
 
-$$
-q_{ij}=\frac{(1+\|y_i-y_j\|^2)^{-1}}
-{\sum_{k\neq l}(1+\|y_k-y_l\|^2)^{-1}}
-$$
+### 2.3 优化而非唯一解
 
-目标是最小化 KL 散度：
+t-SNE 目标非凸，初始化、随机种子与超参数都会影响布局。它给出的是局部结构的一种可视化，不是唯一坐标系，也不是聚类检验。
+
+## 3. 数学形式
+
+### 3.1 高维条件相似度
 
 $$
-C=KL(P\|Q)=\sum_i\sum_j p_{ij}\log\frac{p_{ij}}{q_{ij}}
+p_{j\mid i}=
+\frac{
+\exp\left(-\|x_i-x_j\|^2/(2\sigma_i^2)\right)
+}{
+\sum_{k\ne i}
+\exp\left(-\|x_i-x_k\|^2/(2\sigma_i^2)\right)
+}
 $$
 
-### 2.2 参数或统计量含义
+对称化后：
 
-- $p_{ij}$：高维空间中的样本相似概率。
-- $q_{ij}$：低维空间中的样本相似概率。
-- `perplexity`：近似控制每个点关注的邻居数量。
-- `learning_rate`：优化步长。
-- `early_exaggeration`：早期优化阶段放大簇间分离的参数。
-- `n_iter` 或 `max_iter`：优化迭代次数。
+$$
+p_{ij}=\frac{p_{j\mid i}+p_{i\mid j}}{2n}
+$$
 
-### 2.3 关键假设
+### 3.2 Perplexity
 
-- 局部邻域结构比全局距离更重要。
-- 高维距离度量能反映样本相似性。
-- 低维图主要用于探索和展示，而不是严格保距。
+以二进制熵 $H(P_i)$ 定义：
 
-## 3. 数据形式与输入输出
+$$
+\operatorname{Perp}(P_i)=2^{H(P_i)}
+$$
 
-### 3.1 适合的数据形式
+算法通过搜索 $\sigma_i$ 使每个点达到指定 perplexity。它可粗略理解为关注的有效邻居数，但并不等于固定的 $k$。
 
-- 自变量类型：连续型高维特征、嵌入向量或标准化后的矩阵。
-- 因变量类型：t-SNE 本身不需要结局变量。
-- 数据结构：样本乘以特征矩阵。
-- 是否适合高维数据：适合可视化，但常先用 PCA/SVD 降到中等维度再运行。
-- 是否适合缺失较多数据：需先处理缺失。
-- 是否适合删失数据：不直接处理删失结局。
-- 是否适合重复测量数据：需明确样本单位，普通 t-SNE 不处理相关结构。
+### 3.3 低维相似度与目标
 
-### 3.2 示例表格
+$$
+q_{ij}=
+\frac{(1+\|y_i-y_j\|^2)^{-1}}
+{\sum_{k\ne l}(1+\|y_k-y_l\|^2)^{-1}}
+$$
 
-以单细胞表达嵌入为例：
+$$
+C=\operatorname{KL}(P\|Q)
+=\sum_{i\ne j}p_{ij}\log\frac{p_{ij}}{q_{ij}}
+$$
 
-| PC1 | PC2 | PC3 | PC4 | CellType |
-| --- | --- | --- | --- | --- |
-| 2.1 | -0.4 | 0.3 | 1.2 | T cell |
-| 1.9 | -0.2 | 0.5 | 1.0 | T cell |
-| -1.2 | 1.5 | 0.1 | -0.7 | B cell |
-| -1.4 | 1.2 | 0.0 | -0.8 | B cell |
+若某对样本在高维有较大 $p_{ij}$，却在低维有很小 $q_{ij}$，损失会明显增大。
 
-### 3.3 输入与产出
+### 3.4 关键条件
 
-#### 输入
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 距离能表达样本相似性 | 邻域无领域意义 | 预处理与距离比较 |
+| 样本量显著大于 perplexity | 带宽搜索失真 | 保证 perplexity 小于样本数 |
+| 优化达到稳定解 | 图形随种子剧变 | 多种种子与 KL 轨迹 |
+| 局部结构是主要目标 | 误读簇间距离和大小 | 与原空间邻域核对 |
+| 参数未按标签挑图 | 产生确认偏倚 | 预先规定参数网格 |
 
-- 输入数据：高维特征矩阵或预降维后的特征。
-- 关键变量：困惑度、学习率、迭代次数、初始化方式、距离度量。
-- 需要预处理的内容：缺失处理、标准化、异常值检查、必要时先用 PCA/SVD 预降维。
+## 4. 手把手算例
 
-#### 产出
+固定中心样本 $i$，它到两个候选邻居 $j,k$ 的高维距离分别为 1 和 2，令 $\sigma_i=1$。
 
-- 模型对象/统计结果：二维或三维嵌入坐标。
-- 参数估计：优化得到的低维坐标。
-- 预测结果：不直接预测，主要用于可视化。
-- 不确定性指标：不同随机种子、参数和重采样下的嵌入稳定性。
+**Step 1：计算未归一化高维权重。**
 
-## 4. 适用场景
+$$
+s_{ij}=e^{-1^2/2}\approx0.6065
+$$
 
-- 适合：高维数据的局部结构展示、潜在亚群探索、复杂嵌入可视化。
-- 不适合：需要解释坐标轴、保持全局距离、比较簇间距离大小或做正式统计检验的场景。
-- 使用前需要特别检查的点：perplexity 是否与样本量匹配，随机种子是否影响结论，是否把图形分离过度解释为真实聚类。
+$$
+s_{ik}=e^{-2^2/2}=e^{-2}\approx0.1353
+$$
 
-## 5. 实现
+**Step 2：归一化。**
 
-### 5.1 Python
+$$
+p_{j\mid i}
+=\frac{0.6065}{0.6065+0.1353}
+\approx0.8176
+$$
 
-常用包：
+$$
+p_{k\mid i}\approx0.1824
+$$
 
-- `scikit-learn`
+因此 $j$ 是更强的局部邻居。
+
+**Step 3：检查一个低维候选布局。** 若低维距离为 1 和 3，则 Student $t$ 权重分别为：
+
+$$
+r_{ij}=\frac1{1+1^2}=0.5,
+\qquad
+r_{ik}=\frac1{1+3^2}=0.1
+$$
+
+在这两个候选中归一化：
+
+$$
+q_{j\mid i}=0.8333,
+\qquad
+q_{k\mid i}=0.1667
+$$
+
+其局部 KL 贡献约为：
+
+$$
+0.8176\log\frac{0.8176}{0.8333}
++0.1824\log\frac{0.1824}{0.1667}
+\approx0.0009
+$$
+
+这个候选布局很好地复现了中心点的邻居概率。完整 t-SNE 会对所有点对使用对称概率并共同优化坐标。
+
+## 5. 数据形式与输入输出
+
+### 5.1 适合的数据形式
+
+- 输入为样本乘特征矩阵，或预计算距离矩阵。
+- 高维稠密数据通常先标准化并降到约 30 至 50 个主成分。
+- 稀疏数据可先用 Truncated SVD。
+- 缺失值需先处理；删失时间、类别标签不是无监督 t-SNE 的直接输入。
+- 重复测量应考虑个体内相关，避免把同一患者多次记录形成的簇误认为疾病亚型。
+
+### 5.2 示例表格
+
+| Cell | PC1 | PC2 | PC3 | Cell_type |
+| --- | ---: | ---: | ---: | --- |
+| C01 | 2.1 | -0.4 | 0.8 | T |
+| C02 | 1.9 | -0.2 | 0.6 | T |
+| C03 | -1.2 | 1.4 | -0.3 | B |
+| C04 | -1.4 | 1.1 | -0.5 | B |
+
+标签只用于嵌入后着色和外部验证。
+
+### 5.3 输入与产出
+
+输入包括特征或距离、perplexity、学习率、迭代次数、初始化与随机种子。输出主要是低维坐标和最终 KL divergence；标准 scikit-learn `TSNE` 不提供通用的训练后新样本 `transform`。
+
+## 6. 适用场景
+
+- 适合高维样本局部邻域和潜在亚群的探索性可视化。
+- 常用于单细胞、空间组学、影像表征和神经网络嵌入。
+- 不适合解释坐标轴、比较簇间绝对距离、估计簇大小或直接完成统计推断。
+- 若需要稳定投影新样本，可考虑参数化方法、openTSNE 的变换流程或 UMAP，并单独验证。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
 import pandas as pd
 from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
-from sklearn.pipeline import make_pipeline
+from sklearn.manifold import TSNE, trustworthiness
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv("omics_features.csv")
-X = df.drop(columns=["Group"])
+features = [col for col in df.columns if col.startswith("Gene_")]
+X_scaled = StandardScaler().fit_transform(df[features])
+X_pca = PCA(
+    n_components=30,
+    svd_solver="randomized",
+    random_state=42,
+).fit_transform(X_scaled)
 
-X_pca = make_pipeline(
-    StandardScaler(),
-    PCA(n_components=30, random_state=42)
-).fit_transform(X)
-
-tsne = TSNE(
+model = TSNE(
     n_components=2,
     perplexity=30,
     learning_rate="auto",
     init="pca",
-    random_state=42
+    max_iter=1000,
+    random_state=42,
 )
-embedding = tsne.fit_transform(X_pca)
+embedding = model.fit_transform(X_pca)
 
-embedding_df = pd.DataFrame(embedding, columns=["tSNE1", "tSNE2"])
-print(embedding_df.head())
+score = trustworthiness(X_pca, embedding, n_neighbors=15)
+result = pd.DataFrame(embedding, columns=["TSNE1", "TSNE2"])
+print(model.kl_divergence_, score)
 ```
 
-### 5.2 R
-
-常用包：
-
-- `Rtsne`
+### 7.2 R
 
 ```r
 library(Rtsne)
 
-x <- scale(df[, setdiff(names(df), "Group")])
+x <- scale(df[, grep("^Gene_", names(df))])
 pca <- prcomp(x, center = FALSE, scale. = FALSE)
-x_pca <- pca$x[, 1:30]
+x_pca <- pca$x[, 1:30, drop = FALSE]
 
-fit <- Rtsne(x_pca, dims = 2, perplexity = 30, pca = FALSE, seed = 42)
+set.seed(42)
+fit <- Rtsne(
+  x_pca,
+  dims = 2,
+  perplexity = 30,
+  theta = 0.5,
+  pca = FALSE,
+  max_iter = 1000,
+  check_duplicates = TRUE
+)
 embedding <- fit$Y
-head(embedding)
+fit$itercosts
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解读
 
-- 核心结果看什么：局部邻域、样本是否形成稳定的近邻群、已知分组是否在图上呈现连续或分离结构。
-- 每个主要参数如何解释：`perplexity=30` 表示每个样本的有效邻域规模大致在几十个样本量级。
-- 临床或医学意义如何表达：t-SNE 图适合提出探索性假设，不应单独作为分类、预后或机制证据。
-- 常见误读：簇与簇之间的距离、簇大小和坐标轴方向通常没有直接定量解释。
+- 优先解释局部邻近和重复出现的结构。
+- t-SNE1、t-SNE2 的方向、尺度和单位没有直接医学含义。
+- 簇间空白、相对方向和表面积通常不代表原空间的定量关系。
+- 图上有簇不等于存在可重复亚型，应回到原始变量和独立队列验证。
 
-## 7. 推荐可视化
+## 9. 假设诊断与稳健性
 
-- t-SNE 二维散点图，按疾病分组、细胞类型或连续临床变量着色。
-- 不同 perplexity 的嵌入对比。
-- 不同随机种子的稳定性对比。
-- t-SNE 图上叠加关键变量表达或风险评分。
+1. 用多组 perplexity、种子和初始化重复拟合。
+2. 报告最终 KL divergence、迭代次数和 trustworthiness。
+3. 比较 PCA 预降维维数及标准化方案。
+4. 计算原空间与嵌入空间的近邻重叠率。
+5. 检查批次、测序深度、中心和缺失模式是否主导布局。
+6. 对重复运行用 Procrustes 或邻域指标比较，不直接比坐标。
+7. 若用于下游建模，所有预处理必须在训练折内部完成。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
 
-### 优势
+- t-SNE 散点图，分别按生物标签、批次与质量指标着色。
+- perplexity 和随机种子敏感性小多图。
+- KL divergence 或优化成本随迭代变化图。
+- 原空间与低维空间近邻重叠率图。
 
-- 高维局部结构可视化效果强。
-- 常能揭示潜在亚群或局部连续谱。
-- 适合与聚类结果、细胞类型标注等结合展示。
+## 11. 优势、局限与常见坑
 
-### 局限
+**优势：** 局部结构展示能力强；重尾分布缓解拥挤；成熟实现可处理较大数据。
 
-- 不保留全局距离。
-- 对参数和随机初始化敏感。
-- 主要用于可视化，不适合直接作为可解释建模结果。
+**局限：** 非凸、随机且参数敏感；全局几何不可靠；标准实现难以自然投影新样本；二维图容易被过度解读。
 
-### 常见坑
+**常见坑：** 把簇间距离当效应大小；按标签挑最分离的参数；不报告随机种子；跳过批次诊断；直接在 t-SNE 坐标上做正式聚类或差异检验。
 
-- 根据 t-SNE 图上两个簇的距离判断生物学距离。
-- 不做参数敏感性分析。
-- 把 t-SNE 坐标作为普通连续变量进行过度解释。
+## 12. 与相近方法的区别
 
-## 9. 与相近方法的区别
+- [[UMAP（Uniform Manifold Approximation and Projection）]]：两者都强调邻域；UMAP 使用模糊图目标，通常更快并支持拟合后变换。
+- [[主成分分析（Principal Component Analysis, PCA）]]：PCA 是确定性的线性方差投影，坐标和全局关系更易解释。
+- [[Isomap（Isometric Mapping）]]：Isomap 试图保持测地距离；t-SNE 主要保持概率邻域。
+- **如何选择：** 局部探索性可视化可用 t-SNE；需要新样本映射或较大规模时优先评估 UMAP；任何非线性图都应与 PCA 基线并列。
 
-- 和 [[UMAP（Uniform Manifold Approximation and Projection）]] 的区别：UMAP 通常更快、更强调拓扑结构，t-SNE 更经典地用于局部邻域可视化。
-- 和 [[主成分分析（Principal Component Analysis, PCA）]] 的区别：PCA 是线性、可解释方差的降维；t-SNE 是非线性、概率邻域可视化。
-- 和 [[局部线性嵌入（Locally Linear Embedding, LLE）]] 的区别：LLE 保持局部线性重构权重，t-SNE 匹配邻域概率分布。
+## 13. 医学研究中的典型应用
 
-## 10. 医学研究中的典型应用
+- 单细胞转录组细胞类型和状态展示。
+- 病理图像或放射影像深度特征可视化。
+- 多组学患者相似性与候选亚群探索。
 
-- 单细胞转录组细胞群可视化。
-- 医学影像或组学样本的探索性分群展示。
-- 临床高维表型数据中异常样本和局部亚群观察。
+报告中应明确预处理、PCA 维数、perplexity、学习率、初始化、随机种子和重复运行策略。
 
-## 11. 相关方法
+## 14. 关键术语
+
+| 术语 | 含义 |
+| --- | --- |
+| stochastic neighbor embedding 随机邻域嵌入 | 用邻居概率表达并匹配高低维关系 |
+| perplexity 困惑度 | 由邻域概率熵得到的有效邻域尺度 |
+| Student t distribution Student t 分布 | 用于低维相似度的重尾分布 |
+| crowding problem 拥挤问题 | 高维邻域无法无失真塞入低维的现象 |
+| KL divergence KL 散度 | 衡量两组概率分布失配的非对称量 |
+| early exaggeration 早期夸大 | 优化初期放大高维吸引关系的策略 |
+
+## 15. 相关方法
 
 - [[UMAP（Uniform Manifold Approximation and Projection）]]
 - [[主成分分析（Principal Component Analysis, PCA）]]
+- [[Isomap（Isometric Mapping）]]
 - [[局部线性嵌入（Locally Linear Embedding, LLE）]]
 - [[多维尺度分析（Multidimensional Scaling, MDS）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
 - van der Maaten L, Hinton G. Visualizing data using t-SNE. *Journal of Machine Learning Research*. 2008;9:2579-2605.
 - van der Maaten L. Accelerating t-SNE using tree-based algorithms. *Journal of Machine Learning Research*. 2014;15:3221-3245.
-- scikit-learn Developers. `sklearn.manifold.TSNE`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html) （访问日期：2026-07-02）
+- scikit-learn Developers. `TSNE` API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html](https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html) （访问日期：2026-07-09）

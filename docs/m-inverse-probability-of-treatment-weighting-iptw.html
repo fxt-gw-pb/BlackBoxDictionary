@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -53,224 +53,415 @@
     </div>
     <div class="intro-note"><h1>逆概率处理加权（Inverse Probability of Treatment Weighting, IPTW）</h1>
 <blockquote>
-<p>本卡是 <a class="xlink" href="m-causal-inference.html" data-cn="因果推断" data-en="Causal Inference" data-def="因果推断是一组用于估计干预或暴露对结局影响的方法框架。它关注的是“如果我们改变处理状态，结局会怎样变化”，而不是单纯描述变量之间是否相关。">因果推断（Causal Inference）</a> 家族下的具体方法，因果识别假设与潜在结果框架见主条目，这里聚焦 IPTW 的构造、稳定化与实践要点。</p>
+<p>本卡是 <a class="xlink" href="m-causal-inference.html" data-cn="因果推断" data-en="Causal Inference" data-def="因果推断不是问「谁和谁相关」，而是问：如果把同一批人放进另一个干预世界，结局会不会改变、会改变多少。">因果推断（Causal Inference）</a> 家族下的具体方法，因果识别假设与潜在结果框架见主条目；这里聚焦如何用权重构造伪人群。</p>
 </blockquote></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>IPTW 用倾向评分的倒数给每个个体加权，构造一个“伪人群”，在其中处理分配与已测混杂独立，从而估计边际（population-average）处理效应。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>IPTW 给「在自身条件下不太可能接受实际处理」的人更大权重，让加权后的数据看起来像处理被随机分配过。</p>
+<h3>1.2 定义</h3>
+<p>逆概率处理加权使用倾向评分的倒数作为权重，构造一个伪人群。在这个伪人群中，处理组和对照组在已测处理前协变量上的分布应接近平衡，从而可以估计边际处理效应。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：观察性数据中如何在保留全部样本的前提下调整混杂，估计总体平均处理效应。</li>
-<li>适用任务：ATE 估计、边际结构模型、时依处理与时依混杂建模。</li>
-<li>常见医学场景：真实世界疗效比较、随时间变化的用药暴露、需要总体效应而非仅处理组效应的评估。</li>
+<li>研究问题：如何在保留全部或大部分样本的情况下调整已测混杂，估计总体平均处理效应。</li>
+<li>适用任务：ATE 估计、边际结构模型、时依处理和时依混杂调整、IPCW 删失调整。</li>
+<li>常见医学场景：真实世界疗效比较、随时间变化的用药暴露、需要报告总体平均风险差或风险比的政策评估。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>被处理概率越低却接受了处理的人越“稀有”，给他更大权重来代表那些本该像他一样却没被处理的人。加权后处理组和对照组在混杂上看起来分布相同，组间对比就更接近随机化。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>IPTW 像是在补齐一个不均衡的抽样箱。某类患者本来很少接受治疗，但恰好有一位接受了治疗，那么他提供的信息很稀有，就让他代表更多类似患者；某类患者很常接受治疗，则每个这类治疗者代表的人数较少。加权后，两组的病情和基线风险分布被拉到同一个目标人群。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>倾向评分 $e(X)=P(T=1\mid X)$。估计 ATE 的（未稳定化）权重为：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>观察性数据中，处理概率随病情、年龄、既往病史等改变。直接比较处理组和对照组时，某些协变量组合在一组中过多、另一组中过少。IPTW 解决的是<strong>处理分配不均衡导致的混杂</strong>：通过加权让每个协变量组合在处理和对照状态下都被充分代表。</p>
+<h3>2.2 关键洞察</h3>
+<p>关键洞察是「按实际处理概率的倒数重建伪随机化」。如果一个人接受了处理，而模型认为他接受处理的概率只有 0.25，那么他的权重是 4；直觉上，他代表了 4 个类似但在随机世界中可能有不同处理状态的人。加权后，处理不再由 $X$ 强烈决定，混杂变量达到平衡。</p>
+<h3>2.3 与朴素/相邻做法的对比</h3>
+<ul>
+<li>相对朴素均值差：IPTW 先改变每个观测的贡献大小，再比较加权均值。</li>
+<li>相对 <a class="xlink" href="m-propensity-score-matching.html" data-cn="倾向评分匹配" data-en="Propensity Score Matching" data-def="倾向评分匹配把一堆混杂变量压缩成「接受处理的概率」这一维分数，再在分数相近的人之间比较结局。">倾向评分匹配（Propensity Score Matching）</a>：匹配靠丢弃和配对，IPTW 靠加权，通常更接近 ATE。</li>
+<li>相对结局回归：IPTW 建模处理机制；若结合结局模型形成 AIPW，可获得双重稳健性。</li>
+</ul></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>倾向评分为：</p>
+<p>$$
+e(X)=P(T=1\mid X)
+$$</p>
+<p>ATE 的未稳定化权重为：</p>
 <p>$$
 w_i=\frac{T_i}{e(X_i)}+\frac{1-T_i}{1-e(X_i)}
 $$</p>
-<p>稳定化权重降低极端权重的方差：</p>
+<p>稳定化权重为：</p>
 <p>$$
-sw_i=\frac{T_i\,P(T=1)}{e(X_i)}+\frac{(1-T_i)\,P(T=0)}{1-e(X_i)}
+sw_i=\frac{T_iP(T=1)}{e(X_i)}+\frac{(1-T_i)P(T=0)}{1-e(X_i)}
 $$</p>
-<p>加权后用边际结构模型 $E[Y^t]=g^{-1}(\beta_0+\beta_1 t)$ 估计效应。</p>
-<h3>2.2 参数或统计量含义</h3>
+<p>归一化加权均值差（Hájek 形式）为：</p>
+<p>$$
+\widehat{\mathrm{ATE}}=
+\frac{\sum_i T_iw_iY_i}{\sum_i T_iw_i}
+-
+\frac{\sum_i (1-T_i)w_iY_i}{\sum_i (1-T_i)w_i}
+$$</p>
+<p>这个式子在说：先用权重把处理组和对照组各自重构成目标人群，再比较两个加权平均结局。</p>
+<h3>3.2 推导脉络</h3>
+<ol>
+<li>在可交换性和正值性下，给定 $X$ 后处理像随机分配。</li>
+<li>但不同 $X$ 层里处理概率不同，所以直接平均会让某些层过度或不足代表。</li>
+<li>用 $1/e(X)$ 或 $1/\{1-e(X)\}$ 重新加权，可把每个处理状态扩展到目标总体。</li>
+<li>稳定化权重把总体处理比例放到分子，通常不改变目标 estimand，却能减少方差和极端权重影响。</li>
+</ol>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>$e(X)$：倾向评分。</li>
-<li>$w_i$：ATE 权重；$sw_i$：稳定化权重（均值应接近 1）。</li>
-<li>边际结构模型系数：加权回归给出的边际处理效应。</li>
-<li>有效样本量：权重离散度的函数，反映加权带来的信息损失。</li>
+<li>$e(X)$：给定协变量后接受处理的概率。</li>
+<li>$w_i$：未稳定化 IPTW 权重。</li>
+<li>$sw_i$：稳定化权重；均值通常应接近 1。</li>
+<li>ATE：加权伪人群中的总体平均处理效应。</li>
+<li>有效样本量（ESS）：权重离散度造成的信息损失，权重越极端 ESS 越小。</li>
+<li>截断（truncation）：把极端权重限制在某些分位数内，以换取偏倚和方差之间的折中。</li>
 </ul>
-<h3>2.3 关键假设</h3>
+<h3>3.4 关键假设(含违反后果)</h3>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>无未测混杂</td>
+<td>已测 $X$ 足以解释处理选择中的混杂</td>
+<td>加权后仍偏倚</td>
+<td>DAG、负对照、敏感性分析</td>
+</tr>
+<tr>
+<td>正值性</td>
+<td>$0\lt e(X)\lt 1$，且不能太接近边界</td>
+<td>极端权重主导估计</td>
+<td>权重分布、倾向评分重叠图</td>
+</tr>
+<tr>
+<td>倾向评分模型合适</td>
+<td>权重能平衡处理前协变量</td>
+<td>加权后 SMD 仍大</td>
+<td>Love plot、平衡表</td>
+</tr>
+<tr>
+<td>独立观测或正确聚类</td>
+<td>标准误需符合设计</td>
+<td>区间过窄</td>
+<td>聚类稳健方差或 GEE</td>
+</tr>
+<tr>
+<td>缺失/删失处理正确</td>
+<td>缺失或删失不能被忽略时需额外建权重</td>
+<td>选择偏倚</td>
+<td>缺失模型、IPCW、敏感性分析</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>沿用 <a class="xlink" href="m-propensity-score-matching.html" data-cn="倾向评分匹配" data-en="Propensity Score Matching" data-def="倾向评分匹配把一堆混杂变量压缩成「接受处理的概率」这一维分数，再在分数相近的人之间比较结局。">倾向评分匹配（Propensity Score Matching）</a> 的 6 人小数据，$Y$ 为住院天数，越少越好。</p>
+<table>
+<thead>
+<tr>
+<th>患者</th>
+<th>T</th>
+<th>倾向评分 e</th>
+<th>Y</th>
+<th>IPTW 权重</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>0.70</td>
+<td>8</td>
+<td>$1/0.70=1.43$</td>
+</tr>
+<tr>
+<td>B</td>
+<td>1</td>
+<td>0.55</td>
+<td>6</td>
+<td>$1/0.55=1.82$</td>
+</tr>
+<tr>
+<td>C</td>
+<td>1</td>
+<td>0.35</td>
+<td>4</td>
+<td>$1/0.35=2.86$</td>
+</tr>
+<tr>
+<td>D</td>
+<td>0</td>
+<td>0.68</td>
+<td>10</td>
+<td>$1/(1-0.68)=3.13$</td>
+</tr>
+<tr>
+<td>E</td>
+<td>0</td>
+<td>0.50</td>
+<td>7</td>
+<td>$1/(1-0.50)=2.00$</td>
+</tr>
+<tr>
+<td>F</td>
+<td>0</td>
+<td>0.32</td>
+<td>5</td>
+<td>$1/(1-0.32)=1.47$</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Step 1：算加权处理组均值。</strong></p>
+<p>$$
+\bar Y_1^w=
+\frac{1.43\times 8+1.82\times 6+2.86\times 4}{1.43+1.82+2.86}
+=\frac{33.80}{6.11}=5.53
+$$</p>
+<p><strong>Step 2：算加权对照组均值。</strong></p>
+<p>$$
+\bar Y_0^w=
+\frac{3.13\times 10+2.00\times 7+1.47\times 5}{3.13+2.00+1.47}
+=\frac{52.65}{6.60}=7.98
+$$</p>
+<p><strong>Step 3：计算 ATE。</strong></p>
+<p>$$
+\widehat{\mathrm{ATE}}=5.53-7.98=-2.45
+$$</p>
+<p><strong>结论：</strong> IPTW 估计药物在目标总体中平均减少约 2.45 天住院。和 PSM 的 ATT 不同，这里每个人都被保留，只是贡献大小不同；权重越不均，结果越需要做稳健性检查。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
-<li>可忽略性（无未测混杂）与一致性、SUTVA。</li>
-<li>正值性尤为关键：任何协变量组合下处理概率不能接近 0 或 1，否则权重爆炸。</li>
-<li>倾向评分模型近似正确（否则考虑双重稳健 AIPW）。</li>
-</ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：处理变量、混杂协变量。</li>
-<li>因变量类型：连续、二分类或时间到事件。</li>
-<li>数据结构：队列/横断面观察性数据；纵向数据可做时依加权。</li>
-<li>是否适合高维数据：可用机器学习估权，但正值性与极端权重更需警惕。</li>
-<li>是否适合缺失较多数据：需先处理缺失，可与逆概率删失加权（IPCW）结合。</li>
-<li>是否适合删失数据：可结合 IPCW 处理删失。</li>
-<li>是否适合重复测量数据：适合，边际结构模型是其经典应用场景。</li>
+<li>自变量类型：处理前混杂变量，可连续、分类或高维。</li>
+<li>因变量类型：连续、二分类、计数、时间到事件。</li>
+<li>数据结构：个体级观察性队列；纵向资料可扩展为时依权重。</li>
+<li>是否适合高维数据：可以，但需正则化或交叉拟合，并重点看平衡和极端权重。</li>
+<li>是否适合缺失较多数据：需先处理缺失；缺失可能与处理或结局相关时需额外权重或插补。</li>
+<li>是否适合删失数据：适合与 IPCW 结合处理随访删失。</li>
+<li>是否适合重复测量数据：适合，边际结构模型是经典应用。</li>
 </ul>
-<h3>3.2 示例表格</h3>
+<h3>5.2 示例表格</h3>
 <table>
 <thead>
 <tr>
 <th>个体</th>
-<th>处理 T</th>
-<th>倾向评分 e(X)</th>
-<th>权重 w</th>
-<th>稳定化权重 sw</th>
-<th>结局 Y</th>
+<th>Age</th>
+<th>Charlson</th>
+<th>Drug</th>
+<th>ps</th>
+<th>sw</th>
+<th>Readmit30d</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>1</td>
+<td>73</td>
+<td>4</td>
 <td>1</td>
 <td>0.80</td>
-<td>1.25</td>
-<td>0.50</td>
+<td>0.63</td>
 <td>1</td>
 </tr>
 <tr>
 <td>2</td>
+<td>58</td>
+<td>2</td>
 <td>0</td>
 <td>0.30</td>
-<td>1.43</td>
-<td>0.86</td>
+<td>0.71</td>
 <td>0</td>
 </tr>
 <tr>
 <td>3</td>
+<td>69</td>
+<td>5</td>
 <td>1</td>
-<td>0.20</td>
-<td>5.00</td>
-<td>2.00</td>
+<td>0.35</td>
+<td>1.43</td>
 <td>1</td>
 </tr>
 <tr>
 <td>4</td>
+<td>46</td>
+<td>1</td>
 <td>0</td>
-<td>0.70</td>
-<td>3.33</td>
-<td>2.00</td>
+<td>0.20</td>
+<td>0.63</td>
 <td>0</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：处理变量、混杂协变量、结局。</li>
-<li>关键变量：处理定义、协变量集合、权重类型（稳定化/截断）。</li>
-<li>需要预处理的内容：缺失处理、正值性/重叠检查、权重诊断。</li>
+<li>输入数据：处理变量、处理前混杂变量、结局变量。</li>
+<li>关键变量：目标 estimand、权重类型、是否稳定化、是否截断。</li>
+<li>需要预处理的内容：缺失处理、倾向评分估计、权重诊断、平衡诊断。</li>
 </ul>
 <h4>产出</h4>
 <ul>
 <li>模型对象/统计结果：倾向评分、权重、加权结局模型。</li>
-<li>参数估计：ATE（风险差、风险比、率比或 HR）。</li>
-<li>预测结果：加权后的组间结局对比。</li>
-<li>不确定性指标：稳健（三明治）或 bootstrap 标准误、加权后平衡表。</li>
+<li>参数估计：ATE、风险差、风险比、均值差、HR 或边际 OR。</li>
+<li>预测结果：不是核心；主要产出是加权伪人群中的效应。</li>
+<li>不确定性指标：稳健标准误、bootstrap 区间、权重分布、有效样本量。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>适合：需要总体平均效应、重叠良好、有时依处理/混杂的纵向数据。</li>
-<li>不适合：正值性严重违背、极端权重主导估计的场景。</li>
-<li>使用前需要特别检查的点：权重分布与极值、加权后 SMD 平衡、稳定化与截断、正值性。</li>
+<li>适合：重叠较好、希望估计总体边际效应、样本量足以承受加权方差的研究。</li>
+<li>不适合：处理概率接近 0 或 1、极端权重很多、关键混杂未测量、样本很小。</li>
+<li>使用前需要特别检查的点：权重均值、最大权重、分位数、ESS、加权后 SMD、截断敏感性。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="inverse-probability-of-treatment-weighting-iptw" data-i="0">Python</button><button class="codetab" data-uid="inverse-probability-of-treatment-weighting-iptw" data-i="1">R</button></div><div class="codepanel active" data-uid="inverse-probability-of-treatment-weighting-iptw" data-i="0"><p>常用包：</p>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="inverse-probability-of-treatment-weighting-iptw" data-i="0">Python</button><button class="codetab" data-uid="inverse-probability-of-treatment-weighting-iptw" data-i="1">R</button></div><div class="codepanel active" data-uid="inverse-probability-of-treatment-weighting-iptw" data-i="0"><p>常用包:</p>
 <ul>
 <li><code>scikit-learn</code></li>
+<li><code>statsmodels</code></li>
 </ul>
 <pre><code class="language-python">import numpy as np
-import statsmodels.api as sm
+import statsmodels.formula.api as smf
 from sklearn.linear_model import LogisticRegression
 
 X = df[[&quot;Age&quot;, &quot;Charlson&quot;, &quot;PriorAdmission&quot;]]
-T = df[&quot;Drug&quot;].values
-Y = df[&quot;Y&quot;].values
+T = df[&quot;Drug&quot;].to_numpy()
 
-e = LogisticRegression(max_iter=5000).fit(X, T).predict_proba(X)[:, 1]
-pT = T.mean()
-sw = np.where(T == 1, pT / e, (1 - pT) / (1 - e))   # 稳定化权重
+ps = LogisticRegression(max_iter=5000).fit(X, T).predict_proba(X)[:, 1]
+p_treated = T.mean()
+sw = np.where(T == 1, p_treated / ps, (1 - p_treated) / (1 - ps))
 
-wls = sm.WLS(Y, sm.add_constant(T), weights=sw).fit(cov_type=&quot;HC1&quot;)
-print(&quot;加权风险差(ATE):&quot;, round(wls.params[1], 3))
-</code></pre></div><div class="codepanel" data-uid="inverse-probability-of-treatment-weighting-iptw" data-i="1"><p>常用包：</p>
+df = df.copy()
+df[&quot;sw&quot;] = sw
+
+fit = smf.wls(&quot;Readmit30d ~ Drug&quot;, data=df, weights=df[&quot;sw&quot;]).fit(
+    cov_type=&quot;HC1&quot;
+)
+print(fit.params[&quot;Drug&quot;])       # 加权风险差
+print(df[&quot;sw&quot;].describe())      # 权重诊断
+</code></pre></div><div class="codepanel" data-uid="inverse-probability-of-treatment-weighting-iptw" data-i="1"><p>常用包:</p>
 <ul>
 <li><code>WeightIt</code></li>
+<li><code>cobalt</code></li>
 <li><code>survey</code></li>
 </ul>
 <pre><code class="language-r">library(WeightIt)
+library(cobalt)
 library(survey)
 
-w &lt;- weightit(Drug ~ Age + Charlson + PriorAdmission,
-              data = df, method = &quot;ps&quot;,
-              estimand = &quot;ATE&quot;, stabilize = TRUE)
+w &lt;- weightit(
+  Drug ~ Age + Charlson + PriorAdmission,
+  data = df,
+  method = &quot;ps&quot;,
+  estimand = &quot;ATE&quot;,
+  stabilize = TRUE
+)
+
+bal.tab(w, un = TRUE)
+summary(w$weights)
 
 des &lt;- svydesign(ids = ~1, weights = ~w$weights, data = df)
-fit &lt;- svyglm(Y ~ Drug, design = des, family = quasibinomial())
+fit &lt;- svyglm(Readmit30d ~ Drug, design = des, family = quasibinomial())
 summary(fit)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：ATE 估计与稳健区间、权重分布、加权后平衡。</li>
-<li>每个主要参数如何解释：加权模型的处理系数是边际处理效应（对整个目标人群）。</li>
-<li>临床或医学意义如何表达：强调“在识别假设与正值性成立时”的总体效应；报告风险差/比时说明尺度。</li>
-<li>常见误读：忽略极端权重导致的高方差；用普通（未稳健）方差低估不确定性；把 ATE 当条件效应。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>权重分布直方图（识别极端权重）。</li>
-<li>加权前后协变量 SMD 的 Love plot。</li>
-<li>倾向评分重叠图。</li>
-</ul></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>核心结果看什么：ATE 点估计、稳健区间、加权后平衡、权重分布和 ESS。</li>
+<li>每个主要参数如何解读：加权结局模型中 <code>Drug</code> 的系数是目标总体的边际处理效应，解释时要说明效应尺度。</li>
+<li>临床或医学意义如何表达：例如「在目标总体中，用药使 30 天再入院风险平均降低多少个百分点」。</li>
+<li>常见误读：把加权后个体复制当成真实样本量增加；实际上极端权重会降低有效样本量。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>权重诊断：报告均值、最大值、1% 和 99% 分位数、ESS；稳定化权重均值应接近 1。</li>
+<li>平衡诊断：检查加权后 SMD，目标是绝对值小于 0.1；若不达标，重新设定倾向评分模型。</li>
+<li>正值性诊断：画倾向评分重叠图，识别只存在处理或只存在对照的区域。</li>
+<li>截断敏感性：比较不截断、1%/99% 截断、5%/95% 截断的效应是否稳定。</li>
+<li>方差估计：使用稳健三明治方差或 bootstrap；聚类/重复测量数据用聚类稳健方法。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>权重直方图或箱线图：识别极端权重。</li>
+<li>倾向评分重叠图：判断共同支持。</li>
+<li>Love plot：展示加权前后协变量平衡。</li>
+<li>截断敏感性图：横轴为截断规则，纵轴为效应估计和区间。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>保留全部样本，效率通常优于匹配。</li>
-<li>直接估计边际（总体）效应，尺度可解释。</li>
-<li>天然扩展到时依处理的边际结构模型。</li>
+<li>保留样本信息，直接估计边际总体效应。</li>
+<li>可自然扩展到时依处理和边际结构模型。</li>
+<li>与结局模型分离，便于先做设计诊断。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>对正值性违背和极端权重敏感，方差可能很大。</li>
-<li>只调整已测混杂。</li>
-<li>依赖倾向评分模型正确设定。</li>
+<li>对正值性违背和极端权重非常敏感。</li>
+<li>倾向评分模型错设会导致平衡失败和偏倚。</li>
+<li>只调整已测混杂，不能自动处理未测混杂。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>不做权重截断/稳定化，少数极端权重主导结果。</li>
-<li>用普通标准误而非稳健/bootstrap。</li>
-<li>正值性明显违背仍强行加权。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-propensity-score-matching.html" data-cn="倾向评分匹配" data-en="Propensity Score Matching" data-def="倾向评分匹配先估计每个个体接受处理的条件概率（倾向评分），再把处理组个体与倾向评分相近的对照组个体配对，从而在已测混杂上构造可比的两组，估计处理效应。">倾向评分匹配（Propensity Score Matching）</a> 的区别：IPTW 加权保留样本、常估 ATE，匹配丢弃样本、常估 ATT。</li>
-<li>和双重稳健（AIPW）的关系：AIPW 同时建倾向评分和结局模型，任一正确即一致，比单纯 IPTW 更稳健。</li>
-<li>和 <a class="xlink" href="m-causal-inference.html" data-cn="因果推断" data-en="Causal Inference" data-def="因果推断是一组用于估计干预或暴露对结局影响的方法框架。它关注的是“如果我们改变处理状态，结局会怎样变化”，而不是单纯描述变量之间是否相关。">因果推断（Causal Inference）</a> 主条目的关系：本卡是其倾向评分加权的具体实现。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>真实世界数据中总体层面的疗效比较。</li>
-<li>时依用药暴露与结局的边际结构模型分析。</li>
-<li>结合 IPCW 处理随访删失的加权生存分析。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-causal-inference.html" data-cn="因果推断" data-en="Causal Inference" data-def="因果推断是一组用于估计干预或暴露对结局影响的方法框架。它关注的是“如果我们改变处理状态，结局会怎样变化”，而不是单纯描述变量之间是否相关。">因果推断（Causal Inference）</a></li>
-<li><a class="xlink" href="m-propensity-score-matching.html" data-cn="倾向评分匹配" data-en="Propensity Score Matching" data-def="倾向评分匹配先估计每个个体接受处理的条件概率（倾向评分），再把处理组个体与倾向评分相近的对照组个体配对，从而在已测混杂上构造可比的两组，估计处理效应。">倾向评分匹配（Propensity Score Matching）</a></li>
-<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
-<li><a class="xlink" href="m-generalized-estimating-equations-gee.html" data-cn="广义估计方程" data-en="Generalized Estimating Equations, GEE" data-def="GEE 不给每个人建模，只盯人群平均：先用一个「工作相关结构」大致猜同人测量怎么相关（猜错也没关系），再用三明治（sandwich）稳健方差兜底——只要均值模型写对，标准误在大样本下就可信。">广义估计方程（Generalized Estimating Equations, GEE）</a></li>
+<li>不看权重分布就直接报告加权模型结果。</li>
+<li>极端权重明显却不做截断或目标人群限制。</li>
+<li>用普通标准误而不是稳健或 bootstrap 标准误。</li>
+<li>加权后仍不平衡，却把结果解释成因果效应。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li>和 <a class="xlink" href="m-propensity-score-matching.html" data-cn="倾向评分匹配" data-en="Propensity Score Matching" data-def="倾向评分匹配把一堆混杂变量压缩成「接受处理的概率」这一维分数，再在分数相近的人之间比较结局。">倾向评分匹配（Propensity Score Matching）</a> 的区别：IPTW 保留样本并改变贡献大小，PSM 保留可匹配样本并做配对比较。</li>
+<li>和结局回归的区别：IPTW 建模处理分配，结局回归建模 $E(Y\mid T,X)$；二者结合可形成双重稳健估计。</li>
+<li>和 <a class="xlink" href="m-generalized-estimating-equations-gee.html" data-cn="广义估计方程" data-en="Generalized Estimating Equations, GEE" data-def="GEE 不给每个人建模，只盯人群平均：先用一个「工作相关结构」大致猜同人测量怎么相关（猜错也没关系），再用三明治（sandwich）稳健方差兜底——只要均值模型写对，标准误在大样本下就可信。">广义估计方程（Generalized Estimating Equations, GEE）</a> 的关系：GEE 估边际均值，IPTW 可作为权重放入边际模型，尤其用于重复测量和删失。</li>
+<li>如何选择：目标是 ATE 且重叠良好时优先考虑 IPTW；极端权重多时考虑限制人群、匹配或双重稳健方法。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>真实世界数据库中估计两种治疗策略对死亡、再入院或不良事件的总体效应。</li>
+<li>随时间变化的药物使用、依从性和疾病严重度相互影响时，构建边际结构模型。</li>
+<li>生存分析中结合 IPCW 处理失访或治疗转换。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>逆概率权重（Inverse Probability Weight）</strong>：实际处理状态发生概率的倒数。</li>
+<li><strong>稳定化权重（Stabilized Weight）</strong>：分子加入总体处理概率以降低方差的权重。</li>
+<li><strong>伪人群（Pseudo-population）</strong>：加权后构造出的、处理与协变量近似独立的人群。</li>
+<li><strong>正值性（Positivity）</strong>：每类协变量组合下处理概率既不是 0 也不是 1。</li>
+<li><strong>极端权重（Extreme Weight）</strong>：由倾向评分接近边界产生的过大权重。</li>
+<li><strong>有效样本量（Effective Sample Size, ESS）</strong>：考虑权重不均后真正可用的信息量。</li>
+<li><strong>边际结构模型（Marginal Structural Model, MSM）</strong>：用权重调整时依混杂后估计边际因果效应的模型。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-causal-inference.html" data-cn="因果推断" data-en="Causal Inference" data-def="因果推断不是问「谁和谁相关」，而是问：如果把同一批人放进另一个干预世界，结局会不会改变、会改变多少。">因果推断（Causal Inference）</a></li>
+<li><a class="xlink" href="m-propensity-score-matching.html" data-cn="倾向评分匹配" data-en="Propensity Score Matching" data-def="倾向评分匹配把一堆混杂变量压缩成「接受处理的概率」这一维分数，再在分数相近的人之间比较结局。">倾向评分匹配（Propensity Score Matching）</a></li>
+<li><a class="xlink" href="m-logistic-regression.html" data-cn="Logistic回归" data-en="Logistic Regression" data-def="Logistic 回归先把「事件发生的概率」翻译成一个可以取任意实数的量——对数优势（log-odds），再对这个量做普通的线性回归；预测时反向翻译回 0 到 1 的概率。">Logistic回归（Logistic Regression）</a></li>
+<li><a class="xlink" href="m-generalized-estimating-equations-gee.html" data-cn="广义估计方程" data-en="Generalized Estimating Equations, GEE" data-def="GEE 不给每个人建模，只盯人群平均：先用一个「工作相关结构」大致猜同人测量怎么相关（猜错也没关系），再用三明治（sandwich）稳健方差兜底——只要均值模型写对，标准误在大样本下就可信。">广义估计方程（Generalized Estimating Equations, GEE）</a></li>
+<li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Robins JM, Hernán MA, Brumback B. Marginal structural models and causal inference in epidemiology. <em>Epidemiology</em>. 2000;11(5):550-560.</li>
 <li>Austin PC, Stuart EA. Moving towards best practice when using inverse probability of treatment weighting (IPTW). <em>Stat Med</em>. 2015;34(28):3661-3679.</li>
 <li>Hernán MA, Robins JM. <em>Causal Inference: What If</em>. Chapman and Hall/CRC; 2020.</li>
+<li>Cole SR, Hernán MA. Constructing inverse probability weights for marginal structural models. <em>Am J Epidemiol</em>. 2008;168(6):656-664.</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-propensity-score-matching.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">倾向评分匹配</div></a><a class="pg pg-next" href="m-mediation-analysis.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">中介分析</div></a></div>

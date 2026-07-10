@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">术语表</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,233 +54,292 @@
     <div class="intro-note"><h1>高斯混合模型（Gaussian Mixture Model, GMM）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>高斯混合模型是假设观测数据由多个高斯分布按一定权重混合而成的概率模型。它既可以做密度估计，也可以用于软聚类，即给每个样本分配“属于各个簇的概率”。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>GMM 把总体密度表示为若干高斯成分的加权和，并为每名患者给出属于各成分的后验概率。</p>
+<h3>1.2 定义</h3>
+<p>高斯混合模型假设每个观测由一个未观察到的成分生成，每个成分服从自己的多元高斯分布。模型同时估计成分比例、均值、协方差和病例责任概率，可用于密度估计与软聚类。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：当数据中存在多个潜在亚群、且每个亚群近似服从椭圆形分布时，如何估计这些潜在成分及其混合比例。</li>
-<li>适用任务：软聚类、亚型发现、密度估计、异常检测辅助分析。</li>
-<li>常见医学场景：疾病表型分群、多生物标志物亚群识别、患者风险画像的潜在成分建模。</li>
+<li>潜在亚群彼此重叠，硬标签过于武断。</li>
+<li>亚群可能呈不同方向和大小的椭圆分布。</li>
+<li>既希望分群，也希望得到完整概率密度。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>如果你看到一团混在一起的病人数据，GMM 的思路是：这可能不是一个整体，而是几群不同来源的患者混在一起。每一群都有自己的均值、波动和占比，模型要做的就是把这些“隐藏人群”拆出来。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>一张混合人群的指标直方图可能由两个钟形分布叠加而成。GMM 尝试还原每个钟形分布，并回答“这个患者更像哪个成分，以及有多不确定”。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>设观测向量为 $x \in \mathbb{R}^d$，则 GMM 的密度函数写为：</p>
-<p>$$
-p(x) = \sum_{k=1}^{K}\pi_k \mathcal{N}(x \mid \mu_k, \Sigma_k)
-$$</p>
-<p>其中：</p>
-<ul>
-<li>$\pi_k \ge 0$，且 $\sum_{k=1}^{K}\pi_k = 1$</li>
-<li>$\mu_k$ 为第 $k$ 个成分的均值向量</li>
-<li>$\Sigma_k$ 为第 $k$ 个成分的协方差矩阵</li>
-</ul>
-<p>EM 算法中的责任概率为：</p>
-<p>$$
-\gamma_{ik} = P(z_i = k \mid x_i) =
-\frac{\pi_k \mathcal{N}(x_i \mid \mu_k, \Sigma_k)}
-{\sum_{j=1}^{K}\pi_j \mathcal{N}(x_i \mid \mu_j, \Sigma_j)}
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
-<ul>
-<li><code>n_components</code>：混合成分数，也常被理解为潜在簇数。</li>
-<li>$\pi_k$：第 $k$ 个簇在总体中的权重。</li>
-<li>$\mu_k$、$\Sigma_k$：第 $k$ 个簇的位置和形状。</li>
-<li><code>covariance_type</code>：协方差结构，如 <code>full</code>、<code>diag</code>、<code>tied</code>、<code>spherical</code>。</li>
-<li>AIC / BIC：用于选择成分数和模型复杂度。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>每个潜在簇近似服从高斯分布。</li>
-<li>聚类边界允许重叠，样本可以有软归属。</li>
-<li>成分数选择会显著影响结果。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 从距离到生成概率</h3>
+<p><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a> 只比较到质心的距离；GMM 还考虑簇的大小、方向和先验占比。同样距离下，位于高方差成分中的点可能得到更高概率。</p>
+<h3>2.2 软归属</h3>
+<p>每个病例对所有成分都有责任概率，且总和为 1。接近重叠区的病例可呈 0.55/0.45，而不是被强行解释为确定亚型。</p>
+<h3>2.3 EM 估计</h3>
+<p>成分标签未知使直接最大化似然困难。<a class="xlink" href="m-expectation-maximization-algorithm-em.html" data-cn="期望最大化算法" data-en="Expectation-Maximization Algorithm, EM" data-def="EM 在“根据当前参数推断隐藏信息”和“把推断出的软信息当作完整数据更新参数”之间交替，逐步提高观测数据似然。">期望最大化算法（Expectation-Maximization Algorithm, EM）</a> 交替计算责任概率，并用这些软权重更新参数。</p></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：连续变量为主。</li>
-<li>因变量类型：无监督任务，没有显式结局变量。</li>
-<li>数据结构：宽表数据，每行一个样本。</li>
-<li>是否适合高维数据：可以，但高维时常需降维或正则化协方差。</li>
-<li>是否适合缺失较多数据：通常需先处理缺失。</li>
-<li>是否适合删失数据：不适合。</li>
-<li>是否适合重复测量数据：不直接适合。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>以代谢指标驱动的患者亚型分群为例：</p>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 混合密度</h3>
+<p>$$
+p(x)=\sum_{k=1}^{K}\pi_k
+\mathcal N(x\mid\mu_k,\Sigma_k)
+$$</p>
+<p>其中 $\pi_k\ge0$ 且 $\sum_k\pi_k=1$。</p>
+<h3>3.2 责任概率</h3>
+<p>$$
+\gamma_{ik}
+=P(z_i=k\mid x_i)
+=
+\frac{\pi_k\mathcal N(x_i\mid\mu_k,\Sigma_k)}
+{\sum_{j=1}^{K}\pi_j\mathcal N(x_i\mid\mu_j,\Sigma_j)}
+$$</p>
+<h3>3.3 M 步更新</h3>
+<p>令 $N_k=\sum_i\gamma_{ik}$：</p>
+<p>$$
+\pi_k=\frac{N_k}{n},\qquad
+\mu_k=\frac{1}{N_k}\sum_i\gamma_{ik}x_i
+$$</p>
+<p>$$
+\Sigma_k=
+\frac{1}{N_k}
+\sum_i\gamma_{ik}(x_i-\mu_k)(x_i-\mu_k)^\top
+$$</p>
+<h3>3.4 关键条件</h3>
 <table>
 <thead>
 <tr>
-<th>BMI</th>
-<th>TG</th>
-<th>HDL</th>
-<th>FastingGlucose</th>
-<th>SBP</th>
+<th>条件</th>
+<th>违反后果</th>
+<th>检查方式</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>31.2</td>
-<td>2.4</td>
-<td>0.9</td>
-<td>7.8</td>
-<td>146</td>
+<td>成分近似高斯</td>
+<td>非椭圆结构拟合较差</td>
+<td>密度图与后验检查</td>
 </tr>
 <tr>
-<td>24.8</td>
-<td>1.1</td>
-<td>1.5</td>
-<td>5.2</td>
-<td>122</td>
+<td>模型可识别</td>
+<td>成分重叠或退化</td>
+<td>多初始化、协方差正则</td>
 </tr>
 <tr>
-<td>29.5</td>
-<td>2.0</td>
-<td>1.0</td>
-<td>6.9</td>
-<td>138</td>
+<td>样本足以估协方差</td>
+<td>高维协方差不稳定</td>
+<td>降维或约束协方差</td>
 </tr>
 <tr>
-<td>22.9</td>
-<td>0.9</td>
-<td>1.7</td>
-<td>4.9</td>
-<td>116</td>
+<td>成分数合理</td>
+<td>过分拆分或合并亚群</td>
+<td>BIC、稳定性与临床解释</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>一维 GMM 有两个成分，初始参数为：</p>
+<p>$$
+\pi_1=\pi_2=0.5,\quad
+\mu_1=0,\quad\mu_2=4,\quad
+\sigma_1^2=\sigma_2^2=1
+$$</p>
+<p>观测为 $x=(0,1,4)$。</p>
+<p><strong>Step 1：计算 $x=1$ 的责任概率。</strong> 两个高斯密度共有的常数会抵消，只需比较指数部分：</p>
+<p>$$
+\exp[-(1-0)^2/2]\approx0.607
+$$</p>
+<p>$$
+\exp[-(1-4)^2/2]\approx0.011
+$$</p>
+<p>因此：</p>
+<p>$$
+\gamma_{1,1}=
+\frac{0.607}{0.607+0.011}
+\approx0.982
+$$</p>
+<p>该点属于成分 1 的概率约为 98.2%。</p>
+<p><strong>Step 2：三个观测的责任度。</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">$x$</th>
+<th style="text-align: right;">成分 1</th>
+<th style="text-align: right;">成分 2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.9997</td>
+<td style="text-align: right;">0.0003</td>
 </tr>
 <tr>
-<td>33.1</td>
-<td>2.8</td>
-<td>0.8</td>
-<td>8.2</td>
-<td>151</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.9820</td>
+<td style="text-align: right;">0.0180</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.0003</td>
+<td style="text-align: right;">0.9997</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：连续型特征矩阵。</li>
-<li>关键变量：成分数、协方差类型、初始化方式、收敛阈值。</li>
-<li>需要预处理的内容：标准化、异常值检查、可能的降维。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：各成分权重、均值、协方差、对数似然、AIC/BIC。</li>
-<li>参数估计：每个成分的概率分布参数。</li>
-<li>预测结果：硬聚类标签和软聚类概率。</li>
-<li>不确定性指标：后验责任概率、不同成分数下的 AIC/BIC 变化。</li>
-</ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：潜在亚群发现、簇之间有重叠、希望得到概率归属而不只是硬分组。</li>
-<li>不适合：簇形状非常复杂、明显非高斯、类别变量为主的场景。</li>
-<li>使用前需要特别检查的点：是否标准化、成分数选择、局部最优和初始化敏感性。</li>
-</ul></div>
+<p><strong>Step 3：更新均值与权重。</strong></p>
+<p>$$
+N_1\approx1.982,\qquad N_2\approx1.018
+$$</p>
+<p>$$
+\mu_1^{new}\approx0.496,\qquad
+\mu_2^{new}\approx3.946
+$$</p>
+<p>$$
+\pi_1^{new}\approx0.661,\qquad
+\pi_2^{new}\approx0.339
+$$</p>
+<p><strong>结论：</strong> GMM 没有先把 $x=1$ 生硬贴标签，而是用 0.982/0.018 的软归属参与两组参数更新。</p></div>
     </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="gaussian-mixture-model-gmm" data-i="0">Python</button><button class="codetab" data-uid="gaussian-mixture-model-gmm" data-i="1">R</button></div><div class="codepanel active" data-uid="gaussian-mixture-model-gmm" data-i="0"><p>常用包：</p>
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 数据要求</h3>
 <ul>
-<li><code>scikit-learn</code></li>
+<li>以连续变量为主，通常需标准化。</li>
+<li>缺失需妥善处理；高维时常先筛选或降维。</li>
+<li>普通 GMM 不直接处理类别变量、删失或重复测量相关性。</li>
 </ul>
-<pre><code class="language-python">import pandas as pd
+<h3>5.2 输入与产出</h3>
+<p>输入包括成分数、协方差结构、初始化和正则项。输出包括 $\pi_k,\mu_k,\Sigma_k$、对数似然、BIC、硬标签和责任概率矩阵。</p></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>患者亚群可能重叠，希望保留归属不确定性。</li>
+<li>簇近似椭圆形且可由高斯成分描述。</li>
+<li>不适合任意形状、重尾异常点很多或主要为类别变量的数据。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="gaussian-mixture-model-gmm" data-i="0">Python</button><button class="codetab" data-uid="gaussian-mixture-model-gmm" data-i="1">R</button></div><div class="codepanel active" data-uid="gaussian-mixture-model-gmm" data-i="0"><pre><code class="language-python">import numpy as np
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv(&quot;metabolic_profiles.csv&quot;)
-X = df[[&quot;BMI&quot;, &quot;TG&quot;, &quot;HDL&quot;, &quot;FastingGlucose&quot;, &quot;SBP&quot;]]
-X_scaled = StandardScaler().fit_transform(X)
+scaler = StandardScaler().fit(X)
+X_s = scaler.transform(X)
 
-fit = GaussianMixture(
-    n_components=3,
-    covariance_type=&quot;full&quot;,
-    random_state=42
-)
-fit.fit(X_scaled)
+candidates = []
+for k in range(1, 7):
+    model = GaussianMixture(
+        n_components=k,
+        covariance_type=&quot;full&quot;,
+        n_init=20,
+        reg_covar=1e-6,
+        random_state=42,
+    ).fit(X_s)
+    candidates.append((model.bic(X_s), model))
 
-cluster = fit.predict(X_scaled)
-prob = fit.predict_proba(X_scaled)
-</code></pre></div><div class="codepanel" data-uid="gaussian-mixture-model-gmm" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>mclust</code></li>
-</ul>
-<pre><code class="language-r">library(mclust)
+best_bic, model = min(candidates, key=lambda item: item[0])
+cluster = model.predict(X_s)
+prob = model.predict_proba(X_s)
+uncertainty = 1 - prob.max(axis=1)
+print(best_bic, model.converged_, model.weights_)
+</code></pre></div><div class="codepanel" data-uid="gaussian-mixture-model-gmm" data-i="1"><pre><code class="language-r">library(mclust)
 
-X &lt;- scale(df[, c(&quot;BMI&quot;, &quot;TG&quot;, &quot;HDL&quot;, &quot;FastingGlucose&quot;, &quot;SBP&quot;)])
-fit &lt;- Mclust(X, G = 1:6)
+x &lt;- scale(df[, c(&quot;BMI&quot;, &quot;TG&quot;, &quot;HDL&quot;, &quot;FastingGlucose&quot;, &quot;SBP&quot;)])
+fit &lt;- Mclust(x, G = 1:6)
 
 cluster &lt;- fit$classification
 prob &lt;- fit$z
+uncertainty &lt;- fit$uncertainty
+summary(fit)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：成分数、各簇权重、各簇均值模式、样本归属概率。</li>
-<li>每个主要参数如何解释：协方差决定簇的形状和方向，权重决定各亚群所占比例。</li>
-<li>临床或医学意义如何表达：适合用“识别出若干代谢表型亚群，并比较其临床特征差异”来表述。</li>
-<li>常见误读：GMM 输出的是统计成分，不一定天然对应真实生物学实体。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>AIC / BIC 随成分数变化图。</li>
-<li>PCA 或 UMAP 降维后的聚类散点图。</li>
-<li>各簇特征均值雷达图或热图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图展示 GMM 在 PCA 二维空间中的聚类结果，可用于观察软聚类在近似高斯簇结构上的分群效果。</p>
-<p><img alt="" src="img/gmm_clustering_result.png" /></p></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>能给出软聚类概率。</li>
-<li>比 K-means 更灵活，可拟合椭圆形簇。</li>
-<li>同时兼顾聚类和密度估计。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>对初始化敏感，可能陷入局部最优。</li>
-<li>对非高斯结构不一定适合。</li>
-<li>成分数选择会明显影响结论。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>不做标准化就直接聚类。</li>
-<li>把统计成分直接当作真实疾病亚型。</li>
-<li>只看某一次初始化结果，不比较稳定性。</li>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>成分编号可交换，本身没有从低风险到高风险的固定顺序。</li>
+<li>责任概率接近 0.5 表示边界病例，不应只报告硬标签。</li>
+<li>BIC 较低表示在拟合与复杂度之间更优，但不能单独证明生物亚型真实存在。</li>
+<li>应在独立结局或外部队列中描述簇的临床可重复性。</li>
 </ul></div>
     </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 K-means 的区别：K-means 做硬聚类且默认球形簇；GMM 允许软归属和更灵活的协方差结构。</li>
-<li>和核密度估计的区别：KDE 主要做平滑密度估计；GMM 更强调有限成分结构。</li>
-<li>和朴素贝叶斯的区别：二者都用概率分布建模，但 GMM 主要做无监督成分分解，朴素贝叶斯主要做监督分类。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">诊断与稳健性</h2></div>
+      <div class="sec-body"><ol>
+<li>比较不同成分数和协方差结构的 BIC。</li>
+<li>用多个随机初始化检查局部最优。</li>
+<li>检查最小成分比例、协方差特征值和收敛状态。</li>
+<li>bootstrap 重采样后评估标签和责任度稳定性。</li>
+<li>比较 K-means、层次聚类及不同标准化方案。</li>
+</ol></div>
     </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
-<li>代谢综合征或炎症表型分群。</li>
-<li>多组学生物标志物潜在亚型发现。</li>
-<li>聚类前的密度建模与异常样本识别。</li>
-</ul></div>
+<li>BIC 随成分数和协方差模型变化图。</li>
+<li>二维投影上的成分椭圆与责任度透明度。</li>
+<li>成分均值热图和归属概率热图。</li>
+</ul>
+<p>下图展示 GMM 在二维空间中的聚类结果：</p>
+<p><img alt="" src="img/gmm_clustering_result.png" /></p></div>
     </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a></li>
-<li><a class="xlink" href="m-kernel-density-estimation-kde.html" data-cn="核密度估计" data-en="Kernel Density Estimation, KDE" data-def="核密度估计给每个观测放上一个小小的、光滑的「山包」（核），再把所有山包叠加平均，得到一条连续平滑的密度曲线——本质是把直方图的硬台阶抹圆。">核密度估计（Kernel Density Estimation, KDE）</a></li>
-<li><a class="xlink" href="m-naive-bayes.html" data-cn="朴素贝叶斯" data-en="Naive Bayes" data-def="朴素贝叶斯是一类基于贝叶斯定理的概率分类方法。它假设在给定类别后，各特征彼此条件独立，因此可以把联合概率拆成一组一维条件概率的乘积。">朴素贝叶斯（Naive Bayes）</a></li>
-<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p><strong>优势：</strong> 概率软聚类，可拟合椭圆簇，同时提供密度模型。</p>
+<p><strong>局限：</strong> 对高斯假设、初始化和成分数敏感，高维协方差参数很多。</p>
+<p><strong>常见坑：</strong> 把统计成分直接称为疾病亚型；只运行一次；忽略小成分退化；只报告硬标签；在全数据降维后夸大稳定性。</p></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Bishop CM. <em>Pattern Recognition and Machine Learning</em>. Springer; 2006.</li>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a>：硬分配、球形等方差是其更强限制。</li>
+<li><a class="xlink" href="m-fuzzy-c-means-clustering-fcm.html" data-cn="模糊C均值聚类" data-en="Fuzzy C-Means Clustering, FCM" data-def="FCM 用到各中心的相对距离为每个样本分配一组和为 1 的模糊隶属度，再用隶属度幂加权更新中心。">模糊C均值聚类（Fuzzy C-Means Clustering, FCM）</a>：隶属度来自模糊目标，而非生成概率后验。</li>
+<li><a class="xlink" href="m-dbscan-density-based-spatial-clustering-of-applications-with-noise.html" data-cn="DBSCAN" data-en="Density-Based Spatial Clustering of Applications with Noise" data-def="DBSCAN 从局部邻居足够多的核心点向外扩展密度连通区域，并把无法连接到任何核心区域的点标记为噪声。">DBSCAN（Density-Based Spatial Clustering of Applications with Noise）</a>：按密度连通找任意形状簇并标噪声。</li>
+<li>选择经验：重视概率归属且簇近似椭圆时考虑 GMM。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>代谢、炎症或生物标志物表型分群。</li>
+<li>多组学降维后的潜在患者成分识别。</li>
+<li>连续指标混合分布分解与异常概率探索。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">术语表</h2></div>
+      <div class="sec-body"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mixture component</td>
+<td>混合密度中的一个潜在分布</td>
+</tr>
+<tr>
+<td>mixing weight</td>
+<td>成分在总体中的比例</td>
+</tr>
+<tr>
+<td>responsibility</td>
+<td>病例属于某成分的后验概率</td>
+</tr>
+<tr>
+<td>covariance type</td>
+<td>对成分形状和方向的约束</td>
+</tr>
+<tr>
+<td>label switching</td>
+<td>成分编号可互换但模型密度不变</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-expectation-maximization-algorithm-em.html" data-cn="期望最大化算法" data-en="Expectation-Maximization Algorithm, EM" data-def="EM 在“根据当前参数推断隐藏信息”和“把推断出的软信息当作完整数据更新参数”之间交替，逐步提高观测数据似然。">期望最大化算法（Expectation-Maximization Algorithm, EM）</a></li>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a></li>
+<li><a class="xlink" href="m-fuzzy-c-means-clustering-fcm.html" data-cn="模糊C均值聚类" data-en="Fuzzy C-Means Clustering, FCM" data-def="FCM 用到各中心的相对距离为每个样本分配一组和为 1 的模糊隶属度，再用隶属度幂加权更新中心。">模糊C均值聚类（Fuzzy C-Means Clustering, FCM）</a></li>
+<li><a class="xlink" href="m-principal-component-analysis-pca.html" data-cn="主成分分析" data-en="Principal Component Analysis, PCA" data-def="PCA 旋转坐标轴，依次寻找样本投影方差最大的正交方向，用少数线性组合保留主要总变异。">主成分分析（Principal Component Analysis, PCA）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
 <li>McLachlan G, Peel D. <em>Finite Mixture Models</em>. Wiley; 2000.</li>
-<li>scikit-learn Developers. <code>sklearn.mixture.GaussianMixture</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html">https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html</a> （访问日期：2026-07-02）</li>
+<li>Bishop CM. <em>Pattern Recognition and Machine Learning</em>. Springer; 2006.</li>
+<li>scikit-learn Developers. <code>GaussianMixture</code> API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html">https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html</a> （访问日期：2026-07-09）</li>
 </ul></div>
     </section>
     <div class="pager"><span></span><a class="pg pg-next" href="m-k-means-clustering.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">K-means聚类</div></a></div>

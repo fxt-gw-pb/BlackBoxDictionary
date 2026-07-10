@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">术语表</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,228 +54,258 @@
     <div class="intro-note"><h1>谱聚类（Spectral Clustering）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>谱聚类是一种基于图的聚类方法。它先把样本表示成相似度图，再利用图拉普拉斯矩阵的特征向量把样本嵌入到低维空间，最后在该空间中进行聚类。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>谱聚类把样本变成相似图，利用图拉普拉斯的低频特征向量寻找“内部连接强、彼此连接弱”的节点组。</p>
+<h3>1.2 定义</h3>
+<p>谱聚类是一类图分割方法。它先构造相似度矩阵，再从图拉普拉斯矩阵的特征向量得到低维谱嵌入，最后对嵌入行进行 K-means 或直接离散化。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：当簇形状非凸或由复杂相似关系定义时，如何进行分组。</li>
-<li>适用任务：图分割、非球形簇识别、相似度矩阵聚类、复杂结构样本分群。</li>
-<li>常见医学场景：患者相似性网络分群，单细胞相似图聚类，影像区域图分割。</li>
+<li>原空间中的簇非凸，质心距离无法正确切分。</li>
+<li>数据天然以邻接图或患者相似矩阵表示。</li>
+<li>希望按照图连接模式而非全局欧氏中心分群。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>谱聚类把样本看作图上的节点，相似样本之间连边更强。算法要做的是把图切成几块，使块内连接强、块间连接弱。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>把患者看成节点，相似患者之间连边。理想切法像剪断少数弱桥，把网络分成内部紧密的社区；拉普拉斯特征向量提供了连续近似的切图坐标。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>设相似度矩阵为 $W$，度矩阵为：</p>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 图比坐标更重要</h3>
+<p>谱聚类先决定谁与谁相似，再做聚类。通过近邻图，两个月牙形簇可各自沿曲线连通，即使它们没有球形质心结构。</p>
+<h3>2.2 拉普拉斯编码平滑性</h3>
+<p>对向量 $f$：</p>
 <p>$$
-D_{ii}=\sum_j W_{ij}
+f^\top Lf=
+\frac12\sum_{i,j}W_{ij}(f_i-f_j)^2
 $$</p>
-<p>未归一化图拉普拉斯矩阵为：</p>
-<p>$$
-L=D-W
-$$</p>
-<p>常见归一化拉普拉斯包括：</p>
-<p>$$
-L_{\text{sym}}=I-D^{-1/2}WD^{-1/2}
-$$</p>
-<p>或：</p>
-<p>$$
-L_{\text{rw}}=I-D^{-1}W
-$$</p>
-<p>谱聚类取拉普拉斯矩阵前 $K$ 个特征向量组成嵌入矩阵 $U$，再对 $U$ 的行进行 <a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a>。</p>
-<h3>2.2 参数或统计量含义</h3>
-<ul>
-<li>$W$：样本相似度矩阵。</li>
-<li>$D$：度矩阵，表示每个节点总连接强度。</li>
-<li>$L$：图拉普拉斯矩阵。</li>
-<li><code>n_clusters</code>：目标簇数。</li>
-<li><code>affinity</code>：相似度构造方式，如 RBF 核、近邻图或预计算矩阵。</li>
-<li><code>gamma</code>：RBF 相似度的尺度参数。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>样本间相似度图能表达真实结构。</li>
-<li>图分割目标与研究问题一致。</li>
-<li>簇内连接强、簇间连接弱。</li>
-<li>相似度参数设置合理，不会造成图过稀或过密。</li>
-</ul></div>
+<p>若强连接节点取值接近，该量较小。因此小特征值对应图上变化缓慢、可揭示社区的方向。</p>
+<h3>2.3 图构造决定答案</h3>
+<p>RBF 尺度、近邻数、互近邻规则和特征标准化会改变边。谱算法只能忠实切分给定图，无法弥补错误相似度。</p></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
-<ul>
-<li>自变量类型：连续特征、图相似度矩阵、预计算邻接矩阵。</li>
-<li>因变量类型：无监督方法，不需要结局变量。</li>
-<li>数据结构：样本乘以特征矩阵，或样本乘以样本相似度矩阵。</li>
-<li>是否适合高维数据：可用，但相似度构造应谨慎，常先降维。</li>
-<li>是否适合缺失较多数据：需先处理缺失或定义能处理缺失的相似度。</li>
-<li>是否适合删失数据：不直接处理删失结局。</li>
-<li>是否适合重复测量数据：可通过自定义相似度纳入，但普通谱聚类不建模相关结构。</li>
-</ul>
-<h3>3.2 示例表格</h3>
-<p>以患者相似度矩阵为例：</p>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 图拉普拉斯</h3>
+<p>$$
+D_{ii}=\sum_jW_{ij},\qquad L=D-W
+$$</p>
+<p>常用对称归一化形式：</p>
+<p>$$
+L_{\mathrm{sym}}=
+I-D^{-1/2}WD^{-1/2}
+$$</p>
+<h3>3.2 谱嵌入</h3>
+<p>取 $L_{\mathrm{sym}}$ 最小的 $K$ 个特征值对应特征向量组成 $U$，按行归一化后对 $U$ 的行聚类。</p>
+<h3>3.3 RBF 相似度</h3>
+<p>$$
+W_{ij}=
+\exp[-\gamma\|x_i-x_j\|^2]
+$$</p>
+<p>也可只保留 K 近邻边，得到稀疏图。</p>
+<h3>3.4 关键条件</h3>
 <table>
 <thead>
 <tr>
-<th>Patient</th>
-<th>P001</th>
-<th>P002</th>
-<th>P003</th>
-<th>P004</th>
+<th>条件</th>
+<th>违反后果</th>
+<th>检查方式</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>P001</td>
-<td>1.00</td>
-<td>0.82</td>
-<td>0.12</td>
-<td>0.20</td>
+<td>相似图表达真实邻近</td>
+<td>切分没有临床意义</td>
+<td>图与邻居审查</td>
 </tr>
 <tr>
-<td>P002</td>
-<td>0.82</td>
-<td>1.00</td>
-<td>0.18</td>
-<td>0.22</td>
+<td>图不过稀或过密</td>
+<td>断裂或所有点连成一团</td>
+<td>连通分量与度分布</td>
 </tr>
 <tr>
-<td>P003</td>
-<td>0.12</td>
-<td>0.18</td>
-<td>1.00</td>
-<td>0.79</td>
+<td>簇数和特征间隙稳定</td>
+<td>分割对参数敏感</td>
+<td>eigengap 与重采样</td>
 </tr>
 <tr>
-<td>P004</td>
-<td>0.20</td>
-<td>0.22</td>
-<td>0.79</td>
-<td>1.00</td>
+<td>样本量可计算</td>
+<td>相似矩阵内存过大</td>
+<td>稀疏近邻图</td>
 </tr>
 </tbody>
-</table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：特征矩阵或相似度矩阵。</li>
-<li>关键变量：簇数、相似度函数、近邻数或核参数。</li>
-<li>需要预处理的内容：缺失处理、标准化、相似度矩阵检查、图连通性检查。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：簇标签、谱嵌入、相似度图。</li>
-<li>参数估计：拉普拉斯特征向量。</li>
-<li>预测结果：标准谱聚类不自然支持新样本预测。</li>
-<li>不确定性指标：不同相似度参数下的聚类稳定性、图割质量指标。</li>
-</ul></div>
+</table></div>
     </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：非凸簇、样本关系适合图表达、已有相似度矩阵的场景。</li>
-<li>不适合：样本量非常大、相似度矩阵难以存储、需要直接解释簇中心的场景。</li>
-<li>使用前需要特别检查的点：相似度构造、图是否连通、簇数选择、谱嵌入稳定性。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>四名患者构成两个互不连接的二节点小组：</p>
+<p>$$
+W=
+\begin{pmatrix}
+0&amp;1&amp;0&amp;0\\
+1&amp;0&amp;0&amp;0\\
+0&amp;0&amp;0&amp;1\\
+0&amp;0&amp;1&amp;0
+\end{pmatrix}
+$$</p>
+<p>每个节点度为 1，所以 $D=I$，未归一化与归一化拉普拉斯相同：</p>
+<p>$$
+L=D-W=
+\begin{pmatrix}
+1&amp;-1&amp;0&amp;0\\
+-1&amp;1&amp;0&amp;0\\
+0&amp;0&amp;1&amp;-1\\
+0&amp;0&amp;-1&amp;1
+\end{pmatrix}
+$$</p>
+<p><strong>Step 1：找零特征向量。</strong></p>
+<p>$$
+u_1=\frac{1}{\sqrt2}(1,1,0,0)^\top,\qquad
+u_2=\frac{1}{\sqrt2}(0,0,1,1)^\top
+$$</p>
+<p>均满足 $Lu=0$。零特征值的重数为 2，正好等于图的连通分量数。</p>
+<p><strong>Step 2：组成谱坐标。</strong> $U=(u_1,u_2)$ 的四行是：</p>
+<p>$$
+\left(\frac1{\sqrt2},0\right),
+\left(\frac1{\sqrt2},0\right),
+\left(0,\frac1{\sqrt2}\right),
+\left(0,\frac1{\sqrt2}\right)
+$$</p>
+<p><strong>Step 3：聚类。</strong> 前两行完全相同，后两行完全相同，K-means 自然得到 $\{1,2\}$ 与 $\{3,4\}$。</p>
+<p><strong>结论：</strong> 谱嵌入把图连接结构变成容易分开的坐标；一般图不是完全断开时，小非零特征值提供近似分割。</p></div>
     </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="spectral-clustering" data-i="0">Python</button><button class="codetab" data-uid="spectral-clustering" data-i="1">R</button></div><div class="codepanel active" data-uid="spectral-clustering" data-i="0"><p>常用包：</p>
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 数据要求</h3>
 <ul>
-<li><code>scikit-learn</code></li>
+<li>可输入数值特征、相似矩阵或邻接图。</li>
+<li>相似矩阵应非负、通常对称，且需检查图连通性。</li>
+<li>缺失需在构图前处理。</li>
 </ul>
-<pre><code class="language-python">import pandas as pd
-from sklearn.cluster import SpectralClustering
+<h3>5.2 输入与产出</h3>
+<p>输入为相似度规则、近邻数或 $\gamma$、簇数与标签离散化方法。输出为谱嵌入和簇标签；标准实现不自然支持新样本外推。</p></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>非凸簇、患者相似网络、单细胞近邻图和图像分割。</li>
+<li>数据规模允许构造稀疏图和求特征向量。</li>
+<li>不适合超大稠密图、相似度定义不可靠或需在线预测的任务。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="spectral-clustering" data-i="0">Python</button><button class="codetab" data-uid="spectral-clustering" data-i="1">R</button></div><div class="codepanel active" data-uid="spectral-clustering" data-i="0"><pre><code class="language-python">from sklearn.cluster import SpectralClustering
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv(&quot;patient_features.csv&quot;)
-X = df[[&quot;Marker_1&quot;, &quot;Marker_2&quot;, &quot;Marker_3&quot;, &quot;Marker_4&quot;]]
-X_scaled = StandardScaler().fit_transform(X)
-
-fit = SpectralClustering(
+X_s = StandardScaler().fit_transform(X)
+model = SpectralClustering(
     n_clusters=3,
     affinity=&quot;nearest_neighbors&quot;,
-    n_neighbors=10,
+    n_neighbors=15,
     assign_labels=&quot;kmeans&quot;,
-    random_state=42
+    n_init=50,
+    random_state=42,
+    n_jobs=-1,
 )
-cluster = fit.fit_predict(X_scaled)
-
-print(pd.Series(cluster).value_counts().sort_index())
-</code></pre></div><div class="codepanel" data-uid="spectral-clustering" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>kernlab</code></li>
-</ul>
-<pre><code class="language-r">library(kernlab)
+cluster = model.fit_predict(X_s)
+affinity = model.affinity_matrix_
+print(cluster)
+</code></pre></div><div class="codepanel" data-uid="spectral-clustering" data-i="1"><pre><code class="language-r">library(kernlab)
 
 x &lt;- scale(df[, c(&quot;Marker_1&quot;, &quot;Marker_2&quot;, &quot;Marker_3&quot;, &quot;Marker_4&quot;)])
-fit &lt;- specc(x, centers = 3, kernel = &quot;rbfdot&quot;)
+fit &lt;- specc(
+  as.matrix(x),
+  centers = 3,
+  kernel = &quot;rbfdot&quot;,
+  kpar = &quot;automatic&quot;
+)
 
 cluster &lt;- as.integer(fit)
 table(cluster)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：相似图中的分割、各簇样本量、谱嵌入中的分离情况、临床变量在簇间的差异。</li>
-<li>每个主要参数如何解释：近邻数越小，图越局部；近邻数越大，图更平滑但可能模糊边界。</li>
-<li>临床或医学意义如何表达：谱聚类发现的是相似性图上的社区结构，应说明相似度定义。</li>
-<li>常见误读：谱聚类没有天然质心，不能像 K-means 那样直接解释“中心患者”。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>相似度矩阵热图。</li>
-<li>谱嵌入二维散点图。</li>
-<li>图网络分割可视化。</li>
-<li>聚类标签在 PCA/UMAP 空间中的分布。</li>
-</ul></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>能处理非凸形状簇。</li>
-<li>可直接利用相似度矩阵或图结构。</li>
-<li>与图分割和网络社区发现关系紧密。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>相似度矩阵计算和存储成本高。</li>
-<li>参数选择影响很大。</li>
-<li>新样本预测不如质心模型方便。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>使用默认 RBF 参数而不检查图结构。</li>
-<li>图不连通或过密时仍直接解释结果。</li>
-<li>把谱聚类标签当作稳定真实亚型而不做敏感性分析。</li>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li>簇是所选相似图上的社区，不一定有原空间质心。</li>
+<li>小特征值和 eigengap 可辅助理解图结构，但不自动确定唯一簇数。</li>
+<li>簇编号无顺序意义。</li>
+<li>必须报告 affinity、近邻数、核参数和标准化方式。</li>
 </ul></div>
     </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a> 的区别：谱聚类先做图谱嵌入，能处理更复杂形状；K-means 直接在原特征空间按质心分组。</li>
-<li>和 <a class="xlink" href="m-dbscan-density-based-spatial-clustering-of-applications-with-noise.html" data-cn="DBSCAN" data-en="Density-Based Spatial Clustering of Applications with Noise" data-def="DBSCAN 是一种基于密度的聚类方法。它把高密度区域连接成簇，并把低密度区域中的点标记为噪声或离群点。">DBSCAN（Density-Based Spatial Clustering of Applications with Noise）</a> 的区别：DBSCAN 基于密度连通，谱聚类基于相似图切分。</li>
-<li>和 <a class="xlink" href="m-hierarchical-clustering.html" data-cn="层次聚类" data-en="Hierarchical Clustering" data-def="层次聚类是一类把样本组织成树状层次结构的无监督方法。最常见的是凝聚式层次聚类：先把每个样本看作一个簇，再按相似性逐步合并，最终形成一棵树状图。">层次聚类（Hierarchical Clustering）</a> 的区别：层次聚类输出树状结构，谱聚类输出图分割结果。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">诊断与稳健性</h2></div>
+      <div class="sec-body"><ol>
+<li>检查图的连通分量、节点度与孤立点。</li>
+<li>改变近邻数、$\gamma$ 和相似度定义。</li>
+<li>比较前若干拉普拉斯特征值与 eigengap。</li>
+<li>重采样后比较共同聚类矩阵。</li>
+<li>与 K-means、DBSCAN 和层次聚类对照。</li>
+</ol></div>
     </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
-<li>患者相似性网络中的亚群发现。</li>
-<li>单细胞近邻图或相似图聚类。</li>
-<li>医学影像区域分割和复杂形状病灶结构探索。</li>
+<li>排序后的相似度矩阵热图。</li>
+<li>近邻图按簇着色。</li>
+<li>谱嵌入二维散点图。</li>
+<li>拉普拉斯特征值 scree/eigengap 图。</li>
 </ul></div>
     </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 聚类是一种基于质心的硬聚类方法。它把样本划分为预先指定的 $K$ 个簇，使每个样本尽量接近自己所属簇的中心。">K-means聚类（K-means Clustering）</a></li>
-<li><a class="xlink" href="m-dbscan-density-based-spatial-clustering-of-applications-with-noise.html" data-cn="DBSCAN" data-en="Density-Based Spatial Clustering of Applications with Noise" data-def="DBSCAN 是一种基于密度的聚类方法。它把高密度区域连接成簇，并把低密度区域中的点标记为噪声或离群点。">DBSCAN（Density-Based Spatial Clustering of Applications with Noise）</a></li>
-<li><a class="xlink" href="m-hierarchical-clustering.html" data-cn="层次聚类" data-en="Hierarchical Clustering" data-def="层次聚类是一类把样本组织成树状层次结构的无监督方法。最常见的是凝聚式层次聚类：先把每个样本看作一个簇，再按相似性逐步合并，最终形成一棵树状图。">层次聚类（Hierarchical Clustering）</a></li>
-<li><a class="xlink" href="m-uniform-manifold-approximation-and-projection.html" data-cn="UMAP" data-en="Uniform Manifold Approximation and Projection" data-def="UMAP 是一种非线性降维和可视化方法，基于流形假设和近邻图构建高维数据的模糊拓扑结构，再在低维空间中寻找相似的结构。">UMAP（Uniform Manifold Approximation and Projection）</a></li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p><strong>优势：</strong> 能处理非凸簇，直接利用图或相似矩阵，图切分解释清晰。</p>
+<p><strong>局限：</strong> 构图与特征分解昂贵，参数敏感，新样本预测困难。</p>
+<p><strong>常见坑：</strong> 默认相似度直接使用；图断裂却未检查；把 UMAP 图上的邻近当原始图；只展示标签不报告构图规则。</p></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>von Luxburg U. A tutorial on spectral clustering. <em>Statistics and Computing</em>. 2007;17:395-416.</li>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a>：原空间质心分组；谱聚类先把图结构展开。</li>
+<li><a class="xlink" href="m-dbscan-density-based-spatial-clustering-of-applications-with-noise.html" data-cn="DBSCAN" data-en="Density-Based Spatial Clustering of Applications with Noise" data-def="DBSCAN 从局部邻居足够多的核心点向外扩展密度连通区域，并把无法连接到任何核心区域的点标记为噪声。">DBSCAN（Density-Based Spatial Clustering of Applications with Noise）</a>：按密度可达分簇并标噪声。</li>
+<li><a class="xlink" href="m-hierarchical-clustering.html" data-cn="层次聚类" data-en="Hierarchical Clustering" data-def="层次聚类按距离逐步合并或拆分样本，把从细到粗的分群过程保存为一棵树，而不是只给单一分组。">层次聚类（Hierarchical Clustering）</a>：产生树状嵌套结构，谱聚类产生给定 $K$ 的图分割。</li>
+<li>选择经验：复杂非凸结构且能构造可信相似图时使用谱聚类。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>患者相似网络亚群。</li>
+<li>单细胞或空间组学近邻图分群。</li>
+<li>医学图像区域与病灶轮廓分割。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">术语表</h2></div>
+      <div class="sec-body"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>affinity matrix</td>
+<td>节点两两相似度矩阵</td>
+</tr>
+<tr>
+<td>degree matrix</td>
+<td>对角线上为节点总边权的矩阵</td>
+</tr>
+<tr>
+<td>graph Laplacian</td>
+<td>编码图连接和平滑性的矩阵</td>
+</tr>
+<tr>
+<td>spectral embedding</td>
+<td>由拉普拉斯低频特征向量形成的坐标</td>
+</tr>
+<tr>
+<td>eigengap</td>
+<td>相邻特征值差距，用于观察潜在分割尺度</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-k-means-clustering.html" data-cn="K-means聚类" data-en="K-means Clustering" data-def="K-means 把每个样本分给最近的质心，并反复更新质心，使总簇内平方距离尽可能小。">K-means聚类（K-means Clustering）</a></li>
+<li><a class="xlink" href="m-dbscan-density-based-spatial-clustering-of-applications-with-noise.html" data-cn="DBSCAN" data-en="Density-Based Spatial Clustering of Applications with Noise" data-def="DBSCAN 从局部邻居足够多的核心点向外扩展密度连通区域，并把无法连接到任何核心区域的点标记为噪声。">DBSCAN（Density-Based Spatial Clustering of Applications with Noise）</a></li>
+<li><a class="xlink" href="m-hierarchical-clustering.html" data-cn="层次聚类" data-en="Hierarchical Clustering" data-def="层次聚类按距离逐步合并或拆分样本，把从细到粗的分群过程保存为一棵树，而不是只给单一分组。">层次聚类（Hierarchical Clustering）</a></li>
+<li><a class="xlink" href="m-uniform-manifold-approximation-and-projection.html" data-cn="UMAP" data-en="Uniform Manifold Approximation and Projection" data-def="UMAP 把高维近邻关系做成带置信度的模糊图，再优化低维点的位置，使高置信边靠近、缺失边保持分离。">UMAP（Uniform Manifold Approximation and Projection）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>von Luxburg U. A tutorial on spectral clustering. <em>Stat Comput</em>. 2007;17:395-416.</li>
 <li>Ng AY, Jordan MI, Weiss Y. On spectral clustering: analysis and an algorithm. <em>NeurIPS</em>. 2001.</li>
-<li>scikit-learn Developers. <code>sklearn.cluster.SpectralClustering</code>. scikit-learn API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.SpectralClustering.html">https://scikit-learn.org/stable/modules/generated/sklearn.cluster.SpectralClustering.html</a> （访问日期：2026-07-02）</li>
+<li>scikit-learn Developers. <code>SpectralClustering</code> API Reference. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.SpectralClustering.html">https://scikit-learn.org/stable/modules/generated/sklearn.cluster.SpectralClustering.html</a> （访问日期：2026-07-09）</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-mean-shift-clustering.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">均值漂移聚类</div></a><a class="pg pg-next" href="m-mini-batch-k-means-clustering.html"><div class="pg-lab">下一篇 →</div><div class="pg-t">Mini-Batch K-means聚类</div></a></div>

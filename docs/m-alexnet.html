@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解读</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,191 +54,349 @@
     <div class="intro-note"><h1>AlexNet（AlexNet）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>AlexNet 是深度学习图像识别史上的经典卷积神经网络架构。它通过较深的卷积层堆叠、ReLU、dropout 和大规模 GPU 训练，推动了现代深度视觉模型的发展。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>AlexNet 用五层卷积逐步提取视觉特征，再用三层全连接分类，并以 ReLU、GPU 训练、数据增强和 dropout 证明深层 CNN 可在大规模图像任务上显著超越传统特征。</p>
+<h3>1.2 定义</h3>
+<p>AlexNet 是 2012 年 ImageNet 竞赛中的经典深层卷积网络，包含 5 个卷积层和 3 个全连接层。原始实现受双 GPU 限制使用分组卷积，并采用局部响应归一化；现代实现常保留总体结构但调整输入、padding 和归一化细节。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：如何在传统浅层视觉模型之外，利用深层 CNN 从原始图像中学习更强的判别特征。</li>
-<li>适用任务：图像分类、迁移学习、卷积网络教学与基线建模。</li>
-<li>常见医学场景：小型医学图像分类基线、教学演示、预训练视觉骨干对比。</li>
+<li>研究问题：能否直接从大规模原始图像学习分层特征，而不依赖人工设计的 SIFT/HOG。</li>
+<li>适用任务：图像分类、迁移学习教学、经典 CNN 基线。</li>
+<li>常见医学场景：小型医学图像分类基线、架构教学、与现代骨干的历史对照。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>AlexNet 像现代 CNN 的早期原型机。它用多层卷积逐步把像素加工成越来越抽象的图像特征，再通过全连接层输出分类结果。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>AlexNet 像一条由粗到细的视觉流水线：前几层寻找边缘和颜色变化，中间层组合纹理与局部形状，最后全连接层把整幅图的高级特征映射到类别。它的历史意义在于把当时已知的多个点子组合到足够大的数据和算力上。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>AlexNet 的基本运算仍是卷积、激活和池化：</p>
-<p>$$
-Y_{i,j,c} = \sum_{m,n,k} X_{i+m, j+n, k} K_{m,n,k,c} + b_c
-$$</p>
-<p>随后经过：</p>
-<p>$$
-A = \operatorname{ReLU}(Y)
-$$</p>
-<p>再通过池化、展平和全连接层输出类别概率。</p>
-<h3>2.2 参数或统计量含义</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 它到底在解决什么根本困难</h3>
+<p>传统视觉流程需要专家先定义特征，分类器只能在固定特征上学习。更深网络虽有表达力，却面临 sigmoid/tanh 饱和、训练慢、参数多和过拟合。AlexNet 用 ReLU 加快优化，用 GPU 承担卷积计算，用增强与 dropout 控制过拟合。</p>
+<h3>2.2 关键洞察</h3>
+<p>其突破不是某一个全新公式，而是工程与统计要素协同：</p>
 <ul>
-<li>大卷积核和步幅：早期层快速扩大感受野。</li>
-<li>ReLU：加速训练并缓解梯度消失。</li>
-<li>dropout：减少全连接层过拟合。</li>
-<li>全连接层：综合高级视觉特征完成分类。</li>
+<li>卷积共享权重，保留图像局部结构；</li>
+<li>ReLU 在正半轴导数为 1，训练比饱和激活更快；</li>
+<li>重叠最大池化逐步缩小空间尺寸；</li>
+<li>大规模数据增强扩大有效样本；</li>
+<li>dropout 随机屏蔽全连接单元，减少共同适应。</li>
 </ul>
-<h3>2.3 关键假设</h3>
+<h3>2.3 与朴素/相邻做法的对比</h3>
 <ul>
-<li>图像中存在可由深层卷积逐层提取的判别模式。</li>
-<li>有足够训练样本或可借助预训练。</li>
-<li>任务受益于经典 CNN 视觉归纳偏置。</li>
+<li>相比浅 CNN：AlexNet 更深、更宽，配合 GPU 和正则。</li>
+<li>相比 ResNet：AlexNet 是顺序堆叠，没有残差通路，难以扩展到上百层。</li>
+<li>相比 DenseNet：AlexNet 不跨层复用所有早期特征。</li>
+<li>相比现代轻量网络：参数主要集中在全连接层，效率较低。</li>
 </ul></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
+<p>卷积层：</p>
+<p>$$
+z_{i,j,k}
+=b_k+\sum_{c,u,v}W_{u,v,c,k}X_{i+u,j+v,c},
+\qquad
+H_{i,j,k}=\max(0,z_{i,j,k})
+$$</p>
+<p>输出尺寸：</p>
+<p>$$
+N_{\mathrm{out}}
+=\left\lfloor
+\frac{N+2P-K}{S}
+\right\rfloor+1
+$$</p>
+<p>dropout 训练时可写为</p>
+<p>$$
+\tilde{\mathbf h}
+=\frac{\mathbf m\odot\mathbf h}{1-p},
+\qquad
+m_j\sim\operatorname{Bernoulli}(1-p)
+$$</p>
+<p>这个式子在说：卷积提取局部特征，ReLU 截断负响应，池化压缩空间；dropout 随机删除部分隐藏单元并缩放剩余激活。</p>
+<h3>3.2 推导脉络</h3>
+<p>图像从输入到分类经历“空间变小、通道变多”：卷积把局部像素变为特征图，池化扩大有效感受野并降低计算，深层卷积形成高级表示，展平后全连接层完成全局分类。交叉熵训练全部参数；数据增强和 dropout 针对约 6000 万参数带来的过拟合。</p>
+<h3>3.3 参数与统计量含义</h3>
 <ul>
-<li>自变量类型：二维彩色或灰度图像。</li>
-<li>因变量类型：图像类别标签。</li>
-<li>数据结构：图像张量。</li>
-<li>是否适合高维数据：适合图像高维输入。</li>
-<li>是否适合缺失较多数据：需先处理图像缺损和低质量样本。</li>
-<li>是否适合删失数据：不直接处理删失。</li>
-<li>是否适合重复测量数据：不直接建模时间相关性。</li>
+<li>$K,S,P$：卷积核、步幅和 padding。</li>
+<li>channel：每个卷积核产生一个输出通道。</li>
+<li>ReLU：$\max(0,z)$。</li>
+<li>max pooling：局部窗口取最大响应。</li>
+<li>dropout rate $p$：训练时屏蔽比例。</li>
+<li>FC：全连接层；原始 AlexNet 的大部分参数位于 FC6/FC7。</li>
+<li>LRN：原论文的局部响应归一化，现代网络多用 BatchNorm 等替代。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>以皮肤病变分类为例：</p>
+<h3>3.4 关键假设（含违反后果）</h3>
 <table>
 <thead>
 <tr>
-<th>ImageID</th>
-<th>ImagePath</th>
-<th>BodySite</th>
-<th>LesionType</th>
+<th>假设</th>
+<th>含义</th>
+<th>违反后会怎样</th>
+<th>如何粗查</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>D001</td>
-<td>derm_001.png</td>
-<td>arm</td>
-<td>benign</td>
+<td>图像含可复用局部模式</td>
+<td>卷积局部性合理</td>
+<td>架构收益有限</td>
+<td>与非图像/全局模型比较</td>
 </tr>
 <tr>
-<td>D002</td>
-<td>derm_002.png</td>
-<td>face</td>
-<td>malignant</td>
+<td>数据量支撑大参数量</td>
+<td>增强/迁移后信息足够</td>
+<td>严重过拟合</td>
+<td>学习曲线</td>
 </tr>
 <tr>
-<td>D003</td>
-<td>derm_003.png</td>
-<td>back</td>
-<td>benign</td>
+<td>输入尺寸和预处理一致</td>
+<td>层尺寸按设计匹配</td>
+<td>形状错误或分布漂移</td>
+<td>逐层形状、外部验证</td>
 </tr>
 <tr>
-<td>D004</td>
-<td>derm_004.png</td>
-<td>leg</td>
-<td>malignant</td>
+<td>患者级切分</td>
+<td>同源图像不跨集合</td>
+<td>性能虚高</td>
+<td>patient_id 与哈希去重</td>
+</tr>
+<tr>
+<td>增强符合医学语义</td>
+<td>变换不改变标签</td>
+<td>引入错误监督</td>
+<td>临床审核增强样本</td>
+</tr>
+</tbody>
+</table></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>沿原始 AlexNet 的 $227\times227\times3$ 输入计算空间尺寸。</p>
+<p><strong>Conv1：</strong> $11\times11$ 核、stride 4、padding 0、96 通道：</p>
+<p>$$
+\left\lfloor\frac{227-11}{4}\right\rfloor+1=55
+$$</p>
+<p>输出为 $55\times55\times96$。</p>
+<p><strong>Pool1：</strong> $3\times3$、stride 2：</p>
+<p>$$
+\left\lfloor\frac{55-3}{2}\right\rfloor+1=27
+$$</p>
+<p>输出 $27\times27\times96$。</p>
+<p><strong>Conv2：</strong> $5\times5$、stride 1、padding 2，空间保持 27；Pool2 后变成 13。Conv3–Conv5 用 $3\times3$、padding 1 保持 13；最后池化得到 $6\times6\times256$。</p>
+<p>展平维度为</p>
+<p>$$
+6\times6\times256=9216
+$$</p>
+<p><strong>参数量对比。</strong> Conv1 参数：</p>
+<p>$$
+11\times11\times3\times96+96=34{,}944
+$$</p>
+<p>FC6 从 9216 连到 4096：</p>
+<p>$$
+9216\times4096+4096=37{,}752{,}832
+$$</p>
+<p>单个 FC6 就超过 3775 万参数，是 Conv1 的约 1080 倍。这解释了 AlexNet 为何特别依赖 dropout，也解释了现代 CNN 常用全局平均池化替代巨大全连接层。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
+<ul>
+<li>自变量类型：二维 RGB/灰度图像。</li>
+<li>因变量类型：二分类或多分类。</li>
+<li>数据结构：batch × height × width × channel（或 PyTorch 的 channel-first）。</li>
+<li>是否适合高维数据：适合图像，但参数和显存较大。</li>
+<li>是否适合缺失较多数据：不直接处理缺失图像/模态。</li>
+<li>是否适合删失数据：标准分类头不处理删失。</li>
+<li>是否适合重复测量数据：需患者级切分和聚合。</li>
+</ul>
+<h3>5.2 示例表格</h3>
+<table>
+<thead>
+<tr>
+<th>patient_id</th>
+<th>image_path</th>
+<th>view</th>
+<th>site</th>
+<th>diagnosis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P01</td>
+<td>p01.png</td>
+<td>PA</td>
+<td>A</td>
+<td>normal</td>
+</tr>
+<tr>
+<td>P02</td>
+<td>p02.png</td>
+<td>AP</td>
+<td>B</td>
+<td>pneumonia</td>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
-<li>输入数据：图像张量及标签。</li>
-<li>关键变量：输入尺寸、学习率、dropout、是否迁移学习。</li>
-<li>需要预处理的内容：缩放、标准化、增强、病人级划分。</li>
+<li>统一尺寸/通道的图像与类别标签。</li>
+<li>增强、学习率、dropout 和预训练/微调设置。</li>
+<li>患者级训练/验证/测试划分。</li>
 </ul>
 <h4>产出</h4>
 <ul>
-<li>模型对象/统计结果：训练好的 AlexNet 参数和验证性能。</li>
-<li>参数估计：卷积层与全连接层权重。</li>
-<li>预测结果：类别概率和最终分类标签。</li>
-<li>不确定性指标：验证集 AUC、召回率、错误样本复核结果。</li>
+<li>类别 logits、概率和中间卷积特征。</li>
+<li>训练历史和测试指标。</li>
+<li>不自动产出校准保证、因果解释或删失校正。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
-      <div class="sec-body"><ul>
-<li>适合：作为经典 CNN 基线、教学示例、轻量迁移学习起点。</li>
-<li>不适合：需要最先进性能或极深特征建模的复杂任务。</li>
-<li>使用前需要特别检查的点：输入分辨率、过拟合、是否有更合适的现代骨干网络。</li>
-</ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="alexnet" data-i="0">Python</button><button class="codetab" data-uid="alexnet" data-i="1">R</button></div><div class="codepanel active" data-uid="alexnet" data-i="0"><p>常用包：</p>
-<ul>
-<li><code>torch</code></li>
-<li><code>torchvision</code></li>
-</ul>
-<pre><code class="language-python">from torchvision.models import alexnet
-
-model = alexnet(weights=None, num_classes=2)
-</code></pre></div><div class="codepanel" data-uid="alexnet" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>keras</code></li>
-</ul>
-<pre><code class="language-r"># R 中更常通过 keras 调用预训练视觉模型，AlexNet 本身通常在 Python 生态中实现。
-</code></pre></div></div></div>
     </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
-<li>核心结果看什么：分类性能、训练收敛情况、是否比更简单 CNN 基线明显更优。</li>
-<li>每个主要参数如何解释：卷积层负责局部特征提取，全连接层负责最终判别整合。</li>
-<li>临床或医学意义如何表达：AlexNet 更常用作技术基线，而不是最终临床部署模型。</li>
-<li>常见误读：AlexNet 在深度学习历史上重要，但在很多现代任务中并非最优选择。</li>
+<li>适合：CNN 教学、历史基线、迁移学习架构比较。</li>
+<li>不适合：算力/内存严格、追求当前最佳性能、小数据从零训练或三维上下文关键。</li>
+<li>使用前检查：输入尺寸、灰度到三通道处理、患者级切分、类别不平衡和域偏移。</li>
 </ul></div>
     </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>训练/验证曲线。</li>
-<li>混淆矩阵。</li>
-<li>典型正确与错误分类样本图。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="alexnet" data-i="0">Python</button><button class="codetab" data-uid="alexnet" data-i="1">R</button></div><div class="codepanel active" data-uid="alexnet" data-i="0"><p>常用包：PyTorch、torchvision。</p>
+<pre><code class="language-python">import torch
+from torch import nn
+from torch.utils.data import DataLoader
+from torchvision import datasets, models, transforms
+
+dataset = datasets.FakeData(
+    size=64, image_size=(3, 224, 224), num_classes=2,
+    transform=transforms.ToTensor()
+)
+loader = DataLoader(dataset, batch_size=4, shuffle=True)
+
+model = models.alexnet(weights=None)
+model.classifier[6] = nn.Linear(model.classifier[6].in_features, 2)
+images, labels = next(iter(loader))
+logits = model(images)
+loss = nn.CrossEntropyLoss()(logits, labels)
+loss.backward()
+print(logits.shape, float(loss))
+</code></pre></div><div class="codepanel" data-uid="alexnet" data-i="1"><p>常用包：keras3。下面是适合教学的简化 AlexNet。</p>
+<pre><code class="language-r">library(keras3)
+
+model &lt;- keras_model_sequential() |&gt;
+  layer_conv_2d(
+    96, 11, strides = 4, activation = &quot;relu&quot;,
+    input_shape = c(224, 224, 3), padding = &quot;same&quot;
+  ) |&gt;
+  layer_max_pooling_2d(pool_size = 3, strides = 2) |&gt;
+  layer_conv_2d(256, 5, padding = &quot;same&quot;, activation = &quot;relu&quot;) |&gt;
+  layer_max_pooling_2d(pool_size = 3, strides = 2) |&gt;
+  layer_conv_2d(384, 3, padding = &quot;same&quot;, activation = &quot;relu&quot;) |&gt;
+  layer_conv_2d(384, 3, padding = &quot;same&quot;, activation = &quot;relu&quot;) |&gt;
+  layer_conv_2d(256, 3, padding = &quot;same&quot;, activation = &quot;relu&quot;) |&gt;
+  layer_max_pooling_2d(pool_size = 3, strides = 2) |&gt;
+  layer_flatten() |&gt;
+  layer_dense(512, activation = &quot;relu&quot;) |&gt;
+  layer_dropout(0.5) |&gt;
+  layer_dense(2, activation = &quot;softmax&quot;)
+
+model |&gt; compile(
+  optimizer = &quot;adam&quot;,
+  loss = &quot;sparse_categorical_crossentropy&quot;,
+  metrics = &quot;accuracy&quot;
+)
+summary(model)
+</code></pre></div></div></div>
     </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解读</h2></div>
+      <div class="sec-body"><ul>
+<li>AlexNet 是架构，不是性能指标；最终仍看患者级外部区分度、校准和阈值。</li>
+<li>从零训练表现差可能是数据量不足，而非卷积原理无效。</li>
+<li>与现代模型比较必须统一分辨率、增强、训练预算和数据切分。</li>
+<li>预训练特征的迁移有效性需用冻结/微调对照。</li>
+<li>激活图或 Grad-CAM 不能替代伪影审计和外部验证。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li>绘制训练/验证损失，检查大 FC 层过拟合。</li>
+<li>比较 dropout 强度、全局平均池化替代和权重衰减。</li>
+<li>审计重复图像、同一患者多视角和切片泄漏。</li>
+<li>按设备、中心、视角和病灶大小分层评估。</li>
+<li>检查增强是否改变左右、方向或病理语义。</li>
+<li>与浅 CNN、ResNet、DenseNet 在同预算下比较。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>原始 AlexNet 的逐层尺寸流程图。</li>
+<li>各层参数量柱状图，突出 FC6/FC7。</li>
+<li>卷积核、浅层特征图与 Grad-CAM。</li>
+<li>训练/验证曲线和混淆矩阵。</li>
+<li>跨中心和设备性能图。</li>
+</ul></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
-<li>结构经典，易于学习和复现。</li>
-<li>作为 CNN 基线有历史代表性。</li>
-<li>可快速用于小型迁移学习实验。</li>
+<li>结构清晰，适合学习经典 CNN 设计。</li>
+<li>ReLU、dropout、增强等要素影响深远。</li>
+<li>torchvision 等生态中易复现。</li>
 </ul>
 <h3>局限</h3>
 <ul>
-<li>相比 ResNet、DenseNet 等现代网络较浅且效率较低。</li>
-<li>全连接层参数较多，易过拟合。</li>
-<li>对复杂影像任务性能常不够强。</li>
+<li>全连接层参数巨大、计算效率低。</li>
+<li>无残差连接，难以稳定扩展到很深。</li>
+<li>相比现代架构性能和参数效率通常较弱。</li>
 </ul>
 <h3>常见坑</h3>
 <ul>
-<li>把 AlexNet 当成现代最佳视觉架构。</li>
-<li>不做病人级切分和外部验证。</li>
-<li>输入尺寸和预处理与预训练权重不匹配。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="卷积神经网络是一类专门处理图像或局部空间结构数据的神经网络。它通过卷积核、激活函数和池化层，从原始像素中自动提取边缘、纹理和高级语义特征。">卷积神经网络（Convolutional Neural Network, CNN）</a> 的区别：AlexNet 是经典 CNN 具体架构。</li>
-<li>和 <a class="xlink" href="m-residual-network-resnet.html" data-cn="残差网络" data-en="Residual Network, ResNet" data-def="ResNet 是在深层 CNN 中引入残差连接的网络架构。它通过快捷连接把输入直接加到后续层输出上，从而缓解深层网络训练中的退化与梯度传播困难。">残差网络（Residual Network, ResNet）</a> 的区别：ResNet 更深且通过残差连接改善训练。</li>
-<li>和 <a class="xlink" href="m-densely-connected-convolutional-network-densenet.html" data-cn="DenseNet" data-en="Densely Connected Convolutional Network, DenseNet" data-def="DenseNet 是一种密集连接卷积网络。它让每一层都接收所有前面层的特征图作为输入，从而强化特征复用并改善梯度传播。">DenseNet（Densely Connected Convolutional Network, DenseNet）</a> 的区别：DenseNet 更强调跨层特征复用。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>医学图像分类教学基线。</li>
-<li>预训练模型对照实验。</li>
-<li>小规模视觉任务的快速原型开发。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="卷积神经网络是一类专门处理图像或局部空间结构数据的神经网络。它通过卷积核、激活函数和池化层，从原始像素中自动提取边缘、纹理和高级语义特征。">卷积神经网络（Convolutional Neural Network, CNN）</a></li>
-<li><a class="xlink" href="m-residual-network-resnet.html" data-cn="残差网络" data-en="Residual Network, ResNet" data-def="ResNet 是在深层 CNN 中引入残差连接的网络架构。它通过快捷连接把输入直接加到后续层输出上，从而缓解深层网络训练中的退化与梯度传播困难。">残差网络（Residual Network, ResNet）</a></li>
-<li><a class="xlink" href="m-densely-connected-convolutional-network-densenet.html" data-cn="DenseNet" data-en="Densely Connected Convolutional Network, DenseNet" data-def="DenseNet 是一种密集连接卷积网络。它让每一层都接收所有前面层的特征图作为输入，从而强化特征复用并改善梯度传播。">DenseNet（Densely Connected Convolutional Network, DenseNet）</a></li>
-<li><a class="xlink" href="m-artificial-neural-network-ann.html" data-cn="人工神经网络" data-en="Artificial Neural Network, ANN" data-def="人工神经网络是由多层神经元节点组成的一类函数逼近模型。它通过权重、偏置和非线性激活函数，把输入数据映射到分类、回归或表征学习目标上。">人工神经网络（Artificial Neural Network, ANN）</a></li>
+<li>混淆原论文 227 输入与现代实现 224 输入。</li>
+<li>忽略原始分组卷积的双 GPU 历史原因。</li>
+<li>在小型医学数据上从零训练并过度解读。</li>
+<li>按图片/切片而非患者划分。</li>
+<li>把历史影响力等同于当前最佳选择。</li>
 </ul></div>
     </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>Krizhevsky A, Sutskever I, Hinton GE. ImageNet classification with deep convolutional neural networks. <em>Advances in Neural Information Processing Systems</em>. 2012;25.</li>
+<li>与普通 CNN：AlexNet 是具体的经典顺序 CNN 架构。</li>
+<li>与 ResNet：ResNet 用残差连接支持更深网络。</li>
+<li>与 DenseNet：DenseNet 用密集拼接复用早期特征。</li>
+<li>与 VGG：VGG 用大量统一 $3\times3$ 卷积，结构更规整。</li>
+<li>如何选择：AlexNet 适合教学/历史基线；实际医学任务通常先用预训练 ResNet/DenseNet 或现代轻量网络。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>医学图像分类课程与基准复现。</li>
+<li>小型胸片、皮肤、眼底数据的传统 CNN 对照。</li>
+<li>研究深度、ReLU、dropout 与参数量的消融。</li>
+<li>作为迁移学习历史骨干比较对象。</li>
+</ul>
+<p>必须报告输入尺寸、患者级切分、预训练来源、增强、类别不平衡、设备/中心分布和外部验证。普通 AlexNet 分类头不处理删失。</p></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>ReLU</strong>：将负值置 0、正值保持不变的激活函数。</li>
+<li><strong>Dropout</strong>：训练时随机屏蔽单元以减少共同适应。</li>
+<li><strong>重叠池化（Overlapping pooling）</strong>：池化步幅小于窗口大小。</li>
+<li><strong>分组卷积（Grouped convolution）</strong>：把通道分组分别卷积。</li>
+<li><strong>局部响应归一化（LRN）</strong>：原 AlexNet 使用的跨通道归一化。</li>
+<li><strong>全连接层（Fully connected layer）</strong>：每个输出连接所有输入的层。</li>
+<li><strong>数据增强（Data augmentation）</strong>：用标签保持的变换扩充训练变化。</li>
+<li><strong>ImageNet</strong>：推动大规模视觉预训练的图像分类数据集。</li>
+</ul></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-convolutional-neural-network-cnn.html" data-cn="卷积神经网络" data-en="Convolutional Neural Network, CNN" data-def="CNN 用同一个小型滤波器在整幅图像上滑动，把“局部模式可重复出现”写进网络结构，从而用远少于全连接层的参数学习空间特征。">卷积神经网络（Convolutional Neural Network, CNN）</a></li>
+<li><a class="xlink" href="m-residual-network-resnet.html" data-cn="残差网络" data-en="Residual Network, ResNet" data-def="ResNet 不要求每组层从头学习完整映射，而是学习“在输入基础上还要改多少”，并用快捷连接给信息和梯度提供一条直接通路。">残差网络（Residual Network, ResNet）</a></li>
+<li><a class="xlink" href="m-densely-connected-convolutional-network-densenet.html" data-cn="DenseNet" data-en="Densely Connected Convolutional Network, DenseNet" data-def="DenseNet 让每一层直接看到并保留所有前层特征，通过通道拼接实现特征复用和短梯度路径，而不是反复覆盖旧表示。">DenseNet（Densely Connected Convolutional Network, DenseNet）</a></li>
+<li><a class="xlink" href="m-multilayer-perceptron-classifier-mlp.html" data-cn="多层感知机分类器" data-en="Multilayer Perceptron Classifier, MLP" data-def="MLP 把多次“线性组合 + 非线性激活”串起来，将原本不能用一条直线分开的类别，在逐层变换后的表示空间中分开。">多层感知机分类器（Multilayer Perceptron Classifier, MLP）</a></li>
+<li><a class="xlink" href="m-cross-validation.html" data-cn="交叉验证" data-en="Cross-Validation" data-def="交叉验证轮流把每部分样本当作未见数据，用多次“训练—验证”近似模型对新样本的泛化表现。">交叉验证（Cross-Validation）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
+      <div class="sec-body"><ul>
+<li>Krizhevsky A, Sutskever I, Hinton GE. ImageNet classification with deep convolutional neural networks. <em>NeurIPS</em>. 2012;25.</li>
 <li>Goodfellow I, Bengio Y, Courville A. <em>Deep Learning</em>. MIT Press; 2016.</li>
-<li>torchvision Developers. AlexNet model. <a href="https://pytorch.org/vision/stable/models/alexnet.html">https://pytorch.org/vision/stable/models/alexnet.html</a> （访问日期：2026-07-02）</li>
+<li>LeCun Y, Bengio Y, Hinton G. Deep learning. <em>Nature</em>. 2015;521:436-444. https://doi.org/10.1038/nature14539</li>
+<li>torchvision developers. AlexNet. https://pytorch.org/vision/stable/models/alexnet.html</li>
 </ul></div>
     </section>
     <div class="pager"><a class="pg pg-prev" href="m-densely-connected-convolutional-network-densenet.html"><div class="pg-lab">← 上一篇</div><div class="pg-t">DenseNet</div></a><span></span></div>

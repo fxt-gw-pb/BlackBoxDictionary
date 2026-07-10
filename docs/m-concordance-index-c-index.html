@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">假设诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">关键术语</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,39 +54,102 @@
     <div class="intro-note"><h1>一致性指数（Concordance Index, C-index）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>C-index 从所有能够判断结局先后的个体对中，计算模型把更早发生事件者排在更高风险位置的比例。</p>
+<h3>1.2 定义</h3>
 <p>一致性指数衡量预测模型的区分度：随机取一对可比较个体，模型给「更早发生事件者」更高风险的概率。它是 ROC 曲线下面积在生存数据上的推广。</p>
-<h3>1.2 它主要解决什么问题</h3>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
 <li>研究问题：预测模型能否把高风险个体与低风险个体正确排序。</li>
 <li>适用任务：生存/风险预测模型的区分度评估与比较。</li>
 <li>常见医学场景：预后评分、复发风险模型、列线图的判别能力评价。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
+<h3>1.4 直觉理解</h3>
 <p>好的风险模型应给「结局更差的人」更高的风险分。C-index 就是把所有能比较的个体两两配对，数一数模型排序正确的比例——0.5 相当于抛硬币，1.0 为完美排序。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 根本困难</h3>
+<p>生存结局既有事件发生时间，又有删失。对两个患者，如果一人先发生事件，就能判断谁结局更早；但若一人在另一人发生事件前已经失访，就无法确定两人的真实先后。</p>
+<h3>2.2 关键洞察</h3>
+<p>只在结局先后可判定的个体对中检查风险排序：先发生事件者风险分更高记为一致，方向相反记为不一致，风险并列通常记半分。Harrell C 直接计算这些对；Uno C 再以删失分布的逆概率权重修正重删失造成的偏倚。</p>
+<h3>2.3 它回答与不回答的问题</h3>
+<p>C-index 回答“谁更早发生事件，模型能否排对”，不回答“患者在 3 年时发生事件的概率是否准确”，也不衡量按某阈值采取治疗能否带来净获益。因此应与校准和 DCA 联合报告。</p></div>
+    </section><section id="sec-3" data-sec="3" class="sec">
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 核心公式</h3>
 <p>$$
 C=\frac{\#\{\text{可比对且预测排序一致}\}}{\#\{\text{可比对}\}}
 $$</p>
 <p>即在所有可比较对 $(i,j)$（结局先后可判定）中，预测风险与实际结局排序一致的比例。</p>
-<h3>2.2 参数或统计量含义</h3>
+<h3>3.3 参数或统计量含义</h3>
 <ul>
 <li>可比对：两个体的事件先后可确定（考虑删失后仍可判定者）。</li>
 <li>一致对：实际先发生事件者被赋予更高风险。</li>
 <li>$C=0.5$ 无区分度，$C=1$ 完美；二分类结局时 $C=\mathrm{AUC}$。</li>
 <li>时依 C-index 可评估某一时间窗内的区分度。</li>
 </ul>
-<h3>2.3 关键假设</h3>
+<h3>3.4 关键假设</h3>
 <ul>
 <li>风险评分与结局排序的方向一致。</li>
 <li>删失为非信息性；重删失会使 Harrell C 偏乐观（可用 Uno C 校正）。</li>
 <li>只衡量排序（区分度），不衡量校准。</li>
 </ul></div>
-    </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>考虑 4 位患者，风险分越大表示越危险：</p>
+<table>
+<thead>
+<tr>
+<th>患者</th>
+<th style="text-align: right;">观察时间</th>
+<th style="text-align: right;">事件</th>
+<th style="text-align: right;">风险分</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.90</td>
+</tr>
+<tr>
+<td>B</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.60</td>
+</tr>
+<tr>
+<td>C</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.30</td>
+</tr>
+<tr>
+<td>D</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.95</td>
+</tr>
+</tbody>
+</table>
+<p>可比较对及其排序如下：</p>
+<ul>
+<li>A–B：A 在时间 2 发生事件且风险更高，一致。</li>
+<li>A–C：A 在 C 删失前发生事件且风险更高，一致。</li>
+<li>A–D：A 在 D 删失前发生事件，但 D 风险更高，不一致。</li>
+<li>B–C：B 在 C 删失前发生事件且风险更高，一致。</li>
+<li>B–D：D 在 B 发生事件前已删失，真实先后未知，不可比较。</li>
+<li>C–D：两者均未观察到事件，不可比较。</li>
+</ul>
+<p>因此 4 个可比较对中有 3 个一致：</p>
+<p>$$
+C=\frac{3}{4}=0.75
+$$</p>
+<p>若 A 与 D 风险分相同，通常给该对 0.5 分，此时 $C=(3+0.5)/4=0.875$。这个算例也说明删失比例和删失发生时点会改变哪些个体对进入分母。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 适合的数据形式</h3>
 <ul>
 <li>自变量类型：模型输出的风险评分/线性预测子。</li>
 <li>因变量类型：二分类或时间到事件（含删失）。</li>
@@ -96,7 +159,7 @@ $$</p>
 <li>是否适合删失数据：适用（Harrell/Uno C）。</li>
 <li>是否适合重复测量数据：需时依 C-index 扩展。</li>
 </ul>
-<h3>3.2 示例表格</h3>
+<h3>5.2 示例表格</h3>
 <table>
 <thead>
 <tr>
@@ -133,7 +196,7 @@ $$</p>
 </tr>
 </tbody>
 </table>
-<h3>3.3 输入与产出</h3>
+<h3>5.3 输入与产出</h3>
 <h4>输入</h4>
 <ul>
 <li>输入数据：预测风险评分、结局（及生存时间/事件）。</li>
@@ -147,15 +210,15 @@ $$</p>
 <li>预测结果：无（是评估指标）。</li>
 <li>不确定性指标：C 的 95% CI，两模型 C 的比较检验。</li>
 </ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
       <div class="sec-body"><ul>
 <li>适合：比较模型区分能力、报告预后模型判别度。</li>
-<li>不适合：评估校准（用 <a class="xlink" href="m-calibration-curve.html" data-cn="校准曲线" data-en="Calibration Curve" data-def="校准曲线（可靠性图）比较模型的预测概率与实际观察到的事件发生频率，用来判断“模型说的 20% 风险，是不是真的大约 20% 的人发生了事件”。">校准曲线（Calibration Curve）</a>）或临床净获益（用 <a class="xlink" href="m-decision-curve-analysis-dca.html" data-cn="决策曲线分析" data-en="Decision Curve Analysis, DCA" data-def="决策曲线分析通过“净获益”指标，评估一个预测模型或诊断策略在不同决策阈值下相对于“全部干预”和“全部不干预”两个极端策略的临床价值。">决策曲线分析（Decision Curve Analysis, DCA）</a>）。</li>
+<li>不适合：评估校准（用 <a class="xlink" href="m-calibration-curve.html" data-cn="校准曲线" data-en="Calibration Curve" data-def="校准回答“预测 20% 风险的人是否约有 20% 发病”，关注概率的绝对可信度，而不是排序。">校准曲线（Calibration Curve）</a>）或临床净获益（用 <a class="xlink" href="m-decision-curve-analysis-dca.html" data-cn="决策曲线分析" data-en="Decision Curve Analysis, DCA" data-def="DCA 用阈值概率把漏诊与误治代价换成同一尺度，比较模型、全治和全不治谁带来更高净获益。">决策曲线分析（Decision Curve Analysis, DCA）</a>）。</li>
 <li>使用前需要特别检查的点：删失比例、是否需 Uno C、是否需时依评估。</li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
       <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="concordance-index-c-index" data-i="0">Python</button><button class="codetab" data-uid="concordance-index-c-index" data-i="1">R</button></div><div class="codepanel active" data-uid="concordance-index-c-index" data-i="0"><p>常用包：</p>
 <ul>
 <li><code>lifelines</code></li>
@@ -175,23 +238,34 @@ summary(fit)$concordance          # C-index 及标准误
 # 或直接:
 concordance(Surv(time, event) ~ risk_score, data = df)
 </code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
       <div class="sec-body"><ul>
 <li>核心结果看什么：C 值大小与置信区间是否明显高于 0.5。</li>
-<li>每个主要参数如何解释：约定俗成——$0.5$ 无用、$0.7$ 尚可、$0.8$ 良好、$&gt;0.9$ 很强（依场景而定）。</li>
+<li>每个主要参数如何解释：约定俗成——$0.5$ 无用、$0.7$ 尚可、$0.8$ 良好、$\gt 0.9$ 很强（依场景而定）；这些阈值不能替代具体临床场景判断。</li>
 <li>临床或医学意义如何表达：C 高说明模型能有效排序高低风险，但不代表预测概率准确。</li>
 <li>常见误读：把高 C 当成校准好；忽视 Harrell C 在重删失下偏乐观。</li>
 </ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">假设诊断与稳健性</h2></div>
+      <div class="sec-body"><ul>
+<li><strong>确认评分方向</strong>：先用几个已知高低风险病例核对方向；软件对“更长生存分”和“更高风险分”的约定可能相反。</li>
+<li><strong>描述删失机制</strong>：报告删失比例、随访长度和风险集变化；删失与预后相关时，普通 Harrell C 的解释会受损。</li>
+<li><strong>比较估计量</strong>：重删失或不同随访分布下同时计算 Harrell C 与 Uno C，说明时间截断点 $\tau$ 的选择。</li>
+<li><strong>使用独立预测</strong>：在独立测试集或 out-of-fold 预测上计算；训练集 C-index 会因过拟合而偏高。</li>
+<li><strong>量化不确定性</strong>：用患者层面的 bootstrap 给出置信区间；比较模型时对同一重抽样内的差值取区间，而非只看两个点估计。</li>
+<li><strong>检查时间异质性</strong>：比例风险不成立或排序能力随时间变化时，补充时间依赖 AUC/C-index 曲线。</li>
+<li><strong>联合评价</strong>：同步报告校准曲线、Brier 分数与决策曲线，避免把排序好误写成绝对风险准确或临床有用。</li>
+</ul></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
       <div class="sec-body"><ul>
 <li>不同模型 C-index 的对比（含 CI）森林图。</li>
 <li>时依 C-index 曲线。</li>
 <li>风险分层的 Kaplan-Meier 曲线佐证区分度。</li>
 </ul></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
       <div class="sec-body"><h3>优势</h3>
 <ul>
 <li>单一、可解释的区分度指标，广泛用于预后模型。</li>
@@ -208,32 +282,44 @@ concordance(Surv(time, event) ~ risk_score, data = df)
 <ul>
 <li>只报 C-index 而不报校准与净获益。</li>
 <li>用训练集 C（乐观）而非验证/交叉验证 C。</li>
-<li>评分方向搞反导致 C&lt;0.5。</li>
+<li>评分方向搞反导致 $C\lt 0.5$。</li>
 </ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
       <div class="sec-body"><ul>
-<li>和 <a class="xlink" href="m-receiver-operating-characteristic-and-auc.html" data-cn="ROC曲线与AUC" data-en="Receiver Operating Characteristic and AUC" data-def="ROC 曲线（受试者工作特征曲线）把一个连续评分或预测概率在所有可能阈值下的敏感度与（1−特异度）连成一条曲线；AUC 是曲线下面积，用一个 0–1 的数概括模型的整体区分能力。">ROC曲线与AUC（Receiver Operating Characteristic and AUC）</a> 的区别：AUC 针对固定二分类结局，C-index 推广到含删失的生存结局。</li>
-<li>和 <a class="xlink" href="m-calibration-curve.html" data-cn="校准曲线" data-en="Calibration Curve" data-def="校准曲线（可靠性图）比较模型的预测概率与实际观察到的事件发生频率，用来判断“模型说的 20% 风险，是不是真的大约 20% 的人发生了事件”。">校准曲线（Calibration Curve）</a> 的区别：C 看区分度，校准看概率准确性，二者互补。</li>
-<li>和 <a class="xlink" href="m-decision-curve-analysis-dca.html" data-cn="决策曲线分析" data-en="Decision Curve Analysis, DCA" data-def="决策曲线分析通过“净获益”指标，评估一个预测模型或诊断策略在不同决策阈值下相对于“全部干预”和“全部不干预”两个极端策略的临床价值。">决策曲线分析（Decision Curve Analysis, DCA）</a> 的区别：DCA 评估临床净获益而非排序能力。</li>
+<li>和 <a class="xlink" href="m-receiver-operating-characteristic-and-auc.html" data-cn="ROC曲线与AUC" data-en="Receiver Operating Characteristic and AUC" data-def="ROC 扫描所有阈值观察灵敏度—假阳性权衡，AUC 则等于随机一名阳性得分高于随机一名阴性的概率。">ROC曲线与AUC（Receiver Operating Characteristic and AUC）</a> 的区别：AUC 针对固定二分类结局，C-index 推广到含删失的生存结局。</li>
+<li>和 <a class="xlink" href="m-calibration-curve.html" data-cn="校准曲线" data-en="Calibration Curve" data-def="校准回答“预测 20% 风险的人是否约有 20% 发病”，关注概率的绝对可信度，而不是排序。">校准曲线（Calibration Curve）</a> 的区别：C 看区分度，校准看概率准确性，二者互补。</li>
+<li>和 <a class="xlink" href="m-decision-curve-analysis-dca.html" data-cn="决策曲线分析" data-en="Decision Curve Analysis, DCA" data-def="DCA 用阈值概率把漏诊与误治代价换成同一尺度，比较模型、全治和全不治谁带来更高净获益。">决策曲线分析（Decision Curve Analysis, DCA）</a> 的区别：DCA 评估临床净获益而非排序能力。</li>
 </ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
       <div class="sec-body"><ul>
 <li>肿瘤预后评分/列线图的判别能力评价。</li>
 <li>心血管风险模型的区分度比较。</li>
 <li>新生物标志物加入后区分度是否提升。</li>
 </ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">关键术语</h2></div>
       <div class="sec-body"><ul>
-<li><a class="xlink" href="m-receiver-operating-characteristic-and-auc.html" data-cn="ROC曲线与AUC" data-en="Receiver Operating Characteristic and AUC" data-def="ROC 曲线（受试者工作特征曲线）把一个连续评分或预测概率在所有可能阈值下的敏感度与（1−特异度）连成一条曲线；AUC 是曲线下面积，用一个 0–1 的数概括模型的整体区分能力。">ROC曲线与AUC（Receiver Operating Characteristic and AUC）</a></li>
-<li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
-<li><a class="xlink" href="m-calibration-curve.html" data-cn="校准曲线" data-en="Calibration Curve" data-def="校准曲线（可靠性图）比较模型的预测概率与实际观察到的事件发生频率，用来判断“模型说的 20% 风险，是不是真的大约 20% 的人发生了事件”。">校准曲线（Calibration Curve）</a></li>
-<li><a class="xlink" href="m-decision-curve-analysis-dca.html" data-cn="决策曲线分析" data-en="Decision Curve Analysis, DCA" data-def="决策曲线分析通过“净获益”指标，评估一个预测模型或诊断策略在不同决策阈值下相对于“全部干预”和“全部不干预”两个极端策略的临床价值。">决策曲线分析（Decision Curve Analysis, DCA）</a></li>
+<li><strong>可比较对</strong>：根据事件与删失信息能够确定结局先后的两个个体。</li>
+<li><strong>一致对</strong>：更早发生事件者同时被模型赋予更高风险。</li>
+<li><strong>不一致对</strong>：实际事件顺序与预测风险顺序相反的个体对。</li>
+<li><strong>Harrell C</strong>：直接基于可比较对的经典一致性指数。</li>
+<li><strong>Uno C</strong>：以删失分布逆概率加权、对重删失更稳健的一致性指数。</li>
+<li><strong>风险评分</strong>：用于排序的模型输出；数值方向必须明确。</li>
+<li><strong>时间依赖区分度</strong>：允许模型判别能力随预测时间点变化的评价。</li>
+<li><strong>乐观偏倚</strong>：在模型开发数据上评估造成的性能高估。</li>
 </ul></div>
-    </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-receiver-operating-characteristic-and-auc.html" data-cn="ROC曲线与AUC" data-en="Receiver Operating Characteristic and AUC" data-def="ROC 扫描所有阈值观察灵敏度—假阳性权衡，AUC 则等于随机一名阳性得分高于随机一名阴性的概率。">ROC曲线与AUC（Receiver Operating Characteristic and AUC）</a></li>
+<li><a class="xlink" href="m-cox-proportional-hazards-model.html" data-cn="Cox比例风险模型" data-en="Cox Proportional Hazards Model" data-def="Cox 模型把危险率写成「大家共享的基线风险 × 由协变量决定的倍数」$h(t\mid X)=h_0(t)\,e^{X^\top\beta}$，然后用偏似然巧妙地把未知的基线 $h_0(t)$ 消掉——只凭「每次出事的是谁」就能估出风险比，">Cox比例风险模型（Cox Proportional Hazards Model）</a></li>
+<li><a class="xlink" href="m-calibration-curve.html" data-cn="校准曲线" data-en="Calibration Curve" data-def="校准回答“预测 20% 风险的人是否约有 20% 发病”，关注概率的绝对可信度，而不是排序。">校准曲线（Calibration Curve）</a></li>
+<li><a class="xlink" href="m-decision-curve-analysis-dca.html" data-cn="决策曲线分析" data-en="Decision Curve Analysis, DCA" data-def="DCA 用阈值概率把漏诊与误治代价换成同一尺度，比较模型、全治和全不治谁带来更高净获益。">决策曲线分析（Decision Curve Analysis, DCA）</a></li>
+</ul></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Harrell FE, Lee KL, Mark DB. Multivariable prognostic models. <em>Stat Med</em>. 1996;15(4):361-387.</li>
 <li>Uno H, et al. On the C-statistics for evaluating overall adequacy of risk prediction with censored survival data. <em>Stat Med</em>. 2011;30(10):1105-1117.</li>

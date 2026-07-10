@@ -46,7 +46,7 @@
           <span class="entry-cn">因果推断</span>
           <span class="entry-en">Causal Inference</span>
         </div>
-        <p class="entry-def">因果推断是一组用于估计干预或暴露对结局影响的方法框架。它关注的是“如果我们改变处理状态，结局会怎样变化”，而不是单纯描述变量之间是否相关。</p>
+        <p class="entry-def">因果推断不是问「谁和谁相关」，而是问：如果把同一批人放进另一个干预世界，结局会不会改变、会改变多少。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -59,7 +59,7 @@
           <span class="entry-cn">倾向评分匹配</span>
           <span class="entry-en">Propensity Score Matching</span>
         </div>
-        <p class="entry-def">倾向评分匹配先估计每个个体接受处理的条件概率（倾向评分），再把处理组个体与倾向评分相近的对照组个体配对，从而在已测混杂上构造可比的两组，估计处理效应。</p>
+        <p class="entry-def">倾向评分匹配把一堆混杂变量压缩成「接受处理的概率」这一维分数，再在分数相近的人之间比较结局。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -72,7 +72,7 @@
           <span class="entry-cn">逆概率处理加权</span>
           <span class="entry-en">Inverse Probability of Treatment Weighting, IPTW</span>
         </div>
-        <p class="entry-def">IPTW 用倾向评分的倒数给每个个体加权，构造一个“伪人群”，在其中处理分配与已测混杂独立，从而估计边际（population-average）处理效应。</p>
+        <p class="entry-def">IPTW 给「在自身条件下不太可能接受实际处理」的人更大权重，让加权后的数据看起来像处理被随机分配过。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>
@@ -85,7 +85,7 @@
           <span class="entry-cn">中介分析</span>
           <span class="entry-en">Mediation Analysis</span>
         </div>
-        <p class="entry-def">中介分析把暴露对结局的总效应分解为「经由某中介变量传递的间接效应」与「不经该中介的直接效应」，用于揭示作用机制而非仅仅是否有效。</p>
+        <p class="entry-def">中介分析把「暴露是否影响结局」进一步拆成「有多少影响是通过某个机制变量传过去的」。</p>
       </div>
       <div class="entry-meta">
         <span class="entry-status">◑&nbsp;已建</span>

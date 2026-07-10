@@ -19,213 +19,253 @@ r_packages: [stats, FactoMineR]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-主成分分析是一种线性降维方法。它把原始相关特征转换为一组互相正交的新变量，即主成分，并按解释方差从大到小排序，用少数主成分保留数据中的主要变异。
+PCA 旋转坐标轴，依次寻找样本投影方差最大的正交方向，用少数线性组合保留主要总变异。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：如何用更少的综合变量表示高维连续特征。
-- 适用任务：降维、可视化、去冗余、建模前特征压缩。
-- 常见医学场景：组学数据探索、影像组学特征压缩、多个相关实验室指标综合表征。
+主成分分析是无监督线性降维方法。它将中心化数据投影到一组两两正交的主成分方向，并按解释方差从大到小排序；前若干方向提供低维表示和最小平方重构误差。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-PCA 不直接挑选原始变量，而是把多个相关变量重新组合成新的坐标轴。第一主成分是数据变化最大的方向，第二主成分是在与第一主成分正交的条件下变化第二大的方向。
+- 多个连续特征高度相关，信息重复。
+- 高维数据需要二维可视化、压缩或去噪。
+- 后续模型受共线性或计算成本影响。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+一团斜着延伸的点云用横纵坐标描述很浪费。PCA 把第一根新轴沿点云最长方向放置，第二根轴与它垂直；若点几乎都在第一轴上，第二轴可以舍弃。
 
-设中心化后的数据矩阵为 $\tilde X\in\mathbb{R}^{n\times p}$，协方差矩阵为：
+## 2. 核心思想与原理
 
-$$
-S=\frac{1}{n-1}\tilde X^\top \tilde X
-$$
+### 2.1 最大方差与最小重构误差
 
-PCA 寻找单位向量 $w$，使投影方差最大：
+在单位方向中，第一主成分使投影方差最大。保留前 $k$ 个主成分，也等价于寻找重构平方误差最小的 $k$ 维线性子空间。
 
-$$
-\max_w w^\top S w,\quad \text{s.t. } w^\top w=1
-$$
+### 2.2 无监督意味着什么
 
-其解满足特征值方程：
+PCA 不看结局。方差最大的方向可能是批次效应、测量噪声或个体差异，而不一定最能预测疾病。
 
-$$
-S w_j=\lambda_j w_j
-$$
+### 2.3 中心化与标准化
 
-选择前 $k$ 个特征向量组成 $W_k$，降维后的表示为：
+中心化是 PCA 的基本步骤。是否标准化取决于变量单位与研究问题：单位不同或方差不可比时通常标准化；同单位且方差大小有实际意义时可只中心化。
 
-$$
-Z=\tilde X W_k
-$$
+## 3. 数学形式
 
-累计解释方差比例为：
+### 3.1 协方差矩阵
+
+对中心化矩阵 $\widetilde X\in\mathbb R^{n\times p}$：
 
 $$
-\frac{\sum_{j=1}^{k}\lambda_j}{\sum_{j=1}^{p}\lambda_j}
+S=\frac{1}{n-1}\widetilde X^\top\widetilde X
 $$
 
-### 2.2 参数或统计量含义
+### 3.2 最大方差问题
 
-- 主成分：原始变量的线性组合。
-- 载荷：每个原始变量在主成分中的权重。
-- 特征值 $\lambda_j$：第 $j$ 个主成分解释的方差。
-- `n_components`：保留的主成分数量。
-- 解释方差比例：每个主成分保留的信息比例。
+$$
+w_1=
+\operatorname*{arg\,max}_{\|w\|=1}
+w^\top Sw
+$$
 
-### 2.3 关键假设
+解满足：
 
-- 主要结构可由线性组合表示。
-- 方差较大的方向被视为更重要的信息来源。
-- 特征尺度会影响结果，通常需要标准化。
+$$
+Sw_j=\lambda_jw_j
+$$
 
-## 3. 数据形式与输入输出
+### 3.3 得分与解释方差
 
-### 3.1 适合的数据形式
+$$
+Z=\widetilde XW_k
+$$
 
-- 自变量类型：连续变量或标准化后的数值特征。
-- 因变量类型：PCA 本身不需要结局变量。
-- 数据结构：样本乘以特征矩阵。
-- 是否适合高维数据：适合，尤其适合相关特征较多的数据。
-- 是否适合缺失较多数据：需先插补或使用专门 PCA 变体。
-- 是否适合删失数据：PCA 不处理结局删失。
-- 是否适合重复测量数据：需先定义样本单位，或使用纵向降维方法。
+$$
+\operatorname{EVR}_j=
+\frac{\lambda_j}{\sum_{\ell=1}^{p}\lambda_\ell}
+$$
 
-### 3.2 示例表格
+载荷方向的符号可整体翻转而不改变解。
 
-以代谢组学特征降维为例：
+### 3.4 关键条件
 
-| Metab_1 | Metab_2 | Metab_3 | Metab_4 | Disease |
-| --- | --- | --- | --- | --- |
-| 0.84 | 1.22 | -0.14 | 0.31 | 1 |
-| -0.35 | -0.41 | 0.28 | -0.19 | 0 |
-| 1.10 | 1.45 | -0.33 | 0.52 | 1 |
-| -0.72 | -0.60 | 0.18 | -0.42 | 0 |
-| 0.41 | 0.80 | -0.09 | 0.20 | 1 |
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 主要结构近似线性 | 弯曲流形被压坏 | 与非线性方法比较 |
+| 高方差代表有用信息 | 批次或噪声占主成分 | 载荷与协变量检查 |
+| 尺度处理符合问题 | 大方差变量支配 | 标准化敏感性 |
+| 训练流程无泄漏 | 测试信息进入变换 | 在训练折内拟合 PCA |
 
-### 3.3 输入与产出
+## 4. 手把手算例
 
-#### 输入
+四个已中心化的二维点：
 
-- 输入数据：数值型特征矩阵。
-- 关键变量：保留主成分数量、标准化方式。
-- 需要预处理的内容：缺失处理、异常值检查、中心化和标准化。
+$$
+(-2,-2),\ (-1,-1),\ (1,1),\ (2,2)
+$$
 
-#### 产出
+**Step 1：协方差矩阵。** 两列平方和与乘积和均为 10：
 
-- 模型对象/统计结果：主成分载荷、解释方差比例、主成分得分。
-- 参数估计：载荷矩阵和特征值。
-- 预测结果：PCA 本身不预测，可把主成分作为后续模型输入。
-- 不确定性指标：可用重采样评估主成分稳定性。
+$$
+S=
+\frac13
+\begin{pmatrix}
+10&10\\
+10&10
+\end{pmatrix}
+$$
 
-## 4. 适用场景
+**Step 2：特征值与方向。**
 
-- 适合：连续特征多、特征之间相关性强、需要可视化或降维的场景。
-- 不适合：希望保留原始变量解释、主要结构非线性、特征尺度不可比且不宜标准化的场景。
-- 使用前需要特别检查的点：是否标准化、主成分是否可解释、保留方差比例是否足够。
+$$
+\lambda_1=\frac{20}{3},\qquad
+w_1=\frac{1}{\sqrt2}(1,1)^\top
+$$
 
-## 5. 实现
+$$
+\lambda_2=0,\qquad
+w_2=\frac{1}{\sqrt2}(-1,1)^\top
+$$
 
-### 5.1 Python
+**Step 3：主成分得分。**
 
-常用包：
+$$
+z_1=\widetilde Xw_1=
+(-2\sqrt2,-\sqrt2,\sqrt2,2\sqrt2)^\top
+$$
 
-- `scikit-learn`
+第二主成分得分全部为 0。
+
+**Step 4：解释方差。**
+
+$$
+\operatorname{EVR}_1=
+\frac{20/3}{20/3+0}=1
+$$
+
+**结论：** 所有点都在直线 $x_1=x_2$ 上，一个主成分即可无损表示二维数据。
+
+## 5. 数据形式与输入输出
+
+### 5.1 数据要求
+
+- 连续数值特征或合理变换后的高维矩阵。
+- 缺失需预先处理；异常值会明显影响均值和协方差。
+- 重复测量应明确以患者还是访视为样本单位。
+
+### 5.2 输入与产出
+
+输入为矩阵、中心化/标准化方案和保留维度。输出为主成分得分、方向/载荷、特征值、解释方差比例及可选重构。
+
+## 6. 适用场景
+
+- 高相关连续特征压缩、可视化和去噪。
+- 组学、影像组学和多指标综合表征。
+- 不适合强非线性、需要原变量直接解释或低方差信号很重要的任务。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv("metabolomics.csv")
-X = df[["Metab_1", "Metab_2", "Metab_3", "Metab_4"]]
-
-pca_pipe = make_pipeline(
+pipeline = make_pipeline(
     StandardScaler(),
-    PCA(n_components=0.90)
+    PCA(n_components=0.90, svd_solver="full"),
 )
+Z_train = pipeline.fit_transform(X_train)
+Z_test = pipeline.transform(X_test)
 
-Z = pca_pipe.fit_transform(X)
-pca = pca_pipe.named_steps["pca"]
-
-print("Number of components:", pca.n_components_)
-print("Explained variance ratio:", pca.explained_variance_ratio_)
+pca = pipeline.named_steps["pca"]
+print(pca.n_components_)
+print(pca.explained_variance_ratio_)
+print(pca.components_)
 ```
 
-### 5.2 R
-
-常用包：
-
-- `stats`
+### 7.2 R
 
 ```r
-x <- df[, c("Metab_1", "Metab_2", "Metab_3", "Metab_4")]
+x_train <- train[, feature_names]
+x_test <- test[, feature_names]
 
-fit <- prcomp(x, center = TRUE, scale. = TRUE)
+fit <- prcomp(
+  x_train,
+  center = TRUE,
+  scale. = TRUE
+)
+
+scores_train <- fit$x
+scores_test <- predict(fit, newdata = x_test)
+loadings <- fit$rotation
 summary(fit)
-
-scores <- fit$x[, 1:2]
-loadings <- fit$rotation[, 1:2]
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：前几个主成分解释方差比例、载荷矩阵、样本在主成分空间的分布。
-- 每个主要参数如何解释：`n_components=0.90` 表示保留能解释 90% 方差的主成分。
-- 临床或医学意义如何表达：主成分是综合特征，不是单个原始变量；解释时需结合载荷较大的变量。
-- 常见误读：第一主成分解释方差最大，不代表它一定最能预测结局。
+- 得分是患者在新轴上的坐标；载荷说明原变量如何组成该轴。
+- 解释方差大不等于临床预测能力强。
+- 载荷符号可整体翻转，解释应看相对方向与大小。
+- 二维图上的重叠或分离只是探索证据，不是显著性检验。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
 
-- Scree plot 碎石图。
-- 累计解释方差曲线。
-- PC1-PC2 样本散点图。
-- 主成分载荷热图。
+1. 画 scree 和累计解释方差曲线。
+2. 检查载荷是否由单一变量、批次或异常样本主导。
+3. 比较中心化与标准化方案。
+4. bootstrap 后对齐符号，评估载荷稳定性。
+5. 在交叉验证每个训练折内拟合 PCA，再评价下游任务。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
 
-### 优势
+- scree plot 与累计解释方差曲线。
+- PC1-PC2 得分图。
+- 载荷热图或 biplot。
+- 重构误差随维度变化图。
 
-- 能压缩相关连续特征。
-- 主成分之间正交，缓解共线性。
-- 有助于高维数据可视化。
+## 11. 优势、局限与常见坑
 
-### 局限
+**优势：** 理论清晰、计算高效、正交去冗余，并给出最优线性低秩近似。
 
-- 新特征可解释性弱于原始变量。
-- 只捕捉线性结构。
-- 对尺度和异常值敏感。
+**局限：** 只捕捉线性总方差，对尺度和异常值敏感，成分可能难命名。
 
-### 常见坑
+**常见坑：** 全数据先拟合造成泄漏；默认不标准化；把 PCA 当变量选择；把 PC1 叫疾病严重度却不看载荷；只凭二维图判定亚型。
 
-- 在训练测试划分之外先 fit PCA，造成信息泄露。
-- 不标准化就对量纲差异很大的变量做 PCA。
-- 把 PCA 当成“选择原始变量”的方法。
+## 12. 与相近方法的区别
 
-## 9. 与相近方法的区别
+- [[奇异值分解（Singular Value Decomposition, SVD）]]：PCA 常通过中心化矩阵 SVD 实现，SVD 本身不要求中心化。
+- [[因子分析（Factor Analysis）]]：PCA 解释总方差，因子分析建模共同方差与特异误差。
+- [[独立成分分析（Independent Component Analysis, ICA）]]：PCA 要不相关正交方向，ICA 要统计独立来源。
+- 选择经验：压缩和可视化先用 PCA；潜变量测量结构应考虑因子分析。
 
-- 和 [[相关系数特征选择（Correlation-based Feature Selection）]] 的区别：相关系数法删除冗余原始变量；PCA 构造新的综合变量。
-- 和 [[Lasso回归（Lasso Regression）]] 的区别：Lasso 做监督式稀疏选择；PCA 是无监督降维。
-- 和 [[高斯混合模型（Gaussian Mixture Model, GMM）]] 的区别：PCA 用于降维和表征；GMM 用于软聚类和密度建模。
+## 13. 医学研究中的典型应用
 
-## 10. 医学研究中的典型应用
-
-- 组学数据主结构探索和样本可视化。
+- 组学样本结构、批次效应和主要变异探索。
 - 影像组学特征压缩后进入预测模型。
-- 多个相关实验室指标合成为少数综合表征。
+- 多个相关实验室指标的综合表征。
 
-## 11. 相关方法
+## 14. 术语表
 
-- [[相关系数特征选择（Correlation-based Feature Selection）]]
-- [[Lasso回归（Lasso Regression）]]
-- [[Ridge回归（Ridge Regression）]]
-- [[高斯混合模型（Gaussian Mixture Model, GMM）]]
+| 术语 | 含义 |
+| --- | --- |
+| score | 样本在主成分轴上的坐标 |
+| loading | 原变量构成主成分方向的权重 |
+| explained variance | 主成分承载的样本方差 |
+| scree plot | 特征值或解释方差按成分排序图 |
+| whitening | 将主成分进一步缩放到单位方差 |
 
-## 12. 参考资料
+## 15. 相关方法
 
-- Jolliffe IT. *Principal Component Analysis*. 2nd ed. Springer; 2002.
+- [[奇异值分解（Singular Value Decomposition, SVD）]]
+- [[独立成分分析（Independent Component Analysis, ICA）]]
+- [[因子分析（Factor Analysis）]]
+- [[核主成分分析（Kernel Principal Component Analysis, KPCA）]]
+
+## 16. 参考资料
+
 - Pearson K. On lines and planes of closest fit to systems of points in space. *Philos Mag*. 1901;2(11):559-572.
-- scikit-learn Developers. `sklearn.decomposition.PCA`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html) （访问日期：2026-07-02）
+- Jolliffe IT, Cadima J. Principal component analysis: a review and recent developments. *Philos Trans A*. 2016;374:20150202.
+- scikit-learn Developers. `PCA` API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html) （访问日期：2026-07-09）

@@ -36,7 +36,7 @@
   <aside class="toc-wrap">
     <div class="toc-sticky">
       <div class="toc-label">目录 · Contents</div>
-      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">参考资料</span></a></nav>
+      <nav id="toc"><a class="toc-item" href="#sec-1" data-sec="1"><span class="toc-num">01</span><span class="toc-title">方法概览</span></a><a class="toc-item" href="#sec-2" data-sec="2"><span class="toc-num">02</span><span class="toc-title">核心思想与原理</span></a><a class="toc-item" href="#sec-3" data-sec="3"><span class="toc-num">03</span><span class="toc-title">数学形式</span></a><a class="toc-item" href="#sec-4" data-sec="4"><span class="toc-num">04</span><span class="toc-title">手把手算例</span></a><a class="toc-item" href="#sec-5" data-sec="5"><span class="toc-num">05</span><span class="toc-title">数据形式与输入输出</span></a><a class="toc-item" href="#sec-6" data-sec="6"><span class="toc-num">06</span><span class="toc-title">适用场景</span></a><a class="toc-item" href="#sec-7" data-sec="7"><span class="toc-num">07</span><span class="toc-title">实现</span></a><a class="toc-item" href="#sec-8" data-sec="8"><span class="toc-num">08</span><span class="toc-title">结果如何解释</span></a><a class="toc-item" href="#sec-9" data-sec="9"><span class="toc-num">09</span><span class="toc-title">诊断与稳健性</span></a><a class="toc-item" href="#sec-10" data-sec="10"><span class="toc-num">10</span><span class="toc-title">推荐可视化</span></a><a class="toc-item" href="#sec-11" data-sec="11"><span class="toc-num">11</span><span class="toc-title">优势、局限与常见坑</span></a><a class="toc-item" href="#sec-12" data-sec="12"><span class="toc-num">12</span><span class="toc-title">与相近方法的区别</span></a><a class="toc-item" href="#sec-13" data-sec="13"><span class="toc-num">13</span><span class="toc-title">医学研究中的典型应用</span></a><a class="toc-item" href="#sec-14" data-sec="14"><span class="toc-num">14</span><span class="toc-title">术语表</span></a><a class="toc-item" href="#sec-15" data-sec="15"><span class="toc-num">15</span><span class="toc-title">相关方法</span></a><a class="toc-item" href="#sec-16" data-sec="16"><span class="toc-num">16</span><span class="toc-title">参考资料</span></a></nav>
     </div>
   </aside>
   <article id="article">
@@ -54,266 +54,260 @@
     <div class="intro-note"><h1>XGBoost（Extreme Gradient Boosting, XGBoost）</h1></div>
     <section id="sec-1" data-sec="1" class="sec">
       <div class="sec-head"><span class="sec-no">§1</span><h2 class="sec-h2">方法概览</h2></div>
-      <div class="sec-body"><h3>1.1 定义</h3>
-<p>XGBoost 是一种基于梯度提升树的高性能集成学习方法。它在经典 GBDT 基础上加入了二阶优化、显式正则化、列采样、缺失值处理和工程级并行优化，因此在表格数据预测中非常常用。</p>
-<h3>1.2 它主要解决什么问题</h3>
+      <div class="sec-body"><h3>1.1 一句话本质</h3>
+<p>XGBoost 是带二阶近似、显式树复杂度惩罚、采样与高效实现的梯度提升树。</p>
+<h3>1.2 定义</h3>
+<p>XGBoost 是 Extreme Gradient Boosting 的缩写。它延续 <a class="xlink" href="m-gradient-boosting-decision-tree-gbdt.html" data-cn="梯度提升决策树" data-en="Gradient Boosting Decision Tree, GBDT" data-def="GBDT 把“拟合残差”推广为“拟合损失函数的负梯度”，让浅决策树在函数空间中逐步走向更低损失。">梯度提升决策树（Gradient Boosting Decision Tree, GBDT）</a> 的逐轮加树思路，并利用损失的一阶和二阶导数评估叶节点与分裂，同时加入叶节点权重和叶数惩罚。</p>
+<h3>1.3 它主要解决什么问题</h3>
 <ul>
-<li>研究问题：如何在复杂非线性和高阶交互存在时，获得强预测性能且可扩展的表格数据模型。</li>
-<li>适用任务：二分类、多分类、连续结局预测、排序与特征筛选辅助分析。</li>
-<li>常见医学场景：死亡风险预测、再入院预测、并发症判别、生物标志物驱动的表格型建模。</li>
+<li>在复杂表格数据上获得强预测性能。</li>
+<li>用正则化控制提升树复杂度。</li>
+<li>高效处理稀疏输入、缺失值、行列采样和大规模训练。</li>
 </ul>
-<h3>1.3 直觉理解</h3>
-<p>XGBoost 像是在不断“补错题”。第一棵树先给出粗略判断，后面的树专门学习前面没学好的地方；与此同时，它还会主动惩罚过于复杂的树，让模型不至于只会死记训练集。</p></div>
+<h3>1.4 直觉与类比</h3>
+<p>普通梯度提升知道下坡方向；XGBoost 还利用坡面的弯曲程度判断步幅，并对“修太多枝叶”收费，因此每次分裂都要证明收益足以抵消复杂度成本。</p></div>
     </section><section id="sec-2" data-sec="2" class="sec">
-      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">数学形式</h2></div>
-      <div class="sec-body"><h3>2.1 核心公式</h3>
-<p>XGBoost 的目标函数写成：</p>
-<p>$$
-\mathcal{L}(\theta) = \sum_{i=1}^{n} l(y_i, \hat y_i) + \sum_{t=1}^{T}\Omega(f_t)
-$$</p>
-<p>其中每棵树的正则化项为：</p>
-<p>$$
-\Omega(f) = \gamma J + \frac{1}{2}\lambda \sum_{j=1}^{J} w_j^2
-$$</p>
-<p>在第 $t$ 轮，使用二阶泰勒展开得到近似目标：</p>
-<p>$$
-\mathcal{L}^{(t)} \approx \sum_{i=1}^{n}\left[g_i f_t(x_i) + \frac{1}{2} h_i f_t(x_i)^2\right] + \Omega(f_t)
-$$</p>
-<p>其中 $g_i$ 和 $h_i$ 分别是一阶梯度和二阶 Hessian。若第 $j$ 个叶节点的样本集合为 $I_j$，则最优叶子权重为：</p>
-<p>$$
-w_j^* = -\frac{G_j}{H_j + \lambda}
-$$</p>
-<p>其中：</p>
-<p>$$
-G_j = \sum_{i \in I_j} g_i, \qquad H_j = \sum_{i \in I_j} h_i
-$$</p>
-<p>候选分裂的增益为：</p>
-<p>$$
-\text{Gain} = \frac{1}{2}\left(\frac{G_L^2}{H_L+\lambda} + \frac{G_R^2}{H_R+\lambda} - \frac{(G_L+G_R)^2}{H_L+H_R+\lambda}\right) - \gamma
-$$</p>
-<h3>2.2 参数或统计量含义</h3>
-<ul>
-<li><code>n_estimators</code>：提升轮数。</li>
-<li><code>learning_rate</code>：每轮更新步长。</li>
-<li><code>max_depth</code>：单棵树复杂度上限。</li>
-<li><code>subsample</code>、<code>colsample_bytree</code>：样本和特征子采样比例。</li>
-<li><code>lambda</code>、<code>gamma</code>：控制叶子权重和分裂复杂度的正则化参数。</li>
-</ul>
-<h3>2.3 关键假设</h3>
-<ul>
-<li>表格数据中存在可被树模型捕捉的非线性与交互。</li>
-<li>最终目标更偏预测性能而非参数解释。</li>
-<li>若样本量较小或调参不当，模型仍可能过拟合。</li>
-</ul></div>
+      <div class="sec-head"><span class="sec-no">§2</span><h2 class="sec-h2">核心思想与原理</h2></div>
+      <div class="sec-body"><h3>2.1 二阶近似</h3>
+<p>每轮不直接反复求解原始目标，而是在当前预测附近做二阶泰勒展开。样本的一阶梯度 $g_i$ 表示下降方向，二阶梯度 $h_i$ 表示局部曲率。</p>
+<h3>2.2 显式树正则化</h3>
+<p>叶节点过多会增加 $\gamma T$，叶节点预测绝对值过大会增加 $\lambda\sum w_j^2/2$。因此分裂只有在损失下降足够大时才被接受。</p>
+<h3>2.3 缺失与采样</h3>
+<p>训练时可为缺失值学习默认分支方向；<code>subsample</code> 和 <code>colsample_bytree</code> 分别进行行、列采样。原生缺失处理并不等于理解了缺失机制，临床研究仍需检查缺失是否携带流程信息或造成偏倚。</p></div>
     </section><section id="sec-3" data-sec="3" class="sec">
-      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
-      <div class="sec-body"><h3>3.1 适合的数据形式</h3>
+      <div class="sec-head"><span class="sec-no">§3</span><h2 class="sec-h2">数学形式</h2></div>
+      <div class="sec-body"><h3>3.1 正则化目标</h3>
+<p>$$
+\mathcal L=
+\sum_{i=1}^{n}l(y_i,\hat y_i)
++\sum_{t=1}^{K}\Omega(f_t)
+$$</p>
+<p>$$
+\Omega(f)=\gamma T+\frac12\lambda\sum_{j=1}^{T}w_j^2
+$$</p>
+<h3>3.2 第 $t$ 轮二阶近似</h3>
+<p>$$
+\widetilde{\mathcal L}^{(t)}=
+\sum_{i=1}^{n}
+\left[g_if_t(x_i)+\frac12h_if_t^2(x_i)\right]
++\Omega(f_t)
+$$</p>
+<p>对叶节点 $j$，令 $G_j=\sum_{i\in I_j}g_i$、$H_j=\sum_{i\in I_j}h_i$，最优叶权重为：</p>
+<p>$$
+w_j^*=-\frac{G_j}{H_j+\lambda}
+$$</p>
+<h3>3.3 分裂增益</h3>
+<p>$$
+\operatorname{Gain}=
+\frac12\left[
+\frac{G_L^2}{H_L+\lambda}
++\frac{G_R^2}{H_R+\lambda}
+-\frac{(G_L+G_R)^2}{H_L+H_R+\lambda}
+\right]-\gamma
+$$</p>
+<p>增益为正才说明该分裂在正则化后值得保留。</p>
+<h3>3.4 关键参数</h3>
 <ul>
-<li>自变量类型：连续、二分类、多分类变量均可，类别变量通常需编码。</li>
-<li>因变量类型：二分类、多分类或连续型。</li>
-<li>数据结构：宽表数据。</li>
-<li>是否适合高维数据：适合中高维表格数据。</li>
-<li>是否适合缺失较多数据：对缺失有一定原生处理能力，但仍建议先理解缺失机制。</li>
-<li>是否适合删失数据：原始 XGBoost 不直接适合删失结局。</li>
-<li>是否适合重复测量数据：不直接适合。</li>
+<li><code>learning_rate</code>、<code>n_estimators</code>：步长与轮数。</li>
+<li><code>max_depth</code>、<code>min_child_weight</code>、<code>gamma</code>：树结构约束。</li>
+<li><code>subsample</code>、<code>colsample_bytree</code>：行列采样。</li>
+<li><code>reg_alpha</code>、<code>reg_lambda</code>：L1 与 L2 正则。</li>
+</ul></div>
+    </section><section id="sec-4" data-sec="4" class="sec">
+      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">手把手算例</h2></div>
+      <div class="sec-body"><p>采用平方损失 $l=(\hat y-y)^2/2$。当前预测均为 0，4 个样本真实值为 $(1,2,4,5)$，因此：</p>
+<p>$$
+g=(-1,-2,-4,-5),\qquad h=(1,1,1,1)
+$$</p>
+<p>取 $\lambda=1$、$\gamma=0.1$。候选分裂把前两人与后两人分开。</p>
+<p><strong>Step 1：汇总梯度。</strong></p>
+<p>$$
+G_L=-3,\ H_L=2,\qquad G_R=-9,\ H_R=2
+$$</p>
+<p>父节点为 $G=-12,H=4$。</p>
+<p><strong>Step 2：计算分裂增益。</strong></p>
+<p>$$
+\begin{aligned}
+\operatorname{Gain}
+&amp;=\frac12\left(
+\frac{9}{3}+\frac{81}{3}-\frac{144}{5}
+\right)-0.1\\
+&amp;=\frac12(3+27-28.8)-0.1\\
+&amp;=0.5
+\end{aligned}
+$$</p>
+<p>增益为正，分裂值得保留。</p>
+<p><strong>Step 3：计算两个叶节点值。</strong></p>
+<p>$$
+w_L^*=-\frac{-3}{2+1}=1,\qquad
+w_R^*=-\frac{-9}{2+1}=3
+$$</p>
+<p>若学习率为 $0.1$，本轮实际给两组预测分别增加 $0.1$ 与 $0.3$。</p>
+<p><strong>结论：</strong> XGBoost 同时用梯度、曲率和正则化判断“是否分裂”以及“叶节点修正多少”。</p></div>
+    </section><section id="sec-5" data-sec="5" class="sec">
+      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">数据形式与输入输出</h2></div>
+      <div class="sec-body"><h3>5.1 数据要求</h3>
+<ul>
+<li>连续、二分类、多分类和排序任务均有对应目标函数。</li>
+<li>输入通常为数值矩阵或稀疏矩阵；类别变量需按所用接口妥善处理。</li>
+<li>可原生学习缺失默认方向，但仍须分析缺失机制与数据泄漏。</li>
+<li>重复测量应按患者分组切分；删失结局需选择适当生存目标并明确估计对象。</li>
 </ul>
-<h3>3.2 示例表格</h3>
-<p>以 ICU 患者 30 天死亡风险预测为例：</p>
-<table>
+<h3>5.2 产出</h3>
+<p>输出类别、概率、连续预测或排序分数，以及迭代记录和多种重要性。传统回归系数、标准误与因果效应不是其默认输出。</p></div>
+    </section><section id="sec-6" data-sec="6" class="sec">
+      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">适用场景</h2></div>
+      <div class="sec-body"><ul>
+<li>中大型表格数据，变量关系复杂且预测性能优先。</li>
+<li>稀疏特征、缺失较多或需细致正则化的任务。</li>
+<li>慎用于样本很小、外推要求高、强参数解释或因果推断任务。</li>
+</ul></div>
+    </section><section id="sec-7" data-sec="7" class="sec">
+      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">实现</h2></div>
+      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="extreme-gradient-boosting-xgboost" data-i="0">Python</button><button class="codetab" data-uid="extreme-gradient-boosting-xgboost" data-i="1">R</button></div><div class="codepanel active" data-uid="extreme-gradient-boosting-xgboost" data-i="0"><pre><code class="language-python">from xgboost import XGBClassifier
+from sklearn.metrics import roc_auc_score, brier_score_loss
+
+model = XGBClassifier(
+    objective=&quot;binary:logistic&quot;,
+    eval_metric=&quot;logloss&quot;,
+    tree_method=&quot;hist&quot;,
+    n_estimators=2000,
+    learning_rate=0.03,
+    max_depth=4,
+    min_child_weight=5,
+    subsample=0.8,
+    colsample_bytree=0.8,
+    reg_lambda=1.0,
+    early_stopping_rounds=50,
+    random_state=42,
+)
+model.fit(
+    X_train, y_train,
+    eval_set=[(X_valid, y_valid)],
+    verbose=False,
+)
+
+prob = model.predict_proba(X_test)[:, 1]
+print(model.best_iteration)
+print(roc_auc_score(y_test, prob))
+print(brier_score_loss(y_test, prob))
+</code></pre></div><div class="codepanel" data-uid="extreme-gradient-boosting-xgboost" data-i="1"><pre><code class="language-r">library(xgboost)
+
+dtrain &lt;- xgb.DMatrix(as.matrix(X_train), label = y_train)
+dvalid &lt;- xgb.DMatrix(as.matrix(X_valid), label = y_valid)
+dtest &lt;- xgb.DMatrix(as.matrix(X_test))
+
+fit &lt;- xgb.train(
+  params = list(
+    objective = &quot;binary:logistic&quot;,
+    eval_metric = &quot;logloss&quot;,
+    eta = 0.03,
+    max_depth = 4,
+    subsample = 0.8,
+    colsample_bytree = 0.8
+  ),
+  data = dtrain,
+  nrounds = 2000,
+  evals = list(valid = dvalid),
+  early_stopping_rounds = 50,
+  verbose = 0
+)
+
+prob &lt;- predict(fit, dtest)
+</code></pre></div></div></div>
+    </section><section id="sec-8" data-sec="8" class="sec">
+      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">结果如何解释</h2></div>
+      <div class="sec-body"><ul>
+<li><code>best_iteration</code> 是验证集早停选出的轮数，最终测试集不参与选择。</li>
+<li>gain、cover、weight 等重要性定义不同，报告时应注明类型。</li>
+<li>SHAP 值解释模型在给定数据分布下如何形成预测，不自动代表因果贡献。</li>
+<li>分类概率须在独立数据上检查校准，必要时再校准。</li>
+</ul></div>
+    </section><section id="sec-9" data-sec="9" class="sec">
+      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">诊断与稳健性</h2></div>
+      <div class="sec-body"><ol>
+<li>保存训练和验证指标，检查早停点。</li>
+<li>先联合约束树深、叶节点最小 Hessian 与学习率，再调采样和正则。</li>
+<li>比较随机种子和交叉验证折之间的性能及重要性稳定性。</li>
+<li>审查缺失率、缺失默认方向和可能的数据流程泄漏。</li>
+<li>做外部验证、亚组公平性、校准与决策曲线分析。</li>
+</ol></div>
+    </section><section id="sec-10" data-sec="10" class="sec">
+      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">推荐可视化</h2></div>
+      <div class="sec-body"><ul>
+<li>迭代轮数与训练/验证损失。</li>
+<li>ROC、PR、校准和决策曲线。</li>
+<li>gain 或 permutation importance 图。</li>
+<li>SHAP 总结图与局部解释图。</li>
+</ul>
+<p>下图展示真实值与预测值的对照关系：</p>
+<p><img alt="" src="img/xgboost_actual_vs_pred_optimized.png" /></p></div>
+    </section><section id="sec-11" data-sec="11" class="sec">
+      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
+      <div class="sec-body"><p><strong>优势：</strong> 表格性能强，正则化完整，支持稀疏和缺失输入，训练工具成熟。</p>
+<p><strong>局限：</strong> 超参数多、解释复杂、概率可能失准、分布漂移时性能会下降。</p>
+<p><strong>常见坑：</strong> 用测试集早停；未设置验证集却声称早停；把默认重要性当因果；调参搜索后不做嵌套或独立评估。</p></div>
+    </section><section id="sec-12" data-sec="12" class="sec">
+      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">与相近方法的区别</h2></div>
+      <div class="sec-body"><ul>
+<li><a class="xlink" href="m-gradient-boosting-decision-tree-gbdt.html" data-cn="梯度提升决策树" data-en="Gradient Boosting Decision Tree, GBDT" data-def="GBDT 把“拟合残差”推广为“拟合损失函数的负梯度”，让浅决策树在函数空间中逐步走向更低损失。">梯度提升决策树（Gradient Boosting Decision Tree, GBDT）</a>：XGBoost 增加二阶近似与显式结构正则。</li>
+<li><a class="xlink" href="m-light-gradient-boosting-machine.html" data-cn="LightGBM" data-en="Light Gradient Boosting Machine" data-def="LightGBM 用直方图近似分裂搜索，并优先分裂全树中收益最大的叶节点，以较低内存和较高速度训练梯度提升树。">LightGBM（Light Gradient Boosting Machine）</a>：两者目标相近，后者更强调直方图、leaf-wise、GOSS 与 EFB。</li>
+<li><a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是在 Bagging 多棵树的基础上，再让每个节点只看一部分随机特征，从而让树与树更不相似、投票更稳。">随机森林（Random Forest）</a>：随机森林并行平均，XGBoost 串行优化损失。</li>
+<li><a class="xlink" href="m-adaptive-boosting.html" data-cn="AdaBoost" data-en="Adaptive Boosting" data-def="AdaBoost 通过提高错分样本的权重，让后一轮弱分类器更关注“难题”，最后按弱分类器质量加权投票。">AdaBoost（Adaptive Boosting）</a>：AdaBoost 主要通过错分样本重加权。</li>
+</ul></div>
+    </section><section id="sec-13" data-sec="13" class="sec">
+      <div class="sec-head"><span class="sec-no">§13</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
+      <div class="sec-body"><ul>
+<li>ICU 死亡、败血症、再入院和术后并发症预测。</li>
+<li>临床变量与影像组学、组学特征融合。</li>
+<li>医疗费用、住院时长和连续生物标志物预测。</li>
+</ul></div>
+    </section><section id="sec-14" data-sec="14" class="sec">
+      <div class="sec-head"><span class="sec-no">§14</span><h2 class="sec-h2">术语表</h2></div>
+      <div class="sec-body"><table>
 <thead>
 <tr>
-<th>Age</th>
-<th>SOFA</th>
-<th>Lactate</th>
-<th>Creatinine</th>
-<th>Vasopressor</th>
-<th>Death30d</th>
+<th>术语</th>
+<th>含义</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>73</td>
-<td>9</td>
-<td>3.1</td>
-<td>2.0</td>
-<td>1</td>
-<td>1</td>
+<td>gradient</td>
+<td>损失对当前预测的一阶导数</td>
 </tr>
 <tr>
-<td>46</td>
-<td>3</td>
-<td>1.1</td>
-<td>0.9</td>
-<td>0</td>
-<td>0</td>
+<td>Hessian</td>
+<td>损失对当前预测的二阶导数</td>
 </tr>
 <tr>
-<td>65</td>
-<td>7</td>
-<td>2.4</td>
-<td>1.5</td>
-<td>1</td>
-<td>1</td>
+<td>gain</td>
+<td>分裂带来的正则化目标改善</td>
 </tr>
 <tr>
-<td>39</td>
-<td>2</td>
-<td>0.8</td>
-<td>0.7</td>
-<td>0</td>
-<td>0</td>
+<td>cover</td>
+<td>节点内二阶梯度总量等覆盖度量</td>
 </tr>
 <tr>
-<td>58</td>
-<td>5</td>
-<td>1.6</td>
-<td>1.2</td>
-<td>0</td>
-<td>0</td>
+<td>default direction</td>
+<td>特征缺失时自动采用的分支方向</td>
 </tr>
 </tbody>
-</table>
-<h3>3.3 输入与产出</h3>
-<h4>输入</h4>
-<ul>
-<li>输入数据：目标变量和特征矩阵。</li>
-<li>关键变量：树数、学习率、树深、正则化参数、采样比例。</li>
-<li>需要预处理的内容：训练测试集划分、类别编码、可选的缺失和不平衡处理。</li>
-</ul>
-<h4>产出</h4>
-<ul>
-<li>模型对象/统计结果：树集成模型、特征重要性、训练/验证误差。</li>
-<li>参数估计：不提供传统线性系数。</li>
-<li>预测结果：类别、概率或连续预测值。</li>
-<li>不确定性指标：交叉验证性能、测试集 AUC / PR-AUC / MSE、概率校准结果。</li>
-</ul></div>
-    </section><section id="sec-4" data-sec="4" class="sec">
-      <div class="sec-head"><span class="sec-no">§4</span><h2 class="sec-h2">适用场景</h2></div>
+</table></div>
+    </section><section id="sec-15" data-sec="15" class="sec">
+      <div class="sec-head"><span class="sec-no">§15</span><h2 class="sec-h2">相关方法</h2></div>
       <div class="sec-body"><ul>
-<li>适合：表格数据预测、变量间关系复杂、以性能为导向的建模任务。</li>
-<li>不适合：极小样本、强可解释性或严格因果推断为主的场景。</li>
-<li>使用前需要特别检查的点：类别不平衡、概率校准、外部验证、早停设置。</li>
+<li><a class="xlink" href="m-boosting.html" data-cn="Boosting算法" data-en="Boosting" data-def="Boosting 让弱学习器依次上场，每一轮都针对当前模型尚未解决的错误做一次小修正，最后把这些修正相加成强模型。">Boosting算法（Boosting）</a></li>
+<li><a class="xlink" href="m-gradient-boosting-decision-tree-gbdt.html" data-cn="梯度提升决策树" data-en="Gradient Boosting Decision Tree, GBDT" data-def="GBDT 把“拟合残差”推广为“拟合损失函数的负梯度”，让浅决策树在函数空间中逐步走向更低损失。">梯度提升决策树（Gradient Boosting Decision Tree, GBDT）</a></li>
+<li><a class="xlink" href="m-gradient-boosting-regression.html" data-cn="梯度提升回归" data-en="Gradient Boosting Regression" data-def="梯度提升回归用一连串浅回归树逐步拟合当前损失的负梯度，从而不断修正连续结局预测。">梯度提升回归（Gradient Boosting Regression）</a></li>
+<li><a class="xlink" href="m-light-gradient-boosting-machine.html" data-cn="LightGBM" data-en="Light Gradient Boosting Machine" data-def="LightGBM 用直方图近似分裂搜索，并优先分裂全树中收益最大的叶节点，以较低内存和较高速度训练梯度提升树。">LightGBM（Light Gradient Boosting Machine）</a></li>
+<li><a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是在 Bagging 多棵树的基础上，再让每个节点只看一部分随机特征，从而让树与树更不相似、投票更稳。">随机森林（Random Forest）</a></li>
 </ul></div>
-    </section><section id="sec-5" data-sec="5" class="sec">
-      <div class="sec-head"><span class="sec-no">§5</span><h2 class="sec-h2">实现</h2></div>
-      <div class="sec-body"><div class="impl"><div class="codebar"><button class="codetab active" data-uid="extreme-gradient-boosting-xgboost" data-i="0">Python</button><button class="codetab" data-uid="extreme-gradient-boosting-xgboost" data-i="1">R</button></div><div class="codepanel active" data-uid="extreme-gradient-boosting-xgboost" data-i="0"><p>常用包：</p>
-<ul>
-<li><code>xgboost</code></li>
-<li><code>scikit-learn</code></li>
-</ul>
-<pre><code class="language-python">import pandas as pd
-from sklearn.model_selection import train_test_split
-from xgboost import XGBClassifier
-
-df = pd.read_csv(&quot;icu_mortality.csv&quot;)
-X = df[[&quot;Age&quot;, &quot;SOFA&quot;, &quot;Lactate&quot;, &quot;Creatinine&quot;, &quot;Vasopressor&quot;]]
-y = df[&quot;Death30d&quot;].astype(int)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
-
-fit = XGBClassifier(
-    objective=&quot;binary:logistic&quot;,
-    n_estimators=300,
-    learning_rate=0.05,
-    max_depth=4,
-    subsample=0.8,
-    colsample_bytree=0.8,
-    reg_lambda=1.0,
-    random_state=42,
-    eval_metric=&quot;logloss&quot;
-)
-fit.fit(X_train, y_train)
-
-pred_prob = fit.predict_proba(X_test)[:, 1]
-</code></pre></div><div class="codepanel" data-uid="extreme-gradient-boosting-xgboost" data-i="1"><p>常用包：</p>
-<ul>
-<li><code>xgboost</code></li>
-</ul>
-<pre><code class="language-r">library(xgboost)
-
-X_mat &lt;- as.matrix(df[, c(&quot;Age&quot;, &quot;SOFA&quot;, &quot;Lactate&quot;, &quot;Creatinine&quot;, &quot;Vasopressor&quot;)])
-y &lt;- df$Death30d
-
-fit &lt;- xgboost(
-  data = X_mat,
-  label = y,
-  objective = &quot;binary:logistic&quot;,
-  nrounds = 300,
-  eta = 0.05,
-  max_depth = 4,
-  subsample = 0.8,
-  colsample_bytree = 0.8,
-  verbose = 0
-)
-</code></pre></div></div></div>
-    </section><section id="sec-6" data-sec="6" class="sec">
-      <div class="sec-head"><span class="sec-no">§6</span><h2 class="sec-h2">结果如何解释</h2></div>
-      <div class="sec-body"><ul>
-<li>核心结果看什么：验证集或外部测试集性能、早停轮数、特征重要性、校准表现。</li>
-<li>每个主要参数如何解释：学习率越小通常需要更多树；树越深越灵活但也更容易过拟合。</li>
-<li>临床或医学意义如何表达：更适合表达“模型对个体风险的判别能力和排序能力”，不适合直接把重要性当作独立因果效应。</li>
-<li>常见误读：特征重要性高不等于因果重要，也不等于临床上最值得干预。</li>
-</ul></div>
-    </section><section id="sec-7" data-sec="7" class="sec">
-      <div class="sec-head"><span class="sec-no">§7</span><h2 class="sec-h2">推荐可视化</h2></div>
-      <div class="sec-body"><ul>
-<li>ROC 曲线、PR 曲线。</li>
-<li>特征重要性条形图。</li>
-<li>SHAP 总结图或局部解释图。</li>
-</ul>
-<h3>7.1 图像示例</h3>
-<p>下图展示 XGBoost 案例在优化后的真实值与预测值对照关系，适合直观看模型拟合质量和误差分布。</p>
-<p><img alt="" src="img/xgboost_actual_vs_pred_optimized.png" /></p></div>
-    </section><section id="sec-8" data-sec="8" class="sec">
-      <div class="sec-head"><span class="sec-no">§8</span><h2 class="sec-h2">优势、局限与常见坑</h2></div>
-      <div class="sec-body"><h3>优势</h3>
-<ul>
-<li>表格数据性能通常很强。</li>
-<li>二阶优化和正则化让训练更稳。</li>
-<li>支持缺失值和多种任务目标。</li>
-</ul>
-<h3>局限</h3>
-<ul>
-<li>调参空间较大。</li>
-<li>可解释性弱于参数模型。</li>
-<li>概率输出常需要再校准。</li>
-</ul>
-<h3>常见坑</h3>
-<ul>
-<li>只看内部验证结果，不做外部验证。</li>
-<li>过度追求 AUC，忽略校准和临床阈值。</li>
-<li>让树太深或学习率太大导致过拟合。</li>
-</ul></div>
-    </section><section id="sec-9" data-sec="9" class="sec">
-      <div class="sec-head"><span class="sec-no">§9</span><h2 class="sec-h2">与相近方法的区别</h2></div>
-      <div class="sec-body"><ul>
-<li>和梯度提升回归的区别：XGBoost 是 GBDT 的增强实现，加入了二阶信息、显式正则化和工程优化。</li>
-<li>和 LightGBM 的区别：LightGBM 更强调直方图和 leaf-wise 生长，常在大样本场景更快。</li>
-<li>和随机森林的区别：随机森林是并行 bagging，XGBoost 是串行 boosting。</li>
-</ul></div>
-    </section><section id="sec-10" data-sec="10" class="sec">
-      <div class="sec-head"><span class="sec-no">§10</span><h2 class="sec-h2">医学研究中的典型应用</h2></div>
-      <div class="sec-body"><ul>
-<li>ICU 或住院患者短期死亡风险预测。</li>
-<li>再入院、败血症、并发症等二分类风险模型。</li>
-<li>多变量表格数据中的高性能预测基线。</li>
-</ul></div>
-    </section><section id="sec-11" data-sec="11" class="sec">
-      <div class="sec-head"><span class="sec-no">§11</span><h2 class="sec-h2">相关方法</h2></div>
-      <div class="sec-body"><ul>
-<li><a class="xlink" href="m-boosting.html" data-cn="Boosting算法" data-en="Boosting" data-def="Boosting 是一类串行集成学习方法，它把多个弱学习器按顺序组合起来，每一轮都让新模型重点修正当前集成模型的错误。AdaBoost、GBDT、XGBoost 和 LightGBM 都属于 Boosting 家族。">Boosting算法（Boosting）</a></li>
-<li><a class="xlink" href="m-gradient-boosting-decision-tree-gbdt.html" data-cn="梯度提升决策树" data-en="Gradient Boosting Decision Tree, GBDT" data-def="梯度提升决策树是以决策树为基学习器的梯度提升方法。它通过逐轮拟合损失函数的负梯度或伪残差，把多棵浅树叠加成一个强预测模型。">梯度提升决策树（Gradient Boosting Decision Tree, GBDT）</a></li>
-<li><a class="xlink" href="m-gradient-boosting-regression.html" data-cn="梯度提升回归" data-en="Gradient Boosting Regression" data-def="梯度提升回归是一类通过逐步叠加弱学习器来逼近目标函数的集成回归方法，常见实现是以浅层回归树作为基学习器。">梯度提升回归（Gradient Boosting Regression）</a></li>
-<li><a class="xlink" href="m-light-gradient-boosting-machine.html" data-cn="LightGBM" data-en="Light Gradient Boosting Machine" data-def="LightGBM 是一种高效的梯度提升树实现。它在传统 GBDT 基础上引入直方图分桶、leaf-wise 生长策略，以及大样本场景常用的 GOSS 和 EFB 等优化，使其在大规模表格数据上训练更快、内存占用更低。">LightGBM（Light Gradient Boosting Machine）</a></li>
-<li><a class="xlink" href="m-random-forest.html" data-cn="随机森林" data-en="Random Forest" data-def="随机森林是一类基于 bagging 的树集成方法。它通过对样本做 bootstrap 抽样、对特征做随机子采样，训练许多彼此不同的决策树，再把它们的结果投票或平均起来。">随机森林（Random Forest）</a></li>
-</ul></div>
-    </section><section id="sec-12" data-sec="12" class="sec">
-      <div class="sec-head"><span class="sec-no">§12</span><h2 class="sec-h2">参考资料</h2></div>
+    </section><section id="sec-16" data-sec="16" class="sec">
+      <div class="sec-head"><span class="sec-no">§16</span><h2 class="sec-h2">参考资料</h2></div>
       <div class="sec-body"><ul>
 <li>Chen T, Guestrin C. XGBoost: A scalable tree boosting system. In: <em>Proceedings of KDD 2016</em>. 2016:785-794.</li>
-<li>XGBoost Contributors. XGBoost Documentation. <a href="https://xgboost.readthedocs.io/">https://xgboost.readthedocs.io/</a> （访问日期：2026-07-02）</li>
+<li>XGBoost Contributors. XGBoost Documentation. <a href="https://xgboost.readthedocs.io/">https://xgboost.readthedocs.io/</a> （访问日期：2026-07-09）</li>
 <li>Mitchell R, Frank E. Accelerating the XGBoost algorithm using GPU computing. <em>PeerJ Comput Sci</em>. 2017;3:e127.</li>
 </ul></div>
     </section>

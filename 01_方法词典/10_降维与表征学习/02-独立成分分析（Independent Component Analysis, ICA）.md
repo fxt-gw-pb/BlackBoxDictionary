@@ -19,209 +19,268 @@ r_packages: [fastICA]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-独立成分分析是一种无监督表征学习方法，用来把观测到的混合信号分解成若干统计上尽量相互独立的潜在成分。它常用于盲源分离，也可作为高维数据的独立模式提取方法。
+ICA 假设观测信号是若干非高斯独立源的线性混合，并寻找反混合矩阵把这些来源尽可能分离。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：观测变量可能是多个潜在来源混合后的结果，如何恢复更接近原始来源的独立成分。
-- 适用任务：盲源分离、噪声去除、信号分解、非高斯独立特征提取。
-- 常见医学场景：脑电或脑磁信号伪迹去除，功能影像独立网络提取，组学数据中独立变化模式探索。
+独立成分分析是盲源分离与无监督表征方法。它不只让成分不相关，还利用高阶统计量最大化独立性或非高斯性，以恢复潜在来源。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-如果多个传感器记录到的是若干真实信号的不同混合，ICA 尝试找到一个反混合矩阵，让分离后的成分彼此尽量独立。与 [[主成分分析（Principal Component Analysis, PCA）]] 追求不相关和最大方差不同，ICA 更关注统计独立和非高斯性。
+- 多个传感器记录的是潜在信号的不同混合。
+- 需要分离脑活动、眼动、肌电或设备噪声。
+- 希望提取比 PCA 更接近独立生成机制的模式。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+房间里两人同时说话，两支麦克风各录到不同混合。ICA 只凭混合录音，寻找一组线性组合，让输出尽可能像两条彼此独立的原始声源。
 
-设观测矩阵为 $X\in\mathbb{R}^{n\times p}$，潜在独立源为 $S$，线性混合矩阵为 $A$：
+## 2. 核心思想与原理
+
+### 2.1 不相关不等于独立
+
+PCA 消除二阶相关，但非高斯变量仍可能存在高阶依赖。ICA 追求更强的统计独立性，因此适合源分离。
+
+### 2.2 非高斯性提供可识别信息
+
+多个独立变量的和通常比各源更接近高斯。反过来寻找最非高斯的投影，有助于恢复独立源；因此至多允许一个源为高斯。
+
+### 2.3 白化与旋转
+
+常先中心化和白化，使协方差为单位阵，去掉尺度与相关结构；随后只需在白化空间寻找使成分最独立的旋转。
+
+## 3. 数学形式
+
+### 3.1 混合与分离
+
+按每行一个观测时：
 
 $$
-X = S A^\top
+X=SA^\top
 $$
 
-ICA 的目标是估计反混合矩阵 $W$，使：
-
 $$
-\hat S = X W^\top
+\widehat S=XW^\top
 $$
 
-中的各列尽量统计独立。FastICA 常通过最大化非高斯性来求解，例如用近似负熵：
+理想情况下 $W\approx A^{-1}$ 的相应转置表示。
+
+### 3.2 非高斯目标
+
+FastICA 常最大化近似负熵：
 
 $$
-J(y) \approx \left[E\{G(y)\}-E\{G(v)\}\right]^2
+J(y)\approx
+\left[
+E\{G(y)\}-E\{G(v)\}
+\right]^2
 $$
 
-其中 $v$ 是标准正态变量，$G(\cdot)$ 是非二次函数。
+$v$ 为标准正态变量，$G$ 为非二次函数。
 
-### 2.2 参数或统计量含义
+### 3.3 固定点更新示意
 
-- $X$：观测到的混合信号或特征矩阵。
-- $S$：待恢复的独立成分。
-- $A$：混合矩阵，描述独立源如何组合成观测变量。
-- $W$：反混合矩阵，用于从观测数据中提取独立成分。
-- `n_components`：希望提取的独立成分数量。
-- `whiten`：是否先白化数据，使特征不相关且方差统一。
+对白化数据 $x$，一个常见更新为：
 
-### 2.3 关键假设
+$$
+w^{new}=
+E[xg(w^\top x)]
+-E[g'(w^\top x)]w
+$$
 
-- 观测信号可近似表示为独立源的线性混合。
-- 至多一个独立成分服从高斯分布；非高斯性是可识别性的来源。
-- 样本量足以稳定估计独立成分。
-- 成分的尺度和符号不可唯一确定，解释时需结合背景知识。
+随后归一化并与已提取方向正交化。
 
-## 3. 数据形式与输入输出
+### 3.4 关键条件
 
-### 3.1 适合的数据形式
+| 条件 | 违反后果 | 检查方式 |
+| --- | --- | --- |
+| 源近似独立 | 成分仍混合或不稳定 | 独立性和领域检查 |
+| 混合近似线性 | 无法正确反混合 | 重构与残差 |
+| 至多一个高斯源 | 高斯子空间不可唯一旋转 | 分布与峰度检查 |
+| 样本量足够且收敛 | 结果依赖初始化 | 多种子稳定性 |
 
-- 自变量类型：连续信号、连续特征或标准化后的高维矩阵。
-- 因变量类型：ICA 本身不需要结局变量。
-- 数据结构：样本或时间点乘以观测通道/特征。
-- 是否适合高维数据：适合，但样本数、噪声和成分数会影响稳定性。
-- 是否适合缺失较多数据：不适合直接处理，需先插补或剔除缺失。
-- 是否适合删失数据：不直接处理删失结局。
-- 是否适合重复测量数据：可用于时间序列信号，但需明确时间点、个体和通道结构。
+## 4. 手把手算例
 
-### 3.2 示例表格
+两个独立二值源在四个时点为：
 
-以脑电信号为例：
+$$
+s_1=(1,-1,1,-1)
+$$
 
-| Time | Channel_1 | Channel_2 | Channel_3 | Channel_4 |
-| --- | --- | --- | --- | --- |
-| 0.00 | 0.12 | 0.31 | -0.08 | 0.21 |
-| 0.01 | 0.18 | 0.42 | -0.03 | 0.35 |
-| 0.02 | -0.05 | 0.10 | 0.22 | -0.12 |
-| 0.03 | -0.20 | -0.11 | 0.41 | -0.25 |
+$$
+s_2=(1,1,-1,-1)
+$$
 
-### 3.3 输入与产出
+四种 $(s_1,s_2)$ 组合各出现一次，因此在这个小样本中它们独立且均值为 0。
 
-#### 输入
+设混合矩阵：
 
-- 输入数据：连续型观测矩阵。
-- 关键变量：成分数量、白化方式、收敛阈值、最大迭代次数。
-- 需要预处理的内容：缺失处理、去趋势、中心化、标准化、异常信号检查。
+$$
+A=
+\begin{pmatrix}
+1&1\\
+1&-1
+\end{pmatrix}
+$$
 
-#### 产出
+观测通道为：
 
-- 模型对象/统计结果：独立成分得分、混合矩阵、反混合矩阵。
-- 参数估计：$A$、$W$ 及成分时间序列或样本得分。
-- 预测结果：ICA 本身不做预测，可把独立成分作为后续模型输入。
-- 不确定性指标：可用重采样、重复初始化或跨批次一致性评估稳定性。
+$$
+x_1=s_1+s_2=(2,0,0,-2)
+$$
 
-## 4. 适用场景
+$$
+x_2=s_1-s_2=(0,-2,2,0)
+$$
 
-- 适合：多个潜在来源混合、希望分离信号来源、成分具有非高斯分布且相互独立的场景。
-- 不适合：潜在来源高度相关、主要结构只需线性方差解释、成分解释必须唯一确定的场景。
-- 使用前需要特别检查的点：成分数是否合理，结果是否对随机种子敏感，分离成分是否有明确医学或生物学解释。
+矩阵的逆为：
 
-## 5. 实现
+$$
+A^{-1}=
+\frac12
+\begin{pmatrix}
+1&1\\
+1&-1
+\end{pmatrix}
+$$
 
-### 5.1 Python
+因此：
 
-常用包：
+$$
+\widehat s_1=\frac{x_1+x_2}{2}=s_1
+$$
 
-- `scikit-learn`
+$$
+\widehat s_2=\frac{x_1-x_2}{2}=s_2
+$$
+
+**结论：** 若找到正确反混合矩阵，就能从两个混合通道恢复两条源；ICA 的任务正是在不知道 $A$ 时依靠独立性估计它。
+
+## 5. 数据形式与输入输出
+
+### 5.1 数据要求
+
+- 时间点/样本乘以连续通道或特征矩阵。
+- 缺失需处理，信号常需去趋势、滤波和伪迹初查。
+- 成分数不能超过可识别的观测维数。
+
+### 5.2 输入与产出
+
+输入为观测矩阵、成分数、白化和独立性函数。输出为源得分、混合矩阵、反混合矩阵、均值和收敛迭代数。
+
+## 6. 适用场景
+
+- EEG/MEG/fMRI 盲源分离和伪迹去除。
+- 非高斯独立过程混合的组学或信号数据。
+- 不适合来源高度相关、非线性混合或需要唯一顺序尺度的任务。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import numpy as np
-import pandas as pd
 from sklearn.decomposition import FastICA
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv("eeg_channels.csv")
-X = df[["Channel_1", "Channel_2", "Channel_3", "Channel_4"]]
-
-X_scaled = StandardScaler().fit_transform(X)
-ica = FastICA(n_components=3, whiten="unit-variance", random_state=42)
-S = ica.fit_transform(X_scaled)
-
-components = pd.DataFrame(S, columns=["IC1", "IC2", "IC3"])
-mixing = pd.DataFrame(
-    ica.mixing_,
-    index=X.columns,
-    columns=components.columns
+X_s = StandardScaler().fit_transform(X)
+ica = FastICA(
+    n_components=3,
+    whiten="unit-variance",
+    fun="logcosh",
+    max_iter=1000,
+    tol=1e-5,
+    random_state=42,
 )
-
-print(components.head())
-print(mixing)
+sources = ica.fit_transform(X_s)
+mixing = ica.mixing_
+reconstructed = ica.inverse_transform(sources)
+print(ica.n_iter_)
 ```
 
-### 5.2 R
-
-常用包：
-
-- `fastICA`
+### 7.2 R
 
 ```r
 library(fastICA)
 
 x <- scale(df[, c("Channel_1", "Channel_2", "Channel_3", "Channel_4")])
-fit <- fastICA(x, n.comp = 3)
+set.seed(42)
+fit <- fastICA(
+  x,
+  n.comp = 3,
+  alg.typ = "parallel",
+  fun = "logcosh",
+  maxit = 1000,
+  tol = 1e-5
+)
 
-scores <- fit$S
+sources <- fit$S
 mixing <- fit$A
-head(scores)
-mixing
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：独立成分的时间序列或样本得分、混合矩阵中各原始通道对成分的贡献。
-- 每个主要参数如何解释：`n_components=3` 表示提取 3 个相互尽量独立的潜在来源。
-- 临床或医学意义如何表达：成分不是原始指标，需要结合载荷模式、时间频率特征、空间分布或外部标注解释。
-- 常见误读：独立成分的顺序、符号和尺度没有固定医学含义，不能直接把 IC1 理解成“最重要成分”。
+- 成分顺序、符号和尺度不可识别；跨运行比较前需匹配和对齐。
+- 混合矩阵列描述某独立成分如何投射到观测通道。
+- “统计独立”不等于因果独立或生物过程完全独立。
+- 删除伪迹成分前应结合空间、频谱、时间和外部通道证据。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
 
-- 独立成分时间序列图。
-- 原始混合信号与分离成分对比图。
-- 混合矩阵或载荷热图。
-- 成分得分与临床分组的箱线图或散点图。
+1. 检查收敛迭代和重构误差。
+2. 多随机种子重复并匹配成分。
+3. 比较不同成分数、非线性函数和白化方案。
+4. 检查成分互信息、峰度及领域特征。
+5. 用保留数据或跨受试者评估成分复现。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
 
-### 优势
+- 原始混合信号与独立成分时间序列。
+- 混合矩阵热图或脑空间图。
+- 成分频谱、峰度与稳定性图。
+- 去除某成分前后的重构信号对比。
 
-- 能从混合信号中提取统计独立的潜在来源。
-- 对非高斯信号特别有用。
-- 可用于降噪、伪迹剔除和潜在模式探索。
+## 11. 优势、局限与常见坑
 
-### 局限
+**优势：** 能利用高阶统计分离非高斯来源，适合伪迹去除与信号解释。
 
-- 成分的尺度、符号和顺序不可唯一确定。
-- 对预处理、成分数和随机初始化较敏感。
-- 独立性假设在许多医学数据中只是近似成立。
+**局限：** 假设强，顺序符号不唯一，初始化和成分数敏感。
 
-### 常见坑
+**常见坑：** 把 ICA 当普通降维；只运行一次；将独立称为因果；自动删除成分而无领域核查；混淆 `components_` 与 `mixing_`。
 
-- 把 ICA 当作普通特征选择方法。
-- 未检查收敛和稳定性就解释成分。
-- 把成分独立误解为因果独立。
+## 12. 与相近方法的区别
 
-## 9. 与相近方法的区别
+- [[主成分分析（Principal Component Analysis, PCA）]]：最大化方差并正交，ICA 最大化独立性。
+- [[因子分析（Factor Analysis）]]：解释共同协方差并显式建模特异误差。
+- [[奇异值分解（Singular Value Decomposition, SVD）]]：代数分解，不包含独立生成假设。
+- 选择经验：压缩总方差用 PCA，盲源分离且非高斯独立假设可信时用 ICA。
 
-- 和 [[主成分分析（Principal Component Analysis, PCA）]] 的区别：PCA 提取不相关且解释方差最大的正交方向，ICA 提取统计上尽量独立且通常非正交的成分。
-- 和 [[因子分析（Factor Analysis）]] 的区别：因子分析强调用少数潜变量解释变量间协方差，ICA 更强调独立源分离。
-- 和 [[奇异值分解（Singular Value Decomposition, SVD）]] 的区别：SVD 是矩阵分解工具，ICA 是带有独立性假设的统计模型。
+## 13. 医学研究中的典型应用
 
-## 10. 医学研究中的典型应用
+- EEG/MEG 眼动、心电和肌电伪迹分离。
+- fMRI 独立空间网络提取。
+- 多组学中的相对独立变化模式探索。
 
-- EEG/MEG 中眼动、肌电等伪迹分离。
-- fMRI 数据中独立脑网络或激活模式提取。
-- 多组学数据中寻找相对独立的潜在生物过程。
+## 14. 术语表
 
-## 11. 相关方法
+| 术语 | 含义 |
+| --- | --- |
+| source | 未直接观察的独立生成信号 |
+| mixing matrix | 将独立源映射为观测通道的矩阵 |
+| unmixing matrix | 从观测恢复源的线性变换 |
+| whitening | 使数据不相关且方差标准化 |
+| negentropy | 衡量偏离高斯程度的独立性代理 |
+
+## 15. 相关方法
 
 - [[主成分分析（Principal Component Analysis, PCA）]]
 - [[因子分析（Factor Analysis）]]
 - [[奇异值分解（Singular Value Decomposition, SVD）]]
 - [[t-SNE（t-Distributed Stochastic Neighbor Embedding）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
-- Hyvarinen A, Oja E. Independent component analysis: algorithms and applications. *Neural Networks*. 2000;13(4-5):411-430.
-- Comon P. Independent component analysis, a new concept? *Signal Processing*. 1994;36(3):287-314.
-- scikit-learn Developers. `sklearn.decomposition.FastICA`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html) （访问日期：2026-07-02）
+- Comon P. Independent component analysis, a new concept? *Signal Process*. 1994;36(3):287-314.
+- Hyvarinen A, Oja E. Independent component analysis: algorithms and applications. *Neural Netw*. 2000;13(4-5):411-430.
+- scikit-learn Developers. `FastICA` API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.FastICA.html) （访问日期：2026-07-09）

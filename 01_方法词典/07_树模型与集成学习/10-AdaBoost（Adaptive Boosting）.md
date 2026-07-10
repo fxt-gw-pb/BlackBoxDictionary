@@ -19,220 +19,253 @@ r_packages: [adabag, fastAdaboost]
 
 ## 1. 方法概览
 
-### 1.1 定义
+### 1.1 一句话本质
 
-AdaBoost 是 Adaptive Boosting 的缩写，是一种经典 Boosting 算法。它通过反复调整样本权重，让后续弱分类器更关注前一轮错分的样本，并把多个弱分类器加权组合成强分类器。
+AdaBoost 通过提高错分样本的权重，让后一轮弱分类器更关注“难题”，最后按弱分类器质量加权投票。
 
-### 1.2 它主要解决什么问题
+### 1.2 定义
 
-- 研究问题：如何把一组略优于随机猜测的弱分类器组合为强分类器。
-- 适用任务：二分类和多分类分类任务。
-- 常见医学场景：疾病有无判别、筛查阳性预测、欺诈或异常事件识别。
+AdaBoost 是 Adaptive Boosting 的缩写，是 [[Boosting算法（Boosting）]] 的经典实现。二分类版本通常用树桩作为弱学习器，逐轮更新样本权重，并以错误率决定每个弱分类器在最终决策中的权重。
 
-### 1.3 直觉理解
+### 1.3 它主要解决什么问题
 
-AdaBoost 每一轮都会“放大错题”。前一轮被分错的样本在下一轮获得更高权重，因此新弱分类器会更努力处理这些难分样本。最终预测是多个弱分类器的加权投票。
+- 把略优于随机猜测的弱分类器组合成强分类器。
+- 用自适应样本权重聚焦当前决策边界附近的困难病例。
+- 在不训练深树的情况下构造非线性分类边界。
 
-## 2. 数学形式
+### 1.4 直觉与类比
 
-### 2.1 核心公式
+像复习错题：答对的题暂时降低优先级，答错的题在下一轮出现得更频繁。表现好的辅导老师在最后投票时权重也更高。
 
-设 $y_i\in\{-1,+1\}$，初始样本权重为：
+## 2. 核心思想与原理
 
-$$
-D_1(i)=\frac{1}{n}
-$$
+### 2.1 两层加权
 
-第 $t$ 轮训练弱分类器 $h_t(x)$，加权错误率为：
+AdaBoost 同时调整两类权重：错分病例的训练权重上升；错误率较低的弱分类器在最终投票中的权重更大。
 
-$$
-\epsilon_t=\sum_{i=1}^{n}D_t(i)I(h_t(x_i)\neq y_i)
-$$
+### 2.2 与指数损失的关系
 
-弱分类器权重为：
+其逐轮更新可理解为前向分步最小化指数损失：
 
 $$
-\alpha_t=\frac{1}{2}\log\left(\frac{1-\epsilon_t}{\epsilon_t}\right)
+L(y,F)=\exp[-yF(x)]
 $$
 
-样本权重更新为：
+当病例被错分时，$yF(x)$ 为负，损失迅速增大，因此模型会强烈关注它。这也解释了 AdaBoost 对错误标签和离群点较敏感。
+
+### 2.3 多分类说明
+
+经典推导以 $y\in\{-1,+1\}$ 的二分类为主。多分类可使用 SAMME 等推广；软件实现细节可能不同，分析时应说明算法版本和基学习器。
+
+## 3. 数学形式
+
+### 3.1 加权误差与分类器权重
+
+初始化 $D_1(i)=1/n$。第 $t$ 轮弱分类器的加权错误率为：
 
 $$
-D_{t+1}(i)=\frac{D_t(i)\exp[-\alpha_t y_i h_t(x_i)]}{Z_t}
+\epsilon_t=\sum_{i=1}^{n}D_t(i)I\{h_t(x_i)\ne y_i\}
 $$
 
-最终分类器为：
-
 $$
-H(x)=\mathrm{sign}\left(\sum_{t=1}^{T}\alpha_t h_t(x)\right)
+\alpha_t=\frac12\log\left(\frac{1-\epsilon_t}{\epsilon_t}\right)
 $$
 
-### 2.2 参数或统计量含义
+若 $\epsilon_t\lt0.5$，则 $\alpha_t\gt0$；错误率越低，投票权越大。
 
-- $D_t(i)$：第 $t$ 轮样本 $i$ 的权重。
-- $\epsilon_t$：第 $t$ 个弱分类器的加权错误率。
-- $\alpha_t$：弱分类器权重，错误率越低权重越高。
-- $Z_t$：归一化因子。
-- `n_estimators`：弱分类器数量。
-- `learning_rate`：每个弱分类器权重的缩放系数。
+### 3.2 样本权重更新
 
-### 2.3 关键假设
+$$
+D_{t+1}(i)=
+\frac{D_t(i)\exp[-\alpha_ty_ih_t(x_i)]}{Z_t}
+$$
 
-- 弱学习器在加权数据上能达到优于随机猜测的性能。
-- 标签噪声不宜过高，否则算法会持续追逐错误标签。
-- 分类任务目标和损失设定适合加权投票框架。
+正确分类时指数因子为 $\exp(-\alpha_t)$，错分时为 $\exp(\alpha_t)$。$Z_t$ 使新权重之和为 1。
 
-## 3. 数据形式与输入输出
+### 3.3 最终分类
 
-### 3.1 适合的数据形式
+$$
+H(x)=\operatorname{sign}
+\left[\sum_{t=1}^{T}\alpha_th_t(x)\right]
+$$
 
-- 自变量类型：连续、二分类、多分类变量均可。
-- 因变量类型：二分类或多分类。
-- 数据结构：监督学习宽表数据。
-- 是否适合高维数据：可用，但需控制弱学习器复杂度。
-- 是否适合缺失较多数据：通常需先处理缺失。
-- 是否适合删失数据：不直接适合。
-- 是否适合重复测量数据：不直接适合。
+### 3.4 关键条件
 
-### 3.2 示例表格
+| 条件 | 违反后果 | 如何检查 |
+| --- | --- | --- |
+| 每轮弱分类器优于随机猜测 | $\alpha_t$ 无正贡献 | 查看逐轮错误率 |
+| 标签噪声较低 | 错标签权重不断增大 | 审核高权重病例 |
+| 基学习器足够简单 | 单轮过拟合，集成收益变小 | 比较树桩与浅树 |
+| 训练数据代表目标人群 | 外部性能下降 | 外部或时间验证 |
 
-以急诊患者是否需要 ICU 收治为例：
+## 4. 手把手算例
 
-| Age | RR | SBP | Lactate | GCS | ICU |
-| --- | --- | --- | --- | --- | --- |
-| 81 | 28 | 86 | 4.1 | 12 | 1 |
-| 36 | 16 | 122 | 1.0 | 15 | 0 |
-| 67 | 24 | 95 | 2.8 | 14 | 1 |
-| 45 | 18 | 118 | 1.3 | 15 | 0 |
-| 72 | 26 | 90 | 3.2 | 13 | 1 |
+有 4 名患者，初始权重均为 $0.25$。第一棵树桩分对 3 人、分错 1 人。
 
-### 3.3 输入与产出
+**Step 1：加权错误率。**
 
-#### 输入
+$$
+\epsilon_1=0.25
+$$
 
-- 输入数据：特征矩阵和分类标签。
-- 关键变量：弱分类器、弱分类器数量、学习率、树桩或浅树深度。
-- 需要预处理的内容：缺失处理、异常值检查、类别不平衡处理、训练测试划分。
+**Step 2：计算树桩权重。**
 
-#### 产出
+$$
+\alpha_1=\frac12\log\left(\frac{0.75}{0.25}\right)
+=\frac12\log 3\approx0.549
+$$
 
-- 模型对象/统计结果：AdaBoost 分类器、弱分类器权重、特征重要性。
-- 参数估计：不输出传统回归系数。
-- 预测结果：类别和分类概率或决策分数。
-- 不确定性指标：测试集 AUC / F1、校准曲线、交叉验证性能。
+**Step 3：更新未归一化样本权重。**
 
-## 4. 适用场景
+每个正确病例：
 
-- 适合：较干净的分类数据、需要从简单弱分类器逐步增强的任务。
-- 不适合：标签错误多、异常值多、强类别不平衡但未做处理的任务。
-- 使用前需要特别检查的点：错分样本是否主要是噪声、弱学习器复杂度、学习率与轮数。
+$$
+0.25\exp(-0.549)\approx0.144
+$$
 
-## 5. 实现
+错分病例：
 
-### 5.1 Python
+$$
+0.25\exp(0.549)\approx0.433
+$$
 
-常用包：
+总和约为 $0.866$。归一化后，3 个正确病例各占：
 
-- `scikit-learn`
+$$
+0.144/0.866\approx0.167
+$$
+
+错分病例占：
+
+$$
+0.433/0.866\approx0.500
+$$
+
+**结论：** 下一棵树训练时，那个错分病例独自占一半权重；若它其实是录入错误，算法也会同样执着地追逐它。
+
+## 5. 数据形式与输入输出
+
+### 5.1 数据要求
+
+- 结局为二分类或多分类。
+- 特征可为连续或编码后的类别变量。
+- 基学习器必须支持样本权重。
+- 通常需预先处理缺失；极端类别不平衡时需结合合适指标与阈值。
+
+### 5.2 产出
+
+模型输出类别、决策分数和实现所定义的概率估计，还可查看各弱分类器权重与错误率。概率是否校准必须另行验证。
+
+## 6. 适用场景
+
+- 适合：标签较干净、样本量中等、希望用浅树获得非线性分类器。
+- 慎用：错标签多、离群病例多、类别极不平衡且漏诊成本高。
+- 在医学研究中，最好把它作为候选预测模型，而非病因解释工具。
+
+## 7. 实现
+
+### 7.1 Python
 
 ```python
-import pandas as pd
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import train_test_split
+from sklearn.metrics import roc_auc_score, brier_score_loss
 
-df = pd.read_csv("emergency_icu.csv")
-X = df[["Age", "RR", "SBP", "Lactate", "GCS"]]
-y = df["ICU"].astype(int)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
+model = AdaBoostClassifier(
+    estimator=DecisionTreeClassifier(max_depth=1, random_state=42),
+    n_estimators=200,
+    learning_rate=0.05,
+    random_state=42,
 )
+model.fit(X_train, y_train)
 
-fit = AdaBoostClassifier(
-    estimator=DecisionTreeClassifier(max_depth=1),
-    n_estimators=100,
-    learning_rate=0.5,
-    random_state=42
-)
-fit.fit(X_train, y_train)
-
-pred_prob = fit.predict_proba(X_test)[:, 1]
+prob = model.predict_proba(X_test)[:, 1]
+print("AUC:", roc_auc_score(y_test, prob))
+print("Brier:", brier_score_loss(y_test, prob))
+print(model.estimator_errors_[:5])
 ```
 
-### 5.2 R
-
-常用包：
-
-- `adabag`
+### 7.2 R
 
 ```r
 library(adabag)
 
 fit <- boosting(
   ICU ~ Age + RR + SBP + Lactate + GCS,
-  data = df_train,
+  data = train,
   boos = TRUE,
-  mfinal = 100
+  mfinal = 200,
+  coeflearn = "Breiman"
 )
 
-pred <- predict.boosting(fit, newdata = df_test)
+pred <- predict.boosting(fit, newdata = test)
+prob <- pred$prob[, 2]
+table(observed = test$ICU, predicted = pred$class)
 ```
 
-## 6. 结果如何解释
+## 8. 结果如何解释
 
-- 核心结果看什么：测试集判别性能、混淆矩阵、错误样本分布、校准情况。
-- 每个主要参数如何解释：弱分类器越复杂越容易过拟合；轮数越多越可能追逐噪声。
-- 临床或医学意义如何表达：可用于构建分类预测器，但重要性和错分权重不等于病因解释。
-- 常见误读：AdaBoost 关注错分样本，不代表这些样本一定具有临床特殊机制，也可能只是标签错误或异常值。
+- 决策分数是弱分类器加权和；绝对值越大通常表示分类间隔越大。
+- `estimator_errors_` 高说明该轮弱学习器表现有限。
+- 变量重要性只表示预测过程中被使用的程度。
+- 临床报告应同时给出敏感度、特异度、PR-AUC、校准与阈值依据。
 
-## 7. 推荐可视化
+## 9. 诊断与稳健性
 
-- 训练和验证错误率随轮数变化曲线。
-- 混淆矩阵、ROC 曲线、PR 曲线。
-- 特征重要性条形图。
+1. 画训练和验证错误率随轮数变化。
+2. 列出最终高权重病例，核查标签、缺失和异常测量。
+3. 比较树桩与深度 2 或 3 的浅树。
+4. 在类别不平衡时重点检查 PR 曲线和少数类召回率。
+5. 用时间切分或外部中心检验泛化，并在需要时进行概率校准。
 
-## 8. 优势、局限与常见坑
+## 10. 推荐可视化
 
-### 优势
+- 逐轮训练/验证误差曲线。
+- 样本权重分布或高权重病例表。
+- ROC、PR、校准曲线与混淆矩阵。
+- 前若干特征的重要性图。
 
-- 理论清晰，实现简单。
-- 能把简单弱分类器组合成强分类器。
-- 对特征缩放通常不敏感。
+## 11. 优势、局限与常见坑
 
-### 局限
+**优势：** 原理清晰、预处理要求较少、能把树桩组合成复杂边界。
 
-- 对噪声和异常值较敏感。
-- 分类概率可能需要校准。
-- 在复杂表格任务上常被 XGBoost、LightGBM 等现代 GBDT 实现替代。
+**局限：** 对错标签和离群点敏感，训练串行，现代复杂表格任务中常不及正则化提升树。
 
-### 常见坑
+**常见坑：** 使用过深基树；只调树数不调学习率；把决策分数直接当可靠概率；对高权重病例不做数据核查。
 
-- 使用太深的基树，让每轮弱学习器不再“弱”。
-- 标签噪声未处理，导致模型持续放大错误样本。
-- 只看准确率，忽略少数类召回率和临床成本。
+## 12. 与相近方法的区别
 
-## 9. 与相近方法的区别
+- [[Boosting算法（Boosting）]]：AdaBoost 是其中以样本重加权为核心的具体算法。
+- [[梯度提升决策树（Gradient Boosting Decision Tree, GBDT）]]：后者直接拟合损失负梯度，可适配更多损失。
+- [[XGBoost（Extreme Gradient Boosting, XGBoost）]]：后者使用二阶信息、显式正则化和采样。
+- [[随机森林（Random Forest）]]：后者独立训练多树并投票，不逐轮追踪错分样本。
 
-- 和 [[Boosting算法（Boosting）]] 的区别：AdaBoost 是 Boosting 的经典实例，核心是样本权重自适应更新。
-- 和 [[梯度提升决策树（Gradient Boosting Decision Tree, GBDT）]] 的区别：GBDT 用负梯度统一处理多种损失；AdaBoost 以指数损失和样本权重更新为代表。
-- 和 [[XGBoost（Extreme Gradient Boosting, XGBoost）]] 的区别：XGBoost 是正则化的二阶梯度提升树，更适合复杂表格任务。
+## 13. 医学研究中的典型应用
 
-## 10. 医学研究中的典型应用
+- 急诊转 ICU、筛查阳性与疾病有无判别。
+- 影像组学或实验室指标的二分类基线。
+- 可穿戴设备事件识别与异常信号分类。
 
-- 急诊或 ICU 二分类风险筛查。
-- 影像组学二分类模型的轻量基线。
-- 标注较干净的疾病有无判别任务。
+## 14. 术语表
 
-## 11. 相关方法
+| 术语 | 含义 |
+| --- | --- |
+| 树桩 | 深度为 1、只有一次分裂的决策树 |
+| 样本权重 | 病例对下一轮训练误差的贡献 |
+| 分类器权重 | 弱分类器在最终投票中的贡献 |
+| 指数损失 | 对负分类间隔增长很快的损失 |
+| 分类间隔 | $yF(x)$，正值表示分类方向正确 |
+
+## 15. 相关方法
 
 - [[Boosting算法（Boosting）]]
 - [[梯度提升决策树（Gradient Boosting Decision Tree, GBDT）]]
 - [[XGBoost（Extreme Gradient Boosting, XGBoost）]]
 - [[LightGBM（Light Gradient Boosting Machine）]]
 
-## 12. 参考资料
+## 16. 参考资料
 
 - Freund Y, Schapire RE. A decision-theoretic generalization of on-line learning and an application to boosting. *J Comput Syst Sci*. 1997;55(1):119-139.
 - Hastie T, Rosset S, Zhu J, Zou H. Multi-class AdaBoost. *Stat Interface*. 2009;2(3):349-360.
-- scikit-learn Developers. `sklearn.ensemble.AdaBoostClassifier`. scikit-learn API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.AdaBoostClassifier.html](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.AdaBoostClassifier.html) （访问日期：2026-07-02）
+- Hastie T, Tibshirani R, Friedman J. *The Elements of Statistical Learning*. 2nd ed. Springer; 2009.
+- scikit-learn Developers. `AdaBoostClassifier` API Reference. [https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.AdaBoostClassifier.html](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.AdaBoostClassifier.html) （访问日期：2026-07-09）
